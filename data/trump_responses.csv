@@ -1,0 +1,31 @@
+id,response,respondent_id,timestamp,topic
+1,His policies on trade had significant economic impacts,R001,2024-01-01,policy
+2,The media coverage was incredibly polarized,R002,2024-01-02,media
+3,His communication style was unconventional,R003,2024-01-03,communication
+4,Immigration policy changes affected many communities,R004,2024-01-04,immigration
+5,His use of social media was unprecedented for a president,R005,2024-01-05,social_media
+6,The tax reforms had mixed effects on different income groups,R006,2024-01-06,economy
+7,Foreign policy approach was unpredictable,R007,2024-01-07,foreign_policy
+8,His rhetoric energized certain voter demographics,R008,2024-01-08,rhetoric
+9,The relationship with traditional media was adversarial,R009,2024-01-09,media
+10,His business background influenced governance style,R010,2024-01-10,leadership
+11,The impeachment proceedings were highly divisive,R011,2024-01-11,impeachment
+12,His appointments to federal courts will have lasting impact,R012,2024-01-12,judiciary
+13,The America First agenda resonated with many voters,R013,2024-01-13,agenda
+14,His handling of international agreements was controversial,R014,2024-01-14,international
+15,The campaign rallies were theatrical and engaging,R015,2024-01-15,campaign
+16,His criticism of NATO allies caused diplomatic tensions,R016,2024-01-16,nato
+17,The border wall became a symbolic political issue,R017,2024-01-17,border
+18,His response to protests was heavily criticized,R018,2024-01-18,protests
+19,The tax cuts benefited corporations significantly,R019,2024-01-19,taxation
+20,His Twitter presence was both influential and controversial,R020,2024-01-20,twitter
+21,The relationship with Russia was a constant controversy,R021,2024-01-21,russia
+22,His approach to healthcare reform was contentious,R022,2024-01-22,healthcare
+23,The rhetoric around fake news changed media dynamics,R023,2024-01-23,media
+24,His Supreme Court nominees shifted the court rightward,R024,2024-01-24,supreme_court
+25,The trade war with China had global implications,R025,2024-01-25,trade
+26,His connection with working-class voters was notable,R026,2024-01-26,voters
+27,The environmental policy rollbacks concerned scientists,R027,2024-01-27,environment
+28,His loyalty demands from officials were unusual,R028,2024-01-28,loyalty
+29,The pardons issued raised ethical questions,R029,2024-01-29,pardons
+30,His political base remained remarkably consistent,R030,2024-01-30,base
