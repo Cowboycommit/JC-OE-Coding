@@ -1,0 +1,31 @@
+id,response,respondent_id,timestamp,topic
+1,The case exposed serious failures in institutional oversight,R001,2024-02-01,oversight
+2,Media coverage brought attention to systemic accountability issues,R002,2024-02-02,media
+3,The justice system's handling raised questions about equal treatment,R003,2024-02-03,justice
+4,Previous plea deals appeared to show preferential treatment,R004,2024-02-04,plea_deal
+5,The case highlighted need for prison reform and monitoring,R005,2024-02-05,prison_reform
+6,Investigative journalism played a crucial role in exposing facts,R006,2024-02-06,journalism
+7,The connections to powerful people raised accountability concerns,R007,2024-02-07,accountability
+8,Victims' advocates emphasized the importance of believing survivors,R008,2024-02-08,victims
+9,The death in custody raised questions about jail procedures,R009,2024-02-09,custody
+10,Federal investigations revealed institutional failures,R010,2024-02-10,investigation
+11,The case sparked conversations about privilege and justice,R011,2024-02-11,privilege
+12,Conspiracy theories complicated public discourse,R012,2024-02-12,conspiracy
+13,The impact on survivors was finally being recognized,R013,2024-02-13,survivors
+14,Legal reforms were proposed to prevent similar cases,R014,2024-02-14,reform
+15,The wealth factor in legal outcomes became evident,R015,2024-02-15,wealth
+16,Public trust in institutions was significantly damaged,R016,2024-02-16,trust
+17,The case revealed inadequate protection for vulnerable individuals,R017,2024-02-17,protection
+18,Prosecutorial decisions from years prior were questioned,R018,2024-02-18,prosecution
+19,The role of enablers in facilitating crimes was examined,R019,2024-02-19,enablers
+20,Transparency in the justice system became a key concern,R020,2024-02-20,transparency
+21,The case influenced discussions on criminal justice reform,R021,2024-02-21,cj_reform
+22,Media's responsibility in reporting sensitive cases was debated,R022,2024-02-22,media_ethics
+23,The importance of thorough background checks was emphasized,R023,2024-02-23,background
+24,Institutional protections for powerful individuals were criticized,R024,2024-02-24,power
+25,The case highlighted trafficking as a serious societal problem,R025,2024-02-25,trafficking
+26,Victim compensation and support systems were found lacking,R026,2024-02-26,compensation
+27,The legal community debated ethics and professional responsibility,R027,2024-02-27,legal_ethics
+28,Public pressure led to renewed investigations,R028,2024-02-28,pressure
+29,The case became a symbol of systemic injustice,R029,2024-02-29,injustice
+30,Calls for accountability extended to all involved parties,R030,2024-03-01,calls_action
