@@ -2,8 +2,17 @@
 
 A comprehensive Python framework for analyzing open-ended qualitative data through systematic coding, theme identification, and hierarchical categorization.
 
+## 🎯 Two Approaches Available
+
+### 1. **Traditional Keyword-Based Coding** (`open_ended_coding_analysis.ipynb`)
+Manual coding with predefined code frames and keywords
+
+### 2. **ML-Based Open Coding** (`ml_open_coding_analysis.ipynb`) ⭐ NEW!
+Automated theme discovery using machine learning with **15 essential outputs**
+
 ## Features
 
+### Traditional Approach
 - **Code Frames**: Systematic coding structures for categorizing qualitative data
 - **Theme Analysis**: Identification and analysis of recurring patterns and themes
 - **Multi-level Categorization**: Hierarchical classification of coded data
@@ -11,6 +20,15 @@ A comprehensive Python framework for analyzing open-ended qualitative data throu
 - **Interactive Visualizations**: Rich visualizations using Plotly and Seaborn
 - **Robust Error Handling**: Comprehensive logging and error management
 - **Code Quality**: Automated testing and linting via Makefile
+
+### ML-Based Approach (NEW!)
+- 🤖 **Automatic Theme Discovery**: Uses TF-IDF, LDA, NMF, and K-Means clustering
+- 📊 **15 Essential Outputs**: Complete analysis package for researchers
+- 🎯 **Confidence Scoring**: Probabilistic code assignments with quality metrics
+- 📈 **Advanced Analytics**: Co-occurrence analysis, network diagrams, segmentation
+- 💾 **Multiple Export Formats**: CSV, Excel, JSON with comprehensive results
+- 📝 **Executive Summaries**: Auto-generated stakeholder reports
+- ✅ **Quality Assurance**: Built-in validation and error detection
 
 ## Quick Start
 
@@ -23,16 +41,22 @@ pip install -r requirements.txt
 
 ### Running the Analysis
 
+**Option 1: Traditional Keyword-Based Coding**
 ```bash
-# Launch Jupyter notebook
 jupyter notebook open_ended_coding_analysis.ipynb
+```
+
+**Option 2: ML-Based Open Coding (Recommended)**
+```bash
+jupyter notebook ml_open_coding_analysis.ipynb
 ```
 
 ## Project Structure
 
 ```
 .
-├── open_ended_coding_analysis.ipynb  # Main analysis notebook
+├── open_ended_coding_analysis.ipynb  # Traditional keyword-based coding
+├── ml_open_coding_analysis.ipynb     # ML-based automatic coding (NEW!)
 ├── src/
 │   ├── __init__.py
 │   ├── data_loader.py               # Data loading utilities
@@ -143,6 +167,73 @@ cat_manager.create_category(
 # Apply categorization
 df = cat_manager.categorize(df)
 ```
+
+## ML-Based Open Coding (NEW!)
+
+The `ml_open_coding_analysis.ipynb` notebook provides a comprehensive ML-powered framework with **15 essential outputs**:
+
+### Key Features
+
+1. **Code Assignments** - Response-level codes with confidence scores
+2. **Codebook** - Auto-generated code definitions with examples
+3. **Frequency Tables** - Statistical distribution of codes
+4. **Quality Metrics** - Confidence scores and reliability measures
+5. **Binary Matrix** - Code presence/absence for statistical analysis
+6. **Representative Quotes** - Top examples for each code
+7. **Co-Occurrence Analysis** - Code relationship patterns and networks
+8. **Descriptive Statistics** - Comprehensive summary statistics
+9. **Segmentation Analysis** - Code patterns across demographics
+10. **QA Report** - Validation and error analysis
+11. **Visualizations** - Interactive charts, heatmaps, network diagrams
+12. **Multiple Exports** - CSV, Excel, JSON formats
+13. **Method Documentation** - Transparent methodology and reproducibility
+14. **Uncoded Responses** - Edge cases and low-confidence items
+15. **Executive Summary** - High-level insights for stakeholders
+
+### Quick Example
+
+```python
+# Initialize ML coder
+from ml_open_coding_analysis import MLOpenCoder, OpenCodingResults
+
+coder = MLOpenCoder(
+    n_codes=10,              # Number of themes to discover
+    method='tfidf_kmeans',   # Algorithm: 'tfidf_kmeans', 'lda', or 'nmf'
+    min_confidence=0.3       # Confidence threshold
+)
+
+# Fit on your data
+coder.fit(df['response'])
+
+# Generate complete results package
+results = OpenCodingResults(df, coder, response_col='response')
+
+# Get all 15 outputs
+assignments = results.get_code_assignments()
+codebook = results.get_codebook_detailed()
+frequency = results.get_frequency_table()
+quality = results.get_quality_metrics()
+# ... and 11 more outputs!
+
+# Export everything
+from ml_open_coding_analysis import ResultsExporter
+exporter = ResultsExporter(results)
+exporter.export_all()
+exporter.export_excel('results.xlsx')
+```
+
+### Supported Algorithms
+
+- **TF-IDF + K-Means** (default): Fast, interpretable clustering
+- **Latent Dirichlet Allocation (LDA)**: Probabilistic topic modeling
+- **Non-negative Matrix Factorization (NMF)**: Parts-based decomposition
+
+### Output Formats
+
+- **CSV**: Individual files for each output type
+- **Excel**: Single workbook with multiple sheets
+- **JSON**: Structured data for APIs and further processing
+- **Markdown**: Executive summaries and documentation
 
 ## Development
 
@@ -363,16 +454,34 @@ Built with:
 
 ## Roadmap
 
+### Completed Features
+
+- [x] Machine learning-assisted coding (ML-based notebook)
+- [x] Advanced NLP integration (topic modeling with LDA, NMF, K-Means)
+- [x] Comprehensive export formats (CSV, Excel, JSON)
+- [x] Executive summaries and stakeholder reports
+
 ### Planned Features
 
-- [ ] Machine learning-assisted coding
-- [ ] Advanced NLP integration (topic modeling, sentiment analysis)
 - [ ] Real-time collaborative coding
 - [ ] Web-based dashboard
 - [ ] API for programmatic access
 - [ ] Support for qualitative data software export formats (NVivo, Atlas.ti)
+- [ ] Sentiment analysis integration
+- [ ] Multi-language support
 
 ## Version History
+
+### v1.1.0 (2024) - ML-Based Open Coding
+- Added ML-based automatic coding notebook
+- Implemented 15 essential outputs for comprehensive analysis
+- Added support for TF-IDF, LDA, NMF, and K-Means algorithms
+- Automatic theme discovery and code generation
+- Confidence scoring and quality metrics
+- Co-occurrence analysis and network visualizations
+- Multiple export formats (CSV, Excel, JSON)
+- Executive summary generation
+- Method documentation and reproducibility support
 
 ### v1.0.0 (2024)
 - Initial release
