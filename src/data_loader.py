@@ -1,0 +1,167 @@
+"""
+Data loading utilities for Open-Ended Coding Analysis.
+
+This module provides robust data loading from multiple sources including:
+- CSV files
+- Excel files
+- SQLite databases
+- PostgreSQL databases
+"""
+
+import logging
+import os
+from typing import Union
+
+import pandas as pd
+import sqlite3
+from sqlalchemy import create_engine
+
+
+class DataLoader:
+    """Handles data loading from various sources with error handling."""
+
+    def __init__(self):
+        """Initialize DataLoader with logging."""
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    def load_csv(self, filepath: str, **kwargs) -> pd.DataFrame:
+        """
+        Load data from CSV file.
+
+        Args:
+            filepath: Path to CSV file
+            **kwargs: Additional arguments for pd.read_csv
+
+        Returns:
+            DataFrame with loaded data
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            pd.errors.EmptyDataError: If file is empty
+        """
+        try:
+            if not os.path.exists(filepath):
+                raise FileNotFoundError(f"File not found: {filepath}")
+
+            df = pd.read_csv(filepath, **kwargs)
+            self.logger.info(f"Successfully loaded {len(df)} rows from {filepath}")
+            return df
+
+        except pd.errors.EmptyDataError:
+            self.logger.error(f"Empty file: {filepath}")
+            raise
+        except Exception as e:
+            self.logger.error(f"Error loading CSV {filepath}: {str(e)}")
+            raise
+
+    def load_excel(
+        self, filepath: str, sheet_name: Union[str, int] = 0, **kwargs
+    ) -> pd.DataFrame:
+        """
+        Load data from Excel file.
+
+        Args:
+            filepath: Path to Excel file
+            sheet_name: Sheet name or index
+            **kwargs: Additional arguments for pd.read_excel
+
+        Returns:
+            DataFrame with loaded data
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+        """
+        try:
+            if not os.path.exists(filepath):
+                raise FileNotFoundError(f"File not found: {filepath}")
+
+            df = pd.read_excel(filepath, sheet_name=sheet_name, **kwargs)
+            self.logger.info(f"Successfully loaded {len(df)} rows from {filepath}")
+            return df
+
+        except Exception as e:
+            self.logger.error(f"Error loading Excel {filepath}: {str(e)}")
+            raise
+
+    def load_from_sqlite(self, db_path: str, query: str) -> pd.DataFrame:
+        """
+        Load data from SQLite database.
+
+        Args:
+            db_path: Path to SQLite database file
+            query: SQL query to execute
+
+        Returns:
+            DataFrame with query results
+
+        Raises:
+            FileNotFoundError: If database file doesn't exist
+            Exception: For database connection or query errors
+        """
+        try:
+            if not os.path.exists(db_path):
+                raise FileNotFoundError(f"Database not found: {db_path}")
+
+            conn = sqlite3.connect(db_path)
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            self.logger.info(f"Successfully loaded {len(df)} rows from SQLite database")
+            return df
+
+        except Exception as e:
+            self.logger.error(f"Error loading from SQLite: {str(e)}")
+            raise
+
+    def load_from_postgres(self, connection_string: str, query: str) -> pd.DataFrame:
+        """
+        Load data from PostgreSQL database.
+
+        Args:
+            connection_string: PostgreSQL connection string
+            query: SQL query to execute
+
+        Returns:
+            DataFrame with query results
+
+        Raises:
+            Exception: For database connection or query errors
+        """
+        try:
+            engine = create_engine(connection_string)
+            df = pd.read_sql_query(query, engine)
+            engine.dispose()
+            self.logger.info(
+                f"Successfully loaded {len(df)} rows from PostgreSQL database"
+            )
+            return df
+
+        except Exception as e:
+            self.logger.error(f"Error loading from PostgreSQL: {str(e)}")
+            raise
+
+    def validate_dataframe(
+        self, df: pd.DataFrame, required_columns: list = None
+    ) -> bool:
+        """
+        Validate DataFrame structure.
+
+        Args:
+            df: DataFrame to validate
+            required_columns: List of required column names
+
+        Returns:
+            True if valid
+
+        Raises:
+            ValueError: If validation fails
+        """
+        if df is None or df.empty:
+            raise ValueError("DataFrame is empty")
+
+        if required_columns:
+            missing = set(required_columns) - set(df.columns)
+            if missing:
+                raise ValueError(f"Missing required columns: {missing}")
+
+        self.logger.info(f"DataFrame validated: {df.shape[0]} rows, {df.shape[1]} columns")
+        return True

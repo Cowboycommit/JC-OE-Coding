@@ -1,0 +1,31 @@
+id,response,respondent_id,timestamp
+1,I love the flexibility of remote work,R001,2024-01-01
+2,Better work-life balance is crucial,R002,2024-01-02
+3,Communication challenges with team members,R003,2024-01-03
+4,Increased productivity at home,R004,2024-01-04
+5,Missing social interactions with colleagues,R005,2024-01-05
+6,Technology issues affect my work,R006,2024-01-06
+7,More time for family and personal activities,R007,2024-01-07
+8,Difficulty separating work and personal life,R008,2024-01-08
+9,Cost savings from not commuting,R009,2024-01-09
+10,Feeling isolated from the team,R010,2024-01-10
+11,Flexible schedule allows better time management,R011,2024-01-11
+12,Video call fatigue is real,R012,2024-01-12
+13,Can focus better without office distractions,R013,2024-01-13
+14,Miss casual conversations at the office,R014,2024-01-14
+15,Home office setup improves comfort,R015,2024-01-15
+16,Internet connectivity problems,R016,2024-01-16
+17,Appreciate the autonomy,R017,2024-01-17
+18,Harder to build relationships remotely,R018,2024-01-18
+19,Reduced stress from commuting,R019,2024-01-19
+20,Challenging to stay motivated alone,R020,2024-01-20
+21,Freedom to work from anywhere is amazing,R021,2024-01-21
+22,Struggle with work-life boundaries,R022,2024-01-22
+23,Collaboration tools make teamwork easier,R023,2024-01-23
+24,Miss the energy of the office,R024,2024-01-24
+25,Save money on transportation and lunch,R025,2024-01-25
+26,Technical difficulties interrupt my flow,R026,2024-01-26
+27,More quality time with family,R027,2024-01-27
+28,Lack of face-to-face interaction,R028,2024-01-28
+29,Higher productivity without commute time,R029,2024-01-29
+30,Feeling disconnected from company culture,R030,2024-01-30
