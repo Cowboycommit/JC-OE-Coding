@@ -70,6 +70,9 @@ df = loader.load_csv('data/responses.csv')
 # From Excel
 df = loader.load_excel('data/responses.xlsx', sheet_name='Survey')
 
+# From JSON (standard or JSON Lines)
+df = loader.load_json('data/responses.json', lines=True)
+
 # From SQLite
 df = loader.load_from_sqlite('data/survey.db', 'SELECT * FROM responses')
 
