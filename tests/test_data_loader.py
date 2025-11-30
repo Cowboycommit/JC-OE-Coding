@@ -28,6 +28,16 @@ class TestDataLoader:
         yield temp_path
         os.unlink(temp_path)
 
+    @pytest.fixture
+    def sample_json_lines(self):
+        """Create temporary JSON Lines file."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.jsonl', delete=False) as f:
+            f.write('{"id": 1, "text": "sample", "value": 100}\n')
+            f.write('{"id": 2, "text": "test", "value": 200}\n')
+            temp_path = f.name
+        yield temp_path
+        os.unlink(temp_path)
+
     def test_load_csv_success(self, data_loader, sample_csv):
         """Test successful CSV loading."""
         df = data_loader.load_csv(sample_csv)
@@ -39,6 +49,30 @@ class TestDataLoader:
         """Test CSV loading with non-existent file."""
         with pytest.raises(FileNotFoundError):
             data_loader.load_csv('nonexistent.csv')
+
+    def test_load_json_lines_success(self, data_loader, sample_json_lines):
+        """Test loading JSON Lines file."""
+        df = data_loader.load_json(sample_json_lines, lines=True)
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 2
+        assert list(df.columns) == ['id', 'text', 'value']
+
+    def test_load_json_file_not_found(self, data_loader):
+        """Test JSON loading with non-existent file."""
+        with pytest.raises(FileNotFoundError):
+            data_loader.load_json('missing.json')
+
+    def test_load_json_invalid_content(self, data_loader):
+        """Test JSON loading with invalid content."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            f.write("not json")
+            temp_path = f.name
+
+        try:
+            with pytest.raises(ValueError):
+                data_loader.load_json(temp_path)
+        finally:
+            os.unlink(temp_path)
 
     def test_validate_dataframe_success(self, data_loader):
         """Test DataFrame validation."""

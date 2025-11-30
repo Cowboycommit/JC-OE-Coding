@@ -139,6 +139,41 @@ class DataLoader:
             self.logger.error(f"Error loading from PostgreSQL: {str(e)}")
             raise
 
+    def load_json(
+        self, filepath: str, lines: bool = False, orient: str = None, **kwargs
+    ) -> pd.DataFrame:
+        """
+        Load data from JSON file.
+
+        Args:
+            filepath: Path to JSON file
+            lines: Whether the file is in JSON lines format
+            orient: Expected JSON orientation (passed to ``pandas.read_json``)
+            **kwargs: Additional arguments for ``pandas.read_json``
+
+        Returns:
+            DataFrame with loaded data
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            ValueError: If JSON cannot be decoded
+        """
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File not found: {filepath}")
+
+        try:
+            df = pd.read_json(filepath, lines=lines, orient=orient, **kwargs)
+            self.logger.info(
+                "Successfully loaded %s rows from JSON file %s", len(df), filepath
+            )
+            return df
+        except ValueError:
+            self.logger.error("Invalid JSON content in %s", filepath)
+            raise
+        except Exception as e:
+            self.logger.error(f"Error loading JSON {filepath}: {str(e)}")
+            raise
+
     def validate_dataframe(
         self, df: pd.DataFrame, required_columns: list = None
     ) -> bool:
