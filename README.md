@@ -10,6 +10,9 @@ Manual coding with predefined code frames and keywords
 ### 2. **ML-Based Open Coding** (`ml_open_coding_analysis.ipynb`) ⭐ NEW!
 Automated theme discovery using machine learning with **15 essential outputs**
 
+### 3. **Streamlit Web UI** (`streamlit_app.py`) 🌐 NEW!
+Interactive web interface for ML-based coding - no coding required!
+
 ## Features
 
 ### Traditional Approach
@@ -30,6 +33,15 @@ Automated theme discovery using machine learning with **15 essential outputs**
 - 📝 **Executive Summaries**: Auto-generated stakeholder reports
 - ✅ **Quality Assurance**: Built-in validation and error detection
 
+### Streamlit Web UI (NEW!)
+- 🌐 **No Coding Required**: User-friendly web interface
+- 📤 **Drag & Drop Upload**: Upload CSV/Excel files easily
+- ⚙️ **Interactive Configuration**: Visual parameter adjustment
+- 📊 **Real-time Visualizations**: Interactive charts and graphs
+- 💾 **One-Click Export**: Download complete results packages
+- 📱 **Responsive Design**: Works on desktop and mobile
+- 🎨 **Professional Styling**: Publication-ready visualizations
+
 ## Quick Start
 
 ### Installation
@@ -41,40 +53,51 @@ pip install -r requirements.txt
 
 ### Running the Analysis
 
-**Option 1: Traditional Keyword-Based Coding**
+**Option 1: Streamlit Web UI (Easiest - Recommended for Non-Programmers)**
 ```bash
-jupyter notebook open_ended_coding_analysis.ipynb
+streamlit run streamlit_app.py
 ```
+Then open your browser to `http://localhost:8501`
 
-**Option 2: ML-Based Open Coding (Recommended)**
+**Option 2: ML-Based Open Coding Notebook**
 ```bash
 jupyter notebook ml_open_coding_analysis.ipynb
+```
+
+**Option 3: Traditional Keyword-Based Coding**
+```bash
+jupyter notebook open_ended_coding_analysis.ipynb
 ```
 
 ## Project Structure
 
 ```
 .
+├── streamlit_app.py                 # Streamlit web UI (NEW!)
 ├── open_ended_coding_analysis.ipynb  # Traditional keyword-based coding
 ├── ml_open_coding_analysis.ipynb     # ML-based automatic coding (NEW!)
+├── helpers/                         # Helper modules for Streamlit (NEW!)
+│   ├── __init__.py
+│   ├── formatting.py               # Formatting utilities
+│   └── analysis.py                 # Analysis helper functions
 ├── src/
 │   ├── __init__.py
-│   ├── data_loader.py               # Data loading utilities
-│   ├── code_frame.py                # Code frame management
-│   ├── theme_analyzer.py            # Theme identification
-│   └── category_manager.py          # Categorization system
+│   ├── data_loader.py              # Data loading utilities
+│   ├── code_frame.py               # Code frame management
+│   ├── theme_analyzer.py           # Theme identification
+│   └── category_manager.py         # Categorization system
 ├── data/
-│   ├── sample_responses.csv         # Sample data
-│   └── README.md                    # Data documentation
-├── output/                          # Analysis results
-├── tests/                           # Unit tests
+│   ├── sample_responses.csv        # Sample data
+│   └── README.md                   # Data documentation
+├── output/                         # Analysis results
+├── tests/                          # Unit tests
 │   ├── test_data_loader.py
 │   ├── test_code_frame.py
 │   ├── test_theme_analyzer.py
 │   └── test_category_manager.py
-├── requirements.txt                 # Python dependencies
-├── Makefile                         # Build and test automation
-└── README.md                        # This file
+├── requirements.txt                # Python dependencies
+├── Makefile                        # Build and test automation
+└── README.md                       # This file
 ```
 
 ## Usage
@@ -167,6 +190,62 @@ cat_manager.create_category(
 # Apply categorization
 df = cat_manager.categorize(df)
 ```
+
+## Streamlit Web UI (NEW!)
+
+The `streamlit_app.py` provides an intuitive web interface for ML-based coding - **perfect for non-programmers**!
+
+### 🌐 Features
+
+- **📤 Data Upload**: Drag and drop CSV/Excel files
+- **🔍 Data Preview**: Instantly see your data with column information
+- **⚙️ Interactive Configuration**:
+  - Select text column visually
+  - Adjust number of codes with sliders
+  - Choose ML algorithm from dropdown
+  - Set confidence thresholds
+- **🚀 One-Click Analysis**: Run complete ML analysis with progress tracking
+- **📊 Rich Visualizations**:
+  - Interactive frequency charts
+  - Co-occurrence heatmaps
+  - Network diagrams
+  - Distribution plots
+  - Confidence score analysis
+- **💾 Easy Exports**: Download complete results as Excel with one click
+- **📝 Executive Summaries**: Auto-generated insights and reports
+
+### 🎯 How to Use
+
+1. **Launch the app**:
+   ```bash
+   streamlit run streamlit_app.py
+   ```
+
+2. **Upload your data**: Click "Browse files" and select your CSV/Excel file
+
+3. **Configure analysis**:
+   - Select the column containing responses
+   - Choose number of themes (3-30)
+   - Pick ML algorithm (TF-IDF+K-Means recommended)
+   - Set confidence threshold (0.3 works well)
+
+4. **Run analysis**: Click "Start Analysis" and watch the magic happen!
+
+5. **Explore results**:
+   - View key metrics and insights
+   - Examine code frequencies and examples
+   - Explore interactive visualizations
+   - Download complete results package
+
+### 📱 Interface Sections
+
+- **📤 Data Upload**: Load and preview your data
+- **⚙️ Configuration**: Set up analysis parameters
+- **🚀 Run Analysis**: Execute ML coding with progress tracking
+- **📊 Results Overview**: View metrics, insights, and codebook
+- **📈 Visualizations**: Interactive charts and graphs
+- **💾 Export Results**: Download complete packages
+- **ℹ️ About**: Documentation and help
 
 ## ML-Based Open Coding (NEW!)
 
@@ -471,6 +550,17 @@ Built with:
 - [ ] Multi-language support
 
 ## Version History
+
+### v1.2.0 (2024) - Streamlit Web UI
+- Added Streamlit web application for no-code analysis
+- Drag-and-drop file upload (CSV/Excel)
+- Interactive parameter configuration
+- Real-time progress tracking
+- Rich interactive visualizations (Plotly)
+- One-click export of complete results
+- Formatted helper modules for analysis and formatting
+- Mobile-responsive design
+- Professional UI with custom styling
 
 ### v1.1.0 (2024) - ML-Based Open Coding
 - Added ML-based automatic coding notebook
