@@ -516,7 +516,7 @@ If you use this framework in your research, please cite:
   title = {Open-Ended Coding Analysis Framework},
   author = {Your Name},
   year = {2024},
-  url = {https://github.com/yourusername/open-ended-coding}
+  url = {https://github.com/Cowboycommit/JC-OE-Coding}
 }
 ```
 
