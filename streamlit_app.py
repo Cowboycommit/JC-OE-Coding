@@ -940,7 +940,7 @@ def page_about():
 
     ### 📚 Resources
 
-    - [GitHub Repository](https://github.com/yourusername/open-ended-coding)
+    - [GitHub Repository](https://github.com/Cowboycommit/JC-OE-Coding)
     - [Documentation](https://docs.example.com)
     - [Tutorial Videos](https://youtube.com)
     - [Research Paper](https://arxiv.org)
@@ -965,7 +965,7 @@ def page_about():
     with col2:
         st.markdown("**💬 Discord**  \ndiscord.gg/example")
     with col3:
-        st.markdown("**🐛 GitHub Issues**  \ngithub.com/issues")
+        st.markdown("**🐛 GitHub Issues**  \ngithub.com/Cowboycommit/JC-OE-Coding/issues")
 
 
 if __name__ == "__main__":
