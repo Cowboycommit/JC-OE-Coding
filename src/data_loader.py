@@ -102,9 +102,8 @@ class DataLoader:
             if not os.path.exists(db_path):
                 raise FileNotFoundError(f"Database not found: {db_path}")
 
-            conn = sqlite3.connect(db_path)
-            df = pd.read_sql_query(query, conn)
-            conn.close()
+            with sqlite3.connect(db_path) as conn:
+                df = pd.read_sql_query(query, conn)
             self.logger.info(f"Successfully loaded {len(df)} rows from SQLite database")
             return df
 
@@ -128,12 +127,14 @@ class DataLoader:
         """
         try:
             engine = create_engine(connection_string)
-            df = pd.read_sql_query(query, engine)
-            engine.dispose()
-            self.logger.info(
-                f"Successfully loaded {len(df)} rows from PostgreSQL database"
-            )
-            return df
+            try:
+                df = pd.read_sql_query(query, engine)
+                self.logger.info(
+                    f"Successfully loaded {len(df)} rows from PostgreSQL database"
+                )
+                return df
+            finally:
+                engine.dispose()
 
         except Exception as e:
             self.logger.error(f"Error loading from PostgreSQL: {str(e)}")
