@@ -5,6 +5,8 @@ Provides functions for running ML analysis, generating insights,
 and processing results.
 """
 
+from collections import Counter
+
 import pandas as pd
 import numpy as np
 import streamlit as st
