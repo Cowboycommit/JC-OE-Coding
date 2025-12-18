@@ -3,6 +3,13 @@ Formatting utilities for the Streamlit UI.
 
 Provides functions for formatting data, creating styled tables,
 and generating download links.
+
+Color Palette:
+    Primary Color: #1f77b4 (Medium blue - buttons, links, accents)
+    Background Color: #ffffff (White - main background)
+    Secondary Background: #f0f2f6 (Light gray - cards, containers, sidebar)
+    Text Color: #262730 (Dark charcoal - main text)
+    Font: sans-serif
 """
 
 import base64
@@ -10,6 +17,12 @@ import pandas as pd
 import streamlit as st
 from typing import Any, Union, List, Dict
 from io import BytesIO
+
+# Theme Color Constants
+THEME_PRIMARY = "#1f77b4"
+THEME_BACKGROUND = "#ffffff"
+THEME_SECONDARY_BG = "#f0f2f6"
+THEME_TEXT = "#262730"
 
 
 def format_number(value: Union[int, float], decimals: int = 0) -> str:
@@ -402,8 +415,10 @@ def create_badge(text: str, color: str = "blue") -> str:
     Returns:
         HTML string for badge
     """
+    # Color palette aligned with theme:
+    # Primary: #1f77b4, Secondary BG: #f0f2f6, Text: #262730
     color_map = {
-        'blue': '#007bff',
+        'blue': '#1f77b4',      # Primary color
         'green': '#28a745',
         'red': '#dc3545',
         'yellow': '#ffc107',
@@ -417,10 +432,11 @@ def create_badge(text: str, color: str = "blue") -> str:
     return f'''
     <span style="
         background-color: {bg_color};
-        color: white;
+        color: #ffffff;
         padding: 2px 8px;
         border-radius: 12px;
         font-size: 0.85em;
         font-weight: 500;
+        font-family: sans-serif;
     ">{text}</span>
     '''

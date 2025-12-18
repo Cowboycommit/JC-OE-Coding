@@ -48,7 +48,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Custom CSS - Color Palette:
+# Primary: #1f77b4 (Medium blue)
+# Background: #ffffff (White)
+# Secondary Background: #f0f2f6 (Light gray)
+# Text: #262730 (Dark charcoal)
+# Font: sans-serif
 st.markdown("""
 <style>
     .main-header {
@@ -57,16 +62,18 @@ st.markdown("""
         color: #1f77b4;
         text-align: center;
         margin-bottom: 2rem;
+        font-family: sans-serif;
     }
     .sub-header {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #2c3e50;
+        color: #262730;
         margin-top: 2rem;
         margin-bottom: 1rem;
+        font-family: sans-serif;
     }
     .metric-card {
-        background-color: #f8f9fa;
+        background-color: #f0f2f6;
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -77,6 +84,7 @@ st.markdown("""
         padding: 15px;
         margin: 10px 0;
         border-radius: 5px;
+        color: #262730;
     }
     .warning-box {
         background-color: #fff3cd;
@@ -84,22 +92,30 @@ st.markdown("""
         padding: 15px;
         margin: 10px 0;
         border-radius: 5px;
+        color: #262730;
     }
     .info-box {
-        background-color: #d1ecf1;
-        border-left: 5px solid #17a2b8;
+        background-color: #e8f4f8;
+        border-left: 5px solid #1f77b4;
         padding: 15px;
         margin: 10px 0;
         border-radius: 5px;
+        color: #262730;
     }
     .stButton>button {
         width: 100%;
         background-color: #1f77b4;
-        color: white;
+        color: #ffffff;
         font-weight: 600;
+        font-family: sans-serif;
     }
     .stButton>button:hover {
         background-color: #155a8a;
+        color: #ffffff;
+    }
+    /* Ensure text uses the correct color */
+    p, li, span {
+        color: #262730;
     }
 </style>
 """, unsafe_allow_html=True)
