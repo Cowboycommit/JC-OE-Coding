@@ -178,13 +178,6 @@ def main():
         else:
             st.metric("Analysis Status", "⏸️ Pending")
 
-        st.markdown("---")
-        st.markdown("""
-        ### 🔗 Resources
-        - [📖 Documentation](#)
-        - [💡 Tutorial](#)
-        - [🐛 Report Bug](#)
-        """)
 
     # Page routing
     if page == "📤 Data Upload":
@@ -955,35 +948,7 @@ def page_about():
     3. **Run Analysis**: Let ML discover themes
     4. **Explore Results**: View codes, insights, and visualizations
     5. **Export**: Download complete results package
-
-    ### 📚 Resources
-
-    - [GitHub Repository](https://github.com/Cowboycommit/JC-OE-Coding)
-    - [Documentation](https://docs.example.com)
-    - [Tutorial Videos](https://youtube.com)
-    - [Research Paper](https://arxiv.org)
-
-    ### 🔧 Technical Details
-
-    - **Built with**: Python, Streamlit, scikit-learn, Plotly
-    - **Version**: 1.0.0
-    - **License**: MIT
-
-    ### 👥 Credits
-
-    Developed with ❤️ for qualitative researchers
     """)
-
-    st.markdown("---")
-    st.markdown("### 📞 Support")
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("**📧 Email**  \nsupport@example.com")
-    with col2:
-        st.markdown("**💬 Discord**  \ndiscord.gg/example")
-    with col3:
-        st.markdown("**🐛 GitHub Issues**  \ngithub.com/Cowboycommit/JC-OE-Coding/issues")
 
 
 if __name__ == "__main__":
