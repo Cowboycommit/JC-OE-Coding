@@ -10,7 +10,7 @@ Manual coding with predefined code frames and keywords
 ### 2. **ML-Based Open Coding** (`ml_open_coding_analysis.ipynb`) ⭐ NEW!
 Automated theme discovery using machine learning with **15 essential outputs**
 
-### 3. **Streamlit Web UI** (`dashboard.py`) 🌐 NEW!
+### 3. **Streamlit Web UI** (`app.py`) 🌐 NEW!
 Interactive web interface for ML-based coding - no coding required!
 
 ## Features
@@ -55,7 +55,7 @@ pip install -r requirements.txt
 
 **Option 1: Streamlit Web UI (Easiest - Recommended for Non-Programmers)**
 ```bash
-streamlit run dashboard.py
+streamlit run app.py
 ```
 Then open your browser to `http://localhost:8501`
 
@@ -73,7 +73,7 @@ jupyter notebook open_ended_coding_analysis.ipynb
 
 ```
 .
-├── dashboard.py                     # Streamlit web UI (NEW!)
+├── app.py                           # Streamlit web UI (NEW!)
 ├── open_ended_coding_analysis.ipynb  # Traditional keyword-based coding
 ├── ml_open_coding_analysis.ipynb     # ML-based automatic coding (NEW!)
 ├── helpers/                         # Helper modules for Streamlit (NEW!)
@@ -196,7 +196,7 @@ df = cat_manager.categorize(df)
 
 ## Streamlit Web UI (NEW!)
 
-The `dashboard.py` provides an intuitive web interface for ML-based coding - **perfect for non-programmers**!
+The `app.py` provides an intuitive web interface for ML-based coding - **perfect for non-programmers**!
 
 ### 🌐 Features
 
@@ -221,7 +221,7 @@ The `dashboard.py` provides an intuitive web interface for ML-based coding - **p
 
 1. **Launch the app**:
    ```bash
-   streamlit run dashboard.py
+   streamlit run app.py
    ```
 
 2. **Upload your data**: Click "Browse files" and select your CSV/Excel file
