@@ -32,6 +32,7 @@ from helpers.analysis import (
     validate_dataframe,
     preprocess_responses,
     run_ml_analysis,
+    find_optimal_codes,
     calculate_metrics_summary,
     generate_insights,
     get_analysis_summary,
@@ -204,27 +205,41 @@ def page_data_upload():
     Try the tool with sample data or upload your own qualitative responses.
     """)
 
-    # Sample data option
-    if st.button("Load Sample Data", use_container_width=True):
-        # Create sample data
-        sample_data = {
-            'response': [
-                "I love the flexibility of remote work and the better work-life balance it provides.",
-                "Communication challenges and feeling isolated are major issues with remote work.",
-                "Remote work has improved my productivity significantly due to fewer distractions.",
-                "I miss the social interaction and collaboration from the office environment.",
-                "The flexibility to work from anywhere is the best part of remote work.",
-                "Video call fatigue and technology issues make remote work challenging.",
-                "I appreciate being able to spend more time with family while working remotely.",
-                "It's difficult to separate work and personal life when working from home.",
-                "Remote work has eliminated my commute and reduced stress levels.",
-                "I struggle with motivation and staying focused when working remotely."
-            ] * 5  # Repeat for more data
-        }
+    # Sample data option with dropdown
+    st.markdown("### 📊 Select a Sample Dataset")
 
-        st.session_state.uploaded_df = pd.DataFrame(sample_data)
-        st.success("✅ Sample data loaded! Go to Configuration to continue.")
-        st.rerun()
+    # Define available sample datasets
+    sample_datasets = {
+        "Remote Work Experiences": "data/sample_responses.csv",
+        "Fashion Industry Perspectives": "data/fashion_responses.csv",
+        "Cricket Commentary": "data/cricket_responses.csv",
+        "Cultural Commentary": "data/cultural_commentary_responses.csv",
+        "Consumer Perspectives": "data/consumer_perspectives_responses.csv",
+        "Industry Professional Responses": "data/industry_professional_responses.csv",
+        "Trump-Related Responses": "data/trump_responses.csv",
+        "Epstein Case Responses": "data/epstein_case_responses.csv"
+    }
+
+    # Dropdown to select sample dataset
+    selected_dataset = st.selectbox(
+        "Choose a sample dataset:",
+        options=list(sample_datasets.keys()),
+        help="Select from pre-loaded sample datasets to explore the tool"
+    )
+
+    # Load button
+    if st.button("Load Selected Dataset", use_container_width=True):
+        try:
+            dataset_path = sample_datasets[selected_dataset]
+            df = pd.read_csv(dataset_path)
+
+            st.session_state.uploaded_df = df
+            st.success(f"✅ {selected_dataset} loaded successfully! ({len(df)} responses)")
+            st.rerun()
+        except FileNotFoundError:
+            st.error(f"❌ Dataset file not found: {dataset_path}")
+        except Exception as e:
+            st.error(f"❌ Error loading dataset: {str(e)}")
 
     # Upload your data section
     st.markdown("---")
@@ -368,14 +383,24 @@ def page_configuration():
     col1, col2 = st.columns(2)
 
     with col1:
+        auto_optimal_codes = st.checkbox(
+            "Auto-select optimal number of codes",
+            value=False,
+            help="Let the algorithm automatically determine the optimal number of codes based on your data using silhouette analysis"
+        )
+
         n_codes = st.slider(
             "Number of codes to discover",
             min_value=3,
             max_value=30,
             value=10,
             step=1,
-            help="How many themes/codes should the algorithm discover?"
+            help="How many themes/codes should the algorithm discover?",
+            disabled=auto_optimal_codes
         )
+
+        if auto_optimal_codes:
+            st.info("🔍 The algorithm will test different numbers of codes (3-15) and select the optimal value based on clustering quality.")
 
         method = st.selectbox(
             "ML Algorithm",
@@ -388,6 +413,14 @@ def page_configuration():
             }[x],
             help="Choose the machine learning algorithm"
         )
+
+        # Algorithm descriptions
+        algorithm_descriptions = {
+            'tfidf_kmeans': "**TF-IDF + K-Means** converts text into numerical features based on word importance, then groups similar responses together. Fast and interpretable—ideal for discovering distinct themes in your data.",
+            'lda': "**Latent Dirichlet Allocation** is a probabilistic model that discovers hidden topics in text. Each response can belong to multiple topics, making it great for overlapping themes.",
+            'nmf': "**Non-negative Matrix Factorization** decomposes text into parts-based representations. Produces sparse, interpretable results—best when themes are distinct and non-overlapping."
+        }
+        st.info(algorithm_descriptions[method])
 
     with col2:
         min_confidence = st.slider(
@@ -411,6 +444,7 @@ def page_configuration():
     st.session_state.config = {
         'text_column': selected_column,
         'n_codes': n_codes,
+        'auto_optimal_codes': auto_optimal_codes,
         'method': method,
         'min_confidence': min_confidence,
         'stop_words': stop_words
@@ -425,7 +459,7 @@ def page_configuration():
     with config_col1:
         st.metric("Responses", f"{len(df):,}")
     with config_col2:
-        st.metric("Codes to Find", n_codes)
+        st.metric("Codes to Find", "Auto" if auto_optimal_codes else n_codes)
     with config_col3:
         st.metric("Algorithm", method.upper())
 
@@ -450,15 +484,20 @@ def page_run_analysis():
     # Display configuration
     st.markdown("### 📋 Ready to Analyze")
 
+    auto_optimal = config.get('auto_optimal_codes', False)
+
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Responses", f"{len(df):,}")
     with col2:
         st.metric("Text Column", config['text_column'])
     with col3:
-        st.metric("Codes", config['n_codes'])
+        st.metric("Codes", "Auto" if auto_optimal else config['n_codes'])
     with col4:
         st.metric("Method", config['method'].upper())
+
+    if auto_optimal:
+        st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
 
     st.markdown("---")
 
@@ -476,14 +515,44 @@ def page_run_analysis():
             # Run analysis
             start_time = time.time()
 
+            # Determine number of codes
+            n_codes = config['n_codes']
+
+            if auto_optimal:
+                status_text.text("🔍 Finding optimal number of codes...")
+                progress_bar.progress(0.1)
+
+                optimal_n, optimal_results = find_optimal_codes(
+                    df=df,
+                    text_column=config['text_column'],
+                    method=config['method'],
+                    stop_words=config.get('stop_words', 'english'),
+                    progress_callback=lambda p, m: (progress_bar.progress(0.1 + p * 0.3), status_text.text(m))
+                )
+                n_codes = optimal_n
+
+                st.success(f"✨ Optimal number of codes determined: **{optimal_n}** (silhouette score: {optimal_results['best_silhouette_score']:.4f})")
+
+                # Adjust progress for main analysis
+                def adjusted_progress(p, m):
+                    progress_bar.progress(0.4 + p * 0.6)
+                    status_text.text(m)
+            else:
+                adjusted_progress = update_progress
+
             coder, results_df, metrics = run_ml_analysis(
                 df=df,
                 text_column=config['text_column'],
-                n_codes=config['n_codes'],
+                n_codes=n_codes,
                 method=config['method'],
                 min_confidence=config['min_confidence'],
-                progress_callback=update_progress
+                progress_callback=adjusted_progress
             )
+
+            # Store optimization info if auto-detection was used
+            if auto_optimal:
+                metrics['auto_optimal'] = True
+                metrics['optimal_analysis'] = optimal_results
 
             # Save to session state
             st.session_state.coder = coder
