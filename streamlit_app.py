@@ -15,6 +15,8 @@ import time
 from datetime import datetime
 from io import BytesIO
 import base64
+import os
+from pathlib import Path
 
 # Import helper modules
 from helpers.formatting import (
@@ -310,26 +312,51 @@ def page_data_upload():
         st.markdown("---")
         st.markdown("### 📂 Or use sample data")
 
-        if st.button("Load Sample Data", use_container_width=True):
-            # Create sample data
-            sample_data = {
-                'response': [
-                    "I love the flexibility of remote work and the better work-life balance it provides.",
-                    "Communication challenges and feeling isolated are major issues with remote work.",
-                    "Remote work has improved my productivity significantly due to fewer distractions.",
-                    "I miss the social interaction and collaboration from the office environment.",
-                    "The flexibility to work from anywhere is the best part of remote work.",
-                    "Video call fatigue and technology issues make remote work challenging.",
-                    "I appreciate being able to spend more time with family while working remotely.",
-                    "It's difficult to separate work and personal life when working from home.",
-                    "Remote work has eliminated my commute and reduced stress levels.",
-                    "I struggle with motivation and staying focused when working remotely."
-                ] * 5  # Repeat for more data
-            }
+        # Get list of sample datasets from the data directory
+        data_dir = Path(__file__).parent / "data"
+        sample_datasets = {}
 
-            st.session_state.uploaded_df = pd.DataFrame(sample_data)
-            st.success("✅ Sample data loaded! Go to Configuration to continue.")
-            st.rerun()
+        if data_dir.exists():
+            for file in sorted(data_dir.glob("*.csv")):
+                # Create a friendly display name from the filename
+                display_name = file.stem.replace("_", " ").title()
+                sample_datasets[display_name] = file
+
+        if sample_datasets:
+            # Dropdown selector for sample datasets
+            selected_dataset = st.selectbox(
+                "Select a sample dataset:",
+                options=["-- Select a dataset --"] + list(sample_datasets.keys()),
+                help="Choose from our collection of sample datasets to explore the tool"
+            )
+
+            if selected_dataset != "-- Select a dataset --":
+                # Show dataset info before loading
+                dataset_path = sample_datasets[selected_dataset]
+
+                # Preview the dataset
+                try:
+                    preview_df = pd.read_csv(dataset_path, nrows=5)
+                    total_rows = sum(1 for _ in open(dataset_path)) - 1  # Subtract header
+
+                    st.markdown(f"**Dataset:** `{dataset_path.name}`")
+                    st.markdown(f"**Total rows:** {total_rows:,} | **Columns:** {len(preview_df.columns)}")
+
+                    with st.expander("Preview first 5 rows"):
+                        st.dataframe(preview_df, use_container_width=True)
+                except Exception as e:
+                    st.warning(f"Could not preview dataset: {e}")
+
+                if st.button("📥 Load Selected Dataset", use_container_width=True, type="primary"):
+                    try:
+                        df = pd.read_csv(dataset_path)
+                        st.session_state.uploaded_df = df
+                        st.success(f"✅ Loaded '{selected_dataset}' with {len(df):,} responses! Go to Configuration to continue.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"❌ Error loading dataset: {str(e)}")
+        else:
+            st.warning("No sample datasets found in the data directory")
 
 
 def page_configuration():
