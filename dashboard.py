@@ -204,27 +204,41 @@ def page_data_upload():
     Try the tool with sample data or upload your own qualitative responses.
     """)
 
-    # Sample data option
-    if st.button("Load Sample Data", use_container_width=True):
-        # Create sample data
-        sample_data = {
-            'response': [
-                "I love the flexibility of remote work and the better work-life balance it provides.",
-                "Communication challenges and feeling isolated are major issues with remote work.",
-                "Remote work has improved my productivity significantly due to fewer distractions.",
-                "I miss the social interaction and collaboration from the office environment.",
-                "The flexibility to work from anywhere is the best part of remote work.",
-                "Video call fatigue and technology issues make remote work challenging.",
-                "I appreciate being able to spend more time with family while working remotely.",
-                "It's difficult to separate work and personal life when working from home.",
-                "Remote work has eliminated my commute and reduced stress levels.",
-                "I struggle with motivation and staying focused when working remotely."
-            ] * 5  # Repeat for more data
-        }
+    # Sample data option with dropdown
+    st.markdown("### 📊 Select a Sample Dataset")
 
-        st.session_state.uploaded_df = pd.DataFrame(sample_data)
-        st.success("✅ Sample data loaded! Go to Configuration to continue.")
-        st.rerun()
+    # Define available sample datasets
+    sample_datasets = {
+        "Remote Work Experiences": "data/sample_responses.csv",
+        "Fashion Industry Perspectives": "data/fashion_responses.csv",
+        "Cricket Commentary": "data/cricket_responses.csv",
+        "Cultural Commentary": "data/cultural_commentary_responses.csv",
+        "Consumer Perspectives": "data/consumer_perspectives_responses.csv",
+        "Industry Professional Responses": "data/industry_professional_responses.csv",
+        "Trump-Related Responses": "data/trump_responses.csv",
+        "Epstein Case Responses": "data/epstein_case_responses.csv"
+    }
+
+    # Dropdown to select sample dataset
+    selected_dataset = st.selectbox(
+        "Choose a sample dataset:",
+        options=list(sample_datasets.keys()),
+        help="Select from pre-loaded sample datasets to explore the tool"
+    )
+
+    # Load button
+    if st.button("Load Selected Dataset", use_container_width=True):
+        try:
+            dataset_path = sample_datasets[selected_dataset]
+            df = pd.read_csv(dataset_path)
+
+            st.session_state.uploaded_df = df
+            st.success(f"✅ {selected_dataset} loaded successfully! ({len(df)} responses)")
+            st.rerun()
+        except FileNotFoundError:
+            st.error(f"❌ Dataset file not found: {dataset_path}")
+        except Exception as e:
+            st.error(f"❌ Error loading dataset: {str(e)}")
 
     # Upload your data section
     st.markdown("---")
