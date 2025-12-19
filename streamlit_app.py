@@ -205,7 +205,37 @@ def main():
 
 def page_data_upload():
     """Data upload page."""
-    st.markdown('<h2 class="sub-header">📤 Upload Your Data</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="sub-header">📂 Load Sample Data</h2>', unsafe_allow_html=True)
+
+    st.markdown("""
+    Try the tool with sample data or upload your own qualitative responses.
+    """)
+
+    # Sample data option
+    if st.button("Load Sample Data", use_container_width=True):
+        # Create sample data
+        sample_data = {
+            'response': [
+                "I love the flexibility of remote work and the better work-life balance it provides.",
+                "Communication challenges and feeling isolated are major issues with remote work.",
+                "Remote work has improved my productivity significantly due to fewer distractions.",
+                "I miss the social interaction and collaboration from the office environment.",
+                "The flexibility to work from anywhere is the best part of remote work.",
+                "Video call fatigue and technology issues make remote work challenging.",
+                "I appreciate being able to spend more time with family while working remotely.",
+                "It's difficult to separate work and personal life when working from home.",
+                "Remote work has eliminated my commute and reduced stress levels.",
+                "I struggle with motivation and staying focused when working remotely."
+            ] * 5  # Repeat for more data
+        }
+
+        st.session_state.uploaded_df = pd.DataFrame(sample_data)
+        st.success("✅ Sample data loaded! Go to Configuration to continue.")
+        st.rerun()
+
+    # Upload your data section
+    st.markdown("---")
+    st.markdown("### 📤 Or Upload Your Data")
 
     st.markdown("""
     Upload a CSV or Excel file containing your qualitative responses.
@@ -302,34 +332,6 @@ def page_data_upload():
 
         except Exception as e:
             st.error(f"❌ Error loading file: {str(e)}")
-
-    else:
-        st.info("👆 Upload a file to get started")
-
-        # Sample data option
-        st.markdown("---")
-        st.markdown("### 📂 Or use sample data")
-
-        if st.button("Load Sample Data", use_container_width=True):
-            # Create sample data
-            sample_data = {
-                'response': [
-                    "I love the flexibility of remote work and the better work-life balance it provides.",
-                    "Communication challenges and feeling isolated are major issues with remote work.",
-                    "Remote work has improved my productivity significantly due to fewer distractions.",
-                    "I miss the social interaction and collaboration from the office environment.",
-                    "The flexibility to work from anywhere is the best part of remote work.",
-                    "Video call fatigue and technology issues make remote work challenging.",
-                    "I appreciate being able to spend more time with family while working remotely.",
-                    "It's difficult to separate work and personal life when working from home.",
-                    "Remote work has eliminated my commute and reduced stress levels.",
-                    "I struggle with motivation and staying focused when working remotely."
-                ] * 5  # Repeat for more data
-            }
-
-            st.session_state.uploaded_df = pd.DataFrame(sample_data)
-            st.success("✅ Sample data loaded! Go to Configuration to continue.")
-            st.rerun()
 
 
 def page_configuration():
