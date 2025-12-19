@@ -60,7 +60,7 @@ st.markdown("""
         font-size: 3rem;
         font-weight: 700;
         color: #1f77b4;
-        text-align: center;
+        text-align: left;
         margin-bottom: 2rem;
         font-family: sans-serif;
     }
