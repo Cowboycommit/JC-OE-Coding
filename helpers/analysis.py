@@ -103,6 +103,119 @@ def preprocess_responses(
     return processed
 
 
+def find_optimal_codes(
+    df: pd.DataFrame,
+    text_column: str,
+    min_codes: int = 3,
+    max_codes: int = 15,
+    method: str = 'tfidf_kmeans',
+    stop_words: str = 'english',
+    progress_callback=None
+) -> Tuple[int, Dict[str, Any]]:
+    """
+    Find the optimal number of codes using silhouette analysis.
+
+    Args:
+        df: DataFrame with responses
+        text_column: Name of the text column
+        min_codes: Minimum number of codes to test
+        max_codes: Maximum number of codes to test
+        method: ML method to use for testing
+        stop_words: Stop words language
+        progress_callback: Optional callback for progress updates
+
+    Returns:
+        Tuple of (optimal_n_codes, analysis_results)
+    """
+    import re
+    from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+    from sklearn.cluster import KMeans
+    from sklearn.decomposition import LatentDirichletAllocation, NMF
+    from sklearn.metrics import silhouette_score, calinski_harabasz_score
+
+    responses = df[text_column].tolist()
+
+    # Preprocess text
+    def preprocess_text(text):
+        if pd.isna(text):
+            return ""
+        text = str(text).lower()
+        text = re.sub(r'[^a-z\s]', ' ', text)
+        text = ' '.join(text.split())
+        return text
+
+    processed = [preprocess_text(r) for r in responses]
+
+    # Create feature matrix based on method
+    if method == 'lda':
+        vectorizer = CountVectorizer(
+            max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
+        )
+    else:
+        vectorizer = TfidfVectorizer(
+            max_features=1000, stop_words=stop_words, min_df=2,
+            max_df=0.8, ngram_range=(1, 2)
+        )
+
+    feature_matrix = vectorizer.fit_transform(processed)
+
+    # Limit max_codes based on data size
+    max_codes = min(max_codes, len(df) - 1, feature_matrix.shape[1] - 1)
+    if max_codes < min_codes:
+        max_codes = min_codes
+
+    results = {
+        'silhouette_scores': {},
+        'calinski_scores': {},
+        'tested_range': list(range(min_codes, max_codes + 1))
+    }
+
+    best_score = -1
+    optimal_n = min_codes
+
+    total_iterations = max_codes - min_codes + 1
+
+    for i, n in enumerate(range(min_codes, max_codes + 1)):
+        if progress_callback:
+            progress = (i + 1) / total_iterations
+            progress_callback(progress, f"Testing {n} codes...")
+
+        try:
+            if method == 'tfidf_kmeans':
+                model = KMeans(n_clusters=n, random_state=42, n_init=10)
+                labels = model.fit_predict(feature_matrix)
+            elif method == 'lda':
+                model = LatentDirichletAllocation(n_components=n, random_state=42, max_iter=10)
+                doc_topics = model.fit_transform(feature_matrix)
+                labels = doc_topics.argmax(axis=1)
+            else:  # nmf
+                model = NMF(n_components=n, random_state=42, max_iter=100)
+                doc_topics = model.fit_transform(feature_matrix)
+                labels = doc_topics.argmax(axis=1)
+
+            # Calculate silhouette score (only if we have more than 1 unique label)
+            if len(set(labels)) > 1:
+                sil_score = silhouette_score(feature_matrix, labels)
+                cal_score = calinski_harabasz_score(feature_matrix.toarray(), labels)
+
+                results['silhouette_scores'][n] = sil_score
+                results['calinski_scores'][n] = cal_score
+
+                if sil_score > best_score:
+                    best_score = sil_score
+                    optimal_n = n
+        except Exception as e:
+            logger.warning(f"Could not evaluate {n} codes: {e}")
+            continue
+
+    results['optimal_n_codes'] = optimal_n
+    results['best_silhouette_score'] = best_score
+
+    logger.info(f"Optimal number of codes: {optimal_n} (silhouette score: {best_score:.4f})")
+
+    return optimal_n, results
+
+
 def run_ml_analysis(
     df: pd.DataFrame,
     text_column: str,
