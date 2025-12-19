@@ -165,6 +165,7 @@ def main():
                 "💾 Export Results",
                 "ℹ️ About"
             ],
+            key="navigation_page",
             label_visibility="collapsed"
         )
 
@@ -601,7 +602,7 @@ def page_run_analysis():
             st.info("Analysis results are ready to view")
         with col2:
             if st.button("View Results", use_container_width=True):
-                st.session_state.current_page = "📊 Results Overview"
+                st.session_state.navigation_page = "📊 Results Overview"
                 st.rerun()
 
 
