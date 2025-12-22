@@ -83,21 +83,65 @@ class DataLoader:
             self.logger.error(f"Error loading Excel {filepath}: {str(e)}")
             raise
 
+    def _validate_query(self, query: str) -> None:
+        """
+        Validate that a SQL query is safe for execution.
+
+        Only SELECT queries are allowed. Destructive operations are rejected.
+
+        Args:
+            query: SQL query to validate
+
+        Raises:
+            ValueError: If query contains disallowed statements
+        """
+        if not query or not query.strip():
+            raise ValueError("Query cannot be empty")
+
+        normalized = query.strip().upper()
+
+        # Check for destructive keywords
+        disallowed = [
+            "DROP", "DELETE", "TRUNCATE", "UPDATE", "INSERT",
+            "ALTER", "CREATE", "GRANT", "REVOKE", "EXEC", "EXECUTE"
+        ]
+        for keyword in disallowed:
+            # Check for keyword as a standalone word
+            if f" {keyword} " in f" {normalized} " or normalized.startswith(f"{keyword} "):
+                raise ValueError(
+                    f"Query contains disallowed operation: {keyword}. "
+                    "Only SELECT queries are permitted."
+                )
+
+        # Ensure query starts with SELECT or WITH (for CTEs)
+        if not (normalized.startswith("SELECT") or normalized.startswith("WITH")):
+            raise ValueError(
+                "Query must start with SELECT or WITH. "
+                "Only read operations are permitted."
+            )
+
     def load_from_sqlite(self, db_path: str, query: str) -> pd.DataFrame:
         """
         Load data from SQLite database.
 
         Args:
             db_path: Path to SQLite database file
-            query: SQL query to execute
+            query: SQL query to execute (SELECT statements only)
 
         Returns:
             DataFrame with query results
 
         Raises:
             FileNotFoundError: If database file doesn't exist
+            ValueError: If query contains disallowed operations
             Exception: For database connection or query errors
+
+        Security:
+            Only SELECT queries are permitted. Destructive operations
+            (DROP, DELETE, UPDATE, INSERT, etc.) are rejected.
         """
+        self._validate_query(query)
+
         try:
             if not os.path.exists(db_path):
                 raise FileNotFoundError(f"Database not found: {db_path}")
@@ -117,14 +161,21 @@ class DataLoader:
 
         Args:
             connection_string: PostgreSQL connection string
-            query: SQL query to execute
+            query: SQL query to execute (SELECT statements only)
 
         Returns:
             DataFrame with query results
 
         Raises:
+            ValueError: If query contains disallowed operations
             Exception: For database connection or query errors
+
+        Security:
+            Only SELECT queries are permitted. Destructive operations
+            (DROP, DELETE, UPDATE, INSERT, etc.) are rejected.
         """
+        self._validate_query(query)
+
         try:
             engine = create_engine(connection_string)
             try:

@@ -189,27 +189,50 @@ class CategoryManager:
 
         Returns:
             Cross-tabulation DataFrame
+
+        Raises:
+            ValueError: If category IDs are not found or column names would conflict
         """
         if "categories" not in df.columns:
             return pd.DataFrame()
 
+        # Validate category IDs exist
+        if category1 not in self.categories:
+            raise ValueError(f"Category '{category1}' not found in categories")
+        if category2 not in self.categories:
+            raise ValueError(f"Category '{category2}' not found in categories")
+
+        # Check for column name conflicts
+        col1 = f"has_{category1}"
+        col2 = f"has_{category2}"
+        if col1 in df.columns:
+            raise ValueError(
+                f"Column '{col1}' already exists in DataFrame. "
+                "Rename or remove it before calling cross_tabulation."
+            )
+        if col2 in df.columns:
+            raise ValueError(
+                f"Column '{col2}' already exists in DataFrame. "
+                "Rename or remove it before calling cross_tabulation."
+            )
+
+        # Work on a copy to avoid mutating the original DataFrame
+        df_copy = df.copy()
+
         # Create binary indicators
-        df[f"has_{category1}"] = df["categories"].apply(
+        df_copy[col1] = df_copy["categories"].apply(
             lambda x: 1 if category1 in x else 0
         )
-        df[f"has_{category2}"] = df["categories"].apply(
+        df_copy[col2] = df_copy["categories"].apply(
             lambda x: 1 if category2 in x else 0
         )
 
         crosstab = pd.crosstab(
-            df[f"has_{category1}"],
-            df[f"has_{category2}"],
+            df_copy[col1],
+            df_copy[col2],
             rownames=[self.categories[category1]["name"]],
             colnames=[self.categories[category2]["name"]],
         )
-
-        # Clean up temporary columns
-        df.drop([f"has_{category1}", f"has_{category2}"], axis=1, inplace=True)
 
         return crosstab
 

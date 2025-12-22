@@ -70,16 +70,26 @@ class CodeFrame:
         else:
             self.logger.warning(f"Code {code_id} not found")
 
-    def apply_codes(self, text: str, case_sensitive: bool = False) -> List[str]:
+    def apply_codes(
+        self, text: str, case_sensitive: bool = False, update_counts: bool = True
+    ) -> List[str]:
         """
         Apply codes to text based on keyword matching.
 
         Args:
             text: Text to code
             case_sensitive: Whether to use case-sensitive matching
+            update_counts: Whether to increment code counts for matches.
+                Set to False when reprocessing text or when you want to
+                match without affecting statistics. Default is True.
 
         Returns:
             List of matching code IDs
+
+        Note:
+            When processing a batch of texts, call reset_counts() before
+            starting to ensure accurate statistics, or set update_counts=False
+            if you only need the matching results without counting.
         """
         if not text:
             return []
@@ -96,7 +106,8 @@ class CodeFrame:
             for keyword in keywords:
                 if keyword in text:
                     matched_codes.append(code_id)
-                    self.codes[code_id]["count"] += 1
+                    if update_counts:
+                        self.codes[code_id]["count"] += 1
                     break
 
         return matched_codes
