@@ -60,6 +60,48 @@ class ThemeAnalyzer:
         else:
             self.logger.warning(f"Theme {theme_id} not found")
 
+    def _extract_codes_from_value(self, value) -> set:
+        """
+        Safely extract a set of codes from a cell value.
+
+        Handles None, NaN, lists, and logs warnings for unexpected types.
+
+        Args:
+            value: The cell value to extract codes from
+
+        Returns:
+            Set of code strings, empty set if value is invalid
+        """
+        # Handle None and NaN
+        if value is None or (isinstance(value, float) and pd.isna(value)):
+            return set()
+
+        # Handle lists (expected type)
+        if isinstance(value, list):
+            return set(value)
+
+        # Handle sets (also acceptable)
+        if isinstance(value, set):
+            return value
+
+        # Handle strings - likely a data issue, log warning
+        if isinstance(value, str):
+            self.logger.warning(
+                f"Code column contains string value '{value[:50]}...' instead of list. "
+                "Treating as empty. Consider fixing data format."
+            )
+            return set()
+
+        # Handle other iterables cautiously
+        try:
+            return set(value)
+        except TypeError:
+            self.logger.warning(
+                f"Code column contains non-iterable value of type {type(value).__name__}. "
+                "Treating as empty."
+            )
+            return set()
+
     def identify_themes(
         self, df: pd.DataFrame, code_column: str = "codes"
     ) -> pd.DataFrame:
@@ -68,11 +110,21 @@ class ThemeAnalyzer:
 
         Args:
             df: DataFrame with coded responses
-            code_column: Column name containing codes
+            code_column: Column name containing codes (should contain lists of code IDs)
 
         Returns:
             DataFrame with theme assignments
+
+        Raises:
+            ValueError: If code_column does not exist in the DataFrame
         """
+        # Validate column exists
+        if code_column not in df.columns:
+            raise ValueError(
+                f"Column '{code_column}' not found in DataFrame. "
+                f"Available columns: {list(df.columns)}"
+            )
+
         # Reset response lists
         for theme_info in self.themes.values():
             theme_info["responses"] = []
@@ -80,7 +132,7 @@ class ThemeAnalyzer:
         theme_assignments = []
 
         for idx, row in df.iterrows():
-            response_codes = set(row[code_column]) if row[code_column] else set()
+            response_codes = self._extract_codes_from_value(row[code_column])
             matched_themes = []
 
             for theme_id, theme_info in self.themes.items():
