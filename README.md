@@ -46,10 +46,24 @@ Interactive web interface for ML-based coding - no coding required!
 
 ### Installation
 
+**For Users (Production):**
 ```bash
-# Install dependencies
+# Install production dependencies
 pip install -r requirements.txt
 ```
+
+**For Developers:**
+```bash
+# Install development dependencies (includes production dependencies)
+pip install -r requirements-dev.txt
+```
+
+The `requirements-dev.txt` includes additional tools for:
+- Testing (pytest, coverage)
+- Code quality (black, flake8, pylint, mypy)
+- Documentation (Sphinx)
+- Development utilities (debuggers, profilers)
+- Notebook tools (Jupyter extensions)
 
 ### Running the Analysis
 
@@ -95,7 +109,8 @@ jupyter notebook open_ended_coding_analysis.ipynb
 │   ├── test_code_frame.py
 │   ├── test_theme_analyzer.py
 │   └── test_category_manager.py
-├── requirements.txt                # Python dependencies
+├── requirements.txt                # Production dependencies
+├── requirements-dev.txt            # Development dependencies
 ├── Makefile                        # Build and test automation
 └── README.md                       # This file
 ```
