@@ -216,9 +216,7 @@ def page_data_upload():
         "Cricket Commentary": "data/cricket_responses.csv",
         "Cultural Commentary": "data/cultural_commentary_responses.csv",
         "Consumer Perspectives": "data/consumer_perspectives_responses.csv",
-        "Industry Professional Responses": "data/industry_professional_responses.csv",
-        "Trump-Related Responses": "data/trump_responses.csv",
-        "Epstein Case Responses": "data/epstein_case_responses.csv"
+        "Industry Professional Responses": "data/industry_professional_responses.csv"
     }
 
     # Dropdown to select sample dataset

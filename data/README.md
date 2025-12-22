@@ -17,46 +17,6 @@ Sample dataset of remote work experiences with 30 responses.
 **Use Case:**
 This sample data demonstrates coding, theme identification, and categorization of qualitative responses about remote work experiences.
 
-### trump_responses.csv
-
-Dataset analyzing public opinions and perspectives on political leadership with 30 responses.
-
-**Columns:**
-- `id`: Unique response identifier
-- `response`: Text response from participant
-- `respondent_id`: Unique participant identifier
-- `timestamp`: Response submission date
-- `topic`: Topic category tag
-
-**Use Case:**
-Demonstrates qualitative coding of political discourse, policy analysis, and public opinion research. Covers topics including:
-- Policy impacts (trade, immigration, healthcare)
-- Media coverage and communication styles
-- Foreign policy and international relations
-- Economic policies and reforms
-- Political rhetoric and voter engagement
-
-### epstein_case_responses.csv
-
-Dataset examining institutional accountability and justice system issues with 30 responses.
-
-**Columns:**
-- `id`: Unique response identifier
-- `response`: Text response from participant
-- `respondent_id`: Unique participant identifier
-- `timestamp`: Response submission date
-- `topic`: Topic category tag
-
-**Use Case:**
-Demonstrates qualitative analysis of systemic issues, institutional oversight, and justice system accountability. Covers themes including:
-- Institutional failures and oversight
-- Justice system transparency
-- Media coverage and investigative journalism
-- Legal reforms and accountability
-- Victim advocacy and support systems
-
-**Note:** This dataset focuses on systemic and institutional analysis for educational purposes.
-
 ### cricket_responses.csv
 
 Dataset analyzing cricket enthusiasts' perspectives with 30 responses.
@@ -144,19 +104,11 @@ The provided sample datasets represent diverse research topics suitable for qual
    - Survey question: *"How has remote work affected your professional experience?"*
    - Themes: work-life balance, productivity, social connections, technology
 
-2. **Political Leadership (trump_responses.csv)**
-   - Public opinion on political leadership and policy impacts
-   - Themes: policy analysis, media coverage, governance, voter perspectives
-
-3. **Justice System (epstein_case_responses.csv)**
-   - Institutional accountability and justice system analysis
-   - Themes: oversight, transparency, legal reform, accountability
-
-4. **Sports Culture (cricket_responses.csv)**
+2. **Sports Culture (cricket_responses.csv)**
    - Cricket enthusiasts' perspectives on the sport
    - Themes: formats, commercialization, technology, tradition, community
 
-5. **Fashion Industry (fashion_responses.csv)**
+3. **Fashion Industry (fashion_responses.csv)**
    - Consumer attitudes and industry perspectives
    - Themes: sustainability, inclusivity, trends, ethics, self-expression
 
