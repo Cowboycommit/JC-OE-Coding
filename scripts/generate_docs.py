@@ -24,6 +24,7 @@ from generators.methodology import generate_methodology_documentation
 from generators.input_spec import generate_input_specification
 from generators.reporting import generate_reporting_standards
 from generators.tools_review import generate_tools_review
+from generators.benchmark import generate_benchmark_standards
 
 
 def print_banner():
@@ -67,6 +68,7 @@ def generate_all(config: ProjectConfig, only: str = None) -> dict:
         'input_spec': (config.generate_input_spec, generate_input_specification),
         'reporting': (config.generate_reporting_standards, generate_reporting_standards),
         'tools_review': (config.generate_tools_review, generate_tools_review),
+        'benchmark': (config.generate_benchmark, generate_benchmark_standards),
     }
 
     for doc_type, (enabled, generator) in generators.items():
@@ -105,6 +107,7 @@ Document types for --only:
   input_spec    - Input data specification
   reporting     - Reporting and visualization standards
   tools_review  - Open-source tools review
+  benchmark     - Benchmark standards with technique references
         """
     )
 
@@ -130,7 +133,7 @@ Document types for --only:
     parser.add_argument(
         '--only',
         type=str,
-        choices=['methodology', 'input_spec', 'reporting', 'tools_review'],
+        choices=['methodology', 'input_spec', 'reporting', 'tools_review', 'benchmark'],
         help='Generate only the specified document type'
     )
 
