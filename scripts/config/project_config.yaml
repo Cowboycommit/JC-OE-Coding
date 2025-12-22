@@ -1,0 +1,110 @@
+# Documentation Toolkit Configuration
+# Project: JC-OE-Coding (Open-Ended Coding Analysis Framework)
+
+# Project Identification
+project_name: "JC-OE-Coding"
+framework_name: "Open-Ended Coding Analysis Framework"
+description: |
+  A machine learning-based framework for analyzing open-ended survey responses
+  and qualitative text data. Uses NLP techniques including TF-IDF, clustering,
+  and topic modeling to automatically discover themes and patterns.
+version: "1.0"
+author: "Cowboycommit"
+github_url: "https://github.com/Cowboycommit/JC-OE-Coding"
+
+# Paths (relative to this config file's directory, or absolute)
+project_root: "../.."
+source_dirs:
+  - "src"
+  - "helpers"
+docs_dir: "documentation"
+data_dir: "data"
+
+# Which documents to generate
+generate_methodology: true
+generate_input_spec: true
+generate_reporting_standards: true
+generate_tools_review: true
+
+# Formatting specifications
+formatting:
+  font_name: "Times New Roman"
+  font_size_body: 12
+  font_size_h1: 16
+  font_size_h2: 14
+  font_size_h3: 12
+  font_size_title: 18
+  margin_inches: 0.75
+  line_spacing: 1.5
+  table_header_bg: "#1f77b4"
+  table_header_fg: "#ffffff"
+  colors:
+    primary: "#1f77b4"
+    secondary: "#f0f2f6"
+    success: "#28a745"
+    warning: "#ffc107"
+    danger: "#dc3545"
+    dark: "#262730"
+    light: "#ffffff"
+
+# Data field specifications
+data_fields:
+  template_file: "input_data_template.xlsx"
+  required_fields:
+    - name: "response"
+      type: "string"
+      description: "The open-ended text response to analyze"
+  optional_fields:
+    - name: "id"
+      type: "string/integer"
+      description: "Unique identifier for each response"
+    - name: "respondent_id"
+      type: "string/integer"
+      description: "Identifier for the respondent"
+    - name: "timestamp"
+      type: "datetime"
+      description: "When the response was collected"
+    - name: "topic"
+      type: "string"
+      description: "Topic or question category"
+    - name: "demographic_field"
+      type: "string"
+      description: "Any demographic grouping variable"
+    - name: "weight"
+      type: "float"
+      description: "Sampling weight for weighted analysis"
+
+# Custom content sections (optional overrides for generated text)
+custom_sections:
+  methodology_intro: |
+    This document provides comprehensive methodology documentation for the
+    Open-Ended Coding Analysis Framework. The framework leverages machine learning
+    and natural language processing techniques to automatically analyze qualitative
+    text data, identifying themes, patterns, and insights that would traditionally
+    require manual coding.
+
+  analysis_description: |
+    The framework employs a multi-stage analytical approach:
+    1. Text preprocessing and normalization
+    2. Feature extraction using TF-IDF vectorization
+    3. Unsupervised clustering (K-Means, hierarchical)
+    4. Topic modeling (LDA, NMF)
+    5. Theme validation and refinement
+    6. Results visualization and export
+
+  input_spec_overview: |
+    This document specifies the input data requirements for the Open-Ended
+    Coding Analysis Framework. Proper data formatting ensures accurate analysis
+    and reliable results. The framework accepts various file formats and can
+    handle datasets ranging from hundreds to millions of text responses.
+
+  reporting_intro: |
+    This document establishes visualization and reporting standards for the
+    Open-Ended Coding Analysis Framework. Consistent reporting practices ensure
+    that analysis results are clearly communicated and easily interpreted by
+    stakeholders across different contexts.
+
+  tools_intro: |
+    This document reviews the open-source libraries and tools that power the
+    Open-Ended Coding Analysis Framework. Each tool has been selected for its
+    reliability, performance, and compatibility with the framework's objectives.
