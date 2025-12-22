@@ -940,19 +940,24 @@ def page_export_results():
     st.markdown("### 📝 Generate Summary Report")
 
     if st.button("Generate Executive Summary", use_container_width=True):
-        summary = get_analysis_summary(coder, results_df)
+        try:
+            summary = get_analysis_summary(coder, results_df)
 
-        st.markdown(summary)
+            st.success("✅ Executive summary generated successfully!")
 
-        # Download as markdown
-        summary_bytes = summary.encode()
-        st.download_button(
-            label="Download Summary (Markdown)",
-            data=summary_bytes,
-            file_name=f"executive_summary_{datetime.now().strftime('%Y%m%d')}.md",
-            mime="text/markdown",
-            use_container_width=True
-        )
+            st.markdown(summary)
+
+            # Download as markdown
+            summary_bytes = summary.encode()
+            st.download_button(
+                label="Download Summary (Markdown)",
+                data=summary_bytes,
+                file_name=f"executive_summary_{datetime.now().strftime('%Y%m%d')}.md",
+                mime="text/markdown",
+                use_container_width=True
+            )
+        except Exception as e:
+            st.error(f"❌ Failed to generate summary: {str(e)}")
 
 
 def page_about():
