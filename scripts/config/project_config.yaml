@@ -25,6 +25,7 @@ generate_methodology: true
 generate_input_spec: true
 generate_reporting_standards: true
 generate_tools_review: true
+generate_benchmark: true
 
 # Formatting specifications
 formatting:
@@ -108,3 +109,9 @@ custom_sections:
     This document reviews the open-source libraries and tools that power the
     Open-Ended Coding Analysis Framework. Each tool has been selected for its
     reliability, performance, and compatibility with the framework's objectives.
+
+  benchmark_intro: |
+    This document establishes benchmark standards for the machine learning and
+    NLP techniques used in the Open-Ended Coding Analysis Framework. Each technique
+    is documented with gold-standard outputs, quality metrics, and authoritative
+    academic references to ensure reproducibility and enable quality assessment.

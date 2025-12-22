@@ -61,6 +61,7 @@ class ProjectConfig:
     generate_input_spec: bool = True
     generate_reporting_standards: bool = True
     generate_tools_review: bool = True
+    generate_benchmark: bool = True
 
     # Nested configs
     formatting: FormattingConfig = field(default_factory=FormattingConfig)
@@ -157,6 +158,7 @@ generate_methodology: true
 generate_input_spec: true
 generate_reporting_standards: true
 generate_tools_review: true
+generate_benchmark: true
 
 # Formatting specifications
 formatting:
