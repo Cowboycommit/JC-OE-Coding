@@ -58,12 +58,10 @@ st.set_page_config(
 st.markdown("""
 <style>
     .main-header {
-        font-size: 3rem;
-        font-weight: 700;
+        font-size: 2.5rem;
+        font-weight: bold;
         color: #1f77b4;
-        text-align: left;
-        margin-bottom: 2rem;
-        font-family: sans-serif;
+        margin-bottom: 1rem;
     }
     .sub-header {
         font-size: 1.5rem;
@@ -141,7 +139,7 @@ def main():
     initialize_session_state()
 
     # Header
-    st.markdown('<h1 class="main-header">📊 ML-Based Open Coding Analysis</h1>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">📊 ML Open Coding Analysis</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="info-box">
     <strong>Welcome!</strong> This tool uses machine learning to automatically discover themes
