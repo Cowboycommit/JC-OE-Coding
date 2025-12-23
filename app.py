@@ -147,6 +147,16 @@ def reset_analysis():
         del st.session_state.text_column
 
 
+def render_next_button(next_page):
+    """Render a 'Next Step' button that navigates to the next page."""
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button(f"➡️ Next: {next_page}", use_container_width=True, type="primary"):
+            st.session_state.navigation_page = next_page
+            st.rerun()
+
+
 def main():
     """Main application function."""
     initialize_session_state()
@@ -391,6 +401,10 @@ def page_data_upload():
         except Exception as e:
             st.error(f"❌ Error loading file: {str(e)}")
 
+    # Next button - show when data is loaded
+    if st.session_state.uploaded_df is not None:
+        render_next_button("⚙️ Configuration")
+
 
 def page_configuration():
     """Configuration page."""
@@ -514,6 +528,10 @@ def page_configuration():
         st.metric("Algorithm", method.upper())
 
     st.success("✅ Configuration saved! Go to 'Run Analysis' to start.")
+
+    # Next button - show when config is saved
+    if 'config' in st.session_state:
+        render_next_button("🚀 Run Analysis")
 
 
 def page_run_analysis():
@@ -651,6 +669,10 @@ def page_run_analysis():
         </div>
         """, unsafe_allow_html=True)
 
+    # Next button - show when analysis is complete
+    if st.session_state.analysis_complete:
+        render_next_button("📊 Results Overview")
+
 
 def page_results_overview():
     """Results overview page."""
@@ -755,6 +777,9 @@ def page_results_overview():
                 with col2:
                     st.metric("Count", f"{info['count']:,}")
                     st.metric("Avg Confidence", f"{info['avg_confidence']:.2f}")
+
+    # Next button - always show on this page if analysis is complete
+    render_next_button("📈 Visualizations")
 
 
 def page_visualizations():
@@ -1057,6 +1082,9 @@ def page_visualizations():
                 st.metric("Max", f"{np.max(all_confidences):.3f}")
         else:
             st.info("No confidence scores available")
+
+    # Next button - always show on this page if analysis is complete
+    render_next_button("💾 Export Results")
 
 
 def page_export_results():
