@@ -2,6 +2,25 @@
 
 This directory contains sample data files for the Open-Ended Coding Analysis framework.
 
+## 📥 Getting Started with Your Data
+
+### Download the Data Template
+
+To ensure your data is properly formatted, we provide a comprehensive Excel template:
+
+**Location:** `../documentation/input_data_template.xlsx`
+
+**Download via:**
+- Streamlit UI: Click "📥 Download Template" on the Data Upload page
+- Command line: `python ../scripts/create_data_template.py`
+
+**Template includes:**
+- 📋 **Instructions sheet** - Complete formatting guidelines
+- ✏️ **Data Entry sheet** - Pre-formatted columns for your data
+- 📊 **Sample Data sheet** - Real examples showing proper format
+
+**Minimum requirement:** One column named `response` with text data (5+ characters)
+
 ## Files
 
 ### sample_responses.csv
@@ -59,25 +78,29 @@ Demonstrates qualitative analysis of consumer behavior, industry trends, and soc
 
 ## Adding Your Own Data
 
+**Recommended:** Download and use the data template (`../documentation/input_data_template.xlsx`) for properly formatted data structure.
+
 ### CSV Format
 
 Your CSV file should include at minimum:
-- One column with text responses
+- One column with text responses (recommended name: `response`)
 - Optional: respondent identifiers, timestamps, demographics
 
 Example:
 ```csv
-id,response,metadata
-1,"Your text response here",optional_field
-2,"Another response",optional_field
+id,response,respondent_id,timestamp,topic
+1,"Your text response here",R001,2024-01-01,General
+2,"Another response",R002,2024-01-02,Feedback
 ```
 
 ### Excel Format
 
 Excel files are also supported. Ensure your data is in a worksheet with:
 - Header row with column names
-- Text response column
+- Text response column (minimum 5 characters per response)
 - Any additional metadata columns
+
+**Tip:** Use our template (`input_data_template.xlsx`) as a starting point!
 
 ### Database Format
 
