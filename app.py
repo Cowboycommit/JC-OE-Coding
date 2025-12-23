@@ -252,6 +252,7 @@ def page_data_upload():
 
             st.session_state.uploaded_df = df
             st.success(f"✅ {selected_dataset} loaded successfully! ({len(df)} responses)")
+            st.info("👉 **Next step:** Go to '⚙️ Configuration' in the sidebar to select your text column and set up analysis parameters.")
             st.rerun()
         except FileNotFoundError:
             st.error(f"❌ Dataset file not found: {dataset_path}")
@@ -322,6 +323,8 @@ def page_data_upload():
             </div>
             """, unsafe_allow_html=True)
 
+            st.info("👉 **Next step:** Go to '⚙️ Configuration' in the sidebar to select your text column and set up analysis parameters.")
+
             # Display column selector
             st.markdown("### 🔍 Preview Data")
 
@@ -382,6 +385,7 @@ def page_data_upload():
                         st.session_state.uploaded_df = processed_df
 
                         st.success(f"✅ Preprocessed! Went from {len(df):,} to {len(processed_df):,} responses")
+                        st.info("👉 **Next step:** Go to '⚙️ Configuration' in the sidebar to set up your analysis parameters.")
                     else:
                         st.error("Please select a text column in the Configuration page first")
 
@@ -641,15 +645,12 @@ def page_run_analysis():
     # Show previous results if available
     if st.session_state.analysis_complete:
         st.markdown("---")
-        st.markdown("### ✅ Previous Analysis Available")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.info("Analysis results are ready to view")
-        with col2:
-            if st.button("View Results", use_container_width=True):
-                st.session_state.navigation_page = "📊 Results Overview"
-                st.rerun()
+        st.markdown("""
+        <div class="success-box">
+        <h3>✅ Previous Analysis Available</h3>
+        <p>Your analysis results are ready! Navigate to <strong>"📊 Results Overview"</strong> in the sidebar to view them.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def page_results_overview():
