@@ -248,6 +248,36 @@ def page_data_upload():
     Your file should have at least one column with text responses.
     """)
 
+    # Template download section
+    st.markdown("#### 📥 Download Data Template")
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("""
+        Need help formatting your data? Download our Excel template with instructions,
+        examples, and proper column formatting.
+        """)
+
+    with col2:
+        # Load template file for download
+        template_path = "documentation/input_data_template.xlsx"
+        try:
+            with open(template_path, "rb") as template_file:
+                template_bytes = template_file.read()
+
+            st.download_button(
+                label="📥 Download Template",
+                data=template_bytes,
+                file_name="data_template.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                help="Download Excel template with formatting and instructions"
+            )
+        except FileNotFoundError:
+            st.warning("Template file not found. Please contact administrator.")
+
+    st.markdown("")  # Add spacing
+
     # File uploader
     uploaded_file = st.file_uploader(
         "Choose a file",

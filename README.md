@@ -215,6 +215,7 @@ The `app.py` provides an intuitive web interface for ML-based coding - **perfect
 
 ### 🌐 Features
 
+- **📥 Download Data Template**: Get a formatted Excel template with instructions and examples
 - **📤 Data Upload**: Drag and drop CSV/Excel files
 - **🔍 Data Preview**: Instantly see your data with column information
 - **⚙️ Interactive Configuration**:
@@ -239,17 +240,19 @@ The `app.py` provides an intuitive web interface for ML-based coding - **perfect
    streamlit run app.py
    ```
 
-2. **Upload your data**: Click "Browse files" and select your CSV/Excel file
+2. **Download the template** (optional): Click "📥 Download Template" to get a formatted Excel file with instructions and examples
 
-3. **Configure analysis**:
+3. **Upload your data**: Click "Browse files" and select your CSV/Excel file
+
+4. **Configure analysis**:
    - Select the column containing responses
    - Choose number of themes (3-30)
    - Pick ML algorithm (TF-IDF+K-Means recommended)
    - Set confidence threshold (0.3 works well)
 
-4. **Run analysis**: Click "Start Analysis" and watch the magic happen!
+5. **Run analysis**: Click "Start Analysis" and watch the magic happen!
 
-5. **Explore results**:
+6. **Explore results**:
    - View key metrics and insights
    - Examine code frequencies and examples
    - Explore interactive visualizations
@@ -379,6 +382,28 @@ Your data should be in CSV, Excel, or database format with at least one column c
 |----|----------|----------|
 | 1 | "Text response..." | Optional |
 | 2 | "Another response..." | Optional |
+
+### 📥 Data Template Available!
+
+To help you format your data correctly, we provide a comprehensive Excel template with:
+- **Instructions sheet** - Detailed formatting guidelines
+- **Data entry sheet** - Pre-formatted columns ready for your data
+- **Sample data sheet** - 15+ examples showing proper format
+
+**Download the template:**
+- **Via Streamlit UI**: Click the "📥 Download Template" button on the Data Upload page
+- **Direct path**: `documentation/input_data_template.xlsx`
+- **Generate fresh copy**: Run `python scripts/create_data_template.py`
+
+**Required column:**
+- `response` - Your text responses (minimum 5 characters)
+
+**Optional columns (add as needed):**
+- `id` - Unique response identifier
+- `respondent_id` - Participant identifier
+- `timestamp` - Collection date/time (YYYY-MM-DD format)
+- `topic` - Response category or topic
+- Any other demographic or grouping variables
 
 ### Output Files
 
