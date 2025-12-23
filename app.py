@@ -249,6 +249,7 @@ def page_data_upload():
             df = pd.read_csv(dataset_path)
 
             st.session_state.uploaded_df = df
+            st.success("Selected data loaded")
             st.success(f"✅ {selected_dataset} loaded successfully! ({len(df)} responses)")
             st.info("👉 **Next step:** Go to '⚙️ Configuration' in the sidebar to select your text column and set up analysis parameters.")
             st.rerun()
