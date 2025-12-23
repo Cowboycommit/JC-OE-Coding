@@ -836,24 +836,174 @@ def page_visualizations():
 
     with tab3:
         st.markdown("### Code Network Diagram")
-        st.info("Network visualization requires networkx library")
 
-        # Simple scatter plot as alternative
-        top_codes_df = get_top_codes(coder, n=20)
+        try:
+            import networkx as nx
 
-        fig = px.scatter(
-            top_codes_df,
-            x='Count',
-            y='Avg Confidence',
-            size='Count',
-            color='Avg Confidence',
-            hover_data=['Label', 'Keywords'],
-            title='Code Distribution: Count vs Confidence',
-            color_continuous_scale='Viridis'
-        )
-        fig.update_layout(height=500)
+            # Build network graph from co-occurrences
+            codes = [c for c in coder.codebook.keys() if coder.codebook[c]['count'] > 0]
 
-        st.plotly_chart(fig, use_container_width=True)
+            # Create graph
+            G = nx.Graph()
+
+            # Add nodes with attributes
+            for code in codes:
+                G.add_node(
+                    code,
+                    label=coder.codebook[code]['label'],
+                    count=coder.codebook[code]['count'],
+                    confidence=coder.codebook[code]['avg_confidence']
+                )
+
+            # Add edges based on co-occurrence
+            edge_weights = {}
+            for assigned_codes in results_df['assigned_codes']:
+                for i, code1 in enumerate(assigned_codes):
+                    for code2 in assigned_codes[i+1:]:
+                        edge = tuple(sorted([code1, code2]))
+                        edge_weights[edge] = edge_weights.get(edge, 0) + 1
+
+            # Add edges with significant co-occurrence (threshold: 2+)
+            min_cooccurrence = st.slider(
+                "Minimum co-occurrence threshold",
+                min_value=1,
+                max_value=max(edge_weights.values()) if edge_weights else 5,
+                value=2,
+                help="Only show connections between codes that appear together this many times"
+            )
+
+            for (code1, code2), weight in edge_weights.items():
+                if weight >= min_cooccurrence and code1 in G and code2 in G:
+                    G.add_edge(code1, code2, weight=weight)
+
+            if len(G.nodes()) > 0 and len(G.edges()) > 0:
+                # Use spring layout for positioning
+                pos = nx.spring_layout(G, k=2, iterations=50, seed=42)
+
+                # Create edge trace
+                edge_x = []
+                edge_y = []
+                edge_weights_list = []
+
+                for edge in G.edges(data=True):
+                    x0, y0 = pos[edge[0]]
+                    x1, y1 = pos[edge[1]]
+                    edge_x.extend([x0, x1, None])
+                    edge_y.extend([y0, y1, None])
+                    edge_weights_list.append(edge[2]['weight'])
+
+                edge_trace = go.Scatter(
+                    x=edge_x,
+                    y=edge_y,
+                    line=dict(width=1.5, color='#888'),
+                    hoverinfo='none',
+                    mode='lines',
+                    showlegend=False
+                )
+
+                # Create node trace
+                node_x = []
+                node_y = []
+                node_text = []
+                node_size = []
+                node_color = []
+
+                for node in G.nodes():
+                    x, y = pos[node]
+                    node_x.append(x)
+                    node_y.append(y)
+
+                    label = G.nodes[node]['label']
+                    count = G.nodes[node]['count']
+                    confidence = G.nodes[node]['confidence']
+
+                    node_text.append(f"{label}<br>Count: {count}<br>Confidence: {confidence:.2f}")
+                    node_size.append(np.sqrt(count) * 10)
+                    node_color.append(confidence)
+
+                node_trace = go.Scatter(
+                    x=node_x,
+                    y=node_y,
+                    mode='markers+text',
+                    hoverinfo='text',
+                    text=[G.nodes[node]['label'] for node in G.nodes()],
+                    textposition="top center",
+                    textfont=dict(size=10),
+                    hovertext=node_text,
+                    marker=dict(
+                        showscale=True,
+                        colorscale='Viridis',
+                        size=node_size,
+                        color=node_color,
+                        colorbar=dict(
+                            title="Avg<br>Confidence",
+                            thickness=15,
+                            xanchor='left',
+                            titleside='right'
+                        ),
+                        line=dict(width=2, color='white')
+                    ),
+                    showlegend=False
+                )
+
+                # Create figure
+                fig = go.Figure(data=[edge_trace, node_trace])
+
+                fig.update_layout(
+                    title="Code Co-occurrence Network<br><sub>Node size = frequency, Color = confidence, Edges = co-occurrence</sub>",
+                    showlegend=False,
+                    hovermode='closest',
+                    margin=dict(b=20, l=5, r=5, t=60),
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    height=600,
+                    plot_bgcolor='white'
+                )
+
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Network statistics
+                st.markdown("#### Network Statistics")
+                col1, col2, col3, col4 = st.columns(4)
+
+                with col1:
+                    st.metric("Nodes (Codes)", len(G.nodes()))
+                with col2:
+                    st.metric("Edges (Connections)", len(G.edges()))
+                with col3:
+                    if len(G.nodes()) > 0:
+                        density = nx.density(G)
+                        st.metric("Network Density", f"{density:.3f}")
+                with col4:
+                    if len(G.edges()) > 0:
+                        avg_degree = sum(dict(G.degree()).values()) / len(G.nodes())
+                        st.metric("Avg Connections", f"{avg_degree:.1f}")
+
+            elif len(G.nodes()) > 0:
+                st.warning(f"⚠️ No co-occurrences found with threshold of {min_cooccurrence}. Try lowering the threshold.")
+            else:
+                st.info("No active codes to visualize")
+
+        except ImportError:
+            st.error("❌ NetworkX library not installed. Please install it with: pip install networkx")
+
+            # Fallback: Simple scatter plot
+            st.markdown("### Alternative View: Code Distribution")
+            top_codes_df = get_top_codes(coder, n=20)
+
+            fig = px.scatter(
+                top_codes_df,
+                x='Count',
+                y='Avg Confidence',
+                size='Count',
+                color='Avg Confidence',
+                hover_data=['Label', 'Keywords'],
+                title='Code Distribution: Count vs Confidence',
+                color_continuous_scale='Viridis'
+            )
+            fig.update_layout(height=500)
+
+            st.plotly_chart(fig, use_container_width=True)
 
     with tab4:
         st.markdown("### Distribution of Codes per Response")
