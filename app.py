@@ -136,6 +136,19 @@ def initialize_session_state():
         st.session_state.uploaded_df = None
 
 
+def reset_analysis():
+    """Reset all analysis data and return to initial state."""
+    st.session_state.analysis_complete = False
+    st.session_state.coder = None
+    st.session_state.results_df = None
+    st.session_state.metrics = None
+    st.session_state.uploaded_df = None
+    if 'config' in st.session_state:
+        del st.session_state.config
+    if 'text_column' in st.session_state:
+        del st.session_state.text_column
+
+
 def main():
     """Main application function."""
     initialize_session_state()
@@ -151,6 +164,12 @@ def main():
 
     # Sidebar
     with st.sidebar:
+        # Reset button at the top
+        if st.button("🔄 Reset Analysis", use_container_width=True, help="Clear all data and start over"):
+            reset_analysis()
+            st.rerun()
+
+        st.markdown("---")
         st.markdown("### 🎯 Navigation")
 
         page = st.radio(
