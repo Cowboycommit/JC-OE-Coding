@@ -852,16 +852,26 @@ def page_visualizations():
     with tab2:
         st.markdown("### Co-occurrence Heatmap")
 
-        # Build co-occurrence matrix
+        # Build co-occurrence matrix efficiently
+        # Only iterate over assigned code pairs instead of all possible pairs
+        from itertools import combinations
+
         codes = list(coder.codebook.keys())
         n = len(codes)
+        code_to_idx = {code: i for i, code in enumerate(codes)}
         cooccur = np.zeros((n, n))
 
         for assigned_codes in results_df['assigned_codes']:
-            for i, code1 in enumerate(codes):
-                for j, code2 in enumerate(codes):
-                    if code1 in assigned_codes and code2 in assigned_codes:
-                        cooccur[i, j] += 1
+            # Only process pairs of codes that were actually assigned
+            for code1, code2 in combinations(assigned_codes, 2):
+                i, j = code_to_idx[code1], code_to_idx[code2]
+                cooccur[i, j] += 1
+                cooccur[j, i] += 1  # Symmetric matrix
+
+            # Diagonal: each code co-occurs with itself
+            for code in assigned_codes:
+                i = code_to_idx[code]
+                cooccur[i, i] += 1
 
         labels = [coder.codebook[c]['label'] for c in codes]
 
