@@ -599,16 +599,23 @@ def page_run_analysis():
                 status_text.text("🔍 Finding optimal number of codes...")
                 progress_bar.progress(0.1)
 
-                optimal_n, optimal_results = find_optimal_codes(
-                    df=df,
-                    text_column=config['text_column'],
-                    method=config['method'],
-                    stop_words=config.get('stop_words', 'english'),
-                    progress_callback=lambda p, m: (progress_bar.progress(0.1 + p * 0.3), status_text.text(m))
-                )
-                n_codes = optimal_n
+                try:
+                    optimal_n, optimal_results = find_optimal_codes(
+                        df=df,
+                        text_column=config['text_column'],
+                        method=config['method'],
+                        stop_words=config.get('stop_words', 'english'),
+                        progress_callback=lambda p, m: (progress_bar.progress(0.1 + p * 0.3), status_text.text(m))
+                    )
+                    n_codes = optimal_n
 
-                st.success(f"✨ Optimal number of codes determined: **{optimal_n}** (silhouette score: {optimal_results['best_silhouette_score']:.4f})")
+                    st.success(f"✨ Optimal number of codes determined: **{optimal_n}** (silhouette score: {optimal_results['best_silhouette_score']:.4f})")
+                except ValueError as ve:
+                    progress_bar.empty()
+                    status_text.empty()
+                    st.error(f"❌ Cannot find optimal codes: {str(ve)}")
+                    st.info("💡 **Suggestion:** Try uploading a larger dataset with more diverse responses, or disable auto-optimization and manually select a smaller number of codes.")
+                    raise
 
                 # Adjust progress for main analysis
                 def adjusted_progress(p, m):
@@ -662,6 +669,13 @@ def page_run_analysis():
 
             st.info("👉 Go to 'Results Overview' to see detailed results")
 
+        except ValueError as ve:
+            # ValueError indicates dataset validation issues - already handled above or here
+            if "Cannot find optimal codes" not in str(ve):
+                progress_bar.empty()
+                status_text.empty()
+                st.error(f"❌ Dataset validation error: {str(ve)}")
+                st.info("💡 **Suggestions:**\n- Ensure your dataset has enough responses\n- Check that responses aren't too short or too similar\n- Try reducing the number of codes requested\n- Review your preprocessing settings")
         except Exception as e:
             progress_bar.empty()
             status_text.empty()

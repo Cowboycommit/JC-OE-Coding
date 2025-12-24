@@ -126,12 +126,19 @@ def find_optimal_codes(
 
     Returns:
         Tuple of (optimal_n_codes, analysis_results)
+
+    Raises:
+        ValueError: If dataset is too small for clustering
     """
     import re
     from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
     from sklearn.cluster import KMeans
     from sklearn.decomposition import LatentDirichletAllocation, NMF
     from sklearn.metrics import silhouette_score, calinski_harabasz_score
+
+    # Validate dataset is not empty
+    if df is None or len(df) == 0:
+        raise ValueError("DataFrame is empty. Cannot perform code optimization.")
 
     responses = df[text_column].tolist()
 
@@ -159,10 +166,27 @@ def find_optimal_codes(
 
     feature_matrix = vectorizer.fit_transform(processed)
 
-    # Limit max_codes based on data size
-    max_codes = min(max_codes, len(df) - 1, feature_matrix.shape[1] - 1)
-    if max_codes < min_codes:
-        max_codes = min_codes
+    # Calculate the maximum valid number of codes based on data constraints
+    max_valid = min(len(df), feature_matrix.shape[1], max_codes)
+
+    # Check if we have enough data for clustering
+    if max_valid < 2:
+        raise ValueError(
+            f"Dataset too small for clustering. Need at least 2 samples and features, "
+            f"but found {len(df)} samples and {feature_matrix.shape[1]} features after vectorization. "
+            f"Try adding more diverse responses or reducing preprocessing constraints."
+        )
+
+    # Check if we can support the minimum requested codes
+    if max_valid < min_codes:
+        raise ValueError(
+            f"Dataset cannot support {min_codes} codes. Maximum possible is {max_valid}. "
+            f"Found {len(df)} samples and {feature_matrix.shape[1]} features. "
+            f"Either reduce min_codes or provide a larger, more diverse dataset."
+        )
+
+    # Adjust max_codes to valid range
+    max_codes = max_valid
 
     results = {
         'silhouette_scores': {},
@@ -237,6 +261,9 @@ def run_ml_analysis(
 
     Returns:
         Tuple of (coder, results, metrics)
+
+    Raises:
+        ValueError: If dataset is empty or too small for the requested number of codes
     """
     import sys
     sys.path.insert(0, '.')
@@ -249,6 +276,21 @@ def run_ml_analysis(
     from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
     import re
     from collections import Counter, defaultdict
+
+    # Validate dataset before processing
+    if df is None or len(df) == 0:
+        raise ValueError("DataFrame is empty. Cannot perform analysis on empty dataset.")
+
+    if text_column not in df.columns:
+        raise ValueError(f"Column '{text_column}' not found in DataFrame.")
+
+    # Check that we have enough data for the requested number of codes
+    if len(df) < n_codes:
+        raise ValueError(
+            f"Dataset too small for {n_codes} codes. "
+            f"Need at least {n_codes} responses, but only have {len(df)}. "
+            f"Either reduce the number of codes or provide more data."
+        )
 
     # Simple MLOpenCoder class
     class MLOpenCoder:
@@ -368,6 +410,14 @@ def run_ml_analysis(
 
         def get_quality_metrics(self):
             metrics = {}
+
+            # Guard against empty code_assignments
+            if not self.code_assignments or len(self.code_assignments) == 0:
+                metrics['total_assignments'] = 0
+                metrics['avg_codes_per_response'] = 0.0
+                metrics['coverage_pct'] = 0.0
+                return metrics
+
             total_assignments = sum(len(codes) for codes in self.code_assignments)
             metrics['total_assignments'] = total_assignments
             metrics['avg_codes_per_response'] = total_assignments / len(self.code_assignments)
@@ -442,6 +492,20 @@ def calculate_metrics_summary(coder, results_df: pd.DataFrame) -> Dict[str, Any]
     Returns:
         Dictionary of metrics
     """
+    # Guard against empty results
+    if results_df is None or len(results_df) == 0:
+        return {
+            'total_responses': 0,
+            'total_codes': len(coder.codebook) if coder else 0,
+            'active_codes': 0,
+            'total_assignments': 0,
+            'avg_codes_per_response': 0.0,
+            'median_codes_per_response': 0.0,
+            'max_codes_per_response': 0,
+            'coverage_pct': 0.0,
+            'uncoded_count': 0,
+        }
+
     metrics = {
         'total_responses': len(results_df),
         'total_codes': len(coder.codebook),
