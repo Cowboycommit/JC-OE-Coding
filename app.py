@@ -803,12 +803,17 @@ def page_visualizations():
     results_df = st.session_state.results_df
 
     # Tabs for different visualizations
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
         "📊 Frequency",
         "🔥 Heatmap",
         "🕸️ Network",
         "📉 Distribution",
-        "🎯 Confidence"
+        "🎯 Confidence",
+        "🏷️ Topic-Term",
+        "📊 Theme Prevalence",
+        "🗺️ 2D Embedding",
+        "🔬 Coherence",
+        "💬 Quotes"
     ])
 
     with tab1:
@@ -1091,6 +1096,580 @@ def page_visualizations():
                 st.metric("Max", f"{np.max(all_confidences):.3f}")
         else:
             st.info("No confidence scores available")
+
+    with tab6:
+        st.markdown("### Topic-Term Importance Plot")
+
+        # Get top terms for each topic/code
+        codes = list(coder.codebook.keys())
+
+        # Select which codes to display
+        n_codes_to_show = st.slider(
+            "Number of topics to display",
+            min_value=3,
+            max_value=min(len(codes), 15),
+            value=min(len(codes), 8),
+            help="Select how many topics to show"
+        )
+
+        n_terms_per_code = st.slider(
+            "Number of terms per topic",
+            min_value=5,
+            max_value=20,
+            value=10,
+            help="Number of top terms to show for each topic"
+        )
+
+        # Get top codes by frequency
+        top_codes_df = get_top_codes(coder, n=n_codes_to_show)
+        selected_codes = [code for code in codes if coder.codebook[code]['label'] in top_codes_df['Label'].values][:n_codes_to_show]
+
+        # Create heatmap data for topic-term importance
+        term_data = []
+        for code in selected_codes:
+            keywords = coder.codebook[code]['keywords'][:n_terms_per_code]
+            label = coder.codebook[code]['label']
+
+            # Get term weights from the model
+            if hasattr(coder.model, 'components_'):  # LDA or NMF
+                code_idx = int(code.split('_')[1]) - 1
+                topic_weights = coder.model.components_[code_idx]
+                feature_names = coder.vectorizer.get_feature_names_out()
+
+                for i, term in enumerate(keywords):
+                    if term in feature_names:
+                        term_idx = list(feature_names).index(term)
+                        weight = topic_weights[term_idx]
+                        term_data.append({
+                            'Topic': label,
+                            'Term': term,
+                            'Importance': weight
+                        })
+            else:  # K-Means
+                code_idx = int(code.split('_')[1]) - 1
+                cluster_center = coder.model.cluster_centers_[code_idx]
+                feature_names = coder.vectorizer.get_feature_names_out()
+
+                for i, term in enumerate(keywords):
+                    if term in feature_names:
+                        term_idx = list(feature_names).index(term)
+                        weight = cluster_center[term_idx]
+                        term_data.append({
+                            'Topic': label,
+                            'Term': term,
+                            'Importance': weight
+                        })
+
+        if term_data:
+            term_df = pd.DataFrame(term_data)
+
+            # Create pivot table for heatmap
+            pivot_df = term_df.pivot(index='Term', columns='Topic', values='Importance')
+
+            fig = px.imshow(
+                pivot_df,
+                labels=dict(color="Importance"),
+                title="Topic-Term Importance Matrix",
+                color_continuous_scale='RdYlBu_r',
+                aspect='auto'
+            )
+            fig.update_layout(height=max(400, len(pivot_df) * 20))
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Also create a bar chart for top terms in selected topic
+            st.markdown("#### Top Terms by Topic")
+            selected_topic = st.selectbox(
+                "Select a topic to see top terms",
+                options=term_df['Topic'].unique()
+            )
+
+            topic_terms = term_df[term_df['Topic'] == selected_topic].sort_values('Importance', ascending=False).head(15)
+
+            fig2 = px.bar(
+                topic_terms,
+                x='Importance',
+                y='Term',
+                orientation='h',
+                title=f'Top Terms for: {selected_topic}',
+                color='Importance',
+                color_continuous_scale='Viridis'
+            )
+            fig2.update_layout(height=400, yaxis={'categoryorder': 'total ascending'})
+            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("Term importance data not available for the current model")
+
+    with tab7:
+        st.markdown("### Theme Prevalence Distribution")
+
+        # Check if themes exist in results
+        has_themes = 'themes' in results_df.columns if results_df is not None else False
+
+        if has_themes and hasattr(st.session_state, 'theme_analyzer') and st.session_state.theme_analyzer:
+            theme_analyzer = st.session_state.theme_analyzer
+
+            # Get theme counts
+            theme_counts = theme_analyzer.get_dominant_theme(results_df)
+
+            if theme_counts:
+                # Create DataFrame for visualization
+                theme_df = pd.DataFrame([
+                    {
+                        'Theme': theme_analyzer.themes[theme_id]['name'],
+                        'Count': count,
+                        'Percentage': (count / len(results_df)) * 100
+                    }
+                    for theme_id, count in theme_counts.items()
+                ]).sort_values('Count', ascending=False)
+
+                # Bar chart
+                fig = px.bar(
+                    theme_df,
+                    x='Theme',
+                    y='Count',
+                    title='Theme Prevalence Distribution',
+                    color='Percentage',
+                    color_continuous_scale='Viridis',
+                    text='Count',
+                    labels={'Count': 'Frequency', 'Percentage': 'Coverage %'}
+                )
+                fig.update_traces(textposition='outside')
+                fig.update_layout(xaxis_tickangle=-45, height=500)
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Pie chart
+                fig2 = px.pie(
+                    theme_df,
+                    values='Count',
+                    names='Theme',
+                    title='Theme Distribution (Proportional)',
+                    hole=0.3
+                )
+                st.plotly_chart(fig2, use_container_width=True)
+
+                # Statistics
+                st.markdown("#### Theme Statistics")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Total Themes", len(theme_counts))
+                with col2:
+                    coverage = theme_analyzer.calculate_theme_coverage(results_df)
+                    st.metric("Coverage", f"{coverage:.1f}%")
+                with col3:
+                    dominant_theme = theme_df.iloc[0]['Theme']
+                    st.metric("Dominant Theme", dominant_theme)
+
+                # Display theme table
+                st.markdown("#### Theme Details")
+                st.dataframe(theme_df, use_container_width=True)
+            else:
+                st.warning("No themes found in the data. Please run theme analysis first.")
+        else:
+            # Use codes as themes fallback
+            st.info("Theme analysis not performed. Showing code distribution instead.")
+
+            # Get code frequencies
+            code_freq = {}
+            for codes in results_df['assigned_codes']:
+                for code in codes:
+                    label = coder.codebook[code]['label']
+                    code_freq[label] = code_freq.get(label, 0) + 1
+
+            if code_freq:
+                freq_df = pd.DataFrame([
+                    {'Code': code, 'Count': count, 'Percentage': (count / len(results_df)) * 100}
+                    for code, count in code_freq.items()
+                ]).sort_values('Count', ascending=False)
+
+                fig = px.bar(
+                    freq_df,
+                    x='Code',
+                    y='Count',
+                    title='Code Prevalence Distribution',
+                    color='Percentage',
+                    color_continuous_scale='Viridis',
+                    text='Count'
+                )
+                fig.update_traces(textposition='outside')
+                fig.update_layout(xaxis_tickangle=-45, height=500)
+                st.plotly_chart(fig, use_container_width=True)
+
+    with tab8:
+        st.markdown("### 2D Embedding (UMAP/t-SNE) Colored by Theme")
+
+        # Select embedding method
+        embedding_method = st.radio(
+            "Select embedding method",
+            options=['UMAP', 't-SNE'],
+            horizontal=True,
+            help="UMAP is generally faster and preserves global structure better"
+        )
+
+        if coder.feature_matrix is not None:
+            try:
+                # Parameters for embeddings
+                col1, col2 = st.columns(2)
+                with col1:
+                    n_neighbors = st.slider(
+                        "N neighbors (UMAP only)",
+                        min_value=5,
+                        max_value=50,
+                        value=15,
+                        help="Controls local vs global structure"
+                    ) if embedding_method == 'UMAP' else 15
+                with col2:
+                    perplexity = st.slider(
+                        "Perplexity (t-SNE only)",
+                        min_value=5,
+                        max_value=50,
+                        value=30,
+                        help="Balance between local and global structure"
+                    ) if embedding_method == 't-SNE' else 30
+
+                # Generate embeddings
+                if st.button(f"Generate {embedding_method} Embedding", type="primary"):
+                    with st.spinner(f"Computing {embedding_method} embedding..."):
+                        if embedding_method == 'UMAP':
+                            try:
+                                from umap import UMAP
+                                reducer = UMAP(n_neighbors=n_neighbors, n_components=2, random_state=42)
+                                embedding = reducer.fit_transform(coder.feature_matrix.toarray() if hasattr(coder.feature_matrix, 'toarray') else coder.feature_matrix)
+                                st.session_state['embedding_2d'] = embedding
+                                st.session_state['embedding_method'] = 'UMAP'
+                            except ImportError:
+                                st.error("UMAP not installed. Please install with: pip install umap-learn")
+                                st.stop()
+                        else:  # t-SNE
+                            from sklearn.manifold import TSNE
+                            reducer = TSNE(n_components=2, perplexity=perplexity, random_state=42)
+                            embedding = reducer.fit_transform(coder.feature_matrix.toarray() if hasattr(coder.feature_matrix, 'toarray') else coder.feature_matrix)
+                            st.session_state['embedding_2d'] = embedding
+                            st.session_state['embedding_method'] = 't-SNE'
+
+                # Display embedding if available
+                if 'embedding_2d' in st.session_state:
+                    embedding = st.session_state['embedding_2d']
+                    method_name = st.session_state.get('embedding_method', embedding_method)
+
+                    # Prepare data for plotting
+                    embed_df = pd.DataFrame(embedding, columns=['Dim1', 'Dim2'])
+
+                    # Add code/theme information
+                    embed_df['Primary Code'] = [
+                        coder.codebook[codes[0]]['label'] if codes else 'Uncoded'
+                        for codes in results_df['assigned_codes']
+                    ]
+
+                    embed_df['Confidence'] = [
+                        confs[0] if confs else 0.0
+                        for confs in results_df['confidence_scores']
+                    ]
+
+                    # Add themes if available
+                    if 'themes' in results_df.columns:
+                        embed_df['Theme'] = [
+                            ', '.join(themes) if themes else 'No Theme'
+                            for themes in results_df['themes']
+                        ]
+                        color_by = st.radio(
+                            "Color by",
+                            options=['Primary Code', 'Theme', 'Confidence'],
+                            horizontal=True
+                        )
+                    else:
+                        color_by = st.radio(
+                            "Color by",
+                            options=['Primary Code', 'Confidence'],
+                            horizontal=True
+                        )
+
+                    # Create scatter plot
+                    fig = px.scatter(
+                        embed_df,
+                        x='Dim1',
+                        y='Dim2',
+                        color=color_by,
+                        title=f'{method_name} 2D Embedding of Documents',
+                        hover_data={'Dim1': ':.2f', 'Dim2': ':.2f', 'Confidence': ':.2f'},
+                        color_continuous_scale='Viridis' if color_by == 'Confidence' else None,
+                        opacity=0.7
+                    )
+                    fig.update_layout(height=600)
+                    fig.update_traces(marker=dict(size=8, line=dict(width=0.5, color='white')))
+
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    # Add description
+                    st.info(f"""
+                    **About this visualization:**
+                    - Each point represents a document/response
+                    - Similar documents are positioned closer together
+                    - Colors show the {color_by.lower()}
+                    - {method_name} reduces high-dimensional text data to 2D while preserving structure
+                    """)
+                else:
+                    st.info(f"Click the button above to generate {embedding_method} embedding")
+
+            except Exception as e:
+                st.error(f"Error generating embedding: {str(e)}")
+        else:
+            st.warning("Feature matrix not available. Please run ML analysis first.")
+
+    with tab9:
+        st.markdown("### Topic Coherence Diagnostic")
+
+        if coder.feature_matrix is not None and hasattr(coder, 'model'):
+            try:
+                # Calculate coherence scores
+                with st.spinner("Calculating topic coherence scores..."):
+                    from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+
+                    # Get cluster labels
+                    if hasattr(coder.model, 'labels_'):
+                        labels = coder.model.labels_
+                    elif hasattr(coder.model, 'components_'):  # LDA/NMF
+                        doc_topic_matrix = coder.model.transform(coder.feature_matrix)
+                        labels = doc_topic_matrix.argmax(axis=1)
+                    else:
+                        labels = coder.model.predict(coder.feature_matrix)
+
+                    # Calculate metrics
+                    metrics = {}
+
+                    if len(set(labels)) > 1:
+                        try:
+                            metrics['Silhouette Score'] = silhouette_score(coder.feature_matrix, labels)
+                            metrics['Calinski-Harabasz Score'] = calinski_harabasz_score(
+                                coder.feature_matrix.toarray() if hasattr(coder.feature_matrix, 'toarray') else coder.feature_matrix,
+                                labels
+                            )
+                            metrics['Davies-Bouldin Score'] = davies_bouldin_score(
+                                coder.feature_matrix.toarray() if hasattr(coder.feature_matrix, 'toarray') else coder.feature_matrix,
+                                labels
+                            )
+                        except Exception as e:
+                            st.warning(f"Could not calculate some metrics: {str(e)}")
+
+                    # Display metrics
+                    st.markdown("#### Clustering Quality Metrics")
+
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        if 'Silhouette Score' in metrics:
+                            score = metrics['Silhouette Score']
+                            st.metric(
+                                "Silhouette Score",
+                                f"{score:.3f}",
+                                help="Range: [-1, 1]. Higher is better. >0.5 is good."
+                            )
+                            if score > 0.5:
+                                st.success("Excellent separation")
+                            elif score > 0.25:
+                                st.info("Moderate separation")
+                            else:
+                                st.warning("Poor separation")
+
+                    with col2:
+                        if 'Calinski-Harabasz Score' in metrics:
+                            score = metrics['Calinski-Harabasz Score']
+                            st.metric(
+                                "Calinski-Harabasz",
+                                f"{score:.1f}",
+                                help="Higher is better. Measures cluster density and separation."
+                            )
+
+                    with col3:
+                        if 'Davies-Bouldin Score' in metrics:
+                            score = metrics['Davies-Bouldin Score']
+                            st.metric(
+                                "Davies-Bouldin",
+                                f"{score:.3f}",
+                                help="Range: [0, ∞]. Lower is better. <1.0 is good."
+                            )
+                            if score < 1.0:
+                                st.success("Good separation")
+                            elif score < 2.0:
+                                st.info("Moderate separation")
+                            else:
+                                st.warning("Poor separation")
+
+                    # Per-topic coherence
+                    st.markdown("#### Per-Topic Statistics")
+
+                    topic_stats = []
+                    for code in coder.codebook.keys():
+                        code_idx = int(code.split('_')[1]) - 1
+                        topic_docs = (labels == code_idx).sum()
+
+                        topic_stats.append({
+                            'Topic': coder.codebook[code]['label'],
+                            'Documents': topic_docs,
+                            'Percentage': f"{(topic_docs / len(labels) * 100):.1f}%",
+                            'Avg Confidence': coder.codebook[code]['avg_confidence']
+                        })
+
+                    stats_df = pd.DataFrame(topic_stats).sort_values('Documents', ascending=False)
+
+                    # Visualize topic sizes
+                    fig = px.bar(
+                        stats_df,
+                        x='Topic',
+                        y='Documents',
+                        title='Documents per Topic',
+                        color='Avg Confidence',
+                        color_continuous_scale='Viridis',
+                        text='Documents'
+                    )
+                    fig.update_traces(textposition='outside')
+                    fig.update_layout(xaxis_tickangle=-45, height=400)
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    # Display table
+                    st.dataframe(stats_df, use_container_width=True)
+
+                    # Interpretation guide
+                    with st.expander("📚 How to interpret these metrics"):
+                        st.markdown("""
+                        **Silhouette Score** (-1 to 1):
+                        - Measures how similar documents are to their own cluster vs other clusters
+                        - > 0.7: Strong, well-separated clusters
+                        - 0.5-0.7: Reasonable structure
+                        - 0.25-0.5: Weak structure, overlapping clusters
+                        - < 0.25: Poor clustering, consider different parameters
+
+                        **Calinski-Harabasz Score** (0 to ∞):
+                        - Ratio of between-cluster to within-cluster dispersion
+                        - Higher values indicate better-defined clusters
+                        - No fixed threshold, compare across different n_codes
+
+                        **Davies-Bouldin Score** (0 to ∞):
+                        - Average similarity between each cluster and its most similar cluster
+                        - Lower is better
+                        - < 1.0: Good separation
+                        - 1.0-2.0: Moderate separation
+                        - > 2.0: Poor separation, clusters may be too similar
+                        """)
+
+            except Exception as e:
+                st.error(f"Error calculating coherence: {str(e)}")
+        else:
+            st.warning("Model data not available. Please run ML analysis first.")
+
+    with tab10:
+        st.markdown("### Representative Quotes per Theme")
+
+        # Select display mode
+        display_mode = st.radio(
+            "Display by",
+            options=['Code', 'Theme'] if 'themes' in results_df.columns else ['Code'],
+            horizontal=True
+        )
+
+        if display_mode == 'Code':
+            # Get codes sorted by frequency
+            codes_sorted = sorted(
+                coder.codebook.keys(),
+                key=lambda x: coder.codebook[x]['count'],
+                reverse=True
+            )
+
+            # Filter out codes with no examples
+            codes_with_examples = [c for c in codes_sorted if coder.codebook[c]['examples']]
+
+            if codes_with_examples:
+                selected_code = st.selectbox(
+                    "Select a code to see representative quotes",
+                    options=codes_with_examples,
+                    format_func=lambda x: f"{coder.codebook[x]['label']} ({coder.codebook[x]['count']} occurrences)"
+                )
+
+                code_info = coder.codebook[selected_code]
+
+                st.markdown(f"#### {code_info['label']}")
+                st.markdown(f"**Keywords:** {', '.join(code_info['keywords'][:10])}")
+                st.markdown(f"**Frequency:** {code_info['count']} | **Avg Confidence:** {code_info['avg_confidence']:.3f}")
+
+                st.markdown("---")
+                st.markdown("#### Representative Quotes")
+
+                # Sort examples by confidence
+                examples = sorted(code_info['examples'], key=lambda x: x['confidence'], reverse=True)
+
+                n_quotes = st.slider(
+                    "Number of quotes to display",
+                    min_value=1,
+                    max_value=min(len(examples), 20),
+                    value=min(len(examples), 5)
+                )
+
+                for i, example in enumerate(examples[:n_quotes], 1):
+                    with st.container():
+                        col1, col2 = st.columns([4, 1])
+                        with col1:
+                            st.markdown(f"**Quote {i}:**")
+                            st.markdown(f'> {example["text"]}')
+                        with col2:
+                            st.metric("Confidence", f"{example['confidence']:.2f}")
+                        st.markdown("---")
+            else:
+                st.info("No examples available. Try lowering the min_confidence parameter or ensure high-confidence assignments exist.")
+
+        else:  # Theme mode
+            if hasattr(st.session_state, 'theme_analyzer') and st.session_state.theme_analyzer:
+                theme_analyzer = st.session_state.theme_analyzer
+
+                if theme_analyzer.themes:
+                    theme_ids = list(theme_analyzer.themes.keys())
+
+                    selected_theme = st.selectbox(
+                        "Select a theme to see representative quotes",
+                        options=theme_ids,
+                        format_func=lambda x: f"{theme_analyzer.themes[x]['name']} ({len(theme_analyzer.themes[x]['responses'])} responses)"
+                    )
+
+                    theme_info = theme_analyzer.themes[selected_theme]
+
+                    st.markdown(f"#### {theme_info['name']}")
+                    st.markdown(f"**Description:** {theme_info['description']}")
+                    st.markdown(f"**Associated Codes:** {', '.join(theme_info['codes'])}")
+                    st.markdown(f"**Frequency:** {len(theme_info['responses'])}")
+
+                    st.markdown("---")
+                    st.markdown("#### Representative Quotes")
+
+                    # Get responses for this theme
+                    theme_responses = theme_info['responses']
+
+                    if theme_responses:
+                        n_quotes = st.slider(
+                            "Number of quotes to display",
+                            min_value=1,
+                            max_value=min(len(theme_responses), 20),
+                            value=min(len(theme_responses), 5)
+                        )
+
+                        # Get text column name
+                        text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+
+                        for i, resp_idx in enumerate(theme_responses[:n_quotes], 1):
+                            with st.container():
+                                st.markdown(f"**Quote {i}:**")
+                                st.markdown(f'> {results_df.iloc[resp_idx][text_col]}')
+
+                                # Show assigned codes for this response
+                                codes = results_df.iloc[resp_idx]['assigned_codes']
+                                code_labels = [coder.codebook[c]['label'] for c in codes if c in coder.codebook]
+                                st.caption(f"**Codes:** {', '.join(code_labels)}")
+                                st.markdown("---")
+                    else:
+                        st.info("No responses found for this theme.")
+                else:
+                    st.warning("No themes defined. Please run theme analysis first.")
+            else:
+                st.warning("Theme analyzer not available. Showing code-based view instead.")
+                st.info("Switch to 'Code' display mode above to see representative quotes by code.")
 
     # Next button - always show on this page if analysis is complete
     render_next_button("💾 Export Results")
