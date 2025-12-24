@@ -147,14 +147,23 @@ def reset_analysis():
         del st.session_state.text_column
 
 
+def set_navigation_page(page):
+    """Callback to set navigation page."""
+    st.session_state.navigation_page = page
+
+
 def render_next_button(next_page):
     """Render a 'Next Step' button that navigates to the next page."""
     st.markdown("---")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button(f"➡️ Next: {next_page}", use_container_width=True, type="primary"):
-            st.session_state.navigation_page = next_page
-            st.rerun()
+        st.button(
+            f"➡️ Next: {next_page}",
+            use_container_width=True,
+            type="primary",
+            on_click=set_navigation_page,
+            args=(next_page,)
+        )
 
 
 def main():
