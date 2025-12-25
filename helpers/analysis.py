@@ -160,12 +160,15 @@ def find_optimal_codes(
 
     responses = df[text_column].tolist()
 
-    # Preprocess text
+    # Preprocess text with multilingual support
     def preprocess_text(text):
         if pd.isna(text):
             return ""
         text = str(text).lower()
-        text = re.sub(r'[^a-z\s]', ' ', text)
+        # Keep letters (including accented chars for Spanish/French/German) and whitespace
+        # Pattern: a-z (basic Latin), ß (German eszett), à-ö and ø-ÿ (Latin-1 accented letters)
+        # This preserves: é, è, ê, ë, à, â, ç, î, ï, ô, û, ù, ü, ÿ, ñ, á, í, ó, ú, ä, ö, ß, etc.
+        text = re.sub(r'[^a-zßà-öø-ÿ\s]', ' ', text)
         text = ' '.join(text.split())
         return text
 
@@ -182,7 +185,23 @@ def find_optimal_codes(
             max_df=0.8, ngram_range=(1, 2)
         )
 
-    feature_matrix = vectorizer.fit_transform(processed)
+    try:
+        feature_matrix = vectorizer.fit_transform(processed)
+    except ValueError as e:
+        if "empty vocabulary" in str(e).lower():
+            raise ValueError(
+                "Empty vocabulary error: No valid terms found after text preprocessing. "
+                "This can happen when:\n"
+                "  1. The dataset is too small or contains only short responses\n"
+                "  2. All words are filtered by stop words (try a different language)\n"
+                "  3. The min_df/max_df thresholds are too restrictive\n"
+                "  4. Responses contain mostly non-text content (numbers, symbols)\n\n"
+                "Suggestions:\n"
+                "  - Provide more diverse text responses\n"
+                "  - Try a different stop words language setting\n"
+                "  - Check that your data contains meaningful text content"
+            ) from e
+        raise
 
     # Calculate the maximum valid number of codes based on data constraints
     max_valid = min(len(df), feature_matrix.shape[1], max_codes)
@@ -214,6 +233,7 @@ def find_optimal_codes(
 
     best_score = -1
     optimal_n = min_codes
+    any_success = False  # Track whether any configuration succeeded
 
     total_iterations = max_codes - min_codes + 1
 
@@ -242,6 +262,7 @@ def find_optimal_codes(
 
                 results['silhouette_scores'][n] = sil_score
                 results['calinski_scores'][n] = cal_score
+                any_success = True  # Mark that at least one configuration succeeded
 
                 if sil_score > best_score:
                     best_score = sil_score
@@ -249,6 +270,21 @@ def find_optimal_codes(
         except Exception as e:
             logger.warning(f"Could not evaluate {n} codes: {e}")
             continue
+
+    # Validate that at least one configuration succeeded
+    if not any_success:
+        raise ValueError(
+            f"Auto-optimization failed: No valid configurations found when testing {min_codes}-{max_codes} codes. "
+            f"All attempts either failed or produced clusters with only one unique label. "
+            f"This typically indicates:\n"
+            f"  1. The dataset is too homogeneous (responses are too similar)\n"
+            f"  2. The dataset is too small for meaningful clustering\n"
+            f"  3. Text preprocessing removed too much content\n\n"
+            f"Suggestions:\n"
+            f"  - Provide a larger, more diverse dataset\n"
+            f"  - Try reducing the number of codes\n"
+            f"  - Check that responses contain varied content"
+        )
 
     results['optimal_n_codes'] = optimal_n
     results['best_silhouette_score'] = best_score
@@ -371,12 +407,27 @@ def run_ml_analysis(
             if pd.isna(text):
                 return ""
             text = str(text).lower()
-            text = re.sub(r'[^a-z\\s]', ' ', text)
+            # Keep letters (including accented chars for Spanish/French/German) and whitespace
+            # Pattern: a-z (basic Latin), ß (German eszett), à-ö and ø-ÿ (Latin-1 accented letters)
+            # This preserves: é, è, ê, ë, à, â, ç, î, ï, ô, û, ù, ü, ÿ, ñ, á, í, ó, ú, ä, ö, ß, etc.
+            text = re.sub(r'[^a-zßà-öø-ÿ\s]', ' ', text)
             text = ' '.join(text.split())
             return text
 
         def fit(self, responses, stop_words='english'):
             processed = [self.preprocess_text(r) for r in responses]
+
+            # Validate LDA/NMF compatibility with representation
+            # LDA and NMF require non-negative count/frequency matrices (TF-IDF or CountVectorizer)
+            # Semantic embeddings (SBERT, Word2Vec, FastText) produce dense vectors with negative values
+            if self.method in ['lda', 'nmf'] and self.representation != 'tfidf':
+                raise ValueError(
+                    f"Method '{self.method.upper()}' is incompatible with '{self.representation}' representation. "
+                    f"LDA and NMF require non-negative count/frequency matrices (bag-of-words). "
+                    f"Semantic embeddings like SBERT, Word2Vec, and FastText produce vectors with negative values. "
+                    f"Please use representation='tfidf' with LDA/NMF, or switch to method='tfidf_kmeans' "
+                    f"for clustering with semantic embeddings."
+                )
 
             # Choose vectorization method based on representation
             if self.representation == 'tfidf':
@@ -390,7 +441,23 @@ def run_ml_analysis(
                         max_features=1000, stop_words=stop_words, min_df=2,
                         max_df=0.8, ngram_range=(1, 2)
                     )
-                self.feature_matrix = self.vectorizer.fit_transform(processed)
+                try:
+                    self.feature_matrix = self.vectorizer.fit_transform(processed)
+                except ValueError as e:
+                    if "empty vocabulary" in str(e).lower():
+                        raise ValueError(
+                            "Empty vocabulary error: No valid terms found after text preprocessing. "
+                            "This can happen when:\n"
+                            "  1. The dataset is too small or contains only short responses\n"
+                            "  2. All words are filtered by stop words (try a different language)\n"
+                            "  3. The min_df/max_df thresholds are too restrictive\n"
+                            "  4. Responses contain mostly non-text content (numbers, symbols)\n\n"
+                            "Suggestions:\n"
+                            "  - Provide more diverse text responses\n"
+                            "  - Try a different stop words language setting\n"
+                            "  - Check that your data contains meaningful text content"
+                        ) from e
+                    raise
 
             else:
                 # Semantic embeddings (new functionality)
@@ -398,7 +465,16 @@ def run_ml_analysis(
 
                 logger.info(f"Training {self.representation} embeddings...")
                 self.vectorizer = get_embedder(self.representation, **self.embedding_kwargs)
-                self.feature_matrix = self.vectorizer.fit_transform(processed)
+                try:
+                    self.feature_matrix = self.vectorizer.fit_transform(processed)
+                except ValueError as e:
+                    if "empty vocabulary" in str(e).lower():
+                        raise ValueError(
+                            "Empty vocabulary error: No valid terms found for embedding. "
+                            "The dataset may be too small or contain only empty/whitespace responses. "
+                            "Please provide more diverse text content."
+                        ) from e
+                    raise
                 logger.info(
                     f"Embeddings created: shape={self.feature_matrix.shape}, "
                     f"features={self.feature_matrix.shape[1]}"
