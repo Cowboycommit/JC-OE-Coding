@@ -7,6 +7,7 @@ A comprehensive toolkit for qualitative data analysis including:
 - Multi-level categorization
 - Data loading from multiple sources
 - Interactive visualizations
+- Semantic embeddings for text representation
 """
 
 __version__ = "1.0.0"
@@ -16,10 +17,15 @@ from .data_loader import DataLoader
 from .code_frame import CodeFrame
 from .theme_analyzer import ThemeAnalyzer
 from .category_manager import CategoryManager
+from .content_quality import ContentQualityFilter
+
+# Embedding classes are available but not auto-imported to avoid dependencies
+# Import explicitly: from src.embeddings import SentenceBERTEmbedder, etc.
 
 __all__ = [
     "DataLoader",
     "CodeFrame",
     "ThemeAnalyzer",
     "CategoryManager",
+    "ContentQualityFilter",
 ]

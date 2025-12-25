@@ -1,0 +1,303 @@
+# Parameter Log Template for ML Open-Ended Coding
+# This file documents all hyperparameters and configuration choices
+# for reproducibility and transparency.
+
+# Project Metadata
+project:
+  name: "ML Open-Ended Coding Analysis"
+  version: "1.0"
+  analyst: "[Your Name]"
+  date: "YYYY-MM-DD"
+  description: "Brief description of the analysis project"
+
+# Data Preparation
+data_preparation:
+  # Source data
+  data_source:
+    file_path: "data/responses.csv"
+    text_column: "response_text"
+    total_responses_raw: 0  # To be filled
+
+  # Preprocessing parameters
+  preprocessing:
+    remove_nulls: true
+    min_length: 5  # Minimum response length in characters
+    remove_duplicates: false
+    stop_words: "english"
+    manual_exclusions: []  # List any manually excluded response IDs
+
+  # Quality filtering (if implemented)
+  quality_filtering:
+    enabled: false
+    auto_exclude: false  # NEVER true - always flag for review
+    flag_types:
+      - null_responses
+      - too_short
+      - non_english
+      - gibberish
+      - test_responses
+
+  # Final analytic sample
+  analytic_sample:
+    total_responses: 0  # To be filled after preprocessing
+    excluded_count: 0
+    exclusion_reasons: {}
+
+# ML Method Configuration
+ml_method:
+  # Primary method
+  name: "tfidf_kmeans"  # Options: tfidf_kmeans, lda, nmf
+
+  # Code discovery
+  n_codes: 10
+  code_selection_method: "user_specified"  # Options: user_specified, silhouette_optimized
+
+  # For silhouette optimization (if used)
+  code_optimization:
+    enabled: false
+    min_codes: 3
+    max_codes: 15
+
+  # Confidence threshold
+  min_confidence: 0.3  # Minimum probability for code assignment
+
+  # Random seed for reproducibility
+  random_seed: 42
+
+# Text Representation
+text_representation:
+  # Vectorization method
+  vectorizer_type: "tfidf"  # Options: tfidf, count
+
+  # Vectorization parameters
+  vectorization:
+    max_features: 1000
+    ngram_range: [1, 2]  # Unigrams and bigrams for TF-IDF
+    min_df: 2  # Minimum document frequency
+    max_df: 0.8  # Maximum document frequency (80%)
+    sublinear_tf: false  # Whether to use sublinear tf scaling
+
+  # For advanced embeddings (if implemented)
+  embeddings:
+    enabled: false
+    method: null  # Options: word2vec, sbert, fasttext, openai
+    model_name: null
+
+# Model-Specific Parameters
+model_specific:
+  # TF-IDF + K-Means
+  kmeans:
+    n_init: 10  # Number of initializations
+    max_iter: 300
+    algorithm: "lloyd"  # Options: lloyd, elkan
+
+  # Latent Dirichlet Allocation
+  lda:
+    max_iter: 20
+    learning_method: "batch"  # Options: batch, online
+    learning_decay: 0.7
+    doc_topic_prior: null  # Alpha (None = 1/n_components)
+    topic_word_prior: null  # Beta (None = 1/n_components)
+
+  # Non-negative Matrix Factorization
+  nmf:
+    max_iter: 200
+    init: "random"  # Options: random, nndsvd, nndsvda, nndsvdar
+    solver: "cd"  # Options: cd, mu
+    beta_loss: "frobenius"
+
+# Multi-Label Coding
+multi_label:
+  enabled: true  # Always true - system supports multi-label
+  max_codes_per_response: null  # No limit
+  ambiguity_threshold: 3  # Flag responses with 3+ codes as ambiguous
+
+# Human Review Configuration
+human_review:
+  # Flagging criteria
+  flag_for_review:
+    low_confidence: 0.5  # Flag assignments below this confidence
+    uncoded_responses: true  # Flag responses with no codes
+    ambiguous_responses: true  # Flag multi-coded responses
+    high_priority_count: 50  # Number of high-priority responses to flag
+
+  # Review workflow
+  review_workflow:
+    enabled: true
+    queue_size: 100  # Max responses in review queue
+    priority_method: "confidence_based"  # Options: confidence_based, random, stratified
+
+  # Inter-coder reliability (if available)
+  validation:
+    human_coded_sample: 0  # Number of responses coded by humans
+    inter_coder_reliability: null  # Cohen's kappa (if calculated)
+
+# Quality Metrics (to be filled after analysis)
+quality_metrics:
+  # Clustering quality
+  silhouette_score: null
+  calinski_harabasz_score: null
+  davies_bouldin_score: null
+
+  # Coverage
+  total_assignments: null
+  avg_codes_per_response: null
+  coverage_pct: null
+  uncoded_count: null
+
+  # Confidence distribution
+  avg_confidence: null
+  min_confidence_observed: null
+  max_confidence_observed: null
+  std_confidence: null
+
+  # Code utilization
+  active_codes: null  # Number of codes actually used
+  code_balance: null  # Max/min code frequency ratio
+
+# Validation & Testing
+validation:
+  # Bootstrap stability (if performed)
+  bootstrap:
+    enabled: false
+    n_iterations: 100
+    stability_score: null
+
+  # Sensitivity analysis (if performed)
+  sensitivity:
+    tested_parameters: []
+    results: {}
+
+  # Comparison with alternative methods
+  method_comparison:
+    methods_tested: []
+    comparison_results: {}
+
+# Outputs Generated
+outputs:
+  # File paths for all outputs
+  code_assignments: "outputs/code_assignments.csv"
+  codebook: "outputs/codebook.csv"
+  frequency_table: "outputs/frequencies.csv"
+  cooccurrence_matrix: "outputs/cooccurrence.csv"
+  uncoded_responses: "outputs/uncoded_responses.csv"
+  low_confidence_responses: "outputs/low_confidence_responses.csv"
+  review_queue: "outputs/review_queue.csv"
+  quality_report: "outputs/qa_report.txt"
+  methods_documentation: "METHODS.md"
+  executive_summary: "outputs/executive_summary.md"
+  visualizations:
+    - "outputs/frequency_chart.png"
+    - "outputs/cooccurrence_heatmap.png"
+    - "outputs/confidence_distribution.png"
+
+# Manual Overrides & Decisions
+manual_decisions:
+  # Document any manual interventions
+  code_label_changes: []
+    # Example:
+    # - code_id: "CODE_01"
+    #   original_label: "Work Remote Flexibility"
+    #   new_label: "Remote Work Preferences"
+    #   reason: "More accurate thematic description"
+    #   date: "2024-01-15"
+
+  code_merges: []
+    # Example:
+    # - merged_codes: ["CODE_05", "CODE_08"]
+    #   new_code: "CODE_05"
+    #   reason: "Themes were redundant"
+    #   date: "2024-01-16"
+
+  code_splits: []
+    # Example:
+    # - original_code: "CODE_03"
+    #   new_codes: ["CODE_03a", "CODE_03b"]
+    #   reason: "Code was too broad"
+    #   date: "2024-01-17"
+
+  reassignments: []
+    # Example:
+    # - response_id: "R_123"
+    #   original_codes: ["CODE_01"]
+    #   new_codes: ["CODE_02", "CODE_05"]
+    #   reason: "Better thematic fit"
+    #   reviewer: "Jane Doe"
+    #   date: "2024-01-18"
+
+# Assumptions & Limitations
+assumptions:
+  # Key assumptions (document explicitly)
+  - "Responses are independent units (no conversational context)"
+  - "English language dataset (single language)"
+  - "Bag-of-words representation (word order ignored)"
+  - "Linear separability of themes (K-means assumption)"
+  - "Uniform response importance (no weighting)"
+  - "Keyword representativeness (labels from top words)"
+  - "Confidence scores are probabilistic, not truth claims"
+  - "Sufficient data for thematic saturation"
+
+limitations:
+  # Known limitations (be honest)
+  - "Cannot understand sarcasm, irony, or non-literal language"
+  - "Cannot detect cultural nuances or context-dependent meanings"
+  - "Cannot handle multilingual responses or code-switching"
+  - "Cannot replace human qualitative judgment"
+  - "Cannot determine causal relationships"
+  - "Cannot generalize beyond this specific dataset"
+  - "May miss rare themes with small sample sizes"
+  - "Sensitive to preprocessing and parameter choices"
+
+# Ethical Considerations
+ethical_considerations:
+  # Data privacy
+  data_privacy:
+    consent_obtained: true  # Were participants consented?
+    anonymization_applied: true  # Are responses anonymized?
+    irb_approved: false  # IRB approval status
+
+  # Bias monitoring
+  bias_monitoring:
+    demographic_analysis: false  # Analyzed code distribution by demographics?
+    minority_perspective_review: false  # Reviewed minority group coding?
+    fairness_assessment: false  # Assessed fairness metrics?
+
+  # Transparency
+  transparency:
+    methods_documented: true
+    assumptions_explicit: true
+    limitations_acknowledged: true
+    human_review_emphasized: true
+
+# Audit Trail
+audit_trail:
+  # Version control
+  git_commit: null  # Git commit hash for reproducibility
+  code_version: null  # Version of analysis code
+
+  # Execution log
+  execution_date: null
+  execution_time_seconds: null
+
+  # Reproducibility checklist
+  reproducible: false  # Can analysis be exactly reproduced?
+  reproducibility_notes: ""
+
+# Notes & Comments
+notes: |
+  Add any additional notes, observations, or context here.
+
+  Example notes:
+  - "Initial run with 10 codes; may need adjustment after review"
+  - "Several responses about topic X were difficult to code automatically"
+  - "Consider manual coding validation for low-confidence responses"
+
+# Change Log
+change_log:
+  # Document all parameter changes
+  - date: "YYYY-MM-DD"
+    parameter: "n_codes"
+    old_value: null
+    new_value: 10
+    reason: "Initial analysis"
+    analyst: "[Your Name]"

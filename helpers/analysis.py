@@ -3,9 +3,15 @@ Analysis helper functions for the Streamlit UI.
 
 Provides functions for running ML analysis, generating insights,
 and processing results.
+
+Supports multi-granularity text processing (response, sentence, paragraph levels)
+via optional integration with TextSegmenter. Response-level analysis remains
+the default for backward compatibility.
 """
 
 from collections import Counter
+import sys
+from pathlib import Path
 
 import pandas as pd
 import numpy as np
@@ -13,6 +19,18 @@ import streamlit as st
 from typing import Dict, List, Tuple, Optional, Any
 import time
 import logging
+
+# Add src to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from src.methods_documentation import MethodsDocGenerator, export_methods_to_file
+
+# Import TextSegmenter for optional multi-granularity processing
+try:
+    from src.text_processing import TextSegmenter
+    TEXT_SEGMENTER_AVAILABLE = True
+except ImportError:
+    TEXT_SEGMENTER_AVAILABLE = False
+    logging.warning("TextSegmenter not available. Multi-granularity segmentation disabled.")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -246,6 +264,8 @@ def run_ml_analysis(
     n_codes: int = 10,
     method: str = 'tfidf_kmeans',
     min_confidence: float = 0.3,
+    representation: str = 'tfidf',
+    embedding_kwargs: Optional[Dict[str, Any]] = None,
     progress_callback=None
 ) -> Tuple[Any, Any, Dict]:
     """
@@ -257,6 +277,12 @@ def run_ml_analysis(
         n_codes: Number of codes to discover
         method: ML method ('tfidf_kmeans', 'lda', 'nmf')
         min_confidence: Minimum confidence threshold
+        representation: Text representation method:
+            - 'tfidf' (default): TF-IDF vectorization (bag-of-words, fast)
+            - 'sbert': SentenceBERT embeddings (semantic, offline, slower)
+            - 'word2vec': Word2Vec embeddings (semantic, trains on data)
+            - 'fasttext': FastText embeddings (handles typos, trains on data)
+        embedding_kwargs: Additional kwargs for embedding methods (e.g., model_name for SBERT)
         progress_callback: Optional callback for progress updates
 
     Returns:
@@ -264,6 +290,12 @@ def run_ml_analysis(
 
     Raises:
         ValueError: If dataset is empty or too small for the requested number of codes
+
+    Notes:
+        - TF-IDF is the default for backward compatibility and speed
+        - Semantic embeddings provide better understanding but are slower
+        - All embedding methods work offline (no API keys required)
+        - Which embedding was used is recorded in metrics['representation']
     """
     import sys
     sys.path.insert(0, '.')
@@ -294,16 +326,46 @@ def run_ml_analysis(
 
     # Simple MLOpenCoder class
     class MLOpenCoder:
-        def __init__(self, n_codes=10, method='tfidf_kmeans', min_confidence=0.3):
+        def __init__(
+            self,
+            n_codes=10,
+            method='tfidf_kmeans',
+            min_confidence=0.3,
+            representation='tfidf',
+            embedding_kwargs=None
+        ):
+            """
+            Initialize ML-based open coder.
+
+            Args:
+                n_codes: Number of codes to discover
+                method: ML method ('tfidf_kmeans', 'lda', 'nmf')
+                min_confidence: Minimum confidence threshold for code assignment
+                representation: Text representation method:
+                    - 'tfidf' (default): TF-IDF vectorization (bag-of-words)
+                    - 'sbert': SentenceBERT embeddings (semantic, offline)
+                    - 'word2vec': Word2Vec embeddings (semantic, trains on data)
+                    - 'fasttext': FastText embeddings (handles typos, trains on data)
+                embedding_kwargs: Additional kwargs for embedding methods
+            """
             self.n_codes = n_codes
             self.method = method
             self.min_confidence = min_confidence
+            self.representation = representation
+            self.embedding_kwargs = embedding_kwargs or {}
             self.vectorizer = None
             self.model = None
             self.codebook = {}
             self.code_assignments = None
             self.confidence_scores = None
             self.feature_matrix = None
+
+            # Warn about computational costs for large datasets with embeddings
+            if representation != 'tfidf':
+                logger.info(
+                    f"Using {representation} representation. "
+                    "This may be slower than TF-IDF but provides better semantic understanding."
+                )
 
         def preprocess_text(self, text):
             if pd.isna(text):
@@ -316,28 +378,43 @@ def run_ml_analysis(
         def fit(self, responses, stop_words='english'):
             processed = [self.preprocess_text(r) for r in responses]
 
-            if self.method == 'lda':
-                self.vectorizer = CountVectorizer(
-                    max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
-                )
+            # Choose vectorization method based on representation
+            if self.representation == 'tfidf':
+                # Traditional TF-IDF (default, backward compatible)
+                if self.method == 'lda':
+                    self.vectorizer = CountVectorizer(
+                        max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
+                    )
+                else:
+                    self.vectorizer = TfidfVectorizer(
+                        max_features=1000, stop_words=stop_words, min_df=2,
+                        max_df=0.8, ngram_range=(1, 2)
+                    )
                 self.feature_matrix = self.vectorizer.fit_transform(processed)
+
+            else:
+                # Semantic embeddings (new functionality)
+                from src.embeddings import get_embedder
+
+                logger.info(f"Training {self.representation} embeddings...")
+                self.vectorizer = get_embedder(self.representation, **self.embedding_kwargs)
+                self.feature_matrix = self.vectorizer.fit_transform(processed)
+                logger.info(
+                    f"Embeddings created: shape={self.feature_matrix.shape}, "
+                    f"features={self.feature_matrix.shape[1]}"
+                )
+
+            # Train clustering/topic model
+            if self.method == 'lda':
                 self.model = LatentDirichletAllocation(
                     n_components=self.n_codes, random_state=42, max_iter=20
                 )
             elif self.method == 'nmf':
-                self.vectorizer = TfidfVectorizer(
-                    max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
-                )
-                self.feature_matrix = self.vectorizer.fit_transform(processed)
                 self.model = NMF(n_components=self.n_codes, random_state=42, max_iter=200)
-            else:
-                self.vectorizer = TfidfVectorizer(
-                    max_features=1000, stop_words=stop_words, min_df=2,
-                    max_df=0.8, ngram_range=(1, 2)
-                )
-                self.feature_matrix = self.vectorizer.fit_transform(processed)
+            else:  # tfidf_kmeans or any kmeans-based
                 self.model = KMeans(n_clusters=self.n_codes, random_state=42, n_init=10)
 
+            # Fit model and get document-topic distributions
             if self.method in ['lda', 'nmf']:
                 doc_topic_matrix = self.model.fit_transform(self.feature_matrix)
             else:
@@ -445,7 +522,13 @@ def run_ml_analysis(
     if progress_callback:
         progress_callback(0.1, "Initializing ML coder...")
 
-    coder = MLOpenCoder(n_codes=n_codes, method=method, min_confidence=min_confidence)
+    coder = MLOpenCoder(
+        n_codes=n_codes,
+        method=method,
+        min_confidence=min_confidence,
+        representation=representation,
+        embedding_kwargs=embedding_kwargs
+    )
 
     if progress_callback:
         progress_callback(0.3, "Preprocessing text...")
@@ -472,6 +555,8 @@ def run_ml_analysis(
     metrics['total_responses'] = len(df)
     metrics['method'] = method
     metrics['n_codes'] = n_codes
+    metrics['representation'] = representation
+    metrics['embedding_kwargs'] = embedding_kwargs or {}
 
     if progress_callback:
         progress_callback(1.0, "Analysis complete!")
@@ -716,6 +801,226 @@ def get_cooccurrence_pairs(results_df: pd.DataFrame, min_count: int = 2) -> pd.D
     return pd.DataFrame(pair_data)
 
 
+def get_qa_report(
+    coder,
+    results_df: pd.DataFrame,
+    demographics: Optional[pd.DataFrame] = None,
+    demographic_columns: Optional[List[str]] = None,
+    include_rigor: bool = True
+) -> str:
+    """
+    Generate comprehensive Quality Assurance (QA) report.
+
+    This report includes basic quality metrics and advanced rigor diagnostics
+    for methodological validity assessment.
+
+    Args:
+        coder: Fitted MLOpenCoder instance
+        results_df: Results DataFrame with code assignments
+        demographics: Optional demographics DataFrame for bias detection
+        demographic_columns: Optional list of demographic columns to analyze
+        include_rigor: Whether to include rigor diagnostics (default: True)
+
+    Returns:
+        Formatted QA report as string (Markdown format)
+    """
+    from src.rigor_diagnostics import RigorDiagnostics
+
+    # Calculate basic metrics
+    metrics = calculate_metrics_summary(coder, results_df)
+
+    # Initialize report
+    report = []
+    report.append("# Quality Assurance Report")
+    report.append("")
+    report.append("---")
+    report.append("")
+
+    # Section 1: Basic Quality Metrics
+    report.append("## 1. Basic Quality Metrics")
+    report.append("")
+    report.append(f"- **Total Responses**: {metrics['total_responses']:,}")
+    report.append(f"- **Total Codes**: {metrics['total_codes']}")
+    report.append(f"- **Active Codes**: {metrics['active_codes']} ({metrics['active_codes']/metrics['total_codes']*100:.1f}%)")
+    report.append(f"- **Total Assignments**: {metrics['total_assignments']:,}")
+    report.append(f"- **Coverage**: {metrics['coverage_pct']:.1f}% ({metrics['uncoded_count']:,} uncoded)")
+    report.append(f"- **Avg Codes per Response**: {metrics['avg_codes_per_response']:.2f}")
+    report.append("")
+
+    if metrics.get('avg_confidence'):
+        report.append(f"- **Average Confidence**: {metrics['avg_confidence']:.3f}")
+        report.append(f"- **Confidence Range**: {metrics['min_confidence']:.3f} - {metrics['max_confidence']:.3f}")
+        report.append("")
+
+    # Section 2: Rigor Diagnostics (if requested)
+    if include_rigor:
+        diagnostics = RigorDiagnostics()
+
+        # Run diagnostics
+        validity = diagnostics.assess_validity(coder, results_df)
+        bias = diagnostics.detect_bias(
+            results_df,
+            demographics=demographics,
+            demographic_columns=demographic_columns
+        )
+        sanity = diagnostics.sanity_check(coder, results_df)
+        recommendations = diagnostics.generate_recommendations(validity, bias, sanity)
+
+        report.append("## 2. Rigor Diagnostics")
+        report.append("")
+
+        # 2.1 Sanity Check Summary
+        report.append("### 2.1 Health Status")
+        report.append("")
+        health = sanity['health_status']
+        report.append(f"**Status**: {health['message']}")
+        report.append("")
+        if sanity['total_issues'] > 0:
+            report.append(f"**Issues Detected**: {sanity['total_issues']}")
+            report.append("")
+
+        # 2.2 Warnings
+        if sanity['warnings']:
+            report.append("### 2.2 Warnings")
+            report.append("")
+            for warning in sanity['warnings']:
+                report.append(f"- {warning}")
+            report.append("")
+
+        # 2.3 Validity Dimensions
+        report.append("### 2.3 Validity Assessment")
+        report.append("")
+
+        # Coverage
+        coverage = validity['coverage_ratio']
+        report.append(f"**Coverage Ratio**: {coverage['coverage_percentage']:.1f}% - {coverage['interpretation']}")
+
+        # Code Utilization
+        utilization = validity['code_utilization']
+        report.append(f"**Code Utilization**: {utilization['utilization_rate']:.1f}% - {utilization['interpretation']}")
+
+        # Theme Coherence
+        coherence = validity['theme_coherence']
+        if coherence['average_coherence'] is not None:
+            report.append(f"**Theme Coherence**: {coherence['average_coherence']:.3f} - {coherence['interpretation']}")
+
+        # Code Stability
+        stability = validity['code_stability']
+        if stability['stability_score'] is not None:
+            report.append(f"**Code Stability**: {stability['stability_score']:.3f} - {stability['interpretation']}")
+
+        # Thematic Saturation
+        saturation = validity['thematic_saturation']
+        report.append(f"**Thematic Saturation**: {saturation['saturation_status'].replace('_', ' ').title()} - {saturation['message']}")
+
+        # Ambiguity Rate
+        ambiguity = validity['ambiguity_rate']
+        report.append(f"**Ambiguity Rate**: {ambiguity['multi_code_percentage']:.1f}% multi-coded - {ambiguity['interpretation']}")
+
+        # Boundary Cases
+        boundary = validity['boundary_cases']
+        report.append(f"**Boundary Cases**: {boundary['count']} responses ({boundary['percentage']:.1f}%) near decision threshold")
+
+        report.append("")
+
+        # 2.4 Confidence Distribution
+        report.append("### 2.4 Confidence Distribution")
+        report.append("")
+        conf_dist = validity['confidence_distribution']
+        report.append(f"- **Mean**: {conf_dist['mean']:.3f}")
+        report.append(f"- **Median**: {conf_dist['median']:.3f}")
+        report.append(f"- **Std Dev**: {conf_dist['std']:.3f}")
+        report.append(f"- **25th Percentile**: {conf_dist['percentiles']['25th']:.3f}")
+        report.append(f"- **75th Percentile**: {conf_dist['percentiles']['75th']:.3f}")
+        report.append(f"- **90th Percentile**: {conf_dist['percentiles']['90th']:.3f}")
+        report.append(f"- **Interpretation**: {conf_dist['interpretation']}")
+        report.append("")
+
+        # 2.5 Bias Detection
+        report.append("### 2.5 Bias Detection")
+        report.append("")
+
+        imbalance = bias['code_imbalance']
+        report.append(f"**Code Imbalance Ratio**: {imbalance['imbalance_ratio']:.1f}:1 - {imbalance['interpretation']}")
+        report.append(f"**Gini Coefficient**: {imbalance['gini_coefficient']:.3f} (0=perfect equality, 1=perfect inequality)")
+        report.append("")
+
+        # Demographic representation (if provided)
+        if demographics is not None and demographic_columns:
+            report.append("**Demographic Representation**:")
+            demo_rep = bias['demographic_representation']
+            for demo_col in demographic_columns:
+                if demo_col in demo_rep:
+                    chi_test = demo_rep[demo_col]['chi_square_test']
+                    if 'p_value' in chi_test:
+                        report.append(f"- {demo_col}: p={chi_test['p_value']:.4f} - {chi_test['interpretation']}")
+            report.append("")
+
+        # Systematic patterns
+        patterns = bias['systematic_patterns']
+        if 'positional_bias' in patterns:
+            pos_bias = patterns['positional_bias']
+            report.append(f"**Positional Bias**: First half avg={pos_bias['first_half_avg']:.2f}, "
+                         f"Second half avg={pos_bias['second_half_avg']:.2f} "
+                         f"({'Significant' if pos_bias['significant'] else 'Not significant'})")
+            report.append("")
+
+    # Section 3: Recommendations
+    if include_rigor and recommendations:
+        report.append("## 3. Recommendations")
+        report.append("")
+        for i, rec in enumerate(recommendations, 1):
+            report.append(f"{i}. {rec}")
+        report.append("")
+
+    # Section 4: Code Utilization Details
+    report.append("## 4. Code Utilization Details")
+    report.append("")
+
+    if include_rigor:
+        utilization = validity['code_utilization']
+        if utilization['underused_codes']:
+            report.append("**Underused Codes**:")
+            for code in utilization['underused_codes'][:10]:
+                code_info = coder.codebook.get(code, {})
+                report.append(f"- {code}: '{code_info.get('label', 'N/A')}' (count={code_info.get('count', 0)})")
+            report.append("")
+
+        if utilization['overused_codes']:
+            report.append("**Overused Codes**:")
+            for code in utilization['overused_codes'][:5]:
+                code_info = coder.codebook.get(code, {})
+                report.append(f"- {code}: '{code_info.get('label', 'N/A')}' (count={code_info.get('count', 0)})")
+            report.append("")
+
+    # Section 5: Uncoded Responses
+    if metrics['uncoded_count'] > 0:
+        report.append("## 5. Uncoded Responses")
+        report.append("")
+        report.append(f"**Total Uncoded**: {metrics['uncoded_count']:,} ({100 - metrics['coverage_pct']:.1f}%)")
+        report.append("")
+        report.append("**Possible Reasons**:")
+        report.append("- Response does not meet minimum confidence threshold")
+        report.append("- Response content does not match any discovered themes")
+        report.append("- Response may represent outlier or unique perspective")
+        report.append("")
+        report.append("**Recommendation**: Review uncoded responses manually to determine if:")
+        report.append("1. Additional codes are needed")
+        report.append("2. Confidence threshold should be lowered")
+        report.append("3. Responses are truly non-analytic (e.g., 'N/A', 'No comment')")
+        report.append("")
+
+    # Footer
+    report.append("---")
+    report.append("")
+    report.append("*This QA report was generated automatically. All metrics should be interpreted "
+                 "in the context of your specific research questions and data characteristics.*")
+    report.append("")
+    report.append("*For interpretation guidance, see: documentation/RIGOR_DIAGNOSTICS_GUIDE.md*")
+
+    return "\n".join(report)
+
+
 def export_results_package(coder, results_df: pd.DataFrame, format: str = 'excel') -> bytes:
     """
     Export complete results package.
@@ -765,3 +1070,202 @@ def export_results_package(coder, results_df: pd.DataFrame, format: str = 'excel
 
     else:
         raise ValueError(f"Unsupported format: {format}")
+
+
+def generate_methods_documentation(
+    coder,
+    results_df: pd.DataFrame,
+    metrics: Dict[str, Any],
+    preprocessing_params: Optional[Dict[str, Any]] = None,
+    project_name: str = "Open-Ended Coding Analysis",
+    output_path: Optional[str] = None
+) -> str:
+    """
+    Generate comprehensive methods documentation.
+
+    This function creates academic-style methods documentation including:
+    - Data preparation details
+    - Coding approach and methodology
+    - Quality assurance metrics
+    - Methodological assumptions
+    - Honest limitations
+    - Ethical considerations
+    - Reproducibility information
+
+    Args:
+        coder: Fitted MLOpenCoder instance
+        results_df: Results DataFrame with assignments
+        metrics: Quality metrics dictionary
+        preprocessing_params: Optional preprocessing parameters
+        project_name: Name of the project
+        output_path: Optional path to save METHODS.md file
+
+    Returns:
+        Methods documentation as markdown string
+
+    Example:
+        >>> methods_doc = generate_methods_documentation(
+        ...     coder, results_df, metrics,
+        ...     project_name="Survey Analysis 2024"
+        ... )
+        >>> # Optionally export to file
+        >>> export_methods_to_file(methods_doc, "METHODS.md")
+    """
+    generator = MethodsDocGenerator(project_name=project_name)
+
+    # Generate methods section
+    methods = generator.generate_methods_section(
+        coder,
+        results_df,
+        metrics,
+        preprocessing_params
+    )
+
+    # Audit for objectivity claims
+    passed, violations = generator.audit_objectivity_claims(methods)
+    if not passed:
+        logger.warning(
+            f"Methods documentation contains {len(violations)} objectivity claim violations. "
+            "Review and revise before publication."
+        )
+        for violation in violations:
+            logger.warning(f"  - {violation['phrase']}: {violation['context']}")
+
+    # Export to file if path provided
+    if output_path:
+        export_methods_to_file(methods, output_path)
+        logger.info(f"Methods documentation exported to: {output_path}")
+
+    return methods
+
+
+def generate_executive_summary(
+    coder,
+    results_df: pd.DataFrame,
+    metrics: Dict[str, Any],
+    include_methods: bool = True
+) -> str:
+    """
+    Generate executive summary with optional methods section.
+
+    Produces a comprehensive summary including:
+    - Key findings and insights
+    - Quality metrics
+    - Code frequency distribution
+    - Coverage and confidence statistics
+    - Optional: Full methods documentation
+
+    Args:
+        coder: Fitted MLOpenCoder instance
+        results_df: Results DataFrame
+        metrics: Quality metrics dictionary
+        include_methods: Whether to include full methods section
+
+    Returns:
+        Executive summary as markdown string
+    """
+    summary = []
+
+    summary.append("# Executive Summary: Open-Ended Coding Analysis")
+    summary.append("")
+    summary.append("---")
+    summary.append("")
+
+    # Key Findings
+    summary.append("## Key Findings")
+    summary.append("")
+    insights = generate_insights(coder, results_df, top_n=5)
+    for insight in insights:
+        # Remove emojis for professional summary
+        clean_insight = insight.encode('ascii', 'ignore').decode('ascii')
+        summary.append(f"- {clean_insight}")
+    summary.append("")
+
+    # Analysis Overview
+    summary.append("## Analysis Overview")
+    summary.append("")
+    summary.append(f"- **Total Responses**: {metrics.get('total_responses', len(results_df)):,}")
+    summary.append(f"- **Codes Discovered**: {metrics.get('n_codes', coder.n_codes)}")
+    summary.append(f"- **Active Codes**: {sum(1 for info in coder.codebook.values() if info['count'] > 0)}")
+    summary.append(f"- **Coverage**: {metrics.get('coverage_pct', 0):.1f}%")
+    summary.append(f"- **Average Confidence**: {metrics.get('avg_confidence', 0):.2f}")
+    summary.append("")
+
+    # Top Themes
+    summary.append("## Top Themes")
+    summary.append("")
+    top_codes = get_top_codes(coder, n=10)
+    for _, row in top_codes.iterrows():
+        pct = (row['Count'] / len(results_df)) * 100
+        summary.append(
+            f"**{row['Label']}** ({row['Code']}): "
+            f"{row['Count']:,} responses ({pct:.1f}%) | "
+            f"Confidence: {row['Avg Confidence']:.2f}"
+        )
+        summary.append(f"  - Keywords: {row['Keywords']}")
+        summary.append("")
+
+    # Quality Indicators
+    summary.append("## Quality Indicators")
+    summary.append("")
+
+    if 'silhouette_score' in metrics:
+        score = metrics['silhouette_score']
+        if score >= 0.5:
+            quality = "Excellent"
+        elif score >= 0.3:
+            quality = "Good"
+        elif score >= 0.1:
+            quality = "Fair"
+        else:
+            quality = "Weak"
+        summary.append(f"- **Clustering Quality**: {quality} (Silhouette: {score:.3f})")
+
+    summary.append(f"- **Multi-Coding Rate**: {(results_df['num_codes'] > 1).sum() / len(results_df) * 100:.1f}%")
+    summary.append(f"- **Uncoded Responses**: {metrics.get('uncoded_count', 0):,}")
+    summary.append("")
+
+    # Recommendations
+    summary.append("## Recommendations")
+    summary.append("")
+
+    uncoded_pct = 100 - metrics.get('coverage_pct', 100)
+    if uncoded_pct > 20:
+        summary.append("- **High uncoded rate** ({:.1f}%): Consider lowering confidence threshold or adding more codes".format(uncoded_pct))
+
+    if metrics.get('avg_confidence', 1.0) < 0.5:
+        summary.append("- **Low average confidence**: Review model fit and consider alternative ML methods")
+
+    active_codes = sum(1 for info in coder.codebook.values() if info['count'] > 0)
+    if active_codes < coder.n_codes * 0.7:
+        summary.append(f"- **Low code utilization** ({active_codes}/{coder.n_codes}): Consider reducing number of codes")
+
+    multi_coded = (results_df['num_codes'] > 1).sum()
+    if multi_coded / len(results_df) > 0.5:
+        summary.append("- **High multi-coding rate**: Responses are nuanced; ensure codes are distinct")
+
+    if not any([uncoded_pct > 20, metrics.get('avg_confidence', 1.0) < 0.5, active_codes < coder.n_codes * 0.7]):
+        summary.append("- Analysis quality is strong; proceed with human validation")
+
+    summary.append("")
+    summary.append("**Next Steps:**")
+    summary.append("1. Review representative quotes for each code")
+    summary.append("2. Validate auto-generated code labels")
+    summary.append("3. Examine uncoded and low-confidence responses")
+    summary.append("4. Refine code structure (merge/split as needed)")
+    summary.append("5. Document human review decisions in audit trail")
+    summary.append("")
+
+    # Include methods section if requested
+    if include_methods:
+        summary.append("---")
+        summary.append("")
+        methods_doc = generate_methods_documentation(
+            coder,
+            results_df,
+            metrics,
+            project_name="Open-Ended Coding Analysis"
+        )
+        summary.append(methods_doc)
+
+    return "\n".join(summary)
