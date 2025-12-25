@@ -42,6 +42,40 @@ Interactive web interface for ML-based coding - no coding required!
 - 📱 **Responsive Design**: Works on desktop and mobile
 - 🎨 **Professional Styling**: Publication-ready visualizations
 
+## What This System Does
+
+- Assists thematic coding by clustering responses based on word patterns
+- Generates suggested codes with confidence scores
+- Flags responses requiring human review
+- Provides diagnostic metrics for quality assessment
+
+## What This System Cannot Do
+
+- Cannot replace human qualitative judgment
+- Cannot understand context, irony, or cultural nuance
+- Cannot determine causal relationships
+- Cannot detect sarcasm or non-literal language
+
+## Where Human Judgment is Required
+
+- Validating auto-generated code labels
+- Reviewing low-confidence assignments
+- Interpreting co-occurrence patterns
+- Deciding on final code structure
+
+## Known Limitations
+
+- English-only language processing
+- Response-level granularity only
+- Requires minimum 20-30 responses
+- Bag-of-words assumption (word order ignored)
+
+## Ethical Considerations
+
+- Algorithmic bias may reflect biases in method design
+- Automated coding should not be used for high-stakes decisions without validation
+- Researchers remain responsible for interpretations
+
 ## Quick Start
 
 ### Installation

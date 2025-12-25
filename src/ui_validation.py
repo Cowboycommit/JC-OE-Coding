@@ -748,6 +748,38 @@ class UIValidationAgent:
 
         return self.report
 
+    def generate_audit_report(
+        self,
+        session_state: Dict[str, Any],
+        widget_configs: Dict[str, Dict[str, Any]],
+        error_handlers: Dict[str, Callable],
+        cache_functions: List[str],
+        ui_elements: List[Dict[str, Any]]
+    ) -> str:
+        """
+        Generate a markdown-formatted UI audit report.
+
+        This method wraps run_full_audit() and returns a formatted markdown report.
+
+        Args:
+            session_state: Current session state dictionary
+            widget_configs: Configuration for each widget
+            error_handlers: Error handling functions to test
+            cache_functions: List of cached function names
+            ui_elements: List of UI elements with metadata
+
+        Returns:
+            Markdown-formatted audit report string
+        """
+        audit_report = self.run_full_audit(
+            session_state=session_state,
+            widget_configs=widget_configs,
+            error_handlers=error_handlers,
+            cache_functions=cache_functions,
+            ui_elements=ui_elements
+        )
+        return audit_report.generate_markdown_report()
+
     def generate_checklist(self) -> List[Dict[str, Any]]:
         """Generate a UI audit checklist based on best practices."""
         return [

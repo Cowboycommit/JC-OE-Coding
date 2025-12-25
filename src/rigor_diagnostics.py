@@ -152,27 +152,34 @@ class RigorDiagnostics:
 
     def sanity_check(
         self,
-        coder,
-        results_df: pd.DataFrame,
+        coder=None,
+        results_df: Optional[pd.DataFrame] = None,
         min_responses: int = 20
     ) -> Dict[str, Any]:
         """
         Automated sanity checks for common issues.
 
         Args:
-            coder: Fitted MLOpenCoder instance
-            results_df: Results DataFrame
+            coder: Optional fitted MLOpenCoder instance (required for code-level checks)
+            results_df: Results DataFrame (required)
             min_responses: Minimum expected responses
 
         Returns:
             Dictionary with warnings and recommendations
         """
+        # Validate required parameter
+        if results_df is None:
+            raise ValueError("results_df parameter is required")
+
         warnings_list = []
         recommendations = []
         issues = {}
 
-        # Check 1: Are code labels meaningful?
-        long_labels = self._check_long_labels(coder)
+        # Check 1: Are code labels meaningful? (requires coder)
+        if coder is not None:
+            long_labels = self._check_long_labels(coder)
+        else:
+            long_labels = []
         if long_labels:
             issues['long_labels'] = long_labels
             warnings_list.append(
@@ -183,8 +190,11 @@ class RigorDiagnostics:
                 f"Review and shorten these labels: {', '.join(long_labels[:3])}..."
             )
 
-        # Check 2: Are codes balanced?
-        imbalance_ratio = self._check_code_balance(coder)
+        # Check 2: Are codes balanced? (requires coder)
+        if coder is not None:
+            imbalance_ratio = self._check_code_balance(coder)
+        else:
+            imbalance_ratio = 0
         if imbalance_ratio > 10:
             issues['code_imbalance'] = imbalance_ratio
             warnings_list.append(
@@ -234,8 +244,11 @@ class RigorDiagnostics:
                 "methods instead, (3) Treating results as exploratory only"
             )
 
-        # Check 6: Are there unused codes?
-        unused_codes = self._check_unused_codes(coder)
+        # Check 6: Are there unused codes? (requires coder)
+        if coder is not None:
+            unused_codes = self._check_unused_codes(coder)
+        else:
+            unused_codes = []
         if unused_codes:
             issues['unused_codes'] = unused_codes
             warnings_list.append(
