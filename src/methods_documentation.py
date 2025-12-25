@@ -28,7 +28,7 @@ class MethodsDocGenerator:
     - Transparency over marketing
     - Uncertainty surfaced, not suppressed
     - Human judgment acknowledged as central
-    - No claims of objectivity or "ground truth"
+    - No claims of objectivity or definitive accuracy
     """
 
     # Prohibited objectivity claims (for audit)
@@ -277,7 +277,7 @@ analytical decisions. The system:
 - **Does:** Log all parameters and decisions
 
 - **Does NOT:** Replace human qualitative judgment
-- **Does NOT:** Claim objectivity or "ground truth"
+- **Does NOT:** Claim objectivity or definitive accuracy
 - **Does NOT:** Guarantee accuracy of auto-generated labels
 - **Does NOT:** Eliminate researcher interpretation requirements
 
@@ -517,7 +517,7 @@ To address these limitations:
 **Limitations Disclosure:**
 - Do not oversell capabilities of automated coding
 - Acknowledge uncertainty and limitations prominently
-- Avoid language suggesting "objectivity" or "ground truth"
+- Avoid language suggesting "objectivity" or "definitive accuracy"
 - Be transparent about what the system cannot do
 
 ### 6.2 Data Privacy and Consent
@@ -582,7 +582,7 @@ When publishing results from ML-assisted coding:
 3. **Describe human review process** in detail
 4. **Acknowledge limitations** of automated approach
 5. **Share methodological details** sufficient for replication
-6. **Avoid claiming objectivity** or superiority over human coding
+6. **Avoid claiming objectivity** or definitive accuracy over human coding
 7. **Consider sharing** de-identified data and code for reproducibility
 
 ---

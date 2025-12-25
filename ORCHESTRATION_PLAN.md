@@ -647,6 +647,7 @@ This orchestration plan establishes a framework for coordinating specialist agen
 | **Agent-6** | Human-AI Collaboration Specialist | Review workflows, active learning | Human judgment is final authority |
 | **Agent-7** | Evaluation & Validation Specialist | Rigor diagnostics, bias detection | Quantify uncertainty, don't suppress it |
 | **Agent-8** | Documentation Specialist | Auto-generate methods sections, assumption logs | Transparent about what system can/cannot do |
+| **Agent-9** | UI & Interaction Validation Specialist | Front-end robustness, usability auditing (Streamlit) | Coordinate with Agent-0 for UI-backend contract validation |
 
 ### 3.2 Task Scoping Template
 
@@ -725,7 +726,100 @@ testing_requirements:
   - Test with profanity (should NOT auto-flag as non-analytic)
 ```
 
-### 3.4 Coordination Protocols
+### 3.4 Agent-9: UI & Interaction Validation Specialist
+
+```yaml
+agent_id: Agent-9
+task_title: "UI & Interaction Validation Agent (Streamlit)"
+role: "Front-End Robustness & Usability Auditor"
+
+context: |
+  The Streamlit application (app.py) has 7 pages with extensive widgets:
+  - Selectboxes (text column, method, stop words)
+  - Sliders (n_codes 3-30, min_confidence 0.1-0.9)
+  - File uploaders (CSV/Excel)
+  - Buttons (Start Analysis, Reset, Export)
+  - Checkboxes (preprocessing options)
+
+  Current validation exists in helpers/analysis.py (validate_dataframe, etc.)
+  but UI-specific edge cases need dedicated validation.
+
+objective: |
+  Build a UI validation agent that audits Streamlit components for:
+  1. Safe default states and required selection enforcement
+  2. Robust error handling with actionable user messages
+  3. State stability across reruns and widget changes
+  4. Clear UX with proper labels and interpretability
+  5. Correct UI-backend contract (types, ranges, validation)
+
+responsibilities:
+  ui_state_interaction:
+    - Inspect all Streamlit widgets (selectboxes, sliders, uploaders, buttons)
+    - Verify default states are safe and don't cause errors
+    - Ensure required selections are enforced before proceeding
+    - Block invalid widget combinations
+
+  error_handling:
+    - Trigger edge cases: empty datasets, non-numeric columns, single-variable inputs
+    - Confirm errors are caught and don't crash the app
+    - Verify user sees actionable messages (not raw tracebacks)
+
+  state_stability:
+    - Verify behavior under repeated widget changes
+    - Test file re-uploads and method switching (Pearson ↔ Spearman)
+    - Check cached functions (st.cache_data, st.cache_resource)
+    - Prevent unintended recomputation loops and duplicated outputs
+
+  ux_interpretability:
+    - Confirm labels explain statistical meaning
+    - Verify visuals are clearly titled and annotated
+    - Flag ambiguous controls and misleading defaults
+    - Check for warnings where misuse is likely
+
+  ui_backend_contract:
+    - Ensure UI passes correct data types
+    - Validate parameter ranges before backend calls
+    - Ensure backend defensively validates UI inputs
+    - Backend never trusts UI state blindly
+
+constraints:
+  - Agent-9 does NOT do core logic testing (delegates to Agent-0)
+  - Agent-9 focuses only on Streamlit UI components
+  - Must coordinate with Agent-0 for UI-backend integration
+  - All recommendations must be actionable with code examples
+
+deliverables:
+  - Code module: src/ui_validation.py (UIValidationAgent class)
+  - Tests: tests/test_ui_validation.py (comprehensive test suite)
+  - UI audit checklist (5 categories, 25+ checks)
+  - List of failure modes & fixes (8+ common scenarios)
+  - Widget redesign recommendations
+
+success_criteria:
+  - Validates 5 categories: widget_state, error_handling, state_stability, ux_interpretability, ui_backend_contract
+  - Generates markdown audit reports with severity levels (critical, high, medium, low, info)
+  - Passing report = no critical or high severity issues
+  - Performance: <100ms per widget validation
+  - 90%+ test coverage for new module
+
+dependencies:
+  - Works after core logic is stable (Agent-1 through Agent-8)
+  - Provides input to Agent-0 for integration fixes
+
+agent_0_interaction:
+  - Agent-0 does NOT do UI testing
+  - Agent-0 delegates UI inspection to Agent-9
+  - Agent-0 integrates fixes where backend changes are required
+  - Agent-0 ensures UI constraints align with statistical logic
+  - Agent-0 ensures UI does not expose invalid analytical paths
+
+agent_0_responsibility_update: |
+  Add to Agent-0's responsibility list:
+  "Coordinate UI-level validation (e.g. Streamlit) to ensure usability,
+  error handling, and safe interaction with analytical logic."
+```
+
+### 3.5 Coordination Protocols
 
 **Before Starting Work:**
 1. Agent reads full task specification
@@ -1270,7 +1364,7 @@ def audit_objectivity_claims():
 
 The orchestration integration is complete when:
 
-- ✅ All 8 specialist agents have delivered and integrated
+- ✅ All 9 specialist agents have delivered and integrated (including Agent-9: UI Validation)
 - ✅ All existing tests pass (zero regression)
 - ✅ New integration tests pass (orchestration features work)
 - ✅ Manual review checklist completed (no hardcoded themes, no false certainty)
@@ -1300,6 +1394,7 @@ The orchestration integration is complete when:
 │ - Delegates tasks to specialists                            │
 │ - Integrates outputs                                        │
 │ - Validates quality                                         │
+│ - Coordinates UI-level validation (via Agent-9)             │
 └─────────────┬───────────────────────────────────────────────┘
               │
               ├─> [Agent-1: Text Processing] ──────────┐
@@ -1323,11 +1418,13 @@ The orchestration integration is complete when:
               ├─> [Agent-7: Validation] ───────────────┤    │ Sanity  │
               │    - Rigor diagnostics                 │    └────┬────┘
               │                                         │         │
-              └─> [Agent-8: Documentation] ────────────┘         ▼
-                   - Methods, assumptions, limits         ┌──────────────┐
-                                                          │ Final System │
-                                                          │ v2.0         │
-                                                          └──────────────┘
+              ├─> [Agent-8: Documentation] ────────────┤         ▼
+              │    - Methods, assumptions, limits      │    ┌──────────────┐
+              │                                         │    │ Final System │
+              └─> [Agent-9: UI Validation] ────────────┘    │ v2.0         │
+                   - Streamlit robustness & UX             └──────────────┘
+                   - Error handling verification
+                   - State stability checks
 ```
 
 ### 7.2 Risk Mitigation Strategies

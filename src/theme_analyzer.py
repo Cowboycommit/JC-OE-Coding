@@ -147,6 +147,26 @@ class ThemeAnalyzer:
         self.logger.info(f"Identified themes in {len(df)} responses")
         return df
 
+    def analyze_themes(
+        self, df: pd.DataFrame, code_column: str = "codes"
+    ) -> pd.DataFrame:
+        """
+        Analyze themes in coded data (wrapper for identify_themes).
+
+        This method provides API consistency with other analyzer modules.
+
+        Args:
+            df: DataFrame with coded responses
+            code_column: Column name containing codes (should contain lists of code IDs)
+
+        Returns:
+            DataFrame with theme assignments
+
+        Raises:
+            ValueError: If code_column does not exist in the DataFrame
+        """
+        return self.identify_themes(df, code_column)
+
     def theme_co_occurrence(self, df: pd.DataFrame = None) -> pd.DataFrame:
         """
         Calculate co-occurrence matrix of themes.
