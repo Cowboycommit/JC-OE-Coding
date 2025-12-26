@@ -116,6 +116,115 @@ st.markdown("""
     p, li, span {
         color: #262730;
     }
+    /* Stat chips styling */
+    .stat-chip {
+        display: inline-block;
+        background: linear-gradient(135deg, #1f77b4 0%, #155a8a 100%);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        margin: 5px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        font-family: sans-serif;
+    }
+    .stat-chip:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+    /* Stepper navigation styles */
+    .stepper-container {
+        padding: 10px 0;
+    }
+    .stepper-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 5px;
+        margin: 4px 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .stepper-item.active {
+        background-color: #e8f4f8;
+        border-left: 3px solid #1f77b4;
+    }
+    .stepper-item.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .stepper-item.completed .step-number {
+        background-color: #28a745;
+    }
+    .step-number {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #1f77b4;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    .step-number.disabled {
+        background-color: #ccc;
+    }
+    .step-label {
+        font-size: 14px;
+        color: #262730;
+    }
+    .step-label.disabled {
+        color: #999;
+    }
+    .workflow-caption {
+        font-size: 11px;
+        color: #666;
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+    }
+    /* Validation badge styles */
+    .validation-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+    .badge-valid {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .badge-invalid {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .badge-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    /* Stage checklist styles */
+    .stage-item {
+        padding: 6px 0;
+        font-size: 14px;
+    }
+    .stage-pending {
+        color: #999;
+    }
+    .stage-active {
+        color: #1f77b4;
+        font-weight: 600;
+    }
+    .stage-complete {
+        color: #28a745;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -166,6 +275,175 @@ def render_next_button(next_page):
         )
 
 
+def render_stepper_navigation():
+    """Render a numbered stepper navigation with disabled states based on workflow progress."""
+    # Define pages with their prerequisites
+    pages = [
+        {"name": "📤 Data Upload", "step": 1, "requires": None},
+        {"name": "⚙️ Configuration", "step": 2, "requires": "data"},
+        {"name": "🚀 Run Analysis", "step": 3, "requires": "config"},
+        {"name": "📊 Results Overview", "step": 4, "requires": "analysis"},
+        {"name": "📈 Visualizations", "step": 5, "requires": "analysis"},
+        {"name": "💾 Export Results", "step": 6, "requires": "analysis"},
+        {"name": "ℹ️ About", "step": 7, "requires": None},
+    ]
+
+    # Determine which steps are accessible
+    has_data = st.session_state.uploaded_df is not None
+    has_config = 'config' in st.session_state
+    has_analysis = st.session_state.analysis_complete
+
+    # Get current page
+    current_page = st.session_state.get('navigation_page', "📤 Data Upload")
+
+    # Workflow caption
+    st.markdown('<div class="workflow-caption">📍 Upload → Configure → Run → Review → Export</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="stepper-container">', unsafe_allow_html=True)
+
+    for page in pages:
+        # Determine if step is accessible
+        is_accessible = True
+        if page["requires"] == "data" and not has_data:
+            is_accessible = False
+        elif page["requires"] == "config" and not has_config:
+            is_accessible = False
+        elif page["requires"] == "analysis" and not has_analysis:
+            is_accessible = False
+
+        # Determine if step is completed
+        is_completed = False
+        if page["step"] == 1 and has_data:
+            is_completed = True
+        elif page["step"] == 2 and has_config:
+            is_completed = True
+        elif page["step"] == 3 and has_analysis:
+            is_completed = True
+
+        is_active = current_page == page["name"]
+
+        # Build step HTML
+        item_class = "stepper-item"
+        if is_active:
+            item_class += " active"
+        if not is_accessible:
+            item_class += " disabled"
+        if is_completed:
+            item_class += " completed"
+
+        number_class = "step-number"
+        if not is_accessible:
+            number_class += " disabled"
+
+        label_class = "step-label"
+        if not is_accessible:
+            label_class += " disabled"
+
+        # Display indicator
+        if is_completed and not is_active:
+            indicator = "✓"
+        else:
+            indicator = str(page["step"])
+
+        # Create clickable button for accessible steps
+        if is_accessible:
+            if st.button(
+                f"{indicator}  {page['name']}",
+                key=f"nav_{page['step']}",
+                use_container_width=True,
+                type="secondary" if not is_active else "primary"
+            ):
+                st.session_state.navigation_page = page["name"]
+                st.rerun()
+        else:
+            # Show disabled step as text
+            st.markdown(f"""
+            <div class="{item_class}">
+                <span class="{number_class}">{indicator}</span>
+                <span class="{label_class}">{page['name']}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    return current_page
+
+
+def get_stage_checklist_html(stages, current_stage_idx):
+    """Generate HTML for the analysis stage checklist.
+
+    Args:
+        stages: List of stage names
+        current_stage_idx: Index of current stage (0-based), -1 for all complete
+    """
+    html = '<div class="stage-checklist">'
+    for i, stage in enumerate(stages):
+        if current_stage_idx == -1 or i < current_stage_idx:
+            # Completed
+            html += f'<div class="stage-item stage-complete">✅ {stage}</div>'
+        elif i == current_stage_idx:
+            # Active
+            html += f'<div class="stage-item stage-active">⏳ {stage}...</div>'
+        else:
+            # Pending
+            html += f'<div class="stage-item stage-pending">⬜ {stage}</div>'
+    html += '</div>'
+    return html
+
+
+def render_chart_controls(chart_name, fig, data_df=None, explanation=None):
+    """
+    Render consistent controls for charts including explanations and download buttons.
+
+    Args:
+        chart_name: Name of the chart (used for filenames)
+        fig: Plotly figure object
+        data_df: Optional pandas DataFrame with underlying data for CSV download
+        explanation: Dict with 'what', 'how', and 'look_for' keys for the explainer
+    """
+    # Add "What am I seeing?" expander if explanation provided
+    if explanation:
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            if 'what' in explanation:
+                st.markdown(f"**What this shows:** {explanation['what']}")
+            if 'how' in explanation:
+                st.markdown(f"**How to interpret:** {explanation['how']}")
+            if 'look_for' in explanation:
+                st.markdown(f"**Key things to look for:** {explanation['look_for']}")
+
+    # Download buttons
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Download PNG
+        try:
+            # Convert plotly figure to PNG bytes
+            img_bytes = fig.to_image(format="png", width=1200, height=800)
+            st.download_button(
+                label="📥 Download PNG",
+                data=img_bytes,
+                file_name=f"{chart_name.lower().replace(' ', '_')}.png",
+                mime="image/png",
+                use_container_width=True
+            )
+        except Exception as e:
+            st.warning(f"PNG download requires kaleido: pip install kaleido")
+
+    with col2:
+        # Download CSV (if data provided)
+        if data_df is not None:
+            csv_buffer = BytesIO()
+            data_df.to_csv(csv_buffer, index=False)
+            csv_buffer.seek(0)
+            st.download_button(
+                label="📥 Download CSV",
+                data=csv_buffer.getvalue(),
+                file_name=f"{chart_name.lower().replace(' ', '_')}_data.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+
+
 def main():
     """Main application function."""
     initialize_session_state()
@@ -189,20 +467,8 @@ def main():
         st.markdown("---")
         st.markdown("### 🎯 Navigation")
 
-        page = st.radio(
-            "Choose a section:",
-            [
-                "📤 Data Upload",
-                "⚙️ Configuration",
-                "🚀 Run Analysis",
-                "📊 Results Overview",
-                "📈 Visualizations",
-                "💾 Export Results",
-                "ℹ️ About"
-            ],
-            key="navigation_page",
-            label_visibility="collapsed"
-        )
+        # Use stepper navigation with disabled states
+        page = render_stepper_navigation()
 
         st.markdown("---")
         st.markdown("### 📋 Quick Stats")
@@ -281,11 +547,6 @@ def page_data_upload():
     st.markdown("---")
     st.markdown("### 📤 Or Upload Your Data")
 
-    st.markdown("""
-    Upload a CSV or Excel file containing your qualitative responses.
-    Your file should have at least one column with text responses.
-    """)
-
     # Template download section
     st.markdown("#### 📥 Download Data Template")
 
@@ -316,6 +577,16 @@ def page_data_upload():
 
     st.markdown("")  # Add spacing
 
+    # File requirements info box - ABOVE the uploader
+    st.markdown("""
+    <div class="info-box">
+    <strong>📋 File Requirements:</strong><br>
+    • <strong>Accepted formats:</strong> CSV, Excel (.xlsx, .xls)<br>
+    • <strong>Required:</strong> At least one text column with responses<br>
+    • <strong>Recommended:</strong> 20+ responses for reliable analysis
+    </div>
+    """, unsafe_allow_html=True)
+
     # File uploader
     uploaded_file = st.file_uploader(
         "Choose a file",
@@ -333,17 +604,59 @@ def page_data_upload():
 
             st.session_state.uploaded_df = df
 
-            # Show success message
+            # Validate data and show badge
+            text_columns = df.select_dtypes(include=['object']).columns.tolist()
+            has_text_cols = len(text_columns) > 0
+            has_enough_rows = len(df) >= 20
+
+            # Show validation badge
+            if has_text_cols and has_enough_rows:
+                badge_html = '<span class="validation-badge badge-valid">✅ Valid</span>'
+            elif has_text_cols and not has_enough_rows:
+                badge_html = '<span class="validation-badge badge-warning">⚠️ Low sample size</span>'
+            else:
+                badge_html = '<span class="validation-badge badge-invalid">❌ No text columns</span>'
+
+            # Show success message with badge
             st.markdown(f"""
             <div class="success-box">
-            ✅ <strong>File uploaded successfully!</strong><br>
+            ✅ <strong>File uploaded successfully!</strong> {badge_html}<br>
             Loaded {len(df):,} rows and {len(df.columns)} columns
             </div>
             """, unsafe_allow_html=True)
 
-            st.info("👉 **Next step:** Go to '⚙️ Configuration' in the sidebar to select your text column and set up analysis parameters.")
+            # Inline text column selector - so users don't have to go to Configuration
+            if has_text_cols:
+                st.markdown("### 📝 Select Text Column")
+                st.markdown("Choose the column containing responses to analyze:")
 
-            # Display column selector
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    selected_column = st.selectbox(
+                        "Text column:",
+                        text_columns,
+                        index=0,
+                        key="upload_text_column",
+                        help="Select the column with text responses for coding"
+                    )
+                    st.session_state.text_column = selected_column
+
+                with col2:
+                    # Show sample count for selected column
+                    non_null_count = df[selected_column].dropna().shape[0]
+                    st.metric("Valid responses", f"{non_null_count:,}")
+
+                # Show sample of selected column
+                st.caption(f"**Sample from '{selected_column}':**")
+                sample_texts = df[selected_column].dropna().head(3).tolist()
+                for i, text in enumerate(sample_texts, 1):
+                    st.text(f"{i}. {truncate_text(str(text), 100)}")
+
+                st.success(f"✅ Column '{selected_column}' selected! You can proceed to Configuration or customize settings there.")
+            else:
+                st.error("❌ No text columns found. Please upload a file with at least one text column.")
+
+            # Display data preview
             st.markdown("### 🔍 Preview Data")
 
             col1, col2 = st.columns(2)
@@ -359,8 +672,8 @@ def page_data_upload():
                 height=300
             )
 
-            # Column info
-            with st.expander("📋 Column Information"):
+            # Column info - collapsed by default
+            with st.expander("📋 Column Information", expanded=False):
                 col_info = pd.DataFrame({
                     'Column': df.columns,
                     'Type': df.dtypes.astype(str),
@@ -370,42 +683,40 @@ def page_data_upload():
                 })
                 st.dataframe(col_info, use_container_width=True)
 
-            # Data preprocessing options
-            st.markdown("### 🔧 Preprocessing Options")
+            # Data preprocessing options - collapsed by default
+            with st.expander("🔧 Advanced Preprocessing Options", expanded=False):
+                with st.form("preprocessing_form"):
+                    col1, col2 = st.columns(2)
 
-            with st.form("preprocessing_form"):
-                col1, col2 = st.columns(2)
+                    with col1:
+                        remove_nulls = st.checkbox("Remove null responses", value=True)
+                        remove_duplicates = st.checkbox("Remove duplicate responses", value=False)
 
-                with col1:
-                    remove_nulls = st.checkbox("Remove null responses", value=True)
-                    remove_duplicates = st.checkbox("Remove duplicate responses", value=False)
-
-                with col2:
-                    min_length = st.number_input(
-                        "Minimum response length (characters)",
-                        min_value=0,
-                        value=5,
-                        step=1
-                    )
-
-                if st.form_submit_button("Apply Preprocessing", use_container_width=True):
-                    text_column = st.session_state.get('text_column', df.columns[0])
-
-                    if text_column in df.columns:
-                        processed_df = preprocess_responses(
-                            df,
-                            text_column,
-                            remove_nulls=remove_nulls,
-                            remove_duplicates=remove_duplicates,
-                            min_length=min_length
+                    with col2:
+                        min_length = st.number_input(
+                            "Minimum response length (characters)",
+                            min_value=0,
+                            value=5,
+                            step=1
                         )
 
-                        st.session_state.uploaded_df = processed_df
+                    if st.form_submit_button("Apply Preprocessing", use_container_width=True):
+                        text_column = st.session_state.get('text_column', df.columns[0])
 
-                        st.success(f"✅ Preprocessed! Went from {len(df):,} to {len(processed_df):,} responses")
-                        st.info("👉 **Next step:** Go to '⚙️ Configuration' in the sidebar to set up your analysis parameters.")
-                    else:
-                        st.error("Please select a text column in the Configuration page first")
+                        if text_column in df.columns:
+                            processed_df = preprocess_responses(
+                                df,
+                                text_column,
+                                remove_nulls=remove_nulls,
+                                remove_duplicates=remove_duplicates,
+                                min_length=min_length
+                            )
+
+                            st.session_state.uploaded_df = processed_df
+
+                            st.success(f"✅ Preprocessed! Went from {len(df):,} to {len(processed_df):,} responses")
+                        else:
+                            st.error("Please select a text column first")
 
         except Exception as e:
             st.error(f"❌ Error loading file: {str(e)}")
@@ -453,6 +764,20 @@ def page_configuration():
     # ML Configuration
     st.markdown("### 🤖 ML Algorithm Settings")
 
+    # Show text column badge
+    if 'text_column' in st.session_state and st.session_state.text_column:
+        st.markdown(f"""
+        <div class="info-box" style="padding: 10px; margin-bottom: 15px;">
+        📝 <strong>Text column:</strong> {st.session_state.text_column}
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="warning-box" style="padding: 10px; margin-bottom: 15px;">
+        ⚠️ <strong>Select text column in Data Upload first</strong>
+        </div>
+        """, unsafe_allow_html=True)
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -473,7 +798,15 @@ def page_configuration():
         )
 
         if auto_optimal_codes:
-            st.info("🔍 The algorithm will test different numbers of codes (3-15) and select the optimal value based on clustering quality.")
+            st.markdown("""
+            <div class="info-box" style="padding: 10px;">
+            🔍 <strong>Auto-optimization enabled:</strong>
+            <ul style="margin: 5px 0 0 0;">
+            <li>Adds ~2-5 min to test 3-15 code configurations</li>
+            <li>Uses silhouette analysis to find optimal separation</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
         method = st.selectbox(
             "ML Algorithm",
@@ -487,13 +820,37 @@ def page_configuration():
             help="Choose the machine learning algorithm"
         )
 
-        # Algorithm descriptions
-        algorithm_descriptions = {
-            'tfidf_kmeans': "**TF-IDF + K-Means** converts text into numerical features based on word importance, then groups similar responses together. Fast and interpretable—ideal for discovering distinct themes in your data.",
-            'lda': "**Latent Dirichlet Allocation** is a probabilistic model that discovers hidden topics in text. Each response can belong to multiple topics, making it great for overlapping themes.",
-            'nmf': "**Non-negative Matrix Factorization** decomposes text into parts-based representations. Produces sparse, interpretable results—best when themes are distinct and non-overlapping."
+        # Algorithm descriptions with runtime hints and pros/cons
+        algorithm_info = {
+            'tfidf_kmeans': {
+                'description': "**TF-IDF + K-Means** converts text into numerical features based on word importance, then groups similar responses together.",
+                'runtime': "⚡ **Fast** (~5-10s for 1000 responses)",
+                'good_for': "Good for distinct, separable themes",
+                'watch_out': "Watch out for overlapping topics"
+            },
+            'lda': {
+                'description': "**Latent Dirichlet Allocation** is a probabilistic model that discovers hidden topics in text. Each response can belong to multiple topics.",
+                'runtime': "🐢 **Moderate** (~30-60s for 1000 responses)",
+                'good_for': "Good for discovering overlapping themes",
+                'watch_out': "Watch out for slower performance with large datasets"
+            },
+            'nmf': {
+                'description': "**Non-negative Matrix Factorization** decomposes text into parts-based representations. Produces sparse, interpretable results.",
+                'runtime': "⚡ **Fast** (~5-15s for 1000 responses)",
+                'good_for': "Good for sparse, interpretable results",
+                'watch_out': "Watch out for sensitivity to n_codes parameter"
+            }
         }
-        st.info(algorithm_descriptions[method])
+        
+        algo = algorithm_info[method]
+        st.markdown(f"""
+        <div class="info-box" style="padding: 10px;">
+        {algo['description']}<br><br>
+        {algo['runtime']}<br>
+        ✅ {algo['good_for']}<br>
+        ⚠️ {algo['watch_out']}
+        </div>
+        """, unsafe_allow_html=True)
 
     with col2:
         min_confidence = st.slider(
@@ -543,6 +900,44 @@ def page_configuration():
         render_next_button("🚀 Run Analysis")
 
 
+def update_stage_checklist(stages, current_stage):
+    """
+    Generate HTML for stage checklist display.
+
+    Args:
+        stages: List of stage names
+        current_stage: Index of current stage (0-based), or -1 for all incomplete
+
+    Returns:
+        HTML string for the checklist
+    """
+    stage_icons = {
+        'incomplete': '⬜',
+        'complete': '✅',
+        'current': '🔄'
+    }
+
+    html = '<div style="background-color: #f0f2f6; padding: 15px; border-radius: 10px; margin: 10px 0;">'
+    html += '<h4 style="margin-top: 0; color: #1f77b4;">Analysis Progress</h4>'
+    html += '<ul style="list-style-type: none; padding-left: 0; margin: 10px 0;">'
+
+    for idx, stage in enumerate(stages):
+        if idx < current_stage:
+            icon = stage_icons['complete']
+            style = 'color: #28a745; font-weight: bold;'
+        elif idx == current_stage:
+            icon = stage_icons['current']
+            style = 'color: #1f77b4; font-weight: bold;'
+        else:
+            icon = stage_icons['incomplete']
+            style = 'color: #999;'
+
+        html += f'<li style="padding: 5px 0; {style}">{icon} {stage}</li>'
+
+    html += '</ul></div>'
+    return html
+
+
 def page_run_analysis():
     """Run analysis page."""
     st.markdown('<h2 class="sub-header">🚀 Run ML Analysis</h2>', unsafe_allow_html=True)
@@ -580,13 +975,28 @@ def page_run_analysis():
 
     # Run button
     if st.button("🚀 Start Analysis", use_container_width=True, type="primary"):
-        # Progress bar
+        # Define analysis stages
+        stages = [
+            "Data Preparation",
+            "Feature Extraction",
+            "Clustering/Modeling",
+            "Code Labeling",
+            "Generating Insights"
+        ]
+
+        # Progress tracking UI elements
         progress_bar = st.progress(0)
         status_text = st.empty()
+        stage_checklist = st.empty()
 
-        def update_progress(progress, message):
+        # Initialize checklist
+        stage_checklist.markdown(update_stage_checklist(stages, -1), unsafe_allow_html=True)
+
+        def update_progress(progress, message, stage_idx=-1):
             progress_bar.progress(progress)
             status_text.text(message)
+            if stage_idx >= 0:
+                stage_checklist.markdown(update_stage_checklist(stages, stage_idx), unsafe_allow_html=True)
 
         try:
             # Run analysis
@@ -596,8 +1006,7 @@ def page_run_analysis():
             n_codes = config['n_codes']
 
             if auto_optimal:
-                status_text.text("🔍 Finding optimal number of codes...")
-                progress_bar.progress(0.1)
+                update_progress(0.1, "🔍 Finding optimal number of codes...", 0)
 
                 try:
                     optimal_n, optimal_results = find_optimal_codes(
@@ -605,7 +1014,7 @@ def page_run_analysis():
                         text_column=config['text_column'],
                         method=config['method'],
                         stop_words=config.get('stop_words', 'english'),
-                        progress_callback=lambda p, m: (progress_bar.progress(0.1 + p * 0.3), status_text.text(m))
+                        progress_callback=lambda p, m: update_progress(0.1 + p * 0.3, m, 0)
                     )
                     n_codes = optimal_n
 
@@ -619,10 +1028,32 @@ def page_run_analysis():
 
                 # Adjust progress for main analysis
                 def adjusted_progress(p, m):
-                    progress_bar.progress(0.4 + p * 0.6)
-                    status_text.text(m)
+                    # Map progress 0-1 to stages 0-4 and progress 0.4-1.0
+                    if p < 0.3:
+                        stage = 0
+                    elif p < 0.5:
+                        stage = 1
+                    elif p < 0.8:
+                        stage = 2
+                    elif p < 0.95:
+                        stage = 3
+                    else:
+                        stage = 4
+                    update_progress(0.4 + p * 0.6, m, stage)
             else:
-                adjusted_progress = update_progress
+                # Map progress 0-1 to stages 0-4
+                def adjusted_progress(p, m):
+                    if p < 0.3:
+                        stage = 0
+                    elif p < 0.5:
+                        stage = 1
+                    elif p < 0.8:
+                        stage = 2
+                    elif p < 0.95:
+                        stage = 3
+                    else:
+                        stage = 4
+                    update_progress(p, m, stage)
 
             coder, results_df, metrics = run_ml_analysis(
                 df=df,
@@ -643,6 +1074,9 @@ def page_run_analysis():
             st.session_state.results_df = results_df
             st.session_state.metrics = metrics
             st.session_state.analysis_complete = True
+
+            # Mark all stages complete
+            stage_checklist.markdown(update_stage_checklist(stages, len(stages)), unsafe_allow_html=True)
 
             # Clear progress
             progress_bar.empty()
@@ -674,13 +1108,81 @@ def page_run_analysis():
             if "Cannot find optimal codes" not in str(ve):
                 progress_bar.empty()
                 status_text.empty()
+                stage_checklist.empty()
                 st.error(f"❌ Dataset validation error: {str(ve)}")
                 st.info("💡 **Suggestions:**\n- Ensure your dataset has enough responses\n- Check that responses aren't too short or too similar\n- Try reducing the number of codes requested\n- Review your preprocessing settings")
+
+                # Add retry buttons
+                st.markdown("#### 🔄 Quick Fixes")
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    if st.button("Try with fewer codes", use_container_width=True):
+                        if not auto_optimal and config['n_codes'] > 2:
+                            st.session_state.config['n_codes'] = max(2, config['n_codes'] - 2)
+                            st.success(f"✅ Reduced codes to {st.session_state.config['n_codes']}. Click 'Start Analysis' again.")
+                            st.rerun()
+                        else:
+                            st.warning("Cannot reduce codes further or auto-optimization is enabled.")
+
+                with col2:
+                    if st.button("Try with lower confidence", use_container_width=True):
+                        if config['min_confidence'] > 0.1:
+                            st.session_state.config['min_confidence'] = max(0.1, config['min_confidence'] - 0.1)
+                            st.success(f"✅ Reduced confidence to {st.session_state.config['min_confidence']:.2f}. Click 'Start Analysis' again.")
+                            st.rerun()
+                        else:
+                            st.warning("Confidence already at minimum (0.1).")
+
+                with col3:
+                    if st.button("Reset and try again", use_container_width=True):
+                        st.session_state.analysis_complete = False
+                        st.session_state.pop('coder', None)
+                        st.session_state.pop('results_df', None)
+                        st.session_state.pop('metrics', None)
+                        st.success("✅ Analysis state reset. Click 'Start Analysis' again.")
+                        st.rerun()
+            else:
+                # For optimal codes finding error, clear UI elements
+                stage_checklist.empty()
+
         except Exception as e:
             progress_bar.empty()
             status_text.empty()
+            stage_checklist.empty()
             st.error(f"❌ Analysis failed: {str(e)}")
             st.exception(e)
+
+            # Add retry buttons for general errors too
+            st.markdown("#### 🔄 Quick Fixes")
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                if st.button("Try with fewer codes", key="error_fewer_codes", use_container_width=True):
+                    if not auto_optimal and config['n_codes'] > 2:
+                        st.session_state.config['n_codes'] = max(2, config['n_codes'] - 2)
+                        st.success(f"✅ Reduced codes to {st.session_state.config['n_codes']}. Click 'Start Analysis' again.")
+                        st.rerun()
+                    else:
+                        st.warning("Cannot reduce codes further or auto-optimization is enabled.")
+
+            with col2:
+                if st.button("Try with lower confidence", key="error_lower_conf", use_container_width=True):
+                    if config['min_confidence'] > 0.1:
+                        st.session_state.config['min_confidence'] = max(0.1, config['min_confidence'] - 0.1)
+                        st.success(f"✅ Reduced confidence to {st.session_state.config['min_confidence']:.2f}. Click 'Start Analysis' again.")
+                        st.rerun()
+                    else:
+                        st.warning("Confidence already at minimum (0.1).")
+
+            with col3:
+                if st.button("Reset and try again", key="error_reset", use_container_width=True):
+                    st.session_state.analysis_complete = False
+                    st.session_state.pop('coder', None)
+                    st.session_state.pop('results_df', None)
+                    st.session_state.pop('metrics', None)
+                    st.success("✅ Analysis state reset. Click 'Start Analysis' again.")
+                    st.rerun()
 
     # Show previous results if available
     if st.session_state.analysis_complete:
@@ -709,75 +1211,107 @@ def page_results_overview():
     results_df = st.session_state.results_df
     metrics = st.session_state.metrics
 
-    # Metrics overview
+    # Stat chips - compact metric display
     st.markdown("### 📈 Key Metrics")
 
-    col1, col2, col3, col4 = st.columns(4)
+    stat_chips_html = f"""
+    <div style="margin: 10px 0 20px 0;">
+        <span class="stat-chip">📊 {metrics.get('total_responses', 0):,} Responses</span>
+        <span class="stat-chip">🏷️ {metrics.get('n_codes', 0)} Codes</span>
+        <span class="stat-chip">📈 {metrics.get('avg_codes_per_response', 0):.2f} Avg/Response</span>
+        <span class="stat-chip">✅ {metrics.get('coverage_pct', 0):.1f}% Coverage</span>
+    </div>
+    """
+    st.markdown(stat_chips_html, unsafe_allow_html=True)
 
+    # Download All button
+    col1, col2, col3 = st.columns([1, 1, 2])
     with col1:
-        st.metric(
-            "Total Responses",
-            f"{metrics.get('total_responses', 0):,}"
-        )
+        try:
+            excel_data = export_results_package(coder, results_df, format='excel')
+            st.download_button(
+                label="📥 Download All",
+                data=excel_data,
+                file_name=f"analysis_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+        except Exception as e:
+            st.error(f"Export error: {str(e)}")
 
-    with col2:
-        st.metric(
-            "Codes Found",
-            metrics.get('n_codes', 0),
-            delta=f"{metrics.get('active_codes', 0)} active" if 'active_codes' in metrics else None
-        )
-
-    with col3:
-        st.metric(
-            "Avg Codes/Response",
-            f"{metrics.get('avg_codes_per_response', 0):.2f}"
-        )
-
-    with col4:
-        st.metric(
-            "Coverage",
-            f"{metrics.get('coverage_pct', 0):.1f}%"
-        )
-
-    # Key insights
+    # Tabs for Insights, Top Codes, and Assignments
     st.markdown("---")
-    st.markdown("### 💡 Key Insights")
+    tab1, tab2, tab3 = st.tabs(["💡 Insights", "🏆 Top Codes", "📋 Assignments"])
 
-    insights = generate_insights(coder, results_df)
-    for insight in insights:
-        st.markdown(insight)
+    with tab1:
+        # Key insights
+        insights = generate_insights(coder, results_df)
+        for insight in insights:
+            st.markdown(insight)
 
-    # Top codes
-    st.markdown("---")
-    st.markdown("### 🏆 Top Codes")
+    with tab2:
+        # Top codes
+        top_codes_df = get_top_codes(coder, n=10)
 
-    top_codes_df = get_top_codes(coder, n=10)
+        # Display as styled table
+        st.dataframe(
+            style_frequency_table(top_codes_df),
+            use_container_width=True,
+            height=400
+        )
 
-    # Display as styled table
-    st.dataframe(
-        style_frequency_table(top_codes_df),
-        use_container_width=True,
-        height=400
-    )
+    with tab3:
+        # Code assignments with uncertainty filter
+        st.markdown("#### Sample Code Assignments")
 
-    # Code assignments sample
-    st.markdown("---")
-    st.markdown("### 📋 Sample Code Assignments")
+        # Add checkbox for filtering uncertain rows
+        show_uncertain_only = st.checkbox(
+            "Show only uncertain rows (low confidence)",
+            value=False,
+            help="Filter to show only rows where maximum confidence < 0.5"
+        )
 
-    sample_size = min(10, len(results_df))
-    sample_df = results_df[[
-        st.session_state.config['text_column'],
-        'assigned_codes',
-        'num_codes'
-    ]].head(sample_size)
+        # Prepare assignments dataframe with confidence
+        assignments_df = results_df.copy()
 
-    # Format for display
-    display_df = sample_df.copy()
-    display_df['assigned_codes'] = display_df['assigned_codes'].apply(
-        lambda x: ', '.join(x) if x else 'None'
-    )
+        # Calculate max confidence for each row
+        if 'confidence_scores' in assignments_df.columns:
+            assignments_df['max_confidence'] = assignments_df['confidence_scores'].apply(
+                lambda x: max(x) if x and len(x) > 0 else 0.0
+            )
+        else:
+            assignments_df['max_confidence'] = 1.0
 
-    st.dataframe(display_df, use_container_width=True, height=400)
+        # Sort by confidence (ascending - lowest confidence first)
+        assignments_df = assignments_df.sort_values('max_confidence', ascending=True)
+
+        # Apply filter if checkbox is selected
+        if show_uncertain_only:
+            assignments_df = assignments_df[assignments_df['max_confidence'] < 0.5]
+
+        # Select columns and limit rows
+        sample_size = min(20, len(assignments_df))
+        display_cols = [
+            st.session_state.config['text_column'],
+            'assigned_codes',
+            'num_codes',
+            'max_confidence'
+        ]
+        sample_df = assignments_df[display_cols].head(sample_size)
+
+        # Format for display
+        display_df = sample_df.copy()
+        display_df['assigned_codes'] = display_df['assigned_codes'].apply(
+            lambda x: ', '.join(x) if x else 'None'
+        )
+        display_df['max_confidence'] = display_df['max_confidence'].apply(
+            lambda x: f"{x:.3f}"
+        )
+
+        if len(display_df) > 0:
+            st.dataframe(display_df, use_container_width=True, height=400)
+        else:
+            st.info("No uncertain rows found (all rows have confidence ≥ 0.5)")
 
     # Detailed codebook
     st.markdown("---")
@@ -833,6 +1367,19 @@ def page_visualizations():
     with tab1:
         st.markdown("### Code Frequency Distribution")
 
+        # Explanation expander
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            st.markdown("""
+            **What this shows:** Bar chart of the top 15 most frequent codes discovered in your data.
+
+            **How to interpret:** Taller bars = more responses assigned to that code. Color intensity shows average confidence.
+
+            **Key things to look for:**
+            - Dominant codes that capture a large portion of responses
+            - Codes with high confidence (darker colors) vs low confidence
+            - Even vs uneven distribution across codes
+            """)
+
         top_codes_df = get_top_codes(coder, n=15)
 
         fig = px.bar(
@@ -849,8 +1396,48 @@ def page_visualizations():
 
         st.plotly_chart(fig, use_container_width=True)
 
+        # Download buttons
+        col1, col2 = st.columns(2)
+        with col1:
+            csv_data = top_codes_df.to_csv(index=False).encode()
+            st.download_button(
+                label="📥 Download CSV",
+                data=csv_data,
+                file_name="code_frequency.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        with col2:
+            try:
+                img_bytes = fig.to_image(format="png", width=1200, height=600)
+                st.download_button(
+                    label="📥 Download PNG",
+                    data=img_bytes,
+                    file_name="code_frequency.png",
+                    mime="image/png",
+                    use_container_width=True
+                )
+            except Exception:
+                st.caption("PNG export requires kaleido: `pip install kaleido`")
+
     with tab2:
         st.markdown("### Co-occurrence Heatmap")
+
+        # Explanation and legend
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            st.markdown("""
+            **What this shows:** Matrix showing how often codes appear together in the same response.
+
+            **How to interpret:**
+            - **Rows/Columns:** Each row and column represents a discovered code
+            - **Cell color:** Intensity indicates co-occurrence count (darker = more frequent)
+            - **Diagonal:** Shows total count for each code (self-occurrence)
+
+            **Key things to look for:**
+            - Hot spots (dark cells) show codes that frequently appear together
+            - Patterns may reveal thematic clusters or related concepts
+            - Isolated codes (light row/column) may be distinct themes
+            """)
 
         # Build co-occurrence matrix efficiently
         # Only iterate over assigned code pairs instead of all possible pairs
@@ -888,6 +1475,31 @@ def page_visualizations():
 
         st.plotly_chart(fig, use_container_width=True)
 
+        # Download buttons
+        col1, col2 = st.columns(2)
+        with col1:
+            cooccur_df = pd.DataFrame(cooccur, index=labels, columns=labels)
+            csv_data = cooccur_df.to_csv().encode()
+            st.download_button(
+                label="📥 Download CSV",
+                data=csv_data,
+                file_name="cooccurrence_matrix.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        with col2:
+            try:
+                img_bytes = fig.to_image(format="png", width=1200, height=800)
+                st.download_button(
+                    label="📥 Download PNG",
+                    data=img_bytes,
+                    file_name="cooccurrence_heatmap.png",
+                    mime="image/png",
+                    use_container_width=True
+                )
+            except Exception:
+                st.caption("PNG export requires kaleido")
+
         # Co-occurrence pairs table
         st.markdown("#### Top Co-occurring Pairs")
         pairs_df = get_cooccurrence_pairs(results_df, min_count=2)
@@ -898,6 +1510,22 @@ def page_visualizations():
 
     with tab3:
         st.markdown("### Code Network Diagram")
+
+        # Explanation expander
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            st.markdown("""
+            **What this shows:** Interactive network graph where codes are nodes and connections show co-occurrence.
+
+            **How to interpret:**
+            - **Nodes (circles):** Each node represents a code. Size = frequency, color = confidence.
+            - **Edges (lines):** Connections between codes that appear together in responses.
+            - **Clustering:** Codes that frequently co-occur will cluster together.
+
+            **Key things to look for:**
+            - Central nodes with many connections (hub themes)
+            - Isolated nodes (distinct, standalone themes)
+            - Dense clusters (related concepts that often appear together)
+            """)
 
         try:
             import networkx as nx
@@ -925,12 +1553,34 @@ def page_visualizations():
                         edge = tuple(sorted([code1, code2]))
                         edge_weights[edge] = edge_weights.get(edge, 0) + 1
 
-            # Add edges with significant co-occurrence (threshold: 2+)
+            # Preset buttons for threshold
+            st.markdown("**Network density presets:**")
+            preset_col1, preset_col2, preset_col3 = st.columns(3)
+            max_weight = max(edge_weights.values()) if edge_weights else 5
+
+            # Calculate preset values
+            sparse_val = max(1, int(max_weight * 0.6))
+            medium_val = max(1, int(max_weight * 0.3))
+            dense_val = 1
+
+            with preset_col1:
+                if st.button("🔵 Sparse", help=f"Threshold: {sparse_val}+ (fewer connections)", use_container_width=True):
+                    st.session_state.network_threshold = sparse_val
+            with preset_col2:
+                if st.button("🟢 Medium", help=f"Threshold: {medium_val}+ (balanced)", use_container_width=True):
+                    st.session_state.network_threshold = medium_val
+            with preset_col3:
+                if st.button("🟠 Dense", help=f"Threshold: {dense_val}+ (all connections)", use_container_width=True):
+                    st.session_state.network_threshold = dense_val
+
+            # Get threshold from session state or default
+            default_threshold = st.session_state.get('network_threshold', 2)
+
             min_cooccurrence = st.slider(
                 "Minimum co-occurrence threshold",
                 min_value=1,
-                max_value=max(edge_weights.values()) if edge_weights else 5,
-                value=2,
+                max_value=max_weight,
+                value=min(default_threshold, max_weight),
                 help="Only show connections between codes that appear together this many times"
             )
 
@@ -1616,27 +2266,183 @@ def page_visualizations():
                 st.markdown(f"**Frequency:** {code_info['count']} | **Avg Confidence:** {code_info['avg_confidence']:.3f}")
 
                 st.markdown("---")
+
+                # Filters and controls section
+                st.markdown("#### Filters & Export")
+
+                col1, col2, col3 = st.columns([2, 2, 1])
+
+                with col1:
+                    # Confidence range filter
+                    confidence_range = st.slider(
+                        "Confidence Range",
+                        min_value=0.0,
+                        max_value=1.0,
+                        value=(0.0, 1.0),
+                        step=0.05,
+                        help="Filter quotes by confidence score range"
+                    )
+
+                with col2:
+                    # Maximum text length filter
+                    max_length = st.number_input(
+                        "Max Text Length (chars)",
+                        min_value=0,
+                        max_value=10000,
+                        value=0,
+                        step=50,
+                        help="Filter quotes by maximum character length (0 = no limit)"
+                    )
+
+                with col3:
+                    # Focus on edge cases button
+                    if st.button("🔍 Focus on Edge Cases", help="Show quotes with confidence 0.3-0.5 (uncertain assignments for QA review)"):
+                        confidence_range = (0.3, 0.5)
+                        st.rerun()
+
+                # Multiple codes filter
+                show_multi_codes_only = st.checkbox(
+                    "Show only examples with multiple codes",
+                    value=False,
+                    help="Filter to show only responses that have multiple codes assigned"
+                )
+
+                st.markdown("---")
                 st.markdown("#### Representative Quotes")
 
                 # Sort examples by confidence
                 examples = sorted(code_info['examples'], key=lambda x: x['confidence'], reverse=True)
 
+                # Apply filters
+                filtered_examples = []
+                for example in examples:
+                    # Confidence filter
+                    if not (confidence_range[0] <= example['confidence'] <= confidence_range[1]):
+                        continue
+
+                    # Text length filter
+                    if max_length > 0 and len(example['text']) > max_length:
+                        continue
+
+                    # Multiple codes filter
+                    if show_multi_codes_only:
+                        # Find this response in results_df to check number of codes
+                        text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+                        matching_rows = results_df[results_df[text_col] == example['text']]
+                        if len(matching_rows) > 0 and matching_rows.iloc[0]['num_codes'] <= 1:
+                            continue
+
+                    filtered_examples.append(example)
+
+                # Display count of filtered examples
+                st.caption(f"Showing {len(filtered_examples)} of {len(examples)} total quotes")
+
+                # Export buttons
+                if filtered_examples:
+                    col_exp1, col_exp2 = st.columns(2)
+
+                    with col_exp1:
+                        # Prepare clipboard text
+                        clipboard_text = f"Code: {code_info['label']}\n"
+                        clipboard_text += f"Keywords: {', '.join(code_info['keywords'][:10])}\n"
+                        clipboard_text += f"Showing {len(filtered_examples)} quotes\n\n"
+                        clipboard_text += "=" * 80 + "\n\n"
+
+                        for i, ex in enumerate(filtered_examples, 1):
+                            clipboard_text += f"Quote {i} (Confidence: {ex['confidence']:.3f}):\n{ex['text']}\n\n"
+
+                        st.download_button(
+                            label="📋 Copy All Quotes to Clipboard",
+                            data=clipboard_text,
+                            file_name=f"quotes_{selected_code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                            mime="text/plain",
+                            help="Download all filtered quotes as a text file"
+                        )
+
+                    with col_exp2:
+                        # Prepare CSV export
+                        csv_data = []
+                        text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+
+                        for ex in filtered_examples:
+                            # Find associated codes for this response
+                            matching_rows = results_df[results_df[text_col] == ex['text']]
+                            other_codes = ""
+                            num_codes = 1
+
+                            if len(matching_rows) > 0:
+                                row_codes = matching_rows.iloc[0]['assigned_codes']
+                                num_codes = len(row_codes)
+                                other_code_labels = [coder.codebook[c]['label'] for c in row_codes if c != selected_code and c in coder.codebook]
+                                other_codes = ', '.join(other_code_labels)
+
+                            csv_data.append({
+                                'Code': code_info['label'],
+                                'Confidence': ex['confidence'],
+                                'Text': ex['text'],
+                                'Text_Length': len(ex['text']),
+                                'Num_Codes': num_codes,
+                                'Other_Codes': other_codes
+                            })
+
+                        csv_df = pd.DataFrame(csv_data)
+                        csv_buffer = BytesIO()
+                        csv_df.to_csv(csv_buffer, index=False)
+                        csv_buffer.seek(0)
+
+                        st.download_button(
+                            label="📥 Export as CSV",
+                            data=csv_buffer,
+                            file_name=f"quotes_{selected_code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                            mime="text/csv",
+                            help="Download all filtered quotes as a CSV file"
+                        )
+
+                st.markdown("---")
+
+                # Number of quotes slider
                 n_quotes = st.slider(
                     "Number of quotes to display",
                     min_value=1,
-                    max_value=min(len(examples), 20),
-                    value=min(len(examples), 5)
+                    max_value=min(len(filtered_examples), 20) if filtered_examples else 1,
+                    value=min(len(filtered_examples), 5) if filtered_examples else 1
                 )
 
-                for i, example in enumerate(examples[:n_quotes], 1):
-                    with st.container():
-                        col1, col2 = st.columns([4, 1])
-                        with col1:
-                            st.markdown(f"**Quote {i}:**")
-                            st.markdown(f'> {example["text"]}')
-                        with col2:
-                            st.metric("Confidence", f"{example['confidence']:.2f}")
-                        st.markdown("---")
+                # Display filtered quotes
+                if filtered_examples:
+                    # Get text column for finding associated codes
+                    text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+
+                    for i, example in enumerate(filtered_examples[:n_quotes], 1):
+                        with st.container():
+                            # Find this response in results_df to get all assigned codes
+                            matching_rows = results_df[results_df[text_col] == example['text']]
+                            has_multiple_codes = False
+                            other_code_labels = []
+
+                            if len(matching_rows) > 0:
+                                row_codes = matching_rows.iloc[0]['assigned_codes']
+                                has_multiple_codes = len(row_codes) > 1
+                                other_code_labels = [coder.codebook[c]['label'] for c in row_codes if c != selected_code and c in coder.codebook]
+
+                            col1, col2 = st.columns([4, 1])
+                            with col1:
+                                # Show badge if multiple codes
+                                if has_multiple_codes:
+                                    badge = create_badge(f'{len(row_codes)} codes', 'info')
+                                    st.markdown(f"**Quote {i}:** {badge}")
+                                else:
+                                    st.markdown(f"**Quote {i}:**")
+                                st.markdown(f'> {example["text"]}')
+
+                                # Show other assigned codes if any
+                                if other_code_labels:
+                                    st.caption(f"**Also assigned to:** {', '.join(other_code_labels)}")
+                            with col2:
+                                st.metric("Confidence", f"{example['confidence']:.2f}")
+                            st.markdown("---")
+                else:
+                    st.info("No quotes match the selected filters. Try adjusting the filter criteria.")
             else:
                 st.info("No examples available. Try lowering the min_confidence parameter or ensure high-confidence assignments exist.")
 
@@ -1661,32 +2467,176 @@ def page_visualizations():
                     st.markdown(f"**Frequency:** {len(theme_info['responses'])}")
 
                     st.markdown("---")
+
+                    # Filters and controls section
+                    st.markdown("#### Filters & Export")
+
+                    col1, col2, col3 = st.columns([2, 2, 1])
+
+                    with col1:
+                        # Confidence range filter (for theme mode, filter by average confidence)
+                        confidence_range_theme = st.slider(
+                            "Confidence Range",
+                            min_value=0.0,
+                            max_value=1.0,
+                            value=(0.0, 1.0),
+                            step=0.05,
+                            help="Filter quotes by average confidence score range",
+                            key="theme_confidence_range"
+                        )
+
+                    with col2:
+                        # Maximum text length filter
+                        max_length_theme = st.number_input(
+                            "Max Text Length (chars)",
+                            min_value=0,
+                            max_value=10000,
+                            value=0,
+                            step=50,
+                            help="Filter quotes by maximum character length (0 = no limit)",
+                            key="theme_max_length"
+                        )
+
+                    with col3:
+                        # Focus on edge cases button
+                        if st.button("🔍 Focus on Edge Cases", help="Show quotes with confidence 0.3-0.5 (uncertain assignments for QA review)", key="theme_edge_cases"):
+                            confidence_range_theme = (0.3, 0.5)
+                            st.rerun()
+
+                    # Multiple codes filter
+                    show_multi_codes_only_theme = st.checkbox(
+                        "Show only examples with multiple codes",
+                        value=False,
+                        help="Filter to show only responses that have multiple codes assigned",
+                        key="theme_multi_codes"
+                    )
+
+                    st.markdown("---")
                     st.markdown("#### Representative Quotes")
 
                     # Get responses for this theme
                     theme_responses = theme_info['responses']
 
                     if theme_responses:
-                        n_quotes = st.slider(
-                            "Number of quotes to display",
-                            min_value=1,
-                            max_value=min(len(theme_responses), 20),
-                            value=min(len(theme_responses), 5)
-                        )
-
                         # Get text column name
                         text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
 
-                        for i, resp_idx in enumerate(theme_responses[:n_quotes], 1):
-                            with st.container():
-                                st.markdown(f"**Quote {i}:**")
-                                st.markdown(f'> {results_df.iloc[resp_idx][text_col]}')
+                        # Apply filters
+                        filtered_responses = []
+                        for resp_idx in theme_responses:
+                            row = results_df.iloc[resp_idx]
 
-                                # Show assigned codes for this response
-                                codes = results_df.iloc[resp_idx]['assigned_codes']
-                                code_labels = [coder.codebook[c]['label'] for c in codes if c in coder.codebook]
-                                st.caption(f"**Codes:** {', '.join(code_labels)}")
-                                st.markdown("---")
+                            # Calculate average confidence for this response
+                            avg_conf = np.mean(row['confidence_scores']) if 'confidence_scores' in row and len(row['confidence_scores']) > 0 else 0.5
+
+                            # Confidence filter
+                            if not (confidence_range_theme[0] <= avg_conf <= confidence_range_theme[1]):
+                                continue
+
+                            # Text length filter
+                            if max_length_theme > 0 and len(row[text_col]) > max_length_theme:
+                                continue
+
+                            # Multiple codes filter
+                            if show_multi_codes_only_theme and row['num_codes'] <= 1:
+                                continue
+
+                            filtered_responses.append(resp_idx)
+
+                        # Display count of filtered responses
+                        st.caption(f"Showing {len(filtered_responses)} of {len(theme_responses)} total quotes")
+
+                        # Export buttons
+                        if filtered_responses:
+                            col_exp1, col_exp2 = st.columns(2)
+
+                            with col_exp1:
+                                # Prepare clipboard text
+                                clipboard_text = f"Theme: {theme_info['name']}\n"
+                                clipboard_text += f"Description: {theme_info['description']}\n"
+                                clipboard_text += f"Associated Codes: {', '.join(theme_info['codes'])}\n"
+                                clipboard_text += f"Showing {len(filtered_responses)} quotes\n\n"
+                                clipboard_text += "=" * 80 + "\n\n"
+
+                                for i, resp_idx in enumerate(filtered_responses, 1):
+                                    row = results_df.iloc[resp_idx]
+                                    clipboard_text += f"Quote {i}:\n{row[text_col]}\n"
+                                    code_labels = [coder.codebook[c]['label'] for c in row['assigned_codes'] if c in coder.codebook]
+                                    clipboard_text += f"Codes: {', '.join(code_labels)}\n\n"
+
+                                st.download_button(
+                                    label="📋 Copy All Quotes to Clipboard",
+                                    data=clipboard_text,
+                                    file_name=f"quotes_theme_{selected_theme}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                                    mime="text/plain",
+                                    help="Download all filtered quotes as a text file",
+                                    key="theme_clipboard"
+                                )
+
+                            with col_exp2:
+                                # Prepare CSV export
+                                csv_data = []
+                                for resp_idx in filtered_responses:
+                                    row = results_df.iloc[resp_idx]
+                                    code_labels = [coder.codebook[c]['label'] for c in row['assigned_codes'] if c in coder.codebook]
+                                    avg_conf = np.mean(row['confidence_scores']) if 'confidence_scores' in row and len(row['confidence_scores']) > 0 else 0.5
+
+                                    csv_data.append({
+                                        'Theme': theme_info['name'],
+                                        'Text': row[text_col],
+                                        'Text_Length': len(row[text_col]),
+                                        'Num_Codes': row['num_codes'],
+                                        'Assigned_Codes': ', '.join(code_labels),
+                                        'Avg_Confidence': avg_conf
+                                    })
+
+                                csv_df = pd.DataFrame(csv_data)
+                                csv_buffer = BytesIO()
+                                csv_df.to_csv(csv_buffer, index=False)
+                                csv_buffer.seek(0)
+
+                                st.download_button(
+                                    label="📥 Export as CSV",
+                                    data=csv_buffer,
+                                    file_name=f"quotes_theme_{selected_theme}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                                    mime="text/csv",
+                                    help="Download all filtered quotes as a CSV file",
+                                    key="theme_csv"
+                                )
+
+                        st.markdown("---")
+
+                        # Number of quotes slider
+                        n_quotes = st.slider(
+                            "Number of quotes to display",
+                            min_value=1,
+                            max_value=min(len(filtered_responses), 20) if filtered_responses else 1,
+                            value=min(len(filtered_responses), 5) if filtered_responses else 1
+                        )
+
+                        # Display filtered quotes
+                        if filtered_responses:
+                            for i, resp_idx in enumerate(filtered_responses[:n_quotes], 1):
+                                with st.container():
+                                    row = results_df.iloc[resp_idx]
+                                    has_multiple_codes = row['num_codes'] > 1
+
+                                    # Show badge if multiple codes
+                                    if has_multiple_codes:
+                                        badge = create_badge(f'{row["num_codes"]} codes', 'info')
+                                        st.markdown(f"**Quote {i}:** {badge}")
+                                    else:
+                                        st.markdown(f"**Quote {i}:**")
+
+                                    st.markdown(f'> {row[text_col]}')
+
+                                    # Show assigned codes for this response
+                                    codes = row['assigned_codes']
+                                    code_labels = [coder.codebook[c]['label'] for c in codes if c in coder.codebook]
+                                    st.caption(f"**Codes:** {', '.join(code_labels)}")
+                                    st.markdown("---")
+                        else:
+                            st.info("No quotes match the selected filters. Try adjusting the filter criteria.")
                     else:
                         st.info("No responses found for this theme.")
                 else:
