@@ -64,7 +64,7 @@ class ContentQualityFilter:
         r'^i\s*don\'?t\s*know\.?$',         # I don't know
         r'^test\.?$',                       # test
         r'^asdf+$',                         # asdf, asdfasdf
-        r'^[a-z]+\1{2,}$',                  # repeated character patterns
+        r'^(.)\1{2,}$',                     # repeated single character (e.g., "aaaa")
         r'^\.+$',                           # just periods
         r'^-+$',                            # just dashes
         r'^\s*$',                           # whitespace only
