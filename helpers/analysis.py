@@ -79,6 +79,18 @@ except ImportError:
     CLUSTER_EVALUATION_AVAILABLE = False
     logging.warning("Cluster evaluation not available.")
 
+# Import vectorizer factory for method parity
+try:
+    from src.vectorizer_factory import (
+        VectorizerFactory,
+        VectorizerConfig,
+        create_vectorizer_for_method
+    )
+    VECTORIZER_FACTORY_AVAILABLE = True
+except ImportError:
+    VECTORIZER_FACTORY_AVAILABLE = False
+    logging.warning("Vectorizer factory not available. Using legacy vectorization.")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -499,6 +511,9 @@ def run_ml_analysis(
             # New: Post-hoc evaluation metrics (if labels provided)
             self.evaluation_metrics = None
 
+            # New: VectorizerFactory for method parity (NMF/LDA use same settings as KMeans)
+            self._vectorizer_factory = None
+
             # Warn about computational costs for large datasets with embeddings
             if representation != 'tfidf':
                 logger.info(
@@ -554,44 +569,80 @@ def run_ml_analysis(
                     )
                     logger.info(f"Preprocessing config: {config.config_rationale}")
 
-                    # Create vectorizer with adaptive config
-                    if self.method == 'lda':
-                        # LDA needs CountVectorizer
-                        vectorizer_kwargs = config.to_dict()
-                        vectorizer_kwargs.pop('sublinear_tf', None)  # Not applicable
-                        self.vectorizer = CountVectorizer(**vectorizer_kwargs)
+                    # NEW: Use VectorizerFactory for method parity
+                    # This ensures NMF uses the same TF-IDF matrix as KMeans
+                    # and LDA uses CountVectorizer with identical settings
+                    if VECTORIZER_FACTORY_AVAILABLE:
+                        vectorizer_config = VectorizerConfig.from_preprocessing_config(config)
+                        factory = VectorizerFactory()
+                        self.vectorizer, self.feature_matrix = factory.create_for_method(
+                            self.method, processed, vectorizer_config
+                        )
+                        # Store factory for potential reuse
+                        self._vectorizer_factory = factory
+                        logger.info(
+                            f"VectorizerFactory created {type(self.vectorizer).__name__} "
+                            f"for method '{self.method}'"
+                        )
                     else:
-                        self.vectorizer = TfidfVectorizer(**config.to_dict())
+                        # Legacy fallback without factory
+                        if self.method == 'lda':
+                            vectorizer_kwargs = config.to_dict()
+                            vectorizer_kwargs.pop('sublinear_tf', None)
+                            self.vectorizer = CountVectorizer(**vectorizer_kwargs)
+                        else:
+                            self.vectorizer = TfidfVectorizer(**config.to_dict())
+                        self.feature_matrix = self.vectorizer.fit_transform(processed)
                 else:
                     # Fallback: Traditional fixed TF-IDF (backward compatible)
                     logger.info("Using standard preprocessing (adaptive disabled or unavailable)")
-                    if self.method == 'lda':
-                        self.vectorizer = CountVectorizer(
-                            max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
+
+                    # Use VectorizerFactory even without adaptive preprocessing
+                    if VECTORIZER_FACTORY_AVAILABLE:
+                        default_config = VectorizerConfig(
+                            max_features=1000,
+                            stop_words=stop_words,
+                            min_df=2,
+                            max_df=0.8,
+                            ngram_range=(1, 2)
+                        )
+                        factory = VectorizerFactory()
+                        self.vectorizer, self.feature_matrix = factory.create_for_method(
+                            self.method, processed, default_config
+                        )
+                        self._vectorizer_factory = factory
+                        logger.info(
+                            f"VectorizerFactory created {type(self.vectorizer).__name__} "
+                            f"for method '{self.method}' (standard settings)"
                         )
                     else:
-                        self.vectorizer = TfidfVectorizer(
-                            max_features=1000, stop_words=stop_words, min_df=2,
-                            max_df=0.8, ngram_range=(1, 2)
-                        )
-
-                try:
-                    self.feature_matrix = self.vectorizer.fit_transform(processed)
-                except ValueError as e:
-                    if "empty vocabulary" in str(e).lower():
-                        raise ValueError(
-                            "Empty vocabulary error: No valid terms found after text preprocessing. "
-                            "This can happen when:\n"
-                            "  1. The dataset is too small or contains only short responses\n"
-                            "  2. All words are filtered by stop words (try a different language)\n"
-                            "  3. The min_df/max_df thresholds are too restrictive\n"
-                            "  4. Responses contain mostly non-text content (numbers, symbols)\n\n"
-                            "Suggestions:\n"
-                            "  - Provide more diverse text responses\n"
-                            "  - Try a different stop words language setting\n"
-                            "  - Check that your data contains meaningful text content"
-                        ) from e
-                    raise
+                        # Legacy fallback
+                        if self.method == 'lda':
+                            self.vectorizer = CountVectorizer(
+                                max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
+                            )
+                        else:
+                            self.vectorizer = TfidfVectorizer(
+                                max_features=1000, stop_words=stop_words, min_df=2,
+                                max_df=0.8, ngram_range=(1, 2)
+                            )
+                        try:
+                            self.feature_matrix = self.vectorizer.fit_transform(processed)
+                        except ValueError as e:
+                            if "empty vocabulary" in str(e).lower():
+                                raise ValueError(
+                                    "Empty vocabulary error: No valid terms found after text preprocessing. "
+                                    "This can happen when:\n"
+                                    "  1. The dataset is too small or contains only short responses\n"
+                                    "  2. All words are filtered by stop words (try a different language)\n"
+                                    "  3. The min_df/max_df thresholds are too restrictive\n"
+                                    "  4. Responses contain mostly non-text content (numbers, symbols)\n\n"
+                                    "Suggestions:\n"
+                                    "  - Provide more diverse text responses\n"
+                                    "  - Try a different stop words language setting\n"
+                                    "  - Check that your data contains meaningful text content"
+                                ) from e
+                            raise
 
             else:
                 # Semantic embeddings (new functionality)
