@@ -7,6 +7,13 @@ and processing results.
 Supports multi-granularity text processing (response, sentence, paragraph levels)
 via optional integration with TextSegmenter. Response-level analysis remains
 the default for backward compatibility.
+
+NEW: Dataset-aware preprocessing for TF-IDF + KMeans clustering.
+- Adaptive preprocessing based on detected dataset characteristics
+- Mandatory cluster interpretation layer (prevents nonsensical codes)
+- Strict separation between clustering (unsupervised) and evaluation (optional)
+- Multi-label handling for Reuters-style datasets
+- Full backward compatibility with simple OE datasets
 """
 
 from collections import Counter
@@ -16,7 +23,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import streamlit as st
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any, Union
 import time
 import logging
 
@@ -31,6 +38,46 @@ try:
 except ImportError:
     TEXT_SEGMENTER_AVAILABLE = False
     logging.warning("TextSegmenter not available. Multi-granularity segmentation disabled.")
+
+# Import dataset-aware preprocessing modules
+try:
+    from src.dataset_preprocessing import (
+        DatasetCharacteristicsDetector,
+        AdaptivePreprocessor,
+        MultiLabelHandler,
+        DatasetCharacteristics,
+        PreprocessingConfig,
+        get_adaptive_preprocessing
+    )
+    ADAPTIVE_PREPROCESSING_AVAILABLE = True
+except ImportError:
+    ADAPTIVE_PREPROCESSING_AVAILABLE = False
+    logging.warning("Adaptive preprocessing not available.")
+
+# Import cluster interpretation module
+try:
+    from src.cluster_interpretation import (
+        ClusterInterpreter,
+        ClusterInterpretationReport,
+        ClusterSummary,
+        ClusterCodebook
+    )
+    CLUSTER_INTERPRETATION_AVAILABLE = True
+except ImportError:
+    CLUSTER_INTERPRETATION_AVAILABLE = False
+    logging.warning("Cluster interpretation not available.")
+
+# Import cluster evaluation module
+try:
+    from src.cluster_evaluation import (
+        ClusterEvaluator,
+        EvaluationMetrics,
+        evaluate_clusters_posthoc
+    )
+    CLUSTER_EVALUATION_AVAILABLE = True
+except ImportError:
+    CLUSTER_EVALUATION_AVAILABLE = False
+    logging.warning("Cluster evaluation not available.")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -302,7 +349,10 @@ def run_ml_analysis(
     min_confidence: float = 0.3,
     representation: str = 'tfidf',
     embedding_kwargs: Optional[Dict[str, Any]] = None,
-    progress_callback=None
+    progress_callback=None,
+    use_adaptive_preprocessing: bool = True,
+    preprocessing_override: Optional[Dict[str, Any]] = None,
+    label_column: Optional[str] = None
 ) -> Tuple[Any, Any, Dict]:
     """
     Run ML-based open coding analysis.
@@ -320,6 +370,16 @@ def run_ml_analysis(
             - 'fasttext': FastText embeddings (handles typos, trains on data)
         embedding_kwargs: Additional kwargs for embedding methods (e.g., model_name for SBERT)
         progress_callback: Optional callback for progress updates
+        use_adaptive_preprocessing: If True (default), automatically detect dataset
+            characteristics and apply appropriate preprocessing. This is transparent
+            for simple OE datasets (uses standard settings) but adapts for
+            long-form documents (news articles, etc.) to improve clustering quality.
+        preprocessing_override: Optional dict to override specific TF-IDF parameters
+            (e.g., {'min_df': 5, 'max_df': 0.9}). Useful for fine-tuning.
+        label_column: Optional column name containing ground truth labels for
+            POST-HOC evaluation only. CRITICAL: Labels are NEVER used for
+            clustering/training. They are only used for diagnostic metrics
+            (ARI, NMI, purity) after clustering is complete.
 
     Returns:
         Tuple of (coder, results, metrics)
@@ -332,6 +392,25 @@ def run_ml_analysis(
         - Semantic embeddings provide better understanding but are slower
         - All embedding methods work offline (no API keys required)
         - Which embedding was used is recorded in metrics['representation']
+        - Adaptive preprocessing is transparent for simple OE datasets
+        - Labels (if provided) are NEVER used for training, only for post-hoc evaluation
+
+    Example:
+        # Simple OE analysis (backward compatible)
+        coder, results, metrics = run_ml_analysis(df, 'response', n_codes=5)
+
+        # Reuters-style long-form documents with label evaluation
+        coder, results, metrics = run_ml_analysis(
+            df, 'text',
+            n_codes=10,
+            label_column='category'  # For post-hoc evaluation only
+        )
+
+        # Manual preprocessing override
+        coder, results, metrics = run_ml_analysis(
+            df, 'text',
+            preprocessing_override={'min_df': 5, 'sublinear_tf': True}
+        )
     """
     import sys
     sys.path.insert(0, '.')
@@ -360,7 +439,7 @@ def run_ml_analysis(
             f"Either reduce the number of codes or provide more data."
         )
 
-    # Simple MLOpenCoder class
+    # Simple MLOpenCoder class with dataset-aware preprocessing
     class MLOpenCoder:
         def __init__(
             self,
@@ -368,7 +447,10 @@ def run_ml_analysis(
             method='tfidf_kmeans',
             min_confidence=0.3,
             representation='tfidf',
-            embedding_kwargs=None
+            embedding_kwargs=None,
+            use_adaptive_preprocessing=True,
+            preprocessing_override=None,
+            labels_for_evaluation=None
         ):
             """
             Initialize ML-based open coder.
@@ -383,18 +465,39 @@ def run_ml_analysis(
                     - 'word2vec': Word2Vec embeddings (semantic, trains on data)
                     - 'fasttext': FastText embeddings (handles typos, trains on data)
                 embedding_kwargs: Additional kwargs for embedding methods
+                use_adaptive_preprocessing: If True, auto-detect dataset characteristics
+                    and apply appropriate preprocessing. Default: True for backward
+                    compatibility (uses standard settings for simple datasets)
+                preprocessing_override: Optional dict to override specific preprocessing
+                    parameters (e.g., {'min_df': 5, 'max_df': 0.9})
+                labels_for_evaluation: Optional labels for POST-HOC evaluation only.
+                    CRITICAL: Labels are NEVER used for clustering, only for
+                    diagnostic metrics after clustering is complete.
             """
             self.n_codes = n_codes
             self.method = method
             self.min_confidence = min_confidence
             self.representation = representation
             self.embedding_kwargs = embedding_kwargs or {}
+            self.use_adaptive_preprocessing = use_adaptive_preprocessing
+            self.preprocessing_override = preprocessing_override
+            self.labels_for_evaluation = labels_for_evaluation
             self.vectorizer = None
             self.model = None
             self.codebook = {}
             self.code_assignments = None
             self.confidence_scores = None
             self.feature_matrix = None
+
+            # New: Dataset characteristics and preprocessing config (detected during fit)
+            self.dataset_characteristics = None
+            self.preprocessing_config = None
+
+            # New: Cluster interpretation report (generated after clustering)
+            self.cluster_interpretation = None
+
+            # New: Post-hoc evaluation metrics (if labels provided)
+            self.evaluation_metrics = None
 
             # Warn about computational costs for large datasets with embeddings
             if representation != 'tfidf':
@@ -431,16 +534,47 @@ def run_ml_analysis(
 
             # Choose vectorization method based on representation
             if self.representation == 'tfidf':
-                # Traditional TF-IDF (default, backward compatible)
-                if self.method == 'lda':
-                    self.vectorizer = CountVectorizer(
-                        max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
+                # NEW: Adaptive preprocessing based on dataset characteristics
+                if self.use_adaptive_preprocessing and ADAPTIVE_PREPROCESSING_AVAILABLE:
+                    # Detect dataset characteristics
+                    logger.info("Detecting dataset characteristics for adaptive preprocessing...")
+                    config, characteristics = get_adaptive_preprocessing(
+                        texts=responses,  # Use original responses for analysis
+                        labels=self.labels_for_evaluation,  # Labels used ONLY for detection, not training
+                        override_config=self.preprocessing_override
                     )
+                    self.dataset_characteristics = characteristics
+                    self.preprocessing_config = config
+
+                    logger.info(
+                        f"Dataset detected as: {characteristics.suggested_preprocessing} "
+                        f"(median_len={characteristics.median_doc_length:.1f} words, "
+                        f"n_docs={characteristics.n_documents}, "
+                        f"is_long_form={characteristics.is_long_form})"
+                    )
+                    logger.info(f"Preprocessing config: {config.config_rationale}")
+
+                    # Create vectorizer with adaptive config
+                    if self.method == 'lda':
+                        # LDA needs CountVectorizer
+                        vectorizer_kwargs = config.to_dict()
+                        vectorizer_kwargs.pop('sublinear_tf', None)  # Not applicable
+                        self.vectorizer = CountVectorizer(**vectorizer_kwargs)
+                    else:
+                        self.vectorizer = TfidfVectorizer(**config.to_dict())
                 else:
-                    self.vectorizer = TfidfVectorizer(
-                        max_features=1000, stop_words=stop_words, min_df=2,
-                        max_df=0.8, ngram_range=(1, 2)
-                    )
+                    # Fallback: Traditional fixed TF-IDF (backward compatible)
+                    logger.info("Using standard preprocessing (adaptive disabled or unavailable)")
+                    if self.method == 'lda':
+                        self.vectorizer = CountVectorizer(
+                            max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
+                        )
+                    else:
+                        self.vectorizer = TfidfVectorizer(
+                            max_features=1000, stop_words=stop_words, min_df=2,
+                            max_df=0.8, ngram_range=(1, 2)
+                        )
+
                 try:
                     self.feature_matrix = self.vectorizer.fit_transform(processed)
                 except ValueError as e:
@@ -501,6 +635,56 @@ def run_ml_analysis(
 
             self._generate_codebook()
             self._assign_codes(doc_topic_matrix, responses)
+
+            # NEW: Mandatory cluster interpretation layer
+            # This ensures cluster IDs are never exposed without human-readable explanations
+            if CLUSTER_INTERPRETATION_AVAILABLE and self.representation == 'tfidf':
+                try:
+                    interpreter = ClusterInterpreter(
+                        n_top_terms=10,
+                        n_label_terms=3,
+                        n_representative_docs=5
+                    )
+                    self.cluster_interpretation = interpreter.interpret_clusters(
+                        vectorizer=self.vectorizer,
+                        cluster_model=self.model,
+                        texts=responses,
+                        cluster_assignments=labels if hasattr(self.model, 'labels_') else
+                            doc_topic_matrix.argmax(axis=1).tolist(),
+                        feature_matrix=self.feature_matrix,
+                        method_name=self.method
+                    )
+                    logger.info(
+                        f"Cluster interpretation complete: "
+                        f"{self.cluster_interpretation.n_clusters} clusters, "
+                        f"interpretability={self.cluster_interpretation.overall_interpretability:.1%}"
+                    )
+                except Exception as e:
+                    logger.warning(f"Cluster interpretation failed: {e}")
+                    self.cluster_interpretation = None
+
+            # NEW: Post-hoc evaluation with labels (if provided)
+            # CRITICAL: Labels were NOT used for clustering, only for diagnostic metrics
+            if self.labels_for_evaluation is not None and CLUSTER_EVALUATION_AVAILABLE:
+                try:
+                    cluster_labels = (
+                        self.model.labels_.tolist() if hasattr(self.model, 'labels_') else
+                        doc_topic_matrix.argmax(axis=1).tolist()
+                    )
+                    self.evaluation_metrics = evaluate_clusters_posthoc(
+                        cluster_assignments=cluster_labels,
+                        true_labels=self.labels_for_evaluation
+                    )
+                    if self.evaluation_metrics:
+                        logger.info(
+                            f"Post-hoc evaluation: ARI={self.evaluation_metrics.ari:.4f}, "
+                            f"NMI={self.evaluation_metrics.nmi:.4f}, "
+                            f"Purity={self.evaluation_metrics.purity:.4f}"
+                        )
+                except Exception as e:
+                    logger.warning(f"Post-hoc evaluation failed: {e}")
+                    self.evaluation_metrics = None
+
             return self
 
         def _generate_codebook(self, top_words=10):
@@ -590,7 +774,69 @@ def run_ml_analysis(
                 if len(set(labels)) > 1:
                     metrics['silhouette_score'] = silhouette_score(self.feature_matrix, labels)
 
+            # NEW: Include cluster interpretation metrics
+            if self.cluster_interpretation is not None:
+                metrics['cluster_interpretability'] = self.cluster_interpretation.overall_interpretability
+                metrics['interpretation_warnings'] = len(self.cluster_interpretation.warnings)
+
+            # NEW: Include post-hoc evaluation metrics (if labels were provided)
+            if self.evaluation_metrics is not None:
+                metrics['posthoc_ari'] = self.evaluation_metrics.ari
+                metrics['posthoc_nmi'] = self.evaluation_metrics.nmi
+                metrics['posthoc_purity'] = self.evaluation_metrics.purity
+
+            # NEW: Include dataset characteristics (if adaptive preprocessing was used)
+            if self.dataset_characteristics is not None:
+                metrics['dataset_type'] = self.dataset_characteristics.suggested_preprocessing
+                metrics['is_long_form'] = self.dataset_characteristics.is_long_form
+                metrics['median_doc_length'] = self.dataset_characteristics.median_doc_length
+
             return metrics
+
+        def get_cluster_interpretation_report(self) -> Optional[str]:
+            """
+            Get the human-readable cluster interpretation report.
+
+            Returns:
+                Formatted report string, or None if interpretation not available.
+
+            Notes:
+                This report should ALWAYS be presented to users alongside
+                cluster assignments. Cluster IDs are internal identifiers,
+                not semantic labels.
+            """
+            if self.cluster_interpretation is None:
+                return None
+            return self.cluster_interpretation.get_display_report()
+
+        def get_cluster_codebook(self) -> Optional[Dict[str, Any]]:
+            """
+            Get the cluster codebook in dictionary format.
+
+            Returns:
+                Codebook dictionary with all cluster definitions, or None.
+            """
+            if self.cluster_interpretation is None:
+                return None
+
+            codebook = ClusterCodebook(self.cluster_interpretation)
+            return codebook.to_dict()
+
+        def get_evaluation_summary(self) -> Optional[str]:
+            """
+            Get the post-hoc evaluation summary.
+
+            Returns:
+                Evaluation summary string, or None if no labels were provided.
+
+            Notes:
+                This evaluation is purely diagnostic - labels were NOT used
+                for clustering. Metrics measure agreement between discovered
+                clusters and ground truth labels.
+            """
+            if self.evaluation_metrics is None:
+                return None
+            return self.evaluation_metrics.get_summary()
 
     # Run analysis with progress updates
     start_time = time.time()
@@ -598,12 +844,25 @@ def run_ml_analysis(
     if progress_callback:
         progress_callback(0.1, "Initializing ML coder...")
 
+    # Extract labels for post-hoc evaluation (if provided)
+    # CRITICAL: Labels are NEVER used for clustering, only for diagnostic metrics
+    labels_for_evaluation = None
+    if label_column and label_column in df.columns:
+        labels_for_evaluation = df[label_column].tolist()
+        logger.info(
+            f"Labels from column '{label_column}' will be used for POST-HOC "
+            "evaluation only (NOT for clustering)"
+        )
+
     coder = MLOpenCoder(
         n_codes=n_codes,
         method=method,
         min_confidence=min_confidence,
         representation=representation,
-        embedding_kwargs=embedding_kwargs
+        embedding_kwargs=embedding_kwargs,
+        use_adaptive_preprocessing=use_adaptive_preprocessing,
+        preprocessing_override=preprocessing_override,
+        labels_for_evaluation=labels_for_evaluation
     )
 
     if progress_callback:
@@ -633,6 +892,24 @@ def run_ml_analysis(
     metrics['n_codes'] = n_codes
     metrics['representation'] = representation
     metrics['embedding_kwargs'] = embedding_kwargs or {}
+
+    # NEW: Include adaptive preprocessing information
+    metrics['use_adaptive_preprocessing'] = use_adaptive_preprocessing
+    if coder.preprocessing_config is not None:
+        metrics['preprocessing_config'] = coder.preprocessing_config.config_rationale
+    if coder.dataset_characteristics is not None:
+        metrics['dataset_characteristics'] = coder.dataset_characteristics.to_dict()
+
+    # NEW: Include cluster interpretation availability
+    metrics['has_cluster_interpretation'] = coder.cluster_interpretation is not None
+    if coder.cluster_interpretation is not None:
+        metrics['cluster_interpretation_warnings'] = coder.cluster_interpretation.warnings
+
+    # NEW: Include post-hoc evaluation availability
+    metrics['has_posthoc_evaluation'] = coder.evaluation_metrics is not None
+    if label_column:
+        metrics['label_column_used'] = label_column
+        metrics['evaluation_note'] = "Labels used for POST-HOC evaluation only, NOT for clustering"
 
     if progress_callback:
         progress_callback(1.0, "Analysis complete!")
