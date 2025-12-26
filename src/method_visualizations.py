@@ -64,6 +64,75 @@ except ImportError:
     logger.warning("pyLDAvis not available. LDA visualization will use fallback.")
 
 
+# =============================================================================
+# VISUALIZATION-METHOD COMPATIBILITY MATRIX
+# =============================================================================
+# Defines which visualizations are available/recommended for each method
+# =============================================================================
+
+VISUALIZATION_COMPATIBILITY = {
+    'cluster_scatter': {
+        'compatible': ['tfidf_kmeans', 'nmf', 'lda'],
+        'recommended': ['tfidf_kmeans'],
+        'description': 'PCA/t-SNE scatter plot showing document clusters',
+        'note': 'Best for KMeans - shows cluster separation. Works but less meaningful for topic models.'
+    },
+    'silhouette_plot': {
+        'compatible': ['tfidf_kmeans'],
+        'recommended': ['tfidf_kmeans'],
+        'description': 'Silhouette analysis for cluster validation',
+        'note': 'ONLY available for KMeans. Not applicable to topic models (NMF/LDA).'
+    },
+    'topic_term_heatmap': {
+        'compatible': ['tfidf_kmeans', 'nmf', 'lda'],
+        'recommended': ['nmf', 'lda'],
+        'description': 'Heatmap showing top terms per topic/cluster',
+        'note': 'Best for NMF/LDA topic interpretation. Also works for KMeans centroids.'
+    },
+    'topic_distribution': {
+        'compatible': ['nmf', 'lda'],
+        'recommended': ['nmf', 'lda'],
+        'description': 'Stacked bar showing topic composition per document',
+        'note': 'ONLY available for NMF/LDA. Not applicable to KMeans (hard assignments).'
+    },
+    'pyldavis': {
+        'compatible': ['lda'],
+        'recommended': ['lda'],
+        'description': 'Interactive LDA topic exploration',
+        'note': 'ONLY available for LDA method. Requires pyLDAvis package.'
+    },
+    'wordcloud': {
+        'compatible': ['tfidf_kmeans', 'nmf', 'lda'],
+        'recommended': ['tfidf_kmeans', 'nmf', 'lda'],
+        'description': 'Word cloud for cluster/topic',
+        'note': 'Available for all methods.'
+    }
+}
+
+
+def get_visualization_availability(method: str) -> Dict[str, Dict[str, Any]]:
+    """
+    Get available visualizations for a specific method.
+
+    Args:
+        method: The ML method ('tfidf_kmeans', 'nmf', 'lda')
+
+    Returns:
+        Dictionary of visualization name -> availability info
+    """
+    result = {}
+    for viz_name, info in VISUALIZATION_COMPATIBILITY.items():
+        is_compatible = method in info['compatible']
+        is_recommended = method in info['recommended']
+        result[viz_name] = {
+            'available': is_compatible,
+            'recommended': is_recommended,
+            'description': info['description'],
+            'note': info['note']
+        }
+    return result
+
+
 class MethodVisualizer:
     """
     Creates method-specific visualizations for clustering/topic modeling results.
@@ -211,12 +280,25 @@ class MethodVisualizer:
         """
         Create silhouette plot showing cluster cohesion.
 
-        Best for: KMeans (validates cluster quality)
+        ⚠️  METHOD RESTRICTION: ONLY available for TF-IDF + KMeans.
+            Not applicable to NMF or LDA (topic models use soft assignments).
 
         Returns:
-            Plotly Figure or None if not available
+            Plotly Figure or None if not available/compatible
+
+        Raises:
+            None - returns None with warning if method is incompatible
         """
         if not PLOTLY_AVAILABLE or not SKLEARN_AVAILABLE:
+            return None
+
+        # Method compatibility check
+        if self.method != 'tfidf_kmeans':
+            logger.warning(
+                f"⚠️  Silhouette plot is ONLY available for TF-IDF + KMeans method. "
+                f"Current method '{self.method}' uses soft topic assignments. "
+                f"Consider using topic_term_heatmap or topic_distribution instead."
+            )
             return None
 
         if not hasattr(self.model, 'labels_'):
@@ -360,12 +442,25 @@ class MethodVisualizer:
         """
         Create stacked bar chart showing topic distribution per document.
 
-        Best for: NMF, LDA (shows document composition)
+        ⚠️  METHOD RESTRICTION: ONLY available for NMF and LDA methods.
+            Not applicable to KMeans (uses hard cluster assignments, not topic mixtures).
 
         Returns:
-            Plotly Figure or None if not available
+            Plotly Figure or None if not available/compatible
+
+        Raises:
+            None - returns None with warning if method is incompatible
         """
         if not PLOTLY_AVAILABLE:
+            return None
+
+        # Method compatibility check
+        if self.method == 'tfidf_kmeans':
+            logger.warning(
+                f"⚠️  Topic distribution chart is ONLY available for NMF/LDA methods. "
+                f"KMeans uses hard cluster assignments (each doc belongs to exactly one cluster). "
+                f"Consider using cluster_scatter or silhouette_plot instead."
+            )
             return None
 
         if not hasattr(self, 'doc_topic_matrix'):
@@ -526,15 +621,27 @@ class MethodVisualizer:
         """
         Create pyLDAvis visualization for LDA model.
 
+        ⚠️  METHOD RESTRICTION: ONLY available for LDA method.
+            Not applicable to KMeans or NMF. Requires pyLDAvis package.
+
         Returns:
-            HTML string for pyLDAvis or None if not available
+            HTML string for pyLDAvis or None if not available/compatible
+
+        Raises:
+            None - returns None with warning if method is incompatible
         """
         if not PYLDAVIS_AVAILABLE:
-            logger.warning("pyLDAvis not installed. Install with: pip install pyLDAvis")
+            logger.warning(
+                "⚠️  pyLDAvis not installed. Install with: pip install pyLDAvis"
+            )
             return None
 
         if self.method != 'lda':
-            logger.warning("pyLDAvis is only available for LDA models")
+            logger.warning(
+                f"⚠️  pyLDAvis is ONLY available for LDA method. "
+                f"Current method '{self.method}' is not compatible. "
+                f"pyLDAvis requires LDA's probabilistic topic model structure."
+            )
             return None
 
         try:
@@ -565,12 +672,24 @@ class MethodVisualizer:
         """
         Get recommended visualizations for the current method.
 
+        Returns a detailed breakdown of which visualizations are:
+        - Available and recommended for the current method
+        - Available but not optimal for the current method
+        - Not available for the current method
+
         Returns:
             Dictionary with recommended visualizations and their availability
         """
         recommendations = {
             'method': self.method,
-            'visualizations': {}
+            'method_description': {
+                'tfidf_kmeans': 'TF-IDF + KMeans (hard clustering)',
+                'nmf': 'Non-negative Matrix Factorization (soft topic model)',
+                'lda': 'Latent Dirichlet Allocation (probabilistic topic model)'
+            }.get(self.method, self.method),
+            'visualizations': {},
+            'not_available': {},
+            'notes': []
         }
 
         if self.method == 'tfidf_kmeans':
@@ -578,44 +697,116 @@ class MethodVisualizer:
                 'cluster_scatter': {
                     'available': PLOTLY_AVAILABLE and SKLEARN_AVAILABLE,
                     'priority': 'high',
-                    'description': '2D scatter showing cluster separation'
+                    'description': '2D scatter showing cluster separation',
+                    'note': 'Recommended - shows how well clusters are separated'
                 },
                 'silhouette_plot': {
                     'available': PLOTLY_AVAILABLE and SKLEARN_AVAILABLE,
                     'priority': 'high',
-                    'description': 'Cluster cohesion validation'
+                    'description': 'Cluster cohesion validation',
+                    'note': 'Recommended - validates cluster quality'
+                },
+                'topic_term_heatmap': {
+                    'available': PLOTLY_AVAILABLE,
+                    'priority': 'medium',
+                    'description': 'Cluster centroid terms',
+                    'note': 'Available - shows top terms per cluster centroid'
                 },
                 'per_cluster_wordclouds': {
                     'available': WORDCLOUD_AVAILABLE,
                     'priority': 'medium',
-                    'description': 'Word clouds for each cluster'
+                    'description': 'Word clouds for each cluster',
+                    'note': 'Available - visual summary of cluster content'
                 }
             }
-        elif self.method in ['nmf', 'lda']:
+            recommendations['not_available'] = {
+                'topic_distribution': 'Not applicable - KMeans uses hard assignments (1 cluster per doc)',
+                'pyldavis': 'Not applicable - requires LDA probabilistic model'
+            }
+            recommendations['notes'] = [
+                'KMeans assigns each document to exactly ONE cluster',
+                'Use silhouette_plot to validate cluster quality',
+                'Use cluster_scatter to visualize cluster separation'
+            ]
+
+        elif self.method == 'nmf':
             recommendations['visualizations'] = {
                 'topic_term_heatmap': {
                     'available': PLOTLY_AVAILABLE,
                     'priority': 'high',
-                    'description': 'Topic-term weight matrix'
+                    'description': 'Topic-term weight matrix',
+                    'note': 'Recommended - shows topic composition'
                 },
                 'topic_distribution': {
                     'available': PLOTLY_AVAILABLE,
-                    'priority': 'medium',
-                    'description': 'Topic composition per document'
+                    'priority': 'high',
+                    'description': 'Topic composition per document',
+                    'note': 'Recommended - shows document topic mixtures'
+                },
+                'cluster_scatter': {
+                    'available': PLOTLY_AVAILABLE and SKLEARN_AVAILABLE,
+                    'priority': 'low',
+                    'description': '2D scatter (less meaningful for topics)',
+                    'note': 'Available but less informative for topic models'
                 },
                 'per_cluster_wordclouds': {
                     'available': WORDCLOUD_AVAILABLE,
                     'priority': 'medium',
-                    'description': 'Word clouds for each topic'
+                    'description': 'Word clouds for each topic',
+                    'note': 'Available - visual summary of topic content'
                 }
             }
+            recommendations['not_available'] = {
+                'silhouette_plot': 'Not applicable - NMF uses soft topic assignments',
+                'pyldavis': 'Not applicable - requires LDA model specifically'
+            }
+            recommendations['notes'] = [
+                'NMF produces sparse, interpretable topic weights',
+                'Documents can belong to multiple topics with different weights',
+                'Use topic_term_heatmap to understand topic composition'
+            ]
 
-            if self.method == 'lda':
-                recommendations['visualizations']['pyldavis'] = {
+        elif self.method == 'lda':
+            recommendations['visualizations'] = {
+                'pyldavis': {
                     'available': PYLDAVIS_AVAILABLE,
                     'priority': 'high',
-                    'description': 'Interactive LDA exploration'
+                    'description': 'Interactive LDA exploration',
+                    'note': 'Highly recommended - industry standard for LDA'
+                },
+                'topic_term_heatmap': {
+                    'available': PLOTLY_AVAILABLE,
+                    'priority': 'high',
+                    'description': 'Topic-term probability matrix',
+                    'note': 'Recommended - shows word distributions per topic'
+                },
+                'topic_distribution': {
+                    'available': PLOTLY_AVAILABLE,
+                    'priority': 'high',
+                    'description': 'Topic probability per document',
+                    'note': 'Recommended - shows document topic mixtures'
+                },
+                'cluster_scatter': {
+                    'available': PLOTLY_AVAILABLE and SKLEARN_AVAILABLE,
+                    'priority': 'low',
+                    'description': '2D scatter (less meaningful for topics)',
+                    'note': 'Available but less informative for topic models'
+                },
+                'per_cluster_wordclouds': {
+                    'available': WORDCLOUD_AVAILABLE,
+                    'priority': 'medium',
+                    'description': 'Word clouds for each topic',
+                    'note': 'Available - visual summary of topic content'
                 }
+            }
+            recommendations['not_available'] = {
+                'silhouette_plot': 'Not applicable - LDA uses probabilistic topic assignments'
+            }
+            recommendations['notes'] = [
+                'LDA models documents as probability distributions over topics',
+                'Each topic is a probability distribution over words',
+                'pyLDAvis provides the best interactive exploration (install with: pip install pyLDAvis)'
+            ]
 
         return recommendations
 
