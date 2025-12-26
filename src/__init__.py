@@ -17,7 +17,6 @@ from .data_loader import DataLoader
 from .code_frame import CodeFrame
 from .theme_analyzer import ThemeAnalyzer
 from .category_manager import CategoryManager
-from .content_quality import ContentQualityFilter
 
 # Embedding classes are available but not auto-imported to avoid dependencies
 # Import explicitly: from src.embeddings import SentenceBERTEmbedder, etc.
@@ -27,5 +26,4 @@ __all__ = [
     "CodeFrame",
     "ThemeAnalyzer",
     "CategoryManager",
-    "ContentQualityFilter",
 ]
