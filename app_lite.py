@@ -827,23 +827,81 @@ def main():
                     st.error(f"Visualization prep failed: {e}")
 
         if st.session_state["stage_6_complete"]:
+            coder = st.session_state["coder"]
+            results_df = st.session_state["results_df"]
+            top_codes_df = st.session_state["top_codes_df"]
+
             # Generate and show insights
-            insights = generate_insights(
-                st.session_state["coder"],
-                st.session_state["results_df"]
-            )
+            insights = generate_insights(coder, results_df)
             st.markdown("**Key Insights**:")
             for insight in insights:
                 st.markdown(insight)
 
             st.markdown("---")
-            st.markdown("**Top Codes by Frequency**:")
-            if st.session_state["top_codes_df"] is not None:
-                st.dataframe(st.session_state["top_codes_df"], use_container_width=True)
 
-            st.markdown("**Code Co-occurrence Pairs**:")
-            if st.session_state["cooccurrence_df"] is not None and not st.session_state["cooccurrence_df"].empty:
-                st.dataframe(st.session_state["cooccurrence_df"].head(10), use_container_width=True)
+            # === VISUALIZATION 1: Code Frequency Bar Chart ===
+            st.markdown("**Code Frequency Distribution**:")
+            if top_codes_df is not None and not top_codes_df.empty:
+                chart_data = top_codes_df.set_index('Label')['Count'].head(15)
+                st.bar_chart(chart_data)
+
+            # === VISUALIZATION 2: Codes per Response Distribution ===
+            st.markdown("**Codes per Response Distribution**:")
+            codes_per_response = results_df['num_codes'].value_counts().sort_index()
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.bar_chart(codes_per_response)
+            with col2:
+                st.markdown(f"- **Mean**: {results_df['num_codes'].mean():.2f}")
+                st.markdown(f"- **Median**: {results_df['num_codes'].median():.0f}")
+                st.markdown(f"- **Max**: {results_df['num_codes'].max()}")
+                uncoded = (results_df['num_codes'] == 0).sum()
+                st.markdown(f"- **Uncoded**: {uncoded}")
+
+            # === VISUALIZATION 3: Confidence Score Distribution ===
+            st.markdown("**Confidence Score Distribution**:")
+            all_confidences = []
+            for confs in results_df['confidence_scores']:
+                all_confidences.extend(confs)
+            if all_confidences:
+                # Create histogram buckets
+                conf_df = pd.DataFrame({'confidence': all_confidences})
+                conf_df['bucket'] = pd.cut(conf_df['confidence'],
+                                           bins=[0, 0.3, 0.5, 0.7, 0.9, 1.0],
+                                           labels=['0-0.3', '0.3-0.5', '0.5-0.7', '0.7-0.9', '0.9-1.0'])
+                bucket_counts = conf_df['bucket'].value_counts().sort_index()
+                st.bar_chart(bucket_counts)
+
+            # === VISUALIZATION 4: Code Co-occurrence Heatmap ===
+            st.markdown("**Code Co-occurrence Matrix**:")
+            cooccurrence_df = st.session_state["cooccurrence_df"]
+            if cooccurrence_df is not None and not cooccurrence_df.empty:
+                # Build matrix for heatmap
+                codes = list(coder.codebook.keys())
+                matrix = pd.DataFrame(0, index=codes, columns=codes)
+                for _, row in cooccurrence_df.iterrows():
+                    c1, c2 = row['Code 1'], row['Code 2']
+                    if c1 in matrix.index and c2 in matrix.columns:
+                        matrix.loc[c1, c2] = row['Count']
+                        matrix.loc[c2, c1] = row['Count']
+                # Show as heatmap (using dataframe with background gradient)
+                st.dataframe(
+                    matrix.style.background_gradient(cmap='Blues', axis=None),
+                    use_container_width=True
+                )
+            else:
+                st.markdown("*No co-occurrence pairs detected*")
+
+            st.markdown("---")
+
+            # === Data Tables ===
+            st.markdown("**Top Codes Table**:")
+            if top_codes_df is not None:
+                st.dataframe(top_codes_df, use_container_width=True)
+
+            st.markdown("**Co-occurrence Pairs Table**:")
+            if cooccurrence_df is not None and not cooccurrence_df.empty:
+                st.dataframe(cooccurrence_df.head(15), use_container_width=True)
             else:
                 st.markdown("*No co-occurrence pairs with min_count >= 2*")
 
