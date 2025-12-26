@@ -410,8 +410,19 @@ def main():
 
         # Show artifact if complete
         if st.session_state["stage_1_complete"] and st.session_state["raw_df"] is not None:
-            st.markdown("**Artifact Preview (first 5 rows)**:")
-            st.dataframe(st.session_state["raw_df"].head(), use_container_width=True)
+            df = st.session_state["raw_df"]
+            st.markdown("**Dataset Summary**:")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Rows", len(df))
+            with col2:
+                st.metric("Columns", len(df.columns))
+            with col3:
+                st.metric("Memory", f"{df.memory_usage(deep=True).sum() / 1024:.1f} KB")
+
+            st.markdown("**Columns**: " + ", ".join(f"`{c}`" for c in df.columns))
+            st.markdown("**Preview (first 5 rows)**:")
+            st.dataframe(df.head(), use_container_width=True)
 
     # --------------------------------------------------------------------------
     # STAGE 2: Data Validation & Typing
@@ -502,8 +513,18 @@ def main():
 
         # Show artifact
         if st.session_state["stage_2_complete"]:
-            st.markdown(f"**Text Column**: `{st.session_state['text_column']}`")
-            st.markdown(f"**Rows after preprocessing**: {len(st.session_state['validated_df'])}")
+            vdf = st.session_state["validated_df"]
+            text_col = st.session_state["text_column"]
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Responses Ready", len(vdf))
+            with col2:
+                st.metric("Text Column", text_col)
+
+            st.markdown("**Sample Responses (first 3)**:")
+            for i, text in enumerate(vdf[text_col].head(3).tolist(), 1):
+                st.markdown(f"{i}. _{str(text)[:150]}{'...' if len(str(text)) > 150 else ''}_")
 
     # --------------------------------------------------------------------------
     # STAGE 3: Method Eligibility Checks
@@ -666,12 +687,32 @@ def main():
 
         if st.session_state["stage_4_complete"] and st.session_state["metrics"]:
             metrics = st.session_state["metrics"]
+            coder = st.session_state["coder"]
+
+            # Metrics in columns
             st.markdown("**Metrics Summary**:")
-            st.markdown(f"- Total Responses: {metrics.get('total_responses', 'N/A')}")
-            st.markdown(f"- Total Assignments: {metrics.get('total_assignments', 'N/A')}")
-            st.markdown(f"- Coverage: {metrics.get('coverage_pct', 0):.1f}%")
-            st.markdown(f"- Avg Confidence: {metrics.get('avg_confidence', 0):.3f}")
-            st.markdown(f"- Execution Time: {metrics.get('execution_time', 0):.2f}s")
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Responses", metrics.get('total_responses', 'N/A'))
+            with col2:
+                st.metric("Coverage", f"{metrics.get('coverage_pct', 0):.1f}%")
+            with col3:
+                st.metric("Avg Confidence", f"{metrics.get('avg_confidence', 0):.2f}")
+            with col4:
+                st.metric("Time", f"{metrics.get('execution_time', 0):.1f}s")
+
+            # Codebook preview
+            st.markdown("**Discovered Codebook**:")
+            codebook_data = []
+            for code_id, info in coder.codebook.items():
+                codebook_data.append({
+                    "Code": code_id,
+                    "Label": info['label'],
+                    "Count": info['count'],
+                    "Confidence": f"{info['avg_confidence']:.2f}",
+                    "Keywords": ", ".join(info['keywords'][:5])
+                })
+            st.dataframe(pd.DataFrame(codebook_data), use_container_width=True)
 
     # --------------------------------------------------------------------------
     # STAGE 5: Diagnostics & Assumptions
@@ -727,8 +768,9 @@ def main():
                     st.error(f"Diagnostics failed: {e}")
 
         if st.session_state["stage_5_complete"] and st.session_state["qa_report"]:
-            st.markdown("**QA Report Preview (first 1000 chars)**:")
-            st.text(st.session_state["qa_report"][:1000] + "...")
+            st.markdown("**QA Report**:")
+            # Render full report with markdown formatting
+            st.markdown(st.session_state["qa_report"])
 
     # --------------------------------------------------------------------------
     # STAGE 6: Visualization Generation
@@ -785,11 +827,21 @@ def main():
                     st.error(f"Visualization prep failed: {e}")
 
         if st.session_state["stage_6_complete"]:
-            st.markdown("**Top Codes (Data Only)**:")
+            # Generate and show insights
+            insights = generate_insights(
+                st.session_state["coder"],
+                st.session_state["results_df"]
+            )
+            st.markdown("**Key Insights**:")
+            for insight in insights:
+                st.markdown(insight)
+
+            st.markdown("---")
+            st.markdown("**Top Codes by Frequency**:")
             if st.session_state["top_codes_df"] is not None:
                 st.dataframe(st.session_state["top_codes_df"], use_container_width=True)
 
-            st.markdown("**Co-occurrence Pairs (Data Only)**:")
+            st.markdown("**Code Co-occurrence Pairs**:")
             if st.session_state["cooccurrence_df"] is not None and not st.session_state["cooccurrence_df"].empty:
                 st.dataframe(st.session_state["cooccurrence_df"].head(10), use_container_width=True)
             else:
