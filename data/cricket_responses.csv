@@ -29,3 +29,173 @@ id,response,respondent_id,timestamp,topic
 28,Cricket coaching has become much more scientific,R028,2024-03-28,coaching
 29,The legacy of great cricketers inspires new generations,R029,2024-03-29,legacy
 30,Cricket's inclusion in Olympics would boost global reach,R030,2024-03-30,olympics
+31,ODI cricket strikes the perfect balance between formats,R031,2024-04-01,odi
+32,The Pakistan Super League showcases incredible talent,R032,2024-04-03,psl
+33,Day-night Test matches have revitalized the format,R033,2024-04-05,day_night
+34,Virat Kohli's chase mastery is unparalleled,R034,2024-04-07,kohli
+35,The art of wicket-keeping is often overlooked,R035,2024-04-09,wicketkeeping
+36,Cricket in the Caribbean has such vibrant culture,R036,2024-04-11,caribbean
+37,The reverse swing mystery still captivates me,R037,2024-04-13,reverse_swing
+38,Associate nations deserve more opportunities,R038,2024-04-15,associate
+39,Cricket's gentleman's game reputation is outdated,R039,2024-04-17,tradition
+40,The pull shot is cricket's most satisfying stroke,R040,2024-04-19,batting
+41,Franchise cricket is diluting national team loyalty,R041,2024-04-21,franchise
+42,Cricket stadiums like Eden Gardens are cathedrals of sport,R042,2024-04-23,venues
+43,The bouncer adds necessary aggression to the game,R043,2024-04-25,bowling
+44,Cricket analytics have changed how we understand the game,R044,2024-04-27,analytics
+45,The West Indies glory days need to return,R045,2024-04-29,west_indies
+46,Steve Smith's technique defies conventional coaching,R046,2024-05-01,smith
+47,Cricket needs a proper global calendar structure,R047,2024-05-03,calendar
+48,The yorker is the most effective delivery in T20s,R048,2024-05-05,yorker
+49,Cricket commentary should be less biased,R049,2024-05-07,commentary
+50,The slip cordon is where matches are won,R050,2024-05-09,fielding
+51,Afghan cricket's rapid rise is remarkable,R051,2024-05-11,afghanistan
+52,Cricket gear technology has improved player safety,R052,2024-05-13,equipment
+53,The cover drive is the most elegant shot in cricket,R053,2024-05-15,batting
+54,Too many leagues are diluting cricket's quality,R054,2024-05-17,leagues
+55,Cricket's slow over rates need stricter penalties,R055,2024-05-19,over_rates
+56,The fourth innings chase is cricket's ultimate test,R056,2024-05-21,test_cricket
+57,Brendon McCullum revolutionized aggressive Test cricket,R057,2024-05-23,mccullum
+58,Cricket broadcasting has become too commercialized,R058,2024-05-25,broadcasting
+59,The doosra controversy showed cricket's complexity,R059,2024-05-27,doosra
+60,Youth cricket programs are vital for the sport's future,R060,2024-05-29,youth
+61,Cricket in England has the best infrastructure,R061,2024-05-31,england
+62,The leg-spinner's art is the hardest to master,R062,2024-06-02,leg_spin
+63,Cricket needs better mental health support for players,R063,2024-06-04,mental_health
+64,The India-Australia rivalry has become cricket's best,R064,2024-06-06,rivalry
+65,Cricket umpires deserve more respect and support,R065,2024-06-08,umpiring
+66,The straight drive shows perfect batting technique,R066,2024-06-10,technique
+67,Cricket's spirit of cricket clause is too vague,R067,2024-06-12,spirit
+68,South Africa's choker tag is unfair and outdated,R068,2024-06-14,south_africa
+69,The switch hit changed cricket's batting conventions,R069,2024-06-16,switch_hit
+70,Cricket needs standardized playing conditions worldwide,R070,2024-06-18,conditions
+71,The New Zealand cricket team plays the game beautifully,R071,2024-06-20,new_zealand
+72,Cricket's concussion protocols are finally adequate,R072,2024-06-22,safety
+73,The helicopter shot is pure entertainment,R073,2024-06-24,helicopter
+74,Cricket journalism needs more investigative depth,R074,2024-06-26,journalism
+75,The googly remains cricket's most deceptive delivery,R075,2024-06-28,googly
+76,Cricket needs to engage younger audiences better,R076,2024-06-30,engagement
+77,Shane Warne's impact on cricket is immeasurable,R077,2024-07-02,warne
+78,Cricket pitches are becoming too batting-friendly,R078,2024-07-04,pitches
+79,The mankad dismissal should be normalized,R079,2024-07-06,mankad
+80,Cricket's appeal system creates unnecessary drama,R080,2024-07-08,appeals
+81,The IPL auction format is brilliantly entertaining,R081,2024-07-10,auction
+82,Cricket coaching badges should be mandatory,R082,2024-07-12,coaching
+83,The scoop shot has redefined batting innovation,R083,2024-07-14,scoop
+84,Cricket needs stronger anti-racism measures,R084,2024-07-16,racism
+85,The tailender partnership is cricket's most thrilling moment,R085,2024-07-18,partnership
+86,Cricket commentary needs more female voices,R086,2024-07-20,diversity
+87,The outswinger is fundamentally perfect bowling,R087,2024-07-22,outswinger
+88,Cricket's financial inequality between nations is problematic,R088,2024-07-24,inequality
+89,The sweep shot is underutilized in modern cricket,R089,2024-07-26,sweep
+90,Cricket academies are producing cookie-cutter players,R090,2024-07-28,academies
+91,Ben Stokes epitomizes all-rounder excellence,R091,2024-07-30,stokes
+92,Cricket needs better retirement planning for players,R092,2024-08-01,retirement
+93,The paddle sweep revolutionized playing spin,R093,2024-08-03,paddle
+94,Cricket's sustainability practices need improvement,R094,2024-08-05,sustainability
+95,The carrom ball adds mystery to spin bowling,R095,2024-08-07,carrom
+96,Cricket commentary should educate more than entertain,R096,2024-08-09,education
+97,The upper cut is a high-risk high-reward stroke,R097,2024-08-11,uppercut
+98,Cricket needs transparent player selection criteria,R098,2024-08-13,selection
+99,The knuckleball has become essential in white-ball cricket,R099,2024-08-15,knuckleball
+100,Cricket memorabilia connects fans to the game's history,R100,2024-08-17,memorabilia
+101,Ricky Ponting's captaincy set new leadership standards,R101,2024-08-19,ponting
+102,Cricket's dress codes are unnecessarily restrictive,R102,2024-08-21,dress_code
+103,The late cut requires exceptional timing and placement,R103,2024-08-23,late_cut
+104,Cricket needs better pathways for disabled athletes,R104,2024-08-25,disability
+105,The slower ball bouncer is a clever variation,R105,2024-08-27,slower_ball
+106,Cricket podcasts have enriched fan engagement,R106,2024-08-29,podcasts
+107,The flick off the pads is effortlessly graceful,R107,2024-08-31,flick
+108,Cricket administrators need more accountability,R108,2024-09-02,administration
+109,The off-cutter is an underrated wicket-taking ball,R109,2024-09-04,off_cutter
+110,Cricket video games help grow the sport globally,R110,2024-09-06,video_games
+111,AB de Villiers redefined batting possibilities,R111,2024-09-08,de_villiers
+112,Cricket needs stricter player workload management,R112,2024-09-10,workload
+113,The square cut is a classic stroke of authority,R113,2024-09-12,square_cut
+114,Cricket coaching should emphasize creativity more,R114,2024-09-14,creativity
+115,The leg-cutter on dry pitches is lethal,R115,2024-09-16,leg_cutter
+116,Cricket commentary boxes need better diversity,R116,2024-09-18,diversity
+117,The hook shot separates brave batsmen from others,R117,2024-09-20,hook
+118,Cricket needs unified rules across all formats,R118,2024-09-22,rules
+119,The arm ball deceives even experienced batsmen,R119,2024-09-24,arm_ball
+120,Cricket writing has become too statistics-focused,R120,2024-09-26,writing
+121,MS Dhoni's captaincy calmness was extraordinary,R121,2024-09-28,dhoni
+122,Cricket needs better compensation for domestic players,R122,2024-09-30,compensation
+123,The inside-out shot requires tremendous skill,R123,2024-10-02,inside_out
+124,Cricket coaching should address mental skills earlier,R124,2024-10-04,mental_skills
+125,The bouncer barrage is legitimate aggressive bowling,R125,2024-10-06,bouncer
+126,Cricket museums preserve important sporting heritage,R126,2024-10-08,museums
+127,The defensive block is cricket's most important shot,R127,2024-10-10,defense
+128,Cricket needs better support for retired players,R128,2024-10-12,support
+129,The topspinner is a forgotten weapon for spinners,R129,2024-10-14,topspinner
+130,Cricket literature offers deep insights into the game,R130,2024-10-16,literature
+131,Jasprit Bumrah's unique action is devastatingly effective,R131,2024-10-18,bumrah
+132,Cricket needs more transparency in financial dealings,R132,2024-10-20,finance
+133,The pull shot to deep mid-wicket is pure power,R133,2024-10-22,pull
+134,Cricket training should incorporate more match scenarios,R134,2024-10-24,training
+135,The flipper is leg-spin's ultimate surprise weapon,R135,2024-10-26,flipper
+136,Cricket documentaries capture the sport's drama beautifully,R136,2024-10-28,documentaries
+137,The on-drive combines elegance with effectiveness,R137,2024-10-30,on_drive
+138,Cricket needs stronger governance at international level,R138,2024-11-01,governance
+139,The wrong'un keeps batsmen guessing constantly,R139,2024-11-03,wrong_un
+140,Cricket sponsorships should align with sport's values,R140,2024-11-05,sponsorship
+141,Kane Williamson's consistency is underappreciated,R141,2024-11-07,williamson
+142,Cricket needs better anti-corruption education programs,R142,2024-11-09,corruption
+143,The square drive through point is textbook batting,R143,2024-11-11,square_drive
+144,Cricket development in Americas needs more investment,R144,2024-11-13,americas
+145,The bouncer to the body intimidates effectively,R145,2024-11-15,intimidation
+146,Cricket memorabilia collecting is a passionate hobby,R146,2024-11-17,collecting
+147,The glance to fine leg is delicate and precise,R147,2024-11-19,glance
+148,Cricket needs better representation in Olympic discussions,R148,2024-11-21,olympics
+149,The slower bouncer catches batsmen by surprise,R149,2024-11-23,slower_bouncer
+150,Cricket social media has transformed fan interaction,R150,2024-11-25,social_media
+151,Sachin Tendulkar's longevity set impossible standards,R151,2024-11-27,tendulkar
+152,Cricket needs sustainable touring schedules for players,R152,2024-11-29,touring
+153,The reverse sweep changed how spin is played,R153,2024-12-01,reverse_sweep
+154,Cricket umpiring technology should be fully automated,R154,2024-12-03,automation
+155,The inswinger to the right-hander is beautiful bowling,R155,2024-12-05,inswinger
+156,Cricket culture varies wonderfully across nations,R156,2024-12-07,culture
+157,The cut shot square of the wicket is aggressive,R157,2024-12-09,cut
+158,Cricket needs better environmental responsibility,R158,2024-12-11,environment
+159,The beamer is rightly penalized for being dangerous,R159,2024-12-13,beamer
+160,Cricket coaching certifications maintain quality standards,R160,2024-12-15,certification
+161,Ellyse Perry is transforming women's cricket standards,R161,2024-12-17,perry
+162,Cricket needs balanced home and away scheduling,R162,2024-12-19,scheduling
+163,The ramp shot is audacious and entertaining,R163,2024-12-21,ramp
+164,Cricket commentary should explain tactics better,R164,2024-12-23,tactics
+165,The yorker at the stumps is cricket's killer blow,R165,2024-12-25,yorker_stumps
+166,Cricket pitch preparation is an art unto itself,R166,2024-01-15,pitch_prep
+167,The dilscoop requires nerves of steel,R167,2024-02-18,dilscoop
+168,Cricket broadcasting rights should be more accessible,R168,2024-03-22,broadcasting_rights
+169,The leg-glance is timing personified,R169,2024-04-26,leg_glance
+170,Cricket nutrition science has transformed player fitness,R170,2024-05-30,nutrition
+171,Pat Cummins leads by example brilliantly,R171,2024-06-14,cummins
+172,Cricket needs stronger anti-doping enforcement,R172,2024-07-19,doping
+173,The drive down the ground is cricket's signature shot,R173,2024-08-23,drive
+174,Cricket history education should be part of coaching,R174,2024-09-27,history
+175,The quick bouncer tests batsmen's reflexes,R175,2024-10-11,quick_bouncer
+176,Cricket charity matches raise important awareness,R176,2024-01-08,charity
+177,The forward defense is batting's foundation,R177,2024-02-12,forward_defense
+178,Cricket needs better injury prevention protocols,R178,2024-03-16,injury
+179,The full toss is a gift unless it's a yorker,R179,2024-04-20,full_toss
+180,Cricket fan culture creates lifelong friendships,R180,2024-05-24,fans
+181,Smriti Mandhana's strokeplay is breathtaking,R181,2024-06-28,mandhana
+182,Cricket needs consistent enforcement of playing regulations,R182,2024-07-02,regulations
+183,The backfoot punch is compact and powerful,R183,2024-08-06,backfoot_punch
+184,Cricket academies should focus on individual strengths,R184,2024-09-10,strengths
+185,The off-spinner's drift creates natural deception,R185,2024-10-14,drift
+186,Cricket podcasting has given fans insider perspectives,R186,2024-11-18,insider
+187,The leave outside off-stump shows batting discipline,R187,2024-12-22,leave
+188,Cricket needs better concussion substitute rules,R188,2024-01-25,concussion
+189,The toe-crusher yorker is devastating,R189,2024-02-28,toe_crusher
+190,Cricket's T10 format is exciting but lacks depth,R190,2024-04-03,t10
+191,Rashid Khan has revolutionized T20 leg-spin,R191,2024-05-07,rashid
+192,Cricket needs more investment in grassroots facilities,R192,2024-06-11,grassroots
+193,The lofted drive requires confidence and timing,R193,2024-07-15,lofted_drive
+194,Cricket's appeal lies in its strategic complexity,R194,2024-08-19,strategy
+195,The in-dipper to left-handers is a wicket-taker,R195,2024-09-23,in_dipper
+196,Cricket needs better work-life balance for players,R196,2024-10-27,balance
+197,The edge through slips is cricket's luckiest boundary,R197,2024-11-30,edge
+198,Cricket traditions should evolve with modern times,R198,2024-01-04,evolution
+199,The leg-before decision is cricket's most contentious,R199,2024-02-07,lbw
+200,Cricket's global growth depends on inclusive policies,R200,2024-03-12,growth
