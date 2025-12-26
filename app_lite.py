@@ -64,6 +64,21 @@ from helpers.analysis import (
 # -----------------------------------------------------------------------------
 # CONSTANTS
 # -----------------------------------------------------------------------------
+
+# Available sample datasets in the project
+SAMPLE_DATASETS = {
+    "sample_responses.csv": "Sample Responses (General)",
+    "cricket_responses.csv": "Cricket Responses",
+    "fashion_responses.csv": "Fashion Responses",
+    "consumer_perspectives_responses.csv": "Consumer Perspectives",
+    "cultural_commentary_responses.csv": "Cultural Commentary",
+    "industry_professional_responses.csv": "Industry Professional",
+    "20_newsgroups.csv": "20 Newsgroups (Large)",
+    "reuters21578.csv": "Reuters (Large)",
+}
+
+DATA_DIR = Path(__file__).parent / "data"
+
 PIPELINE_STAGES = [
     {
         "number": 1,
@@ -364,39 +379,50 @@ def main():
 
         st.markdown("---")
 
-        # Execution control
-        uploaded_file = st.file_uploader(
-            "Upload dataset (CSV or Excel)",
-            type=["csv", "xlsx", "xls"],
-            key="file_uploader_stage1",
+        # Execution control - Dataset selection
+        st.markdown("**Select a sample dataset or upload your own:**")
+
+        dataset_options = ["-- Select a sample dataset --"] + list(SAMPLE_DATASETS.keys())
+        selected_dataset = st.selectbox(
+            "Sample Dataset",
+            options=dataset_options,
+            format_func=lambda x: SAMPLE_DATASETS.get(x, x),
+            key="dataset_select",
         )
 
         if st.button("Execute Stage 1: Load Data", key="btn_stage_1"):
-            if uploaded_file is not None:
+            if selected_dataset != "-- Select a sample dataset --":
                 try:
-                    # WHY: We use DataLoader from src, not pd.read_csv directly
-                    # This ensures consistent error handling and logging
+                    # Load from project's data directory
+                    filepath = DATA_DIR / selected_dataset
                     loader = DataLoader()
-
-                    if uploaded_file.name.endswith(".csv"):
-                        df = pd.read_csv(uploaded_file)
-                    else:
-                        df = pd.read_excel(uploaded_file)
+                    df = loader.load_csv(str(filepath))
 
                     st.session_state["raw_df"] = df
                     st.session_state["stage_1_complete"] = True
                     reset_downstream_stages(1)
 
-                    st.success(f"Loaded {len(df)} rows, {len(df.columns)} columns")
+                    st.success(f"Loaded '{selected_dataset}': {len(df)} rows, {len(df.columns)} columns")
                 except Exception as e:
                     st.error(f"Failed to load data: {e}")
             else:
-                st.warning("Please upload a file first")
+                st.warning("Please select a dataset first")
 
         # Show artifact if complete
         if st.session_state["stage_1_complete"] and st.session_state["raw_df"] is not None:
-            st.markdown("**Artifact Preview (first 5 rows)**:")
-            st.dataframe(st.session_state["raw_df"].head(), use_container_width=True)
+            df = st.session_state["raw_df"]
+            st.markdown("**Dataset Summary**:")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Rows", len(df))
+            with col2:
+                st.metric("Columns", len(df.columns))
+            with col3:
+                st.metric("Memory", f"{df.memory_usage(deep=True).sum() / 1024:.1f} KB")
+
+            st.markdown("**Columns**: " + ", ".join(f"`{c}`" for c in df.columns))
+            st.markdown("**Preview (first 5 rows)**:")
+            st.dataframe(df.head(), use_container_width=True)
 
     # --------------------------------------------------------------------------
     # STAGE 2: Data Validation & Typing
@@ -433,15 +459,23 @@ def main():
         else:
             if st.session_state["raw_df"] is not None:
                 columns = st.session_state["raw_df"].columns.tolist()
+
+                # Auto-detect text column (prefer 'response' if available)
+                default_idx = columns.index("response") if "response" in columns else 0
+
                 text_col = st.selectbox(
                     "Select text column for analysis",
                     options=columns,
+                    index=default_idx,
                     key="text_col_select",
                 )
 
-                remove_nulls = st.checkbox("Remove null responses", value=True)
-                remove_duplicates = st.checkbox("Remove duplicate responses", value=False)
-                min_length = st.number_input("Minimum response length (chars)", min_value=0, value=5)
+                # Simplified preprocessing with sensible defaults
+                col1, col2 = st.columns(2)
+                with col1:
+                    remove_nulls = st.checkbox("Remove null responses", value=True)
+                with col2:
+                    remove_duplicates = st.checkbox("Remove duplicates", value=False)
 
                 if st.button("Execute Stage 2: Validate & Preprocess", key="btn_stage_2"):
                     try:
@@ -463,7 +497,7 @@ def main():
                                 text_column=text_col,
                                 remove_nulls=remove_nulls,
                                 remove_duplicates=remove_duplicates,
-                                min_length=min_length,
+                                min_length=5,  # Sensible default
                             )
 
                             st.session_state["validated_df"] = processed_df
@@ -479,8 +513,18 @@ def main():
 
         # Show artifact
         if st.session_state["stage_2_complete"]:
-            st.markdown(f"**Text Column**: `{st.session_state['text_column']}`")
-            st.markdown(f"**Rows after preprocessing**: {len(st.session_state['validated_df'])}")
+            vdf = st.session_state["validated_df"]
+            text_col = st.session_state["text_column"]
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Responses Ready", len(vdf))
+            with col2:
+                st.metric("Text Column", text_col)
+
+            st.markdown("**Sample Responses (first 3)**:")
+            for i, text in enumerate(vdf[text_col].head(3).tolist(), 1):
+                st.markdown(f"{i}. _{str(text)[:150]}{'...' if len(str(text)) > 150 else ''}_")
 
     # --------------------------------------------------------------------------
     # STAGE 3: Method Eligibility Checks
@@ -514,60 +558,55 @@ def main():
         if status_3 == "BLOCKED":
             st.info("Complete Stage 2 first")
         else:
-            method = st.selectbox(
-                "ML Method",
-                options=list(ML_METHODS.keys()),
-                format_func=lambda x: ML_METHODS[x],
-                key="method_select",
-            )
+            # Simplified configuration with sensible defaults
+            col1, col2 = st.columns(2)
 
-            representation = st.selectbox(
-                "Text Representation",
-                options=list(REPRESENTATIONS.keys()),
-                format_func=lambda x: REPRESENTATIONS[x],
-                key="repr_select",
-            )
+            with col1:
+                method = st.selectbox(
+                    "ML Method",
+                    options=list(ML_METHODS.keys()),
+                    format_func=lambda x: ML_METHODS[x],
+                    key="method_select",
+                )
 
-            n_codes = st.slider(
-                "Number of codes to discover",
-                min_value=3,
-                max_value=30,
-                value=10,
-                key="n_codes_slider",
-            )
+                n_codes = st.slider(
+                    "Number of codes",
+                    min_value=3,
+                    max_value=20,
+                    value=8,
+                    key="n_codes_slider",
+                )
 
-            min_confidence = st.slider(
-                "Minimum confidence threshold",
-                min_value=0.1,
-                max_value=0.9,
-                value=0.3,
-                step=0.1,
-                key="confidence_slider",
-            )
-
-            if st.button("Execute Stage 3: Check Eligibility", key="btn_stage_3"):
-                errors = []
-
-                # Check 1: LDA/NMF incompatible with semantic embeddings
-                if method in ["lda", "nmf"] and representation != "tfidf":
-                    errors.append(
-                        f"Method '{method.upper()}' requires TF-IDF representation. "
-                        f"Semantic embeddings ({representation}) produce negative values "
-                        "which are incompatible with LDA/NMF."
+            with col2:
+                # Only show TF-IDF for LDA/NMF compatibility
+                if method in ["lda", "nmf"]:
+                    representation = "tfidf"
+                    st.info("Using TF-IDF (required for LDA/NMF)")
+                else:
+                    representation = st.selectbox(
+                        "Text Representation",
+                        options=list(REPRESENTATIONS.keys()),
+                        format_func=lambda x: REPRESENTATIONS[x],
+                        key="repr_select",
                     )
 
-                # Check 2: n_codes vs dataset size
-                if st.session_state["validated_df"] is not None:
-                    n_samples = len(st.session_state["validated_df"])
-                    if n_codes > n_samples:
-                        errors.append(
-                            f"Cannot request {n_codes} codes with only {n_samples} samples. "
-                            f"Reduce n_codes to at most {n_samples}."
-                        )
+                min_confidence = st.slider(
+                    "Min confidence",
+                    min_value=0.1,
+                    max_value=0.9,
+                    value=0.3,
+                    step=0.1,
+                    key="confidence_slider",
+                )
 
-                if errors:
-                    for err in errors:
-                        st.error(err)
+            if st.button("Execute Stage 3: Check Eligibility", key="btn_stage_3"):
+                # Check n_codes vs dataset size
+                n_samples = len(st.session_state["validated_df"])
+                if n_codes > n_samples:
+                    st.error(
+                        f"Cannot request {n_codes} codes with only {n_samples} samples. "
+                        f"Reduce n_codes to at most {n_samples}."
+                    )
                 else:
                     st.session_state["method"] = method
                     st.session_state["representation"] = representation
@@ -576,7 +615,7 @@ def main():
                     st.session_state["stage_3_complete"] = True
                     reset_downstream_stages(3)
 
-                    st.success("Method eligibility confirmed. Ready for model execution.")
+                    st.success(f"Configuration set: {ML_METHODS[method]}, {n_codes} codes")
 
         if st.session_state["stage_3_complete"]:
             st.markdown(f"**Method**: `{st.session_state['method']}`")
@@ -648,12 +687,32 @@ def main():
 
         if st.session_state["stage_4_complete"] and st.session_state["metrics"]:
             metrics = st.session_state["metrics"]
+            coder = st.session_state["coder"]
+
+            # Metrics in columns
             st.markdown("**Metrics Summary**:")
-            st.markdown(f"- Total Responses: {metrics.get('total_responses', 'N/A')}")
-            st.markdown(f"- Total Assignments: {metrics.get('total_assignments', 'N/A')}")
-            st.markdown(f"- Coverage: {metrics.get('coverage_pct', 0):.1f}%")
-            st.markdown(f"- Avg Confidence: {metrics.get('avg_confidence', 0):.3f}")
-            st.markdown(f"- Execution Time: {metrics.get('execution_time', 0):.2f}s")
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Responses", metrics.get('total_responses', 'N/A'))
+            with col2:
+                st.metric("Coverage", f"{metrics.get('coverage_pct', 0):.1f}%")
+            with col3:
+                st.metric("Avg Confidence", f"{metrics.get('avg_confidence', 0):.2f}")
+            with col4:
+                st.metric("Time", f"{metrics.get('execution_time', 0):.1f}s")
+
+            # Codebook preview
+            st.markdown("**Discovered Codebook**:")
+            codebook_data = []
+            for code_id, info in coder.codebook.items():
+                codebook_data.append({
+                    "Code": code_id,
+                    "Label": info['label'],
+                    "Count": info['count'],
+                    "Confidence": f"{info['avg_confidence']:.2f}",
+                    "Keywords": ", ".join(info['keywords'][:5])
+                })
+            st.dataframe(pd.DataFrame(codebook_data), use_container_width=True)
 
     # --------------------------------------------------------------------------
     # STAGE 5: Diagnostics & Assumptions
@@ -709,8 +768,9 @@ def main():
                     st.error(f"Diagnostics failed: {e}")
 
         if st.session_state["stage_5_complete"] and st.session_state["qa_report"]:
-            st.markdown("**QA Report Preview (first 1000 chars)**:")
-            st.text(st.session_state["qa_report"][:1000] + "...")
+            st.markdown("**QA Report**:")
+            # Render full report with markdown formatting
+            st.markdown(st.session_state["qa_report"])
 
     # --------------------------------------------------------------------------
     # STAGE 6: Visualization Generation
@@ -767,13 +827,81 @@ def main():
                     st.error(f"Visualization prep failed: {e}")
 
         if st.session_state["stage_6_complete"]:
-            st.markdown("**Top Codes (Data Only)**:")
-            if st.session_state["top_codes_df"] is not None:
-                st.dataframe(st.session_state["top_codes_df"], use_container_width=True)
+            coder = st.session_state["coder"]
+            results_df = st.session_state["results_df"]
+            top_codes_df = st.session_state["top_codes_df"]
 
-            st.markdown("**Co-occurrence Pairs (Data Only)**:")
-            if st.session_state["cooccurrence_df"] is not None and not st.session_state["cooccurrence_df"].empty:
-                st.dataframe(st.session_state["cooccurrence_df"].head(10), use_container_width=True)
+            # Generate and show insights
+            insights = generate_insights(coder, results_df)
+            st.markdown("**Key Insights**:")
+            for insight in insights:
+                st.markdown(insight)
+
+            st.markdown("---")
+
+            # === VISUALIZATION 1: Code Frequency Bar Chart ===
+            st.markdown("**Code Frequency Distribution**:")
+            if top_codes_df is not None and not top_codes_df.empty:
+                chart_data = top_codes_df.set_index('Label')['Count'].head(15)
+                st.bar_chart(chart_data)
+
+            # === VISUALIZATION 2: Codes per Response Distribution ===
+            st.markdown("**Codes per Response Distribution**:")
+            codes_per_response = results_df['num_codes'].value_counts().sort_index()
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.bar_chart(codes_per_response)
+            with col2:
+                st.markdown(f"- **Mean**: {results_df['num_codes'].mean():.2f}")
+                st.markdown(f"- **Median**: {results_df['num_codes'].median():.0f}")
+                st.markdown(f"- **Max**: {results_df['num_codes'].max()}")
+                uncoded = (results_df['num_codes'] == 0).sum()
+                st.markdown(f"- **Uncoded**: {uncoded}")
+
+            # === VISUALIZATION 3: Confidence Score Distribution ===
+            st.markdown("**Confidence Score Distribution**:")
+            all_confidences = []
+            for confs in results_df['confidence_scores']:
+                all_confidences.extend(confs)
+            if all_confidences:
+                # Create histogram buckets
+                conf_df = pd.DataFrame({'confidence': all_confidences})
+                conf_df['bucket'] = pd.cut(conf_df['confidence'],
+                                           bins=[0, 0.3, 0.5, 0.7, 0.9, 1.0],
+                                           labels=['0-0.3', '0.3-0.5', '0.5-0.7', '0.7-0.9', '0.9-1.0'])
+                bucket_counts = conf_df['bucket'].value_counts().sort_index()
+                st.bar_chart(bucket_counts)
+
+            # === VISUALIZATION 4: Code Co-occurrence Heatmap ===
+            st.markdown("**Code Co-occurrence Matrix**:")
+            cooccurrence_df = st.session_state["cooccurrence_df"]
+            if cooccurrence_df is not None and not cooccurrence_df.empty:
+                # Build matrix for heatmap
+                codes = list(coder.codebook.keys())
+                matrix = pd.DataFrame(0, index=codes, columns=codes)
+                for _, row in cooccurrence_df.iterrows():
+                    c1, c2 = row['Code 1'], row['Code 2']
+                    if c1 in matrix.index and c2 in matrix.columns:
+                        matrix.loc[c1, c2] = row['Count']
+                        matrix.loc[c2, c1] = row['Count']
+                # Show as heatmap (using dataframe with background gradient)
+                st.dataframe(
+                    matrix.style.background_gradient(cmap='Blues', axis=None),
+                    use_container_width=True
+                )
+            else:
+                st.markdown("*No co-occurrence pairs detected*")
+
+            st.markdown("---")
+
+            # === Data Tables ===
+            st.markdown("**Top Codes Table**:")
+            if top_codes_df is not None:
+                st.dataframe(top_codes_df, use_container_width=True)
+
+            st.markdown("**Co-occurrence Pairs Table**:")
+            if cooccurrence_df is not None and not cooccurrence_df.empty:
+                st.dataframe(cooccurrence_df.head(15), use_container_width=True)
             else:
                 st.markdown("*No co-occurrence pairs with min_count >= 2*")
 
