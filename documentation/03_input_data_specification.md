@@ -28,7 +28,7 @@ The Open-Ended Coding Analysis Framework accepts data from multiple sources for 
 
 **Key Design Principles:**
 - **Flexible column naming** - Framework adapts to common variations
-- **Multiple data sources** - Support for CSV, Excel, databases, and JSON
+- **Multiple data sources** - Support for CSV, Excel, and JSON
 - **Minimal requirements** - Only `response` column is required
 - **Quality validation** - Automatic content assessment with transparent flagging
 - **UTF-8 encoding** - Universal text support
@@ -225,78 +225,6 @@ df = loader.load_json('data/responses.json')
 # JSON Lines format
 df = loader.load_json('data/responses.jsonl', lines=True)
 ```
-
----
-
-### 4. SQLite Database
-
-**File Extensions:** `.db`, `.sqlite`, `.sqlite3`
-
-**Specifications:**
-- **Query Type:** SELECT statements only (security enforced)
-- **Table Structure:** Must include response column
-- **Connection:** File-based, no credentials required
-
-**Loading Example:**
-```python
-query = """
-    SELECT
-        id,
-        response_text as response,
-        user_id as respondent_id,
-        created_at as timestamp,
-        topic
-    FROM survey_responses
-    WHERE response_text IS NOT NULL
-    ORDER BY created_at
-"""
-
-df = loader.load_from_sqlite('data/survey.db', query)
-```
-
-**Security Notes:**
-- Only SELECT and WITH (CTE) queries permitted
-- Destructive operations (DROP, DELETE, UPDATE, INSERT) blocked
-- Query validation occurs before execution
-
----
-
-### 5. PostgreSQL Database
-
-**Connection String Format:**
-```
-postgresql://username:password@host:port/database
-```
-
-**Specifications:**
-- **Query Type:** SELECT statements only (security enforced)
-- **SSL:** Supported (optional)
-- **Connection Pooling:** Managed automatically
-
-**Loading Example:**
-```python
-connection_string = "postgresql://user:pass@localhost:5432/mydb"
-
-query = """
-    SELECT
-        response_id as id,
-        response_text as response,
-        respondent_id,
-        created_at as timestamp,
-        question_topic as topic
-    FROM responses
-    WHERE response_text IS NOT NULL
-      AND LENGTH(response_text) > 5
-"""
-
-df = loader.load_from_postgres(connection_string, query)
-```
-
-**Best Practices:**
-- Use environment variables for credentials (never hardcode)
-- Filter null/empty responses in SQL query for efficiency
-- Use column aliases to match expected column names
-- Test queries in database client before using in framework
 
 ---
 
@@ -588,7 +516,7 @@ Before loading your data, verify:
 - [ ] **Header row:** First row contains column names
 - [ ] **No empty responses:** Null/empty responses handled appropriately
 - [ ] **Date format:** Timestamps use consistent format (ISO 8601 recommended)
-- [ ] **File format:** Using supported format (CSV, Excel, JSON, SQLite, PostgreSQL)
+- [ ] **File format:** Using supported format (CSV, Excel, JSON)
 - [ ] **Special characters:** Text properly escaped/quoted if contains commas or quotes
 
 **Next Steps:**

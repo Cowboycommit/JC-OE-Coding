@@ -730,10 +730,6 @@ df = loader.load_csv('data/responses.csv')
 # Load from Excel
 df = loader.load_excel('data/responses.xlsx', sheet_name='Sheet1')
 
-# Load from database
-df = loader.load_from_sqlite('database.db', 'SELECT * FROM responses')
-df = loader.load_from_postgres('postgresql://user:pass@host/db', 'SELECT * FROM responses')
-
 # Load from JSON
 df = loader.load_json('data/responses.json', lines=True)
 
@@ -758,7 +754,6 @@ summary = loader.get_quality_summary(df)
 ```
 
 **Important Notes**:
-- SQL queries are validated to prevent destructive operations (only SELECT allowed)
 - Quality assessment NEVER deletes data, only flags for review
 - All file operations include error handling with informative messages
 
@@ -1619,7 +1614,7 @@ Use this checklist when handing over the framework to a new team member or clien
 - [ ] **Environment setup**: Dependencies installed and tested
 - [ ] **Streamlit app**: Launches successfully
 - [ ] **Jupyter notebooks**: All cells execute without errors
-- [ ] **Database connections**: Tested (if used)
+- [ ] **File loading**: CSV, Excel, JSON loading tested
 - [ ] **Export functionality**: Verified
 
 ### 4.5 Knowledge Transfer
@@ -1678,12 +1673,6 @@ streamlit>=1.28.0
 openpyxl>=3.1.0
 xlrd>=2.0.0
 python-docx>=1.0.0
-```
-
-**Database** (Optional):
-```
-sqlalchemy>=2.0.0
-psycopg2-binary>=2.9.0
 ```
 
 **Testing & Development**:

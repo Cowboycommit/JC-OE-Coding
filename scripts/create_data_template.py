@@ -77,7 +77,6 @@ def create_data_template(output_path):
         ("SUPPORTED FILE FORMATS", subtitle_font, instruction_fill),
         ("• Excel files: .xlsx, .xls", None, None),
         ("• CSV files: .csv", None, None),
-        ("• Database connections: SQLite, PostgreSQL", None, None),
         ("", None, None),
         ("HOW TO USE THIS TEMPLATE", subtitle_font, instruction_fill),
         ("1. Go to the '✏️ Data Entry' sheet", None, None),

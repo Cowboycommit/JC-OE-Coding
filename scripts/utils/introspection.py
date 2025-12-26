@@ -71,7 +71,6 @@ class CodeIntrospector:
         'flask': 'Lightweight web framework',
         'django': 'Full-featured web framework',
         'fastapi': 'Modern API framework',
-        'sqlalchemy': 'SQL toolkit and ORM',
         'requests': 'HTTP client library',
         'pytest': 'Testing framework',
         'nltk': 'Natural language processing toolkit',

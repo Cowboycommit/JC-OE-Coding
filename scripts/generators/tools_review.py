@@ -88,14 +88,6 @@ LIBRARY_DETAILS = {
         'description': 'Industrial-strength natural language processing library.',
         'use_cases': ['Named entity recognition', 'Dependency parsing', 'Text classification'],
     },
-    'sqlalchemy': {
-        'full_name': 'SQLAlchemy',
-        'category': 'Database',
-        'license': 'MIT',
-        'url': 'https://www.sqlalchemy.org/',
-        'description': 'SQL toolkit and Object-Relational Mapping (ORM) library.',
-        'use_cases': ['Database connectivity', 'ORM', 'Query building'],
-    },
     'python-docx': {
         'full_name': 'python-docx',
         'category': 'Document Processing',
