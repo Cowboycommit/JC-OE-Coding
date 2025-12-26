@@ -1303,16 +1303,6 @@ def page_run_analysis():
                     st.success("✅ Analysis state reset. Click 'Start Analysis' again.")
                     st.rerun()
 
-    # Show previous results if available
-    if st.session_state.analysis_complete:
-        st.markdown("---")
-        st.markdown("""
-        <div class="success-box">
-        <h3>✅ Previous Analysis Available</h3>
-        <p>Your analysis results are ready! Navigate to <strong>"📊 Results Overview"</strong> in the sidebar to view them.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
     # Next button - show when analysis is complete
     if st.session_state.analysis_complete:
         render_next_button("📊 Results Overview")
