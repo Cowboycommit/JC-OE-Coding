@@ -40,6 +40,64 @@ from helpers.analysis import (
     get_cooccurrence_pairs,
     export_results_package
 )
+from itertools import combinations
+import networkx as nx
+
+
+# Cached computation functions to prevent UI hangs on visualization page
+@st.cache_data(show_spinner=False)
+def compute_cooccurrence_matrix(_assigned_codes_tuple, codes_list):
+    """Compute co-occurrence matrix with caching to prevent recalculation on every render."""
+    n = len(codes_list)
+    code_to_idx = {code: i for i, code in enumerate(codes_list)}
+    cooccur = np.zeros((n, n))
+
+    for assigned_codes in _assigned_codes_tuple:
+        # Only process pairs of codes that were actually assigned
+        for code1, code2 in combinations(assigned_codes, 2):
+            if code1 in code_to_idx and code2 in code_to_idx:
+                i, j = code_to_idx[code1], code_to_idx[code2]
+                cooccur[i, j] += 1
+                cooccur[j, i] += 1  # Symmetric matrix
+
+        # Diagonal: each code co-occurs with itself
+        for code in assigned_codes:
+            if code in code_to_idx:
+                i = code_to_idx[code]
+                cooccur[i, i] += 1
+
+    return cooccur
+
+
+@st.cache_data(show_spinner=False)
+def compute_edge_weights(_assigned_codes_tuple):
+    """Compute network edge weights with caching."""
+    edge_weights = {}
+    for assigned_codes in _assigned_codes_tuple:
+        for i, code1 in enumerate(assigned_codes):
+            for code2 in assigned_codes[i+1:]:
+                edge = tuple(sorted([code1, code2]))
+                edge_weights[edge] = edge_weights.get(edge, 0) + 1
+    return edge_weights
+
+
+@st.cache_data(show_spinner=False)
+def compute_network_layout(_nodes_tuple, _edges_tuple):
+    """Compute spring layout with caching - this is very expensive."""
+    G = nx.Graph()
+    G.add_nodes_from(_nodes_tuple)
+    G.add_edges_from(_edges_tuple)
+
+    if len(G.nodes()) > 0 and len(G.edges()) > 0:
+        pos = nx.spring_layout(G, k=2, iterations=50, seed=42)
+        return pos
+    return {}
+
+
+@st.cache_data(show_spinner=False)
+def get_text_column(columns_tuple):
+    """Get text column name with caching."""
+    return [col for col in columns_tuple if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
 
 # Page configuration
 st.set_page_config(
@@ -1439,26 +1497,11 @@ def page_visualizations():
             - Isolated codes (light row/column) may be distinct themes
             """)
 
-        # Build co-occurrence matrix efficiently
-        # Only iterate over assigned code pairs instead of all possible pairs
-        from itertools import combinations
-
+        # Build co-occurrence matrix using cached function
         codes = list(coder.codebook.keys())
-        n = len(codes)
-        code_to_idx = {code: i for i, code in enumerate(codes)}
-        cooccur = np.zeros((n, n))
-
-        for assigned_codes in results_df['assigned_codes']:
-            # Only process pairs of codes that were actually assigned
-            for code1, code2 in combinations(assigned_codes, 2):
-                i, j = code_to_idx[code1], code_to_idx[code2]
-                cooccur[i, j] += 1
-                cooccur[j, i] += 1  # Symmetric matrix
-
-            # Diagonal: each code co-occurs with itself
-            for code in assigned_codes:
-                i = code_to_idx[code]
-                cooccur[i, i] += 1
+        # Convert to tuple for caching (lists are not hashable)
+        assigned_codes_tuple = tuple(tuple(ac) for ac in results_df['assigned_codes'])
+        cooccur = compute_cooccurrence_matrix(assigned_codes_tuple, codes)
 
         labels = [coder.codebook[c]['label'] for c in codes]
 
@@ -1528,8 +1571,6 @@ def page_visualizations():
             """)
 
         try:
-            import networkx as nx
-
             # Build network graph from co-occurrences
             codes = [c for c in coder.codebook.keys() if coder.codebook[c]['count'] > 0]
 
@@ -1545,13 +1586,9 @@ def page_visualizations():
                     confidence=coder.codebook[code]['avg_confidence']
                 )
 
-            # Add edges based on co-occurrence
-            edge_weights = {}
-            for assigned_codes in results_df['assigned_codes']:
-                for i, code1 in enumerate(assigned_codes):
-                    for code2 in assigned_codes[i+1:]:
-                        edge = tuple(sorted([code1, code2]))
-                        edge_weights[edge] = edge_weights.get(edge, 0) + 1
+            # Compute edge weights using cached function
+            assigned_codes_tuple = tuple(tuple(ac) for ac in results_df['assigned_codes'])
+            edge_weights = compute_edge_weights(assigned_codes_tuple)
 
             # Preset buttons for threshold
             st.markdown("**Network density presets:**")
@@ -1584,13 +1621,18 @@ def page_visualizations():
                 help="Only show connections between codes that appear together this many times"
             )
 
-            for (code1, code2), weight in edge_weights.items():
-                if weight >= min_cooccurrence and code1 in G and code2 in G:
-                    G.add_edge(code1, code2, weight=weight)
+            # Filter edges by threshold
+            filtered_edges = [(code1, code2, weight) for (code1, code2), weight in edge_weights.items()
+                              if weight >= min_cooccurrence and code1 in G and code2 in G]
+
+            for code1, code2, weight in filtered_edges:
+                G.add_edge(code1, code2, weight=weight)
 
             if len(G.nodes()) > 0 and len(G.edges()) > 0:
-                # Use spring layout for positioning
-                pos = nx.spring_layout(G, k=2, iterations=50, seed=42)
+                # Use cached spring layout for positioning
+                nodes_tuple = tuple(sorted(G.nodes()))
+                edges_tuple = tuple(sorted((e[0], e[1]) for e in G.edges()))
+                pos = compute_network_layout(nodes_tuple, edges_tuple)
 
                 # Create edge trace
                 edge_x = []
@@ -2313,6 +2355,11 @@ def page_visualizations():
                 # Sort examples by confidence
                 examples = sorted(code_info['examples'], key=lambda x: x['confidence'], reverse=True)
 
+                # Pre-compute text column and lookup dictionary for efficient filtering
+                text_col = get_text_column(tuple(results_df.columns))
+                # Create text-to-row lookup to avoid repeated DataFrame filtering
+                text_to_row = {row[text_col]: row for _, row in results_df.iterrows()}
+
                 # Apply filters
                 filtered_examples = []
                 for example in examples:
@@ -2326,10 +2373,9 @@ def page_visualizations():
 
                     # Multiple codes filter
                     if show_multi_codes_only:
-                        # Find this response in results_df to check number of codes
-                        text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
-                        matching_rows = results_df[results_df[text_col] == example['text']]
-                        if len(matching_rows) > 0 and matching_rows.iloc[0]['num_codes'] <= 1:
+                        # Use lookup dictionary instead of DataFrame filtering
+                        row = text_to_row.get(example['text'])
+                        if row is not None and row['num_codes'] <= 1:
                             continue
 
                     filtered_examples.append(example)
@@ -2360,18 +2406,17 @@ def page_visualizations():
                         )
 
                     with col_exp2:
-                        # Prepare CSV export
+                        # Prepare CSV export using pre-computed lookup
                         csv_data = []
-                        text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
 
                         for ex in filtered_examples:
-                            # Find associated codes for this response
-                            matching_rows = results_df[results_df[text_col] == ex['text']]
+                            # Use lookup dictionary instead of DataFrame filtering
+                            row = text_to_row.get(ex['text'])
                             other_codes = ""
                             num_codes = 1
 
-                            if len(matching_rows) > 0:
-                                row_codes = matching_rows.iloc[0]['assigned_codes']
+                            if row is not None:
+                                row_codes = row['assigned_codes']
                                 num_codes = len(row_codes)
                                 other_code_labels = [coder.codebook[c]['label'] for c in row_codes if c != selected_code and c in coder.codebook]
                                 other_codes = ', '.join(other_code_labels)
@@ -2410,18 +2455,18 @@ def page_visualizations():
 
                 # Display filtered quotes
                 if filtered_examples:
-                    # Get text column for finding associated codes
-                    text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+                    # Use pre-computed text_to_row lookup for efficient code lookup
 
                     for i, example in enumerate(filtered_examples[:n_quotes], 1):
                         with st.container():
-                            # Find this response in results_df to get all assigned codes
-                            matching_rows = results_df[results_df[text_col] == example['text']]
+                            # Use lookup dictionary instead of DataFrame filtering
+                            row = text_to_row.get(example['text'])
                             has_multiple_codes = False
                             other_code_labels = []
+                            row_codes = []
 
-                            if len(matching_rows) > 0:
-                                row_codes = matching_rows.iloc[0]['assigned_codes']
+                            if row is not None:
+                                row_codes = row['assigned_codes']
                                 has_multiple_codes = len(row_codes) > 1
                                 other_code_labels = [coder.codebook[c]['label'] for c in row_codes if c != selected_code and c in coder.codebook]
 
@@ -2518,8 +2563,8 @@ def page_visualizations():
                     theme_responses = theme_info['responses']
 
                     if theme_responses:
-                        # Get text column name
-                        text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+                        # Get text column name using cached function
+                        text_col = get_text_column(tuple(results_df.columns))
 
                         # Apply filters
                         filtered_responses = []
