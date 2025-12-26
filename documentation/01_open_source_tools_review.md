@@ -214,8 +214,6 @@ This combination covers all needs without redundancy.
 | Tool | Purpose | Justification |
 |------|---------|---------------|
 | **wordcloud** | Word cloud generation | Simple, popular library for visual exploration |
-| **sqlalchemy** | Database ORM | Standard Python ORM for optional database persistence |
-| **psycopg2-binary** | PostgreSQL adapter | Enable PostgreSQL backend for production deployments |
 | **python-docx** | Word document export | Generate formatted reports in .docx format |
 | **openpyxl, xlrd** | Excel I/O | Read/write Excel files for data import/export |
 
@@ -297,14 +295,12 @@ All dependencies use permissive open source licenses compatible with both academ
 | streamlit | Apache 2.0 | ✓ Yes | Required (notice) |
 | networkx | BSD 3-Clause | ✓ Yes | Recommended |
 | wordcloud | MIT | ✓ Yes | Required (notice) |
-| sqlalchemy | MIT | ✓ Yes | Required (notice) |
-| psycopg2-binary | LGPL 3.0 | ✓ Yes (as library) | Required |
 | python-docx | MIT | ✓ Yes | Required (notice) |
 | openpyxl | MIT | ✓ Yes | Required (notice) |
 | xlrd | BSD 3-Clause | ✓ Yes | Recommended |
 
 **Key Notes:**
-- **LGPL libraries** (gensim, psycopg2): Can be used in commercial applications when included as libraries (dynamic linking). No requirement to open-source your application code.
+- **LGPL libraries** (gensim): Can be used in commercial applications when included as libraries (dynamic linking). No requirement to open-source your application code.
 - **MIT/Apache 2.0**: Require license/notice inclusion in distributions
 - **BSD 3-Clause**: Requires copyright notice, very permissive
 - All licenses permit modification, distribution, and commercial use

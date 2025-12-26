@@ -19,7 +19,7 @@ Interactive web interface for ML-based coding - no coding required!
 - **Code Frames**: Systematic coding structures for categorizing qualitative data
 - **Theme Analysis**: Identification and analysis of recurring patterns and themes
 - **Multi-level Categorization**: Hierarchical classification of coded data
-- **Data Loading**: Support for multiple data sources (CSV, Excel, SQLite, PostgreSQL)
+- **Data Loading**: Support for multiple data sources (CSV, Excel, JSON)
 - **Interactive Visualizations**: Rich visualizations using Plotly and Seaborn
 - **Robust Error Handling**: Comprehensive logging and error management
 - **Code Quality**: Automated testing and linting via Makefile
@@ -168,15 +168,6 @@ df = loader.load_excel('data/responses.xlsx', sheet_name='Survey')
 
 # From JSON (standard or JSON Lines)
 df = loader.load_json('data/responses.json', lines=True)
-
-# From SQLite
-df = loader.load_from_sqlite('data/survey.db', 'SELECT * FROM responses')
-
-# From PostgreSQL
-df = loader.load_from_postgres(
-    'postgresql://user:pass@localhost:5432/db',
-    'SELECT * FROM responses'
-)
 ```
 
 ### 2. Define Code Frames
@@ -410,7 +401,7 @@ make docs
 
 ### Input Data Requirements
 
-Your data should be in CSV, Excel, or database format with at least one column containing text responses:
+Your data should be in CSV, Excel, or JSON format with at least one column containing text responses:
 
 | id | response | metadata |
 |----|----------|----------|
@@ -464,7 +455,6 @@ The framework includes robust error handling:
 
 - File validation before loading
 - Empty data detection
-- Database connection error management
 - Logging of all operations
 - Graceful degradation for missing data
 
@@ -487,16 +477,6 @@ with pd.ExcelWriter('output/analysis_results.xlsx') as writer:
     df.to_excel(writer, sheet_name='Coded Data')
     code_summary.to_excel(writer, sheet_name='Code Summary')
     theme_summary.to_excel(writer, sheet_name='Themes')
-```
-
-### Database Export
-
-```python
-# Save results to database
-from sqlalchemy import create_engine
-
-engine = create_engine('postgresql://localhost/analysis_db')
-df.to_sql('coded_responses', engine, if_exists='replace')
 ```
 
 ## Configuration
@@ -544,12 +524,6 @@ pip install -r requirements.txt --upgrade
 ```bash
 # Solution: Check that codes are being applied correctly
 print(df['codes'].value_counts())
-```
-
-**Issue**: Database connection failures
-```bash
-# Solution: Verify connection string and credentials
-# Test connection separately before running full analysis
 ```
 
 ## Contributing
@@ -605,7 +579,6 @@ If you use this framework in your research, please cite:
 Built with:
 - Pandas for data manipulation
 - Plotly and Seaborn for visualizations
-- SQLAlchemy for database connectivity
 - Jupyter for interactive analysis
 
 ## Roadmap
