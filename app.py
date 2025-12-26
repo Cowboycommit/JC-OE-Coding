@@ -45,35 +45,40 @@ import networkx as nx
 
 
 # Cached computation functions to prevent UI hangs on visualization page
+# Using hash_funcs to properly cache DataFrame-derived computations
+
+def _get_data_hash(results_df):
+    """Generate a hash key for caching based on DataFrame content."""
+    # Use shape and first/last values as a quick hash proxy
+    return (len(results_df), tuple(results_df.columns), id(results_df))
+
+
 @st.cache_data(show_spinner=False)
-def compute_cooccurrence_matrix(_assigned_codes_tuple, codes_list):
-    """Compute co-occurrence matrix with caching to prevent recalculation on every render."""
+def compute_cooccurrence_matrix(data_hash, _results_df, codes_list):
+    """Compute co-occurrence matrix with caching."""
     n = len(codes_list)
     code_to_idx = {code: i for i, code in enumerate(codes_list)}
     cooccur = np.zeros((n, n))
 
-    for assigned_codes in _assigned_codes_tuple:
-        # Only process pairs of codes that were actually assigned
+    for assigned_codes in _results_df['assigned_codes']:
         for code1, code2 in combinations(assigned_codes, 2):
             if code1 in code_to_idx and code2 in code_to_idx:
                 i, j = code_to_idx[code1], code_to_idx[code2]
                 cooccur[i, j] += 1
-                cooccur[j, i] += 1  # Symmetric matrix
+                cooccur[j, i] += 1
 
-        # Diagonal: each code co-occurs with itself
         for code in assigned_codes:
             if code in code_to_idx:
-                i = code_to_idx[code]
-                cooccur[i, i] += 1
+                cooccur[code_to_idx[code], code_to_idx[code]] += 1
 
     return cooccur
 
 
 @st.cache_data(show_spinner=False)
-def compute_edge_weights(_assigned_codes_tuple):
+def compute_edge_weights(data_hash, _results_df):
     """Compute network edge weights with caching."""
     edge_weights = {}
-    for assigned_codes in _assigned_codes_tuple:
+    for assigned_codes in _results_df['assigned_codes']:
         for i, code1 in enumerate(assigned_codes):
             for code2 in assigned_codes[i+1:]:
                 edge = tuple(sorted([code1, code2]))
@@ -82,15 +87,14 @@ def compute_edge_weights(_assigned_codes_tuple):
 
 
 @st.cache_data(show_spinner=False)
-def compute_network_layout(_nodes_tuple, _edges_tuple):
+def compute_network_layout(nodes_tuple, edges_tuple):
     """Compute spring layout with caching - this is very expensive."""
     G = nx.Graph()
-    G.add_nodes_from(_nodes_tuple)
-    G.add_edges_from(_edges_tuple)
+    G.add_nodes_from(nodes_tuple)
+    G.add_edges_from(edges_tuple)
 
     if len(G.nodes()) > 0 and len(G.edges()) > 0:
-        pos = nx.spring_layout(G, k=2, iterations=50, seed=42)
-        return pos
+        return nx.spring_layout(G, k=2, iterations=50, seed=42)
     return {}
 
 
@@ -98,6 +102,75 @@ def compute_network_layout(_nodes_tuple, _edges_tuple):
 def get_text_column(columns_tuple):
     """Get text column name with caching."""
     return [col for col in columns_tuple if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+
+
+@st.cache_data(show_spinner=False)
+def build_text_to_row_lookup(data_hash, _results_df, text_col):
+    """Build text-to-row lookup dictionary with caching (replaces slow iterrows)."""
+    # Use vectorized approach instead of iterrows
+    return dict(zip(_results_df[text_col], _results_df.to_dict('records')))
+
+
+@st.cache_data(show_spinner=False)
+def compute_code_frequency(data_hash, _results_df, _codebook):
+    """Compute code frequency for theme prevalence fallback."""
+    code_freq = {}
+    for codes in _results_df['assigned_codes']:
+        for code in codes:
+            if code in _codebook:
+                label = _codebook[code]['label']
+                code_freq[label] = code_freq.get(label, 0) + 1
+    return code_freq
+
+
+@st.cache_data(show_spinner=False)
+def compute_all_confidences(data_hash, _results_df):
+    """Flatten all confidence scores with caching."""
+    return [conf for confs in _results_df['confidence_scores'] for conf in confs]
+
+
+@st.cache_data(show_spinner=False)
+def build_feature_name_index(_feature_names_tuple):
+    """Build feature name to index mapping for O(1) lookups."""
+    return {name: idx for idx, name in enumerate(_feature_names_tuple)}
+
+
+@st.cache_data(show_spinner=False)
+def compute_coherence_metrics(model_id, _feature_matrix, _labels):
+    """Compute coherence metrics with caching - these are expensive O(n²) operations."""
+    from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+
+    metrics = {}
+    try:
+        if len(set(_labels)) > 1:
+            # Convert sparse matrix to dense if needed for some metrics
+            dense_matrix = _feature_matrix.toarray() if hasattr(_feature_matrix, 'toarray') else _feature_matrix
+
+            metrics['Silhouette Score'] = silhouette_score(_feature_matrix, _labels)
+            metrics['Calinski-Harabasz Score'] = calinski_harabasz_score(dense_matrix, _labels)
+            metrics['Davies-Bouldin Score'] = davies_bouldin_score(dense_matrix, _labels)
+    except Exception:
+        pass
+    return metrics
+
+
+@st.cache_data(show_spinner=False)
+def get_cluster_labels(model_id, _model, _feature_matrix):
+    """Get cluster labels from model with caching."""
+    if hasattr(_model, 'labels_'):
+        return _model.labels_
+    elif hasattr(_model, 'components_'):  # LDA/NMF
+        doc_topic_matrix = _model.transform(_feature_matrix)
+        return doc_topic_matrix.argmax(axis=1)
+    else:
+        return _model.predict(_feature_matrix)
+
+
+@st.cache_data(show_spinner=False)
+def get_top_codes_cached(codebook_hash, _coder, n):
+    """Cached wrapper for get_top_codes to avoid recalculation on every render."""
+    return get_top_codes(_coder, n=n)
+
 
 # Page configuration
 st.set_page_config(
@@ -1308,8 +1381,9 @@ def page_results_overview():
             st.markdown(insight)
 
     with tab2:
-        # Top codes
-        top_codes_df = get_top_codes(coder, n=10)
+        # Top codes (using cached version)
+        codebook_hash = len(coder.codebook)  # Simple hash based on codebook size
+        top_codes_df = get_top_codes_cached(codebook_hash, coder, n=10)
 
         # Display as styled table
         st.dataframe(
@@ -1438,7 +1512,8 @@ def page_visualizations():
             - Even vs uneven distribution across codes
             """)
 
-        top_codes_df = get_top_codes(coder, n=15)
+        codebook_hash = len(coder.codebook)
+        top_codes_df = get_top_codes_cached(codebook_hash, coder, n=15)
 
         fig = px.bar(
             top_codes_df,
@@ -1499,9 +1574,8 @@ def page_visualizations():
 
         # Build co-occurrence matrix using cached function
         codes = list(coder.codebook.keys())
-        # Convert to tuple for caching (lists are not hashable)
-        assigned_codes_tuple = tuple(tuple(ac) for ac in results_df['assigned_codes'])
-        cooccur = compute_cooccurrence_matrix(assigned_codes_tuple, codes)
+        data_hash = _get_data_hash(results_df)
+        cooccur = compute_cooccurrence_matrix(data_hash, results_df, codes)
 
         labels = [coder.codebook[c]['label'] for c in codes]
 
@@ -1587,8 +1661,8 @@ def page_visualizations():
                 )
 
             # Compute edge weights using cached function
-            assigned_codes_tuple = tuple(tuple(ac) for ac in results_df['assigned_codes'])
-            edge_weights = compute_edge_weights(assigned_codes_tuple)
+            data_hash = _get_data_hash(results_df)
+            edge_weights = compute_edge_weights(data_hash, results_df)
 
             # Preset buttons for threshold
             st.markdown("**Network density presets:**")
@@ -1743,7 +1817,8 @@ def page_visualizations():
 
             # Fallback: Simple scatter plot
             st.markdown("### Alternative View: Code Distribution")
-            top_codes_df = get_top_codes(coder, n=20)
+            codebook_hash = len(coder.codebook)
+            top_codes_df = get_top_codes_cached(codebook_hash, coder, n=20)
 
             fig = px.scatter(
                 top_codes_df,
@@ -1785,9 +1860,9 @@ def page_visualizations():
     with tab5:
         st.markdown("### Confidence Score Distribution")
 
-        all_confidences = [
-            conf for confs in results_df['confidence_scores'] for conf in confs
-        ]
+        # Use cached function to compute all confidences
+        data_hash = _get_data_hash(results_df)
+        all_confidences = compute_all_confidences(data_hash, results_df)
 
         if all_confidences:
             fig = px.histogram(
@@ -1836,9 +1911,14 @@ def page_visualizations():
             help="Number of top terms to show for each topic"
         )
 
-        # Get top codes by frequency
-        top_codes_df = get_top_codes(coder, n=n_codes_to_show)
+        # Get top codes by frequency (cached)
+        codebook_hash = len(coder.codebook)
+        top_codes_df = get_top_codes_cached(codebook_hash, coder, n=n_codes_to_show)
         selected_codes = [code for code in codes if coder.codebook[code]['label'] in top_codes_df['Label'].values][:n_codes_to_show]
+
+        # Pre-build feature name index for O(1) lookups (critical performance fix)
+        feature_names = coder.vectorizer.get_feature_names_out()
+        feature_name_index = build_feature_name_index(tuple(feature_names))
 
         # Create heatmap data for topic-term importance
         term_data = []
@@ -1850,11 +1930,10 @@ def page_visualizations():
             if hasattr(coder.model, 'components_'):  # LDA or NMF
                 code_idx = int(code.split('_')[1]) - 1
                 topic_weights = coder.model.components_[code_idx]
-                feature_names = coder.vectorizer.get_feature_names_out()
 
-                for i, term in enumerate(keywords):
-                    if term in feature_names:
-                        term_idx = list(feature_names).index(term)
+                for term in keywords:
+                    if term in feature_name_index:
+                        term_idx = feature_name_index[term]
                         weight = topic_weights[term_idx]
                         term_data.append({
                             'Topic': label,
@@ -1864,11 +1943,10 @@ def page_visualizations():
             else:  # K-Means
                 code_idx = int(code.split('_')[1]) - 1
                 cluster_center = coder.model.cluster_centers_[code_idx]
-                feature_names = coder.vectorizer.get_feature_names_out()
 
-                for i, term in enumerate(keywords):
-                    if term in feature_names:
-                        term_idx = list(feature_names).index(term)
+                for term in keywords:
+                    if term in feature_name_index:
+                        term_idx = feature_name_index[term]
                         weight = cluster_center[term_idx]
                         term_data.append({
                             'Topic': label,
@@ -1985,12 +2063,9 @@ def page_visualizations():
             # Use codes as themes fallback
             st.info("Theme analysis not performed. Showing code distribution instead.")
 
-            # Get code frequencies
-            code_freq = {}
-            for codes in results_df['assigned_codes']:
-                for code in codes:
-                    label = coder.codebook[code]['label']
-                    code_freq[label] = code_freq.get(label, 0) + 1
+            # Get code frequencies using cached function
+            data_hash = _get_data_hash(results_df)
+            code_freq = compute_code_frequency(data_hash, results_df, coder.codebook)
 
             if code_freq:
                 freq_df = pd.DataFrame([
@@ -2137,136 +2212,116 @@ def page_visualizations():
 
         if coder.feature_matrix is not None and hasattr(coder, 'model'):
             try:
-                # Calculate coherence scores
-                with st.spinner("Calculating topic coherence scores..."):
-                    from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+                # Use cached functions for expensive coherence calculations
+                # Create a model ID for cache key based on model type and shape
+                model_id = (type(coder.model).__name__, coder.feature_matrix.shape)
 
-                    # Get cluster labels
-                    if hasattr(coder.model, 'labels_'):
-                        labels = coder.model.labels_
-                    elif hasattr(coder.model, 'components_'):  # LDA/NMF
-                        doc_topic_matrix = coder.model.transform(coder.feature_matrix)
-                        labels = doc_topic_matrix.argmax(axis=1)
-                    else:
-                        labels = coder.model.predict(coder.feature_matrix)
+                # Get cluster labels using cached function
+                labels = get_cluster_labels(model_id, coder.model, coder.feature_matrix)
 
-                    # Calculate metrics
-                    metrics = {}
+                # Calculate metrics using cached function
+                metrics = compute_coherence_metrics(model_id, coder.feature_matrix, labels)
 
-                    if len(set(labels)) > 1:
-                        try:
-                            metrics['Silhouette Score'] = silhouette_score(coder.feature_matrix, labels)
-                            metrics['Calinski-Harabasz Score'] = calinski_harabasz_score(
-                                coder.feature_matrix.toarray() if hasattr(coder.feature_matrix, 'toarray') else coder.feature_matrix,
-                                labels
-                            )
-                            metrics['Davies-Bouldin Score'] = davies_bouldin_score(
-                                coder.feature_matrix.toarray() if hasattr(coder.feature_matrix, 'toarray') else coder.feature_matrix,
-                                labels
-                            )
-                        except Exception as e:
-                            st.warning(f"Could not calculate some metrics: {str(e)}")
+                # Display metrics
+                st.markdown("#### Clustering Quality Metrics")
 
-                    # Display metrics
-                    st.markdown("#### Clustering Quality Metrics")
+                col1, col2, col3 = st.columns(3)
 
-                    col1, col2, col3 = st.columns(3)
+                with col1:
+                    if 'Silhouette Score' in metrics:
+                        score = metrics['Silhouette Score']
+                        st.metric(
+                            "Silhouette Score",
+                            f"{score:.3f}",
+                            help="Range: [-1, 1]. Higher is better. >0.5 is good."
+                        )
+                        if score > 0.5:
+                            st.success("Excellent separation")
+                        elif score > 0.25:
+                            st.info("Moderate separation")
+                        else:
+                            st.warning("Poor separation")
 
-                    with col1:
-                        if 'Silhouette Score' in metrics:
-                            score = metrics['Silhouette Score']
-                            st.metric(
-                                "Silhouette Score",
-                                f"{score:.3f}",
-                                help="Range: [-1, 1]. Higher is better. >0.5 is good."
-                            )
-                            if score > 0.5:
-                                st.success("Excellent separation")
-                            elif score > 0.25:
-                                st.info("Moderate separation")
-                            else:
-                                st.warning("Poor separation")
+                with col2:
+                    if 'Calinski-Harabasz Score' in metrics:
+                        score = metrics['Calinski-Harabasz Score']
+                        st.metric(
+                            "Calinski-Harabasz",
+                            f"{score:.1f}",
+                            help="Higher is better. Measures cluster density and separation."
+                        )
 
-                    with col2:
-                        if 'Calinski-Harabasz Score' in metrics:
-                            score = metrics['Calinski-Harabasz Score']
-                            st.metric(
-                                "Calinski-Harabasz",
-                                f"{score:.1f}",
-                                help="Higher is better. Measures cluster density and separation."
-                            )
+                with col3:
+                    if 'Davies-Bouldin Score' in metrics:
+                        score = metrics['Davies-Bouldin Score']
+                        st.metric(
+                            "Davies-Bouldin",
+                            f"{score:.3f}",
+                            help="Range: [0, ∞]. Lower is better. <1.0 is good."
+                        )
+                        if score < 1.0:
+                            st.success("Good separation")
+                        elif score < 2.0:
+                            st.info("Moderate separation")
+                        else:
+                            st.warning("Poor separation")
 
-                    with col3:
-                        if 'Davies-Bouldin Score' in metrics:
-                            score = metrics['Davies-Bouldin Score']
-                            st.metric(
-                                "Davies-Bouldin",
-                                f"{score:.3f}",
-                                help="Range: [0, ∞]. Lower is better. <1.0 is good."
-                            )
-                            if score < 1.0:
-                                st.success("Good separation")
-                            elif score < 2.0:
-                                st.info("Moderate separation")
-                            else:
-                                st.warning("Poor separation")
+                # Per-topic coherence
+                st.markdown("#### Per-Topic Statistics")
 
-                    # Per-topic coherence
-                    st.markdown("#### Per-Topic Statistics")
+                topic_stats = []
+                for code in coder.codebook.keys():
+                    code_idx = int(code.split('_')[1]) - 1
+                    topic_docs = (labels == code_idx).sum()
 
-                    topic_stats = []
-                    for code in coder.codebook.keys():
-                        code_idx = int(code.split('_')[1]) - 1
-                        topic_docs = (labels == code_idx).sum()
+                    topic_stats.append({
+                        'Topic': coder.codebook[code]['label'],
+                        'Documents': topic_docs,
+                        'Percentage': f"{(topic_docs / len(labels) * 100):.1f}%",
+                        'Avg Confidence': coder.codebook[code]['avg_confidence']
+                    })
 
-                        topic_stats.append({
-                            'Topic': coder.codebook[code]['label'],
-                            'Documents': topic_docs,
-                            'Percentage': f"{(topic_docs / len(labels) * 100):.1f}%",
-                            'Avg Confidence': coder.codebook[code]['avg_confidence']
-                        })
+                stats_df = pd.DataFrame(topic_stats).sort_values('Documents', ascending=False)
 
-                    stats_df = pd.DataFrame(topic_stats).sort_values('Documents', ascending=False)
+                # Visualize topic sizes
+                fig = px.bar(
+                    stats_df,
+                    x='Topic',
+                    y='Documents',
+                    title='Documents per Topic',
+                    color='Avg Confidence',
+                    color_continuous_scale='Viridis',
+                    text='Documents'
+                )
+                fig.update_traces(textposition='outside')
+                fig.update_layout(xaxis_tickangle=-45, height=400)
+                st.plotly_chart(fig, use_container_width=True)
 
-                    # Visualize topic sizes
-                    fig = px.bar(
-                        stats_df,
-                        x='Topic',
-                        y='Documents',
-                        title='Documents per Topic',
-                        color='Avg Confidence',
-                        color_continuous_scale='Viridis',
-                        text='Documents'
-                    )
-                    fig.update_traces(textposition='outside')
-                    fig.update_layout(xaxis_tickangle=-45, height=400)
-                    st.plotly_chart(fig, use_container_width=True)
+                # Display table
+                st.dataframe(stats_df, use_container_width=True)
 
-                    # Display table
-                    st.dataframe(stats_df, use_container_width=True)
+                # Interpretation guide
+                with st.expander("📚 How to interpret these metrics"):
+                    st.markdown("""
+                    **Silhouette Score** (-1 to 1):
+                    - Measures how similar documents are to their own cluster vs other clusters
+                    - > 0.7: Strong, well-separated clusters
+                    - 0.5-0.7: Reasonable structure
+                    - 0.25-0.5: Weak structure, overlapping clusters
+                    - < 0.25: Poor clustering, consider different parameters
 
-                    # Interpretation guide
-                    with st.expander("📚 How to interpret these metrics"):
-                        st.markdown("""
-                        **Silhouette Score** (-1 to 1):
-                        - Measures how similar documents are to their own cluster vs other clusters
-                        - > 0.7: Strong, well-separated clusters
-                        - 0.5-0.7: Reasonable structure
-                        - 0.25-0.5: Weak structure, overlapping clusters
-                        - < 0.25: Poor clustering, consider different parameters
+                    **Calinski-Harabasz Score** (0 to ∞):
+                    - Ratio of between-cluster to within-cluster dispersion
+                    - Higher values indicate better-defined clusters
+                    - No fixed threshold, compare across different n_codes
 
-                        **Calinski-Harabasz Score** (0 to ∞):
-                        - Ratio of between-cluster to within-cluster dispersion
-                        - Higher values indicate better-defined clusters
-                        - No fixed threshold, compare across different n_codes
-
-                        **Davies-Bouldin Score** (0 to ∞):
-                        - Average similarity between each cluster and its most similar cluster
-                        - Lower is better
-                        - < 1.0: Good separation
-                        - 1.0-2.0: Moderate separation
-                        - > 2.0: Poor separation, clusters may be too similar
-                        """)
+                    **Davies-Bouldin Score** (0 to ∞):
+                    - Average similarity between each cluster and its most similar cluster
+                    - Lower is better
+                    - < 1.0: Good separation
+                    - 1.0-2.0: Moderate separation
+                    - > 2.0: Poor separation, clusters may be too similar
+                    """)
 
             except Exception as e:
                 st.error(f"Error calculating coherence: {str(e)}")
@@ -2357,8 +2412,9 @@ def page_visualizations():
 
                 # Pre-compute text column and lookup dictionary for efficient filtering
                 text_col = get_text_column(tuple(results_df.columns))
-                # Create text-to-row lookup to avoid repeated DataFrame filtering
-                text_to_row = {row[text_col]: row for _, row in results_df.iterrows()}
+                # Use cached lookup function (much faster than iterrows)
+                data_hash = _get_data_hash(results_df)
+                text_to_row = build_text_to_row_lookup(data_hash, results_df, text_col)
 
                 # Apply filters
                 filtered_examples = []
