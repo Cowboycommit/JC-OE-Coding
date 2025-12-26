@@ -29,3 +29,173 @@ id,response,respondent_id,timestamp,topic
 28,Digital fashion and NFTs represent an interesting future,R028,2024-04-28,digital
 29,Workplace dress codes are becoming more relaxed,R029,2024-04-29,workplace
 30,Fashion as self-care boosts confidence and wellbeing,R030,2024-04-30,wellbeing
+31,Thrifting is both economical and environmentally conscious,R031,2024-05-01,thrift
+32,The fashion industry exploits workers in developing countries,R032,2024-05-02,labor_rights
+33,Capsule wardrobes simplify daily outfit choices,R033,2024-05-03,capsule
+34,Fashion trends cycle faster than ever before,R034,2024-05-04,trends
+35,Vintage luxury items hold their value better,R035,2024-05-05,investment
+36,Sustainable fabrics are improving in quality and variety,R036,2024-05-06,materials
+37,Fashion should celebrate all body types equally,R037,2024-05-07,body_positivity
+38,Online shopping has transformed retail experiences,R038,2024-05-08,ecommerce
+39,Handmade and artisanal fashion deserves premium pricing,R039,2024-05-09,artisanal
+40,Fast fashion workers deserve fair wages and conditions,R040,2024-05-10,labor_rights
+41,Seasonal fashion trends create unnecessary consumption,R041,2024-05-11,sustainability
+42,Fashion magazines are losing relevance to digital media,R042,2024-05-12,media
+43,Upcycling gives new life to old garments,R043,2024-05-13,upcycling
+44,The fashion industry lacks transparency in supply chains,R044,2024-05-14,transparency
+45,Wearing secondhand is no longer stigmatized,R045,2024-05-15,resale
+46,Fashion can be a powerful form of activism,R046,2024-05-16,activism
+47,Designer collaborations with fast fashion are problematic,R047,2024-05-17,collaboration
+48,Natural fibers are better for skin and environment,R048,2024-05-18,materials
+49,Fashion should embrace aging and mature beauty,R049,2024-05-19,ageism
+50,The uniform trend reduces fashion waste effectively,R050,2024-05-20,minimalism
+51,Textile waste is a major environmental crisis,R051,2024-05-21,waste
+52,Fashion brands need better diversity in leadership,R052,2024-05-22,diversity
+53,Athleisure blurs the line between function and fashion,R053,2024-05-23,athleisure
+54,Luxury fashion prices are becoming increasingly unjustified,R054,2024-05-24,luxury
+55,Fashion should be accessible to people with disabilities,R055,2024-05-25,accessibility
+56,Color psychology in fashion influences mood and perception,R056,2024-05-26,psychology
+57,The fashion calendar system needs fundamental reform,R057,2024-05-27,industry
+58,Indigenous fashion traditions deserve protection and recognition,R058,2024-05-28,cultural
+59,Fashion education is too expensive and exclusionary,R059,2024-05-29,education
+60,Peer pressure drives unnecessary fashion consumption,R060,2024-05-30,consumer_behavior
+61,Fashion advertising perpetuates unrealistic beauty standards,R061,2024-05-31,advertising
+62,Slow fashion movement promotes mindful consumption,R062,2024-06-01,slow_fashion
+63,Fashion knockoffs harm both creators and consumers,R063,2024-06-02,intellectual_property
+64,Seasonal sales encourage overconsumption,R064,2024-06-03,sales
+65,Fashion models need better working conditions and protections,R065,2024-06-04,labor_rights
+66,Personal tailoring creates better-fitting wardrobes,R066,2024-06-05,tailoring
+67,Fashion nostalgia drives current trend cycles,R067,2024-06-06,trends
+68,Climate change will reshape fashion production locations,R068,2024-06-07,climate
+69,Fashion rental reduces ownership but raises hygiene concerns,R069,2024-06-08,rental
+70,The beauty standard in fashion is too Eurocentric,R070,2024-06-09,diversity
+71,Fashion technology innovations are exciting but niche,R071,2024-06-10,technology
+72,Wardrobe organization impacts daily stress levels,R072,2024-06-11,wellbeing
+73,Fashion should prioritize longevity over novelty,R073,2024-06-12,quality
+74,Children's fashion grows too quickly to justify high prices,R074,2024-06-13,children
+75,Fashion documentaries expose industry dark sides,R075,2024-06-14,media
+76,Dress codes in schools limit self-expression unfairly,R076,2024-06-15,education
+77,Fashion pollution affects water systems globally,R077,2024-06-16,pollution
+78,Maternity fashion deserves more stylish options,R078,2024-06-17,maternity
+79,Fashion resale platforms democratize luxury access,R079,2024-06-18,resale
+80,The fashion industry needs stronger regulation,R080,2024-06-19,regulation
+81,Fashion choices reflect personal values and identity,R081,2024-06-20,personal_style
+82,Sustainable fashion certifications lack standardization,R082,2024-06-21,certification
+83,Fashion internships are often exploitative and unpaid,R083,2024-06-22,labor_rights
+84,Modest fashion is underserved by mainstream brands,R084,2024-06-23,modest
+85,Fashion repair skills should be taught universally,R085,2024-06-24,repair
+86,Microplastics from synthetic fabrics harm ocean life,R086,2024-06-25,environment
+87,Fashion events create enormous waste and emissions,R087,2024-06-26,events
+88,Personal shopping services reduce returns and waste,R088,2024-06-27,services
+89,Fashion brands greenwash without meaningful change,R089,2024-06-28,greenwashing
+90,Traditional cultural dress should be preserved,R090,2024-06-29,cultural
+91,Fashion consumption is linked to mental health,R091,2024-06-30,psychology
+92,Shoe production has severe environmental impacts,R092,2024-07-01,footwear
+93,Fashion should celebrate cultural diversity authentically,R093,2024-07-02,diversity
+94,The capsule wardrobe concept is overly restrictive,R094,2024-07-03,minimalism
+95,Fashion critiques can be constructive or destructive,R095,2024-07-04,criticism
+96,Ethical fashion requires systemic industry change,R096,2024-07-05,ethics
+97,Fashion trends exploit consumer insecurity,R097,2024-07-06,consumer_behavior
+98,Bespoke clothing creates less waste than mass production,R098,2024-07-07,custom
+99,Fashion industry diversity initiatives need accountability,R099,2024-07-08,diversity
+100,Secondhand luxury authentication protects consumers,R100,2024-07-09,authentication
+101,Fashion choices signal social status and belonging,R101,2024-07-10,sociology
+102,Water usage in textile production is unsustainable,R102,2024-07-11,water
+103,Fashion brands should pay living wages globally,R103,2024-07-12,labor_rights
+104,Personal style evolution reflects life changes,R104,2024-07-13,personal_style
+105,Fashion sampling creates significant material waste,R105,2024-07-14,waste
+106,Plus-size fashion should not cost more,R106,2024-07-15,inclusivity
+107,Fashion journalism shapes consumer awareness,R107,2024-07-16,journalism
+108,Wardrobe audits reveal overconsumption patterns,R108,2024-07-17,consumer_behavior
+109,Fashion industry needs better mental health support,R109,2024-07-18,wellbeing
+110,Vintage fashion preservation is culturally important,R110,2024-07-19,preservation
+111,Fashion advertising targets vulnerable demographics,R111,2024-07-20,advertising
+112,Circular fashion economy reduces environmental impact,R112,2024-07-21,circular_economy
+113,Fashion choices can empower or constrain identity,R113,2024-07-22,identity
+114,Textile recycling technology needs investment,R114,2024-07-23,recycling
+115,Fashion week schedules are grueling and unhealthy,R115,2024-07-24,fashion_week
+116,Workwear fashion balances professionalism and personality,R116,2024-07-25,workplace
+117,Fashion brands need transparent pricing breakdowns,R117,2024-07-26,transparency
+118,Seasonal fashion storage creates space challenges,R118,2024-07-27,storage
+119,Fashion choices affect first impressions significantly,R119,2024-07-28,psychology
+120,Sustainable packaging in fashion is increasingly important,R120,2024-07-29,packaging
+121,Fashion mentorship programs develop industry talent,R121,2024-07-30,mentorship
+122,Impulse fashion purchases often lead to regret,R122,2024-07-31,consumer_behavior
+123,Fashion should accommodate pregnancy and postpartum bodies,R123,2024-08-01,maternity
+124,Dyeing processes pollute water sources heavily,R124,2024-08-02,pollution
+125,Fashion collections should reflect customer needs,R125,2024-08-03,design
+126,Online fashion returns create logistics nightmares,R126,2024-08-04,ecommerce
+127,Fashion activism drives meaningful industry change,R127,2024-08-05,activism
+128,Wardrobe planning reduces morning stress,R128,2024-08-06,organization
+129,Fashion industry ageism affects designers and models,R129,2024-08-07,ageism
+130,Traditional crafts in fashion deserve preservation,R130,2024-08-08,craftsmanship
+131,Fashion choices communicate nonverbal messages,R131,2024-08-09,communication
+132,Sustainable fashion requires consumer education,R132,2024-08-10,education
+133,Fashion brand loyalty is declining among young consumers,R133,2024-08-11,brand
+134,Costume history informs modern fashion design,R134,2024-08-12,history
+135,Fashion photography diversity is improving slowly,R135,2024-08-13,photography
+136,Wardrobe versatility reduces clothing needs,R136,2024-08-14,versatility
+137,Fashion industry networking is essential for success,R137,2024-08-15,networking
+138,Emotional attachment to clothes reduces waste,R138,2024-08-16,psychology
+139,Fashion supply chains need radical transparency,R139,2024-08-17,supply_chain
+140,Personal color analysis enhances wardrobe effectiveness,R140,2024-08-18,styling
+141,Fashion weeks prioritize spectacle over wearability,R141,2024-08-19,fashion_week
+142,Collaborative consumption models reduce fashion waste,R142,2024-08-20,sharing_economy
+143,Fashion heritage brands balance tradition and innovation,R143,2024-08-21,heritage
+144,Sizing inconsistency frustrates online shoppers,R144,2024-08-22,sizing
+145,Fashion choices reflect generational values,R145,2024-08-23,generations
+146,Textile innovation could revolutionize sustainability,R146,2024-08-24,innovation
+147,Fashion internships should provide real learning,R147,2024-08-25,education
+148,Wardrobe investment pieces justify higher costs,R148,2024-08-26,investment
+149,Fashion industry burnout rates are concerning,R149,2024-08-27,wellbeing
+150,Cultural fashion exchanges enrich global style,R150,2024-08-28,cultural_exchange
+151,Fashion choices evolve with confidence levels,R151,2024-08-29,confidence
+152,Deadstock fabric use reduces textile waste,R152,2024-08-30,sustainability
+153,Fashion criticism should be constructive not cruel,R153,2024-08-31,criticism
+154,Personalization technology improves fit and satisfaction,R154,2024-09-01,technology
+155,Fashion brands need better size range representation,R155,2024-09-02,inclusivity
+156,Wardrobe curation is an ongoing process,R156,2024-09-03,curation
+157,Fashion industry pay gaps reflect broader inequality,R157,2024-09-04,equality
+158,Seasonal wardrobe transitions require strategic planning,R158,2024-09-05,seasonal
+159,Fashion choices balance comfort and presentation,R159,2024-09-06,comfort
+160,Textile certifications help consumers make informed choices,R160,2024-09-07,certification
+161,Fashion entrepreneurship faces high barrier to entry,R161,2024-09-08,entrepreneurship
+162,Wardrobe staples form foundation of personal style,R162,2024-09-09,basics
+163,Fashion media representation affects self-image,R163,2024-09-10,media
+164,Repair cafes extend clothing lifespan effectively,R164,2024-09-11,repair
+165,Fashion choices express creativity and imagination,R165,2024-09-12,creativity
+166,Sustainable fashion requires industry-wide collaboration,R166,2024-09-13,collaboration
+167,Personal shopping habits reflect values and priorities,R167,2024-09-14,values
+168,Fashion technology integration enhances user experience,R168,2024-09-15,tech_integration
+169,Wardrobe documentation helps track consumption patterns,R169,2024-09-16,tracking
+170,Fashion education should emphasize ethical practices,R170,2024-09-17,ethics
+171,Clothing care knowledge extends garment longevity,R171,2024-09-18,care
+172,Fashion choices navigate professional expectations,R172,2024-09-19,professional
+173,Textile waste contributes to landfill overflow,R173,2024-09-20,waste
+174,Fashion brand transparency builds consumer trust,R174,2024-09-21,trust
+175,Wardrobe editing creates clarity and reduces clutter,R175,2024-09-22,organization
+176,Fashion accessibility improvements benefit everyone,R176,2024-09-23,accessibility
+177,Personal style journey involves experimentation,R177,2024-09-24,exploration
+178,Fashion resale value depends on brand and condition,R178,2024-09-25,resale_value
+179,Sustainable fashion investments pay long-term dividends,R179,2024-09-26,investment
+180,Fashion industry needs better work-life balance,R180,2024-09-27,work_life
+181,Wardrobe color palettes create cohesion,R181,2024-09-28,color
+182,Fashion choices adapt to lifestyle changes,R182,2024-09-29,lifestyle
+183,Ethical fashion prioritizes people and planet,R183,2024-09-30,ethics
+184,Personal style confidence comes from self-knowledge,R184,2024-10-01,self_knowledge
+185,Fashion rental services suit special occasions well,R185,2024-10-02,rental
+186,Wardrobe minimalism reduces decision overwhelm,R186,2024-10-03,minimalism
+187,Fashion industry innovation balances creativity and sustainability,R187,2024-10-04,innovation
+188,Personal shopping experiences create brand loyalty,R188,2024-10-05,customer_service
+189,Fashion choices reflect cultural identity proudly,R189,2024-10-06,identity
+190,Wardrobe quality assessment prevents poor purchases,R190,2024-10-07,quality_control
+191,Fashion trends should inspire not dictate choices,R191,2024-10-08,inspiration
+192,Sustainable materials cost more but last longer,R192,2024-10-09,durability
+193,Fashion consumption affects global resource distribution,R193,2024-10-10,resources
+194,Personal style authenticity attracts genuine connections,R194,2024-10-11,authenticity
+195,Fashion industry needs better diversity at all levels,R195,2024-10-12,diversity
+196,Wardrobe functionality should match lifestyle needs,R196,2024-10-13,functionality
+197,Fashion choices balance trends and timelessness,R197,2024-10-14,balance
+198,Ethical fashion certifications need stronger enforcement,R198,2024-10-15,enforcement
+199,Personal style evolution is natural and healthy,R199,2024-10-16,growth
+200,Fashion sustainability requires individual and collective action,R200,2024-10-17,collective_action
