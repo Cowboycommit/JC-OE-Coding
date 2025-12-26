@@ -15,6 +15,15 @@ import time
 from datetime import datetime
 from io import BytesIO
 import base64
+import matplotlib.pyplot as plt
+import re
+
+# Word cloud support (optional but recommended)
+try:
+    from wordcloud import WordCloud
+    WORDCLOUD_AVAILABLE = True
+except ImportError:
+    WORDCLOUD_AVAILABLE = False
 
 # Import helper modules
 from helpers.formatting import (
@@ -139,6 +148,35 @@ def precompute_all_visualizations(coder, results_df):
         c: f"{coder.codebook[c]['label']} ({coder.codebook[c]['count']} occurrences)"
         for c in codes_with_examples
     }
+
+    # 7. Word Cloud data (pre-compute word frequencies)
+    text_col = viz_data['text_column']
+    all_text = ' '.join(results_df[text_col].astype(str).tolist())
+    # Clean text for word cloud
+    cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
+    cleaned_text = ' '.join(cleaned_text.split())  # Normalize whitespace
+    viz_data['wordcloud_text'] = cleaned_text
+    viz_data['wordcloud_available'] = WORDCLOUD_AVAILABLE and len(cleaned_text) > 0
+
+    # 8. Sunburst chart data (hierarchical code structure)
+    sunburst_data = []
+    # Add codes with their relationships
+    for code_id, info in coder.codebook.items():
+        if info['count'] > 0:  # Only include active codes
+            sunburst_data.append({
+                'id': code_id,
+                'label': info['label'],
+                'parent': 'All Codes',
+                'value': info['count'],
+                'confidence': info['avg_confidence']
+            })
+    # Add root node
+    total_count = sum(item['value'] for item in sunburst_data)
+    viz_data['sunburst_data'] = sunburst_data
+    viz_data['sunburst_total'] = total_count
+
+    # 9. Scatter plot data (frequency vs confidence) - uses top_codes_df already computed
+    # Already have top_codes_df with 'Count' and 'Avg Confidence' columns
 
     return viz_data
 
@@ -1473,12 +1511,15 @@ def page_visualizations():
     viz_data = st.session_state.viz_data
     coder = st.session_state.coder
 
-    # Simple 4-tab layout (removed complex Quotes tab, simplified)
-    tab1, tab2, tab3, tab4 = st.tabs([
+    # 7-tab layout with new visualizations (word cloud, sunburst, scatter)
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "📊 Frequency",
         "🔥 Heatmap",
         "📉 Stats",
-        "💬 Quotes"
+        "💬 Quotes",
+        "☁️ Word Cloud",
+        "🌞 Sunburst",
+        "🔵 Scatter"
     ])
 
     # =========================================================================
@@ -1680,6 +1721,163 @@ def page_visualizations():
                         file_name=f"quotes_{selected_code}.txt",
                         mime="text/plain"
                     )
+
+    # =========================================================================
+    # TAB 5: Word Cloud (uses pre-computed text)
+    # =========================================================================
+    with tab5:
+        st.markdown("### Word Cloud")
+
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            st.markdown("""
+            **What this shows:** Visual representation of the most frequent words in responses.
+
+            **How to interpret:** Larger words = more frequent. Colors are for visual distinction.
+            """)
+
+        if viz_data.get('wordcloud_available', False):
+            wordcloud_text = viz_data['wordcloud_text']
+
+            # Generate word cloud (lightweight - just rendering pre-cleaned text)
+            wordcloud = WordCloud(
+                width=800,
+                height=400,
+                background_color='white',
+                colormap='viridis',
+                max_words=100,
+                min_font_size=10,
+                max_font_size=100
+            ).generate(wordcloud_text)
+
+            # Create matplotlib figure
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.imshow(wordcloud, interpolation='bilinear')
+            ax.axis('off')
+            plt.tight_layout()
+
+            st.pyplot(fig, use_container_width=True)
+            plt.close(fig)  # Clean up to prevent memory leaks
+
+            st.caption("Word cloud generated from all response text")
+        else:
+            st.warning("⚠️ Word cloud not available. Please ensure the `wordcloud` package is installed.")
+
+    # =========================================================================
+    # TAB 6: Sunburst Chart (hierarchical code structure)
+    # =========================================================================
+    with tab6:
+        st.markdown("### Code Hierarchy Sunburst")
+
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            st.markdown("""
+            **What this shows:** Hierarchical view of all codes as a sunburst chart.
+
+            **How to interpret:** Arc size = code frequency. Click to zoom into sections.
+            """)
+
+        sunburst_data = viz_data.get('sunburst_data', [])
+
+        if sunburst_data:
+            # Build sunburst DataFrame
+            sunburst_df = pd.DataFrame(sunburst_data)
+
+            # Add root node
+            root_df = pd.DataFrame([{
+                'id': 'All Codes',
+                'label': 'All Codes',
+                'parent': '',
+                'value': viz_data['sunburst_total'],
+                'confidence': 0
+            }])
+            sunburst_df = pd.concat([root_df, sunburst_df], ignore_index=True)
+
+            fig = px.sunburst(
+                sunburst_df,
+                ids='id',
+                names='label',
+                parents='parent',
+                values='value',
+                color='confidence',
+                color_continuous_scale='Viridis',
+                title='Code Distribution Hierarchy'
+            )
+            fig.update_layout(height=600)
+            fig.update_traces(
+                hovertemplate='<b>%{label}</b><br>Count: %{value}<br>Confidence: %{color:.2f}<extra></extra>'
+            )
+
+            st.plotly_chart(fig, use_container_width=True, key="sunburst_chart")
+
+            # Summary stats
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Total Codes", len(sunburst_data))
+            col2.metric("Total Assignments", viz_data['sunburst_total'])
+            avg_conf = np.mean([d['confidence'] for d in sunburst_data]) if sunburst_data else 0
+            col3.metric("Avg Confidence", f"{avg_conf:.2f}")
+        else:
+            st.info("No code data available for sunburst chart.")
+
+    # =========================================================================
+    # TAB 7: Scatter Plot (Frequency vs Confidence)
+    # =========================================================================
+    with tab7:
+        st.markdown("### Frequency vs Confidence")
+
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            st.markdown("""
+            **What this shows:** Scatter plot comparing code frequency (how often a code appears)
+            vs. average confidence (how certain the model is when assigning this code).
+
+            **How to interpret:**
+            - **Top-right:** High frequency, high confidence = strong, reliable codes
+            - **Top-left:** Low frequency, high confidence = specialized but reliable codes
+            - **Bottom-right:** High frequency, low confidence = common but uncertain codes
+            - **Bottom-left:** Low frequency, low confidence = weak codes to review
+            """)
+
+        top_codes_df = viz_data['top_codes_df']
+
+        if not top_codes_df.empty:
+            fig = px.scatter(
+                top_codes_df,
+                x='Count',
+                y='Avg Confidence',
+                text='Label',
+                size='Count',
+                color='Avg Confidence',
+                color_continuous_scale='Viridis',
+                title='Code Frequency vs. Average Confidence',
+                labels={
+                    'Count': 'Frequency (Number of Responses)',
+                    'Avg Confidence': 'Average Confidence Score'
+                }
+            )
+            fig.update_traces(
+                textposition='top center',
+                marker=dict(sizemin=10, sizeref=2.*max(top_codes_df['Count'])/(40.**2)),
+                hovertemplate='<b>%{text}</b><br>Count: %{x}<br>Confidence: %{y:.2f}<extra></extra>'
+            )
+            fig.update_layout(
+                height=550,
+                xaxis=dict(title='Frequency (Count)'),
+                yaxis=dict(title='Average Confidence', range=[0, 1.05])
+            )
+
+            st.plotly_chart(fig, use_container_width=True, key="scatter_chart")
+
+            # Insights
+            st.markdown("#### Quick Insights")
+            if len(top_codes_df) >= 2:
+                highest_conf = top_codes_df.loc[top_codes_df['Avg Confidence'].idxmax()]
+                highest_freq = top_codes_df.loc[top_codes_df['Count'].idxmax()]
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.info(f"**Highest Confidence:** {highest_conf['Label']} ({highest_conf['Avg Confidence']:.2f})")
+                with col2:
+                    st.info(f"**Most Frequent:** {highest_freq['Label']} ({highest_freq['Count']} responses)")
+        else:
+            st.info("No code data available for scatter plot.")
 
     # Next button
     render_next_button("💾 Export Results")
