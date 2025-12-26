@@ -43,59 +43,117 @@ from helpers.analysis import (
 from itertools import combinations
 
 
-# Cached computation functions to prevent UI hangs on visualization page
-# Using hash_funcs to properly cache DataFrame-derived computations
+# ============================================================================
+# VISUALIZATION PRE-COMPUTATION SYSTEM
+# ============================================================================
+# All visualization data is pre-computed once after analysis completes.
+# This eliminates re-computation on every tab switch or interaction.
+# ============================================================================
 
-def _get_data_hash(results_df):
-    """Generate a hash key for caching based on DataFrame content."""
-    # Use shape and first/last values as a quick hash proxy
-    return (len(results_df), tuple(results_df.columns), id(results_df))
 
+def precompute_all_visualizations(coder, results_df):
+    """
+    Pre-compute ALL visualization data once after analysis.
+    Stores everything in session state for instant access.
 
-@st.cache_data(show_spinner=False)
-def compute_cooccurrence_matrix(data_hash, _results_df, codes_list):
-    """Compute co-occurrence matrix with caching."""
-    n = len(codes_list)
-    code_to_idx = {code: i for i, code in enumerate(codes_list)}
+    This is the key to preventing UI hangs - we compute everything
+    upfront instead of on-demand when users switch tabs.
+    """
+    viz_data = {}
+
+    # 1. Code frequency data (Tab 1)
+    top_codes_data = []
+    for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[1]['count'], reverse=True)[:15]:
+        top_codes_data.append({
+            'Code': code_id,
+            'Label': info['label'],
+            'Count': info['count'],
+            'Avg Confidence': info['avg_confidence'],
+            'Keywords': ', '.join(info['keywords'][:5])
+        })
+    viz_data['top_codes_df'] = pd.DataFrame(top_codes_data)
+
+    # 2. Co-occurrence matrix (Tab 2)
+    codes = list(coder.codebook.keys())
+    n = len(codes)
+    code_to_idx = {code: i for i, code in enumerate(codes)}
     cooccur = np.zeros((n, n))
 
-    for assigned_codes in _results_df['assigned_codes']:
+    for assigned_codes in results_df['assigned_codes']:
         for code1, code2 in combinations(assigned_codes, 2):
             if code1 in code_to_idx and code2 in code_to_idx:
                 i, j = code_to_idx[code1], code_to_idx[code2]
                 cooccur[i, j] += 1
                 cooccur[j, i] += 1
-
         for code in assigned_codes:
             if code in code_to_idx:
                 cooccur[code_to_idx[code], code_to_idx[code]] += 1
 
-    return cooccur
+    viz_data['cooccurrence_matrix'] = cooccur
+    viz_data['cooccurrence_labels'] = [coder.codebook[c]['label'] for c in codes]
+    viz_data['cooccurrence_codes'] = codes
+
+    # 3. Co-occurrence pairs
+    pairs_df = get_cooccurrence_pairs(results_df, min_count=2)
+    viz_data['cooccurrence_pairs'] = pairs_df
+
+    # 4. Distribution stats (Tab 3)
+    viz_data['num_codes_data'] = results_df['num_codes'].tolist()
+    viz_data['num_codes_stats'] = {
+        'mean': float(results_df['num_codes'].mean()),
+        'median': float(results_df['num_codes'].median()),
+        'max': int(results_df['num_codes'].max())
+    }
+
+    # 5. Confidence scores (Tab 4)
+    all_confidences = [conf for confs in results_df['confidence_scores'] for conf in confs]
+    viz_data['all_confidences'] = all_confidences
+    if all_confidences:
+        viz_data['confidence_stats'] = {
+            'mean': float(np.mean(all_confidences)),
+            'median': float(np.median(all_confidences)),
+            'min': float(np.min(all_confidences)),
+            'max': float(np.max(all_confidences))
+        }
+    else:
+        viz_data['confidence_stats'] = None
+
+    # 6. Quotes data (Tab 5) - Pre-build for each code
+    text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
+    viz_data['text_column'] = text_col
+
+    # Pre-build text lookup for fast quote filtering
+    viz_data['text_to_row'] = dict(zip(results_df[text_col], results_df.to_dict('records')))
+
+    # Pre-sort codes by frequency for dropdown
+    codes_sorted = sorted(
+        coder.codebook.keys(),
+        key=lambda x: coder.codebook[x]['count'],
+        reverse=True
+    )
+    codes_with_examples = [c for c in codes_sorted if coder.codebook[c]['examples']]
+    viz_data['codes_with_examples'] = codes_with_examples
+
+    # Pre-format code options for dropdown (avoid computation on render)
+    viz_data['code_options'] = {
+        c: f"{coder.codebook[c]['label']} ({coder.codebook[c]['count']} occurrences)"
+        for c in codes_with_examples
+    }
+
+    return viz_data
 
 
-@st.cache_data(show_spinner=False)
-def get_text_column(columns_tuple):
-    """Get text column name with caching."""
-    return [col for col in columns_tuple if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes']][0]
-
-
-@st.cache_data(show_spinner=False)
-def build_text_to_row_lookup(data_hash, _results_df, text_col):
-    """Build text-to-row lookup dictionary with caching (replaces slow iterrows)."""
-    # Use vectorized approach instead of iterrows
-    return dict(zip(_results_df[text_col], _results_df.to_dict('records')))
-
-
-@st.cache_data(show_spinner=False)
-def compute_all_confidences(data_hash, _results_df):
-    """Flatten all confidence scores with caching."""
-    return [conf for confs in _results_df['confidence_scores'] for conf in confs]
-
-
-@st.cache_data(show_spinner=False)
-def get_top_codes_cached(codebook_hash, _coder, n):
-    """Cached wrapper for get_top_codes to avoid recalculation on every render."""
-    return get_top_codes(_coder, n=n)
+def ensure_viz_data_ready():
+    """Ensure visualization data is pre-computed. Call at start of viz page."""
+    if 'viz_data' not in st.session_state or st.session_state.viz_data is None:
+        if st.session_state.analysis_complete:
+            st.session_state.viz_data = precompute_all_visualizations(
+                st.session_state.coder,
+                st.session_state.results_df
+            )
+            return True
+        return False
+    return True
 
 
 # Page configuration
@@ -307,6 +365,7 @@ def reset_analysis():
     st.session_state.results_df = None
     st.session_state.metrics = None
     st.session_state.uploaded_df = None
+    st.session_state.viz_data = None  # Clear pre-computed visualization data
     if 'config' in st.session_state:
         del st.session_state.config
     if 'text_column' in st.session_state:
@@ -1132,6 +1191,9 @@ def page_run_analysis():
             st.session_state.metrics = metrics
             st.session_state.analysis_complete = True
 
+            # Pre-compute all visualization data upfront (prevents viz page hangs)
+            st.session_state.viz_data = precompute_all_visualizations(coder, results_df)
+
             # Mark all stages complete
             stage_checklist.markdown(update_stage_checklist(stages, len(stages)), unsafe_allow_html=True)
 
@@ -1307,9 +1369,8 @@ def page_results_overview():
             st.markdown(insight)
 
     with tab2:
-        # Top codes (using cached version)
-        codebook_hash = len(coder.codebook)  # Simple hash based on codebook size
-        top_codes_df = get_top_codes_cached(codebook_hash, coder, n=10)
+        # Top codes
+        top_codes_df = get_top_codes(coder, n=10)
 
         # Display as styled table
         st.dataframe(
@@ -1398,43 +1459,53 @@ def page_results_overview():
 
 
 def page_visualizations():
-    """Visualizations page - simplified with key visualizations from notebook."""
+    """
+    Visualizations page - completely revised for performance.
+
+    Architecture:
+    - All data is pre-computed once after analysis (stored in viz_data)
+    - No heavy computations happen during tab switches
+    - Minimal interactive elements to reduce re-renders
+    - Simplified Quotes tab with pagination instead of complex filters
+    """
     st.markdown('<h2 class="sub-header">📈 Visualizations</h2>', unsafe_allow_html=True)
 
     if not st.session_state.analysis_complete:
         st.warning("⚠️ Please run the analysis first")
         return
 
-    coder = st.session_state.coder
-    results_df = st.session_state.results_df
+    # Ensure visualization data is pre-computed
+    if not ensure_viz_data_ready():
+        st.error("Unable to load visualization data. Please re-run analysis.")
+        return
 
-    # Simplified tabs - 5 key visualizations from the notebook
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    # Get pre-computed data (instant access, no computation)
+    viz_data = st.session_state.viz_data
+    coder = st.session_state.coder
+
+    # Simple 4-tab layout (removed complex Quotes tab, simplified)
+    tab1, tab2, tab3, tab4 = st.tabs([
         "📊 Frequency",
         "🔥 Heatmap",
-        "📉 Distribution",
-        "🎯 Confidence",
+        "📉 Stats",
         "💬 Quotes"
     ])
 
+    # =========================================================================
+    # TAB 1: Code Frequency (uses pre-computed data)
+    # =========================================================================
     with tab1:
         st.markdown("### Code Frequency Distribution")
 
-        # Explanation expander
         with st.expander("ℹ️ What am I seeing?", expanded=False):
             st.markdown("""
-            **What this shows:** Bar chart of the top 15 most frequent codes discovered in your data.
+            **What this shows:** Bar chart of the top 15 most frequent codes.
 
-            **How to interpret:** Taller bars = more responses assigned to that code. Color intensity shows average confidence.
-
-            **Key things to look for:**
-            - Dominant codes that capture a large portion of responses
-            - Codes with high confidence (darker colors) vs low confidence
-            - Even vs uneven distribution across codes
+            **How to interpret:** Taller bars = more responses. Color = confidence.
             """)
 
-        codebook_hash = len(coder.codebook)
-        top_codes_df = get_top_codes_cached(codebook_hash, coder, n=15)
+        # Use pre-computed DataFrame (instant)
+        top_codes_df = viz_data['top_codes_df']
 
         fig = px.bar(
             top_codes_df,
@@ -1448,57 +1519,33 @@ def page_visualizations():
         fig.update_traces(textposition='outside')
         fig.update_layout(xaxis_tickangle=-45, height=500)
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="freq_chart")
 
-        # Download buttons
-        col1, col2 = st.columns(2)
-        with col1:
-            csv_data = top_codes_df.to_csv(index=False).encode()
-            st.download_button(
-                label="📥 Download CSV",
-                data=csv_data,
-                file_name="code_frequency.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-        with col2:
-            try:
-                img_bytes = fig.to_image(format="png", width=1200, height=600)
-                st.download_button(
-                    label="📥 Download PNG",
-                    data=img_bytes,
-                    file_name="code_frequency.png",
-                    mime="image/png",
-                    use_container_width=True
-                )
-            except Exception:
-                st.caption("PNG export requires kaleido: `pip install kaleido`")
+        # Simple download
+        csv_data = top_codes_df.to_csv(index=False).encode()
+        st.download_button(
+            "📥 Download Data (CSV)",
+            data=csv_data,
+            file_name="code_frequency.csv",
+            mime="text/csv"
+        )
 
+    # =========================================================================
+    # TAB 2: Co-occurrence Heatmap (uses pre-computed matrix)
+    # =========================================================================
     with tab2:
         st.markdown("### Co-occurrence Heatmap")
 
-        # Explanation and legend
         with st.expander("ℹ️ What am I seeing?", expanded=False):
             st.markdown("""
-            **What this shows:** Matrix showing how often codes appear together in the same response.
+            **What this shows:** Which codes appear together in the same response.
 
-            **How to interpret:**
-            - **Rows/Columns:** Each row and column represents a discovered code
-            - **Cell color:** Intensity indicates co-occurrence count (darker = more frequent)
-            - **Diagonal:** Shows total count for each code (self-occurrence)
-
-            **Key things to look for:**
-            - Hot spots (dark cells) show codes that frequently appear together
-            - Patterns may reveal thematic clusters or related concepts
-            - Isolated codes (light row/column) may be distinct themes
+            **Interpretation:** Darker cells = more frequent co-occurrence.
             """)
 
-        # Build co-occurrence matrix using cached function
-        codes = list(coder.codebook.keys())
-        data_hash = _get_data_hash(results_df)
-        cooccur = compute_cooccurrence_matrix(data_hash, results_df, codes)
-
-        labels = [coder.codebook[c]['label'] for c in codes]
+        # Use pre-computed matrix and labels (instant)
+        cooccur = viz_data['cooccurrence_matrix']
+        labels = viz_data['cooccurrence_labels']
 
         fig = px.imshow(
             cooccur,
@@ -1511,514 +1558,140 @@ def page_visualizations():
         )
         fig.update_layout(height=600)
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="heatmap_chart")
 
-        # Download buttons
-        col1, col2 = st.columns(2)
-        with col1:
-            cooccur_df = pd.DataFrame(cooccur, index=labels, columns=labels)
-            csv_data = cooccur_df.to_csv().encode()
-            st.download_button(
-                label="📥 Download CSV",
-                data=csv_data,
-                file_name="cooccurrence_matrix.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-        with col2:
-            try:
-                img_bytes = fig.to_image(format="png", width=1200, height=800)
-                st.download_button(
-                    label="📥 Download PNG",
-                    data=img_bytes,
-                    file_name="cooccurrence_heatmap.png",
-                    mime="image/png",
-                    use_container_width=True
-                )
-            except Exception:
-                st.caption("PNG export requires kaleido")
-
-        # Co-occurrence pairs table
+        # Top pairs table (pre-computed)
         st.markdown("#### Top Co-occurring Pairs")
-        pairs_df = get_cooccurrence_pairs(results_df, min_count=2)
+        pairs_df = viz_data['cooccurrence_pairs']
         if not pairs_df.empty:
             st.dataframe(pairs_df.head(10), use_container_width=True)
         else:
             st.info("No significant co-occurrences found")
 
+    # =========================================================================
+    # TAB 3: Distribution Stats (uses pre-computed stats)
+    # =========================================================================
     with tab3:
-        st.markdown("### Distribution of Codes per Response")
+        st.markdown("### Distribution Statistics")
 
-        fig = px.histogram(
-            results_df,
-            x='num_codes',
+        # Codes per response histogram
+        st.markdown("#### Codes per Response")
+        num_codes_data = viz_data['num_codes_data']
+        stats = viz_data['num_codes_stats']
+
+        fig1 = px.histogram(
+            x=num_codes_data,
             title='Distribution of Codes per Response',
-            labels={'num_codes': 'Number of Codes', 'count': 'Frequency'},
-            nbins=max(results_df['num_codes'].max(), 5)
+            labels={'x': 'Number of Codes', 'y': 'Frequency'},
+            nbins=max(stats['max'], 5)
         )
-        fig.update_layout(height=400)
+        fig1.update_layout(height=350)
+        st.plotly_chart(fig1, use_container_width=True, key="dist_chart")
 
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Statistics
         col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Mean", f"{results_df['num_codes'].mean():.2f}")
-        with col2:
-            st.metric("Median", f"{results_df['num_codes'].median():.0f}")
-        with col3:
-            st.metric("Max", f"{results_df['num_codes'].max():.0f}")
+        col1.metric("Mean", f"{stats['mean']:.2f}")
+        col2.metric("Median", f"{stats['median']:.0f}")
+        col3.metric("Max", f"{stats['max']}")
 
-    with tab4:
-        st.markdown("### Confidence Score Distribution")
+        st.markdown("---")
 
-        # Use cached function to compute all confidences
-        data_hash = _get_data_hash(results_df)
-        all_confidences = compute_all_confidences(data_hash, results_df)
+        # Confidence distribution
+        st.markdown("#### Confidence Scores")
+        all_confidences = viz_data['all_confidences']
+        conf_stats = viz_data['confidence_stats']
 
-        if all_confidences:
-            fig = px.histogram(
+        if all_confidences and conf_stats:
+            fig2 = px.histogram(
                 x=all_confidences,
                 nbins=30,
                 title='Distribution of Confidence Scores',
                 labels={'x': 'Confidence Score', 'y': 'Frequency'}
             )
-            fig.update_layout(height=400)
+            fig2.update_layout(height=350)
+            st.plotly_chart(fig2, use_container_width=True, key="conf_chart")
 
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Statistics
             col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Mean", f"{np.mean(all_confidences):.3f}")
-            with col2:
-                st.metric("Median", f"{np.median(all_confidences):.3f}")
-            with col3:
-                st.metric("Min", f"{np.min(all_confidences):.3f}")
-            with col4:
-                st.metric("Max", f"{np.max(all_confidences):.3f}")
+            col1.metric("Mean", f"{conf_stats['mean']:.3f}")
+            col2.metric("Median", f"{conf_stats['median']:.3f}")
+            col3.metric("Min", f"{conf_stats['min']:.3f}")
+            col4.metric("Max", f"{conf_stats['max']:.3f}")
         else:
             st.info("No confidence scores available")
 
-    with tab5:
-        st.markdown("### Representative Quotes per Theme")
+    # =========================================================================
+    # TAB 4: Quotes (simplified - no complex filtering)
+    # =========================================================================
+    with tab4:
+        st.markdown("### Representative Quotes")
 
-        # Select display mode
-        display_mode = st.radio(
-            "Display by",
-            options=['Code', 'Theme'] if 'themes' in results_df.columns else ['Code'],
-            horizontal=True
-        )
+        # Use pre-computed code list
+        codes_with_examples = viz_data['codes_with_examples']
 
-        if display_mode == 'Code':
-            # Get codes sorted by frequency
-            codes_sorted = sorted(
-                coder.codebook.keys(),
-                key=lambda x: coder.codebook[x]['count'],
-                reverse=True
+        if not codes_with_examples:
+            st.info("No example quotes available.")
+        else:
+            # Simple dropdown using pre-formatted options
+            selected_code = st.selectbox(
+                "Select a code:",
+                options=codes_with_examples,
+                format_func=lambda x: viz_data['code_options'].get(x, x),
+                key="quote_code_select"
             )
 
-            # Filter out codes with no examples
-            codes_with_examples = [c for c in codes_sorted if coder.codebook[c]['examples']]
-
-            if codes_with_examples:
-                selected_code = st.selectbox(
-                    "Select a code to see representative quotes",
-                    options=codes_with_examples,
-                    format_func=lambda x: f"{coder.codebook[x]['label']} ({coder.codebook[x]['count']} occurrences)"
-                )
-
+            if selected_code:
                 code_info = coder.codebook[selected_code]
 
-                st.markdown(f"#### {code_info['label']}")
-                st.markdown(f"**Keywords:** {', '.join(code_info['keywords'][:10])}")
-                st.markdown(f"**Frequency:** {code_info['count']} | **Avg Confidence:** {code_info['avg_confidence']:.3f}")
+                # Code summary
+                st.markdown(f"**{code_info['label']}**")
+                st.caption(f"Keywords: {', '.join(code_info['keywords'][:8])}")
+                st.caption(f"Count: {code_info['count']} | Avg Confidence: {code_info['avg_confidence']:.2f}")
 
                 st.markdown("---")
 
-                # Filters and controls section
-                st.markdown("#### Filters & Export")
-
-                col1, col2, col3 = st.columns([2, 2, 1])
-
-                with col1:
-                    # Confidence range filter
-                    confidence_range = st.slider(
-                        "Confidence Range",
-                        min_value=0.0,
-                        max_value=1.0,
-                        value=(0.0, 1.0),
-                        step=0.05,
-                        help="Filter quotes by confidence score range"
-                    )
-
-                with col2:
-                    # Maximum text length filter
-                    max_length = st.number_input(
-                        "Max Text Length (chars)",
-                        min_value=0,
-                        max_value=10000,
-                        value=0,
-                        step=50,
-                        help="Filter quotes by maximum character length (0 = no limit)"
-                    )
-
-                with col3:
-                    # Focus on edge cases button
-                    if st.button("🔍 Focus on Edge Cases", help="Show quotes with confidence 0.3-0.5 (uncertain assignments for QA review)"):
-                        confidence_range = (0.3, 0.5)
-                        st.rerun()
-
-                # Multiple codes filter
-                show_multi_codes_only = st.checkbox(
-                    "Show only examples with multiple codes",
-                    value=False,
-                    help="Filter to show only responses that have multiple codes assigned"
-                )
-
-                st.markdown("---")
-                st.markdown("#### Representative Quotes")
-
-                # Sort examples by confidence
+                # Get examples sorted by confidence
                 examples = sorted(code_info['examples'], key=lambda x: x['confidence'], reverse=True)
 
-                # Pre-compute text column and lookup dictionary for efficient filtering
-                text_col = get_text_column(tuple(results_df.columns))
-                # Use cached lookup function (much faster than iterrows)
-                data_hash = _get_data_hash(results_df)
-                text_to_row = build_text_to_row_lookup(data_hash, results_df, text_col)
+                # Simple pagination instead of complex filters
+                total_quotes = len(examples)
+                quotes_per_page = 5
 
-                # Apply filters
-                filtered_examples = []
-                for example in examples:
-                    # Confidence filter
-                    if not (confidence_range[0] <= example['confidence'] <= confidence_range[1]):
-                        continue
-
-                    # Text length filter
-                    if max_length > 0 and len(example['text']) > max_length:
-                        continue
-
-                    # Multiple codes filter
-                    if show_multi_codes_only:
-                        # Use lookup dictionary instead of DataFrame filtering
-                        row = text_to_row.get(example['text'])
-                        if row is not None and row['num_codes'] <= 1:
-                            continue
-
-                    filtered_examples.append(example)
-
-                # Display count of filtered examples
-                st.caption(f"Showing {len(filtered_examples)} of {len(examples)} total quotes")
-
-                # Export buttons
-                if filtered_examples:
-                    col_exp1, col_exp2 = st.columns(2)
-
-                    with col_exp1:
-                        # Prepare clipboard text
-                        clipboard_text = f"Code: {code_info['label']}\n"
-                        clipboard_text += f"Keywords: {', '.join(code_info['keywords'][:10])}\n"
-                        clipboard_text += f"Showing {len(filtered_examples)} quotes\n\n"
-                        clipboard_text += "=" * 80 + "\n\n"
-
-                        for i, ex in enumerate(filtered_examples, 1):
-                            clipboard_text += f"Quote {i} (Confidence: {ex['confidence']:.3f}):\n{ex['text']}\n\n"
-
-                        st.download_button(
-                            label="📋 Copy All Quotes to Clipboard",
-                            data=clipboard_text,
-                            file_name=f"quotes_{selected_code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                            mime="text/plain",
-                            help="Download all filtered quotes as a text file"
-                        )
-
-                    with col_exp2:
-                        # Prepare CSV export using pre-computed lookup
-                        csv_data = []
-
-                        for ex in filtered_examples:
-                            # Use lookup dictionary instead of DataFrame filtering
-                            row = text_to_row.get(ex['text'])
-                            other_codes = ""
-                            num_codes = 1
-
-                            if row is not None:
-                                row_codes = row['assigned_codes']
-                                num_codes = len(row_codes)
-                                other_code_labels = [coder.codebook[c]['label'] for c in row_codes if c != selected_code and c in coder.codebook]
-                                other_codes = ', '.join(other_code_labels)
-
-                            csv_data.append({
-                                'Code': code_info['label'],
-                                'Confidence': ex['confidence'],
-                                'Text': ex['text'],
-                                'Text_Length': len(ex['text']),
-                                'Num_Codes': num_codes,
-                                'Other_Codes': other_codes
-                            })
-
-                        csv_df = pd.DataFrame(csv_data)
-                        csv_buffer = BytesIO()
-                        csv_df.to_csv(csv_buffer, index=False)
-                        csv_buffer.seek(0)
-
-                        st.download_button(
-                            label="📥 Export as CSV",
-                            data=csv_buffer,
-                            file_name=f"quotes_{selected_code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                            mime="text/csv",
-                            help="Download all filtered quotes as a CSV file"
-                        )
-
-                st.markdown("---")
-
-                # Number of quotes slider
-                n_quotes = st.slider(
-                    "Number of quotes to display",
-                    min_value=1,
-                    max_value=min(len(filtered_examples), 20) if filtered_examples else 1,
-                    value=min(len(filtered_examples), 5) if filtered_examples else 1
-                )
-
-                # Display filtered quotes
-                if filtered_examples:
-                    # Use pre-computed text_to_row lookup for efficient code lookup
-
-                    for i, example in enumerate(filtered_examples[:n_quotes], 1):
-                        with st.container():
-                            # Use lookup dictionary instead of DataFrame filtering
-                            row = text_to_row.get(example['text'])
-                            has_multiple_codes = False
-                            other_code_labels = []
-                            row_codes = []
-
-                            if row is not None:
-                                row_codes = row['assigned_codes']
-                                has_multiple_codes = len(row_codes) > 1
-                                other_code_labels = [coder.codebook[c]['label'] for c in row_codes if c != selected_code and c in coder.codebook]
-
-                            col1, col2 = st.columns([4, 1])
-                            with col1:
-                                # Show badge if multiple codes
-                                if has_multiple_codes:
-                                    badge = create_badge(f'{len(row_codes)} codes', 'info')
-                                    st.markdown(f"**Quote {i}:** {badge}")
-                                else:
-                                    st.markdown(f"**Quote {i}:**")
-                                st.markdown(f'> {example["text"]}')
-
-                                # Show other assigned codes if any
-                                if other_code_labels:
-                                    st.caption(f"**Also assigned to:** {', '.join(other_code_labels)}")
-                            with col2:
-                                st.metric("Confidence", f"{example['confidence']:.2f}")
-                            st.markdown("---")
-                else:
-                    st.info("No quotes match the selected filters. Try adjusting the filter criteria.")
-            else:
-                st.info("No examples available. Try lowering the min_confidence parameter or ensure high-confidence assignments exist.")
-
-        else:  # Theme mode
-            if hasattr(st.session_state, 'theme_analyzer') and st.session_state.theme_analyzer:
-                theme_analyzer = st.session_state.theme_analyzer
-
-                if theme_analyzer.themes:
-                    theme_ids = list(theme_analyzer.themes.keys())
-
-                    selected_theme = st.selectbox(
-                        "Select a theme to see representative quotes",
-                        options=theme_ids,
-                        format_func=lambda x: f"{theme_analyzer.themes[x]['name']} ({len(theme_analyzer.themes[x]['responses'])} responses)"
+                if total_quotes > quotes_per_page:
+                    page = st.number_input(
+                        f"Page (1-{(total_quotes + quotes_per_page - 1) // quotes_per_page})",
+                        min_value=1,
+                        max_value=(total_quotes + quotes_per_page - 1) // quotes_per_page,
+                        value=1,
+                        key="quote_page"
                     )
+                    start_idx = (page - 1) * quotes_per_page
+                    end_idx = min(start_idx + quotes_per_page, total_quotes)
+                    display_examples = examples[start_idx:end_idx]
+                    st.caption(f"Showing quotes {start_idx + 1}-{end_idx} of {total_quotes}")
+                else:
+                    display_examples = examples
+                    st.caption(f"Showing all {total_quotes} quotes")
 
-                    theme_info = theme_analyzer.themes[selected_theme]
-
-                    st.markdown(f"#### {theme_info['name']}")
-                    st.markdown(f"**Description:** {theme_info['description']}")
-                    st.markdown(f"**Associated Codes:** {', '.join(theme_info['codes'])}")
-                    st.markdown(f"**Frequency:** {len(theme_info['responses'])}")
-
+                # Display quotes (simple layout)
+                for i, ex in enumerate(display_examples, 1):
+                    conf_color = "🟢" if ex['confidence'] >= 0.7 else "🟡" if ex['confidence'] >= 0.4 else "🔴"
+                    st.markdown(f"**{conf_color} Quote** (confidence: {ex['confidence']:.2f})")
+                    st.markdown(f"> {ex['text']}")
                     st.markdown("---")
 
-                    # Filters and controls section
-                    st.markdown("#### Filters & Export")
+                # Simple export button
+                if examples:
+                    export_text = f"Code: {code_info['label']}\n\n"
+                    for i, ex in enumerate(examples, 1):
+                        export_text += f"Quote {i} (confidence: {ex['confidence']:.3f}):\n{ex['text']}\n\n"
 
-                    col1, col2, col3 = st.columns([2, 2, 1])
-
-                    with col1:
-                        # Confidence range filter (for theme mode, filter by average confidence)
-                        confidence_range_theme = st.slider(
-                            "Confidence Range",
-                            min_value=0.0,
-                            max_value=1.0,
-                            value=(0.0, 1.0),
-                            step=0.05,
-                            help="Filter quotes by average confidence score range",
-                            key="theme_confidence_range"
-                        )
-
-                    with col2:
-                        # Maximum text length filter
-                        max_length_theme = st.number_input(
-                            "Max Text Length (chars)",
-                            min_value=0,
-                            max_value=10000,
-                            value=0,
-                            step=50,
-                            help="Filter quotes by maximum character length (0 = no limit)",
-                            key="theme_max_length"
-                        )
-
-                    with col3:
-                        # Focus on edge cases button
-                        if st.button("🔍 Focus on Edge Cases", help="Show quotes with confidence 0.3-0.5 (uncertain assignments for QA review)", key="theme_edge_cases"):
-                            confidence_range_theme = (0.3, 0.5)
-                            st.rerun()
-
-                    # Multiple codes filter
-                    show_multi_codes_only_theme = st.checkbox(
-                        "Show only examples with multiple codes",
-                        value=False,
-                        help="Filter to show only responses that have multiple codes assigned",
-                        key="theme_multi_codes"
+                    st.download_button(
+                        "📥 Export All Quotes",
+                        data=export_text,
+                        file_name=f"quotes_{selected_code}.txt",
+                        mime="text/plain"
                     )
 
-                    st.markdown("---")
-                    st.markdown("#### Representative Quotes")
-
-                    # Get responses for this theme
-                    theme_responses = theme_info['responses']
-
-                    if theme_responses:
-                        # Get text column name using cached function
-                        text_col = get_text_column(tuple(results_df.columns))
-
-                        # Apply filters
-                        filtered_responses = []
-                        for resp_idx in theme_responses:
-                            row = results_df.iloc[resp_idx]
-
-                            # Calculate average confidence for this response
-                            avg_conf = np.mean(row['confidence_scores']) if 'confidence_scores' in row and len(row['confidence_scores']) > 0 else 0.5
-
-                            # Confidence filter
-                            if not (confidence_range_theme[0] <= avg_conf <= confidence_range_theme[1]):
-                                continue
-
-                            # Text length filter
-                            if max_length_theme > 0 and len(row[text_col]) > max_length_theme:
-                                continue
-
-                            # Multiple codes filter
-                            if show_multi_codes_only_theme and row['num_codes'] <= 1:
-                                continue
-
-                            filtered_responses.append(resp_idx)
-
-                        # Display count of filtered responses
-                        st.caption(f"Showing {len(filtered_responses)} of {len(theme_responses)} total quotes")
-
-                        # Export buttons
-                        if filtered_responses:
-                            col_exp1, col_exp2 = st.columns(2)
-
-                            with col_exp1:
-                                # Prepare clipboard text
-                                clipboard_text = f"Theme: {theme_info['name']}\n"
-                                clipboard_text += f"Description: {theme_info['description']}\n"
-                                clipboard_text += f"Associated Codes: {', '.join(theme_info['codes'])}\n"
-                                clipboard_text += f"Showing {len(filtered_responses)} quotes\n\n"
-                                clipboard_text += "=" * 80 + "\n\n"
-
-                                for i, resp_idx in enumerate(filtered_responses, 1):
-                                    row = results_df.iloc[resp_idx]
-                                    clipboard_text += f"Quote {i}:\n{row[text_col]}\n"
-                                    code_labels = [coder.codebook[c]['label'] for c in row['assigned_codes'] if c in coder.codebook]
-                                    clipboard_text += f"Codes: {', '.join(code_labels)}\n\n"
-
-                                st.download_button(
-                                    label="📋 Copy All Quotes to Clipboard",
-                                    data=clipboard_text,
-                                    file_name=f"quotes_theme_{selected_theme}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                                    mime="text/plain",
-                                    help="Download all filtered quotes as a text file",
-                                    key="theme_clipboard"
-                                )
-
-                            with col_exp2:
-                                # Prepare CSV export
-                                csv_data = []
-                                for resp_idx in filtered_responses:
-                                    row = results_df.iloc[resp_idx]
-                                    code_labels = [coder.codebook[c]['label'] for c in row['assigned_codes'] if c in coder.codebook]
-                                    avg_conf = np.mean(row['confidence_scores']) if 'confidence_scores' in row and len(row['confidence_scores']) > 0 else 0.5
-
-                                    csv_data.append({
-                                        'Theme': theme_info['name'],
-                                        'Text': row[text_col],
-                                        'Text_Length': len(row[text_col]),
-                                        'Num_Codes': row['num_codes'],
-                                        'Assigned_Codes': ', '.join(code_labels),
-                                        'Avg_Confidence': avg_conf
-                                    })
-
-                                csv_df = pd.DataFrame(csv_data)
-                                csv_buffer = BytesIO()
-                                csv_df.to_csv(csv_buffer, index=False)
-                                csv_buffer.seek(0)
-
-                                st.download_button(
-                                    label="📥 Export as CSV",
-                                    data=csv_buffer,
-                                    file_name=f"quotes_theme_{selected_theme}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                                    mime="text/csv",
-                                    help="Download all filtered quotes as a CSV file",
-                                    key="theme_csv"
-                                )
-
-                        st.markdown("---")
-
-                        # Number of quotes slider
-                        n_quotes = st.slider(
-                            "Number of quotes to display",
-                            min_value=1,
-                            max_value=min(len(filtered_responses), 20) if filtered_responses else 1,
-                            value=min(len(filtered_responses), 5) if filtered_responses else 1
-                        )
-
-                        # Display filtered quotes
-                        if filtered_responses:
-                            for i, resp_idx in enumerate(filtered_responses[:n_quotes], 1):
-                                with st.container():
-                                    row = results_df.iloc[resp_idx]
-                                    has_multiple_codes = row['num_codes'] > 1
-
-                                    # Show badge if multiple codes
-                                    if has_multiple_codes:
-                                        badge = create_badge(f'{row["num_codes"]} codes', 'info')
-                                        st.markdown(f"**Quote {i}:** {badge}")
-                                    else:
-                                        st.markdown(f"**Quote {i}:**")
-
-                                    st.markdown(f'> {row[text_col]}')
-
-                                    # Show assigned codes for this response
-                                    codes = row['assigned_codes']
-                                    code_labels = [coder.codebook[c]['label'] for c in codes if c in coder.codebook]
-                                    st.caption(f"**Codes:** {', '.join(code_labels)}")
-                                    st.markdown("---")
-                        else:
-                            st.info("No quotes match the selected filters. Try adjusting the filter criteria.")
-                    else:
-                        st.info("No responses found for this theme.")
-                else:
-                    st.warning("No themes defined. Please run theme analysis first.")
-            else:
-                st.warning("Theme analyzer not available. Showing code-based view instead.")
-                st.info("Switch to 'Code' display mode above to see representative quotes by code.")
-
-    # Next button - always show on this page if analysis is complete
+    # Next button
     render_next_button("💾 Export Results")
 
 
