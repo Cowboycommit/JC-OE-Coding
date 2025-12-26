@@ -64,6 +64,21 @@ from helpers.analysis import (
 # -----------------------------------------------------------------------------
 # CONSTANTS
 # -----------------------------------------------------------------------------
+
+# Available sample datasets in the project
+SAMPLE_DATASETS = {
+    "sample_responses.csv": "Sample Responses (General)",
+    "cricket_responses.csv": "Cricket Responses",
+    "fashion_responses.csv": "Fashion Responses",
+    "consumer_perspectives_responses.csv": "Consumer Perspectives",
+    "cultural_commentary_responses.csv": "Cultural Commentary",
+    "industry_professional_responses.csv": "Industry Professional",
+    "20_newsgroups.csv": "20 Newsgroups (Large)",
+    "reuters21578.csv": "Reuters (Large)",
+}
+
+DATA_DIR = Path(__file__).parent / "data"
+
 PIPELINE_STAGES = [
     {
         "number": 1,
@@ -364,34 +379,34 @@ def main():
 
         st.markdown("---")
 
-        # Execution control
-        uploaded_file = st.file_uploader(
-            "Upload dataset (CSV or Excel)",
-            type=["csv", "xlsx", "xls"],
-            key="file_uploader_stage1",
+        # Execution control - Dataset selection
+        st.markdown("**Select a sample dataset or upload your own:**")
+
+        dataset_options = ["-- Select a sample dataset --"] + list(SAMPLE_DATASETS.keys())
+        selected_dataset = st.selectbox(
+            "Sample Dataset",
+            options=dataset_options,
+            format_func=lambda x: SAMPLE_DATASETS.get(x, x),
+            key="dataset_select",
         )
 
         if st.button("Execute Stage 1: Load Data", key="btn_stage_1"):
-            if uploaded_file is not None:
+            if selected_dataset != "-- Select a sample dataset --":
                 try:
-                    # WHY: We use DataLoader from src, not pd.read_csv directly
-                    # This ensures consistent error handling and logging
+                    # Load from project's data directory
+                    filepath = DATA_DIR / selected_dataset
                     loader = DataLoader()
-
-                    if uploaded_file.name.endswith(".csv"):
-                        df = pd.read_csv(uploaded_file)
-                    else:
-                        df = pd.read_excel(uploaded_file)
+                    df = loader.load_csv(str(filepath))
 
                     st.session_state["raw_df"] = df
                     st.session_state["stage_1_complete"] = True
                     reset_downstream_stages(1)
 
-                    st.success(f"Loaded {len(df)} rows, {len(df.columns)} columns")
+                    st.success(f"Loaded '{selected_dataset}': {len(df)} rows, {len(df.columns)} columns")
                 except Exception as e:
                     st.error(f"Failed to load data: {e}")
             else:
-                st.warning("Please upload a file first")
+                st.warning("Please select a dataset first")
 
         # Show artifact if complete
         if st.session_state["stage_1_complete"] and st.session_state["raw_df"] is not None:
@@ -433,15 +448,23 @@ def main():
         else:
             if st.session_state["raw_df"] is not None:
                 columns = st.session_state["raw_df"].columns.tolist()
+
+                # Auto-detect text column (prefer 'response' if available)
+                default_idx = columns.index("response") if "response" in columns else 0
+
                 text_col = st.selectbox(
                     "Select text column for analysis",
                     options=columns,
+                    index=default_idx,
                     key="text_col_select",
                 )
 
-                remove_nulls = st.checkbox("Remove null responses", value=True)
-                remove_duplicates = st.checkbox("Remove duplicate responses", value=False)
-                min_length = st.number_input("Minimum response length (chars)", min_value=0, value=5)
+                # Simplified preprocessing with sensible defaults
+                col1, col2 = st.columns(2)
+                with col1:
+                    remove_nulls = st.checkbox("Remove null responses", value=True)
+                with col2:
+                    remove_duplicates = st.checkbox("Remove duplicates", value=False)
 
                 if st.button("Execute Stage 2: Validate & Preprocess", key="btn_stage_2"):
                     try:
@@ -463,7 +486,7 @@ def main():
                                 text_column=text_col,
                                 remove_nulls=remove_nulls,
                                 remove_duplicates=remove_duplicates,
-                                min_length=min_length,
+                                min_length=5,  # Sensible default
                             )
 
                             st.session_state["validated_df"] = processed_df
@@ -514,60 +537,55 @@ def main():
         if status_3 == "BLOCKED":
             st.info("Complete Stage 2 first")
         else:
-            method = st.selectbox(
-                "ML Method",
-                options=list(ML_METHODS.keys()),
-                format_func=lambda x: ML_METHODS[x],
-                key="method_select",
-            )
+            # Simplified configuration with sensible defaults
+            col1, col2 = st.columns(2)
 
-            representation = st.selectbox(
-                "Text Representation",
-                options=list(REPRESENTATIONS.keys()),
-                format_func=lambda x: REPRESENTATIONS[x],
-                key="repr_select",
-            )
+            with col1:
+                method = st.selectbox(
+                    "ML Method",
+                    options=list(ML_METHODS.keys()),
+                    format_func=lambda x: ML_METHODS[x],
+                    key="method_select",
+                )
 
-            n_codes = st.slider(
-                "Number of codes to discover",
-                min_value=3,
-                max_value=30,
-                value=10,
-                key="n_codes_slider",
-            )
+                n_codes = st.slider(
+                    "Number of codes",
+                    min_value=3,
+                    max_value=20,
+                    value=8,
+                    key="n_codes_slider",
+                )
 
-            min_confidence = st.slider(
-                "Minimum confidence threshold",
-                min_value=0.1,
-                max_value=0.9,
-                value=0.3,
-                step=0.1,
-                key="confidence_slider",
-            )
-
-            if st.button("Execute Stage 3: Check Eligibility", key="btn_stage_3"):
-                errors = []
-
-                # Check 1: LDA/NMF incompatible with semantic embeddings
-                if method in ["lda", "nmf"] and representation != "tfidf":
-                    errors.append(
-                        f"Method '{method.upper()}' requires TF-IDF representation. "
-                        f"Semantic embeddings ({representation}) produce negative values "
-                        "which are incompatible with LDA/NMF."
+            with col2:
+                # Only show TF-IDF for LDA/NMF compatibility
+                if method in ["lda", "nmf"]:
+                    representation = "tfidf"
+                    st.info("Using TF-IDF (required for LDA/NMF)")
+                else:
+                    representation = st.selectbox(
+                        "Text Representation",
+                        options=list(REPRESENTATIONS.keys()),
+                        format_func=lambda x: REPRESENTATIONS[x],
+                        key="repr_select",
                     )
 
-                # Check 2: n_codes vs dataset size
-                if st.session_state["validated_df"] is not None:
-                    n_samples = len(st.session_state["validated_df"])
-                    if n_codes > n_samples:
-                        errors.append(
-                            f"Cannot request {n_codes} codes with only {n_samples} samples. "
-                            f"Reduce n_codes to at most {n_samples}."
-                        )
+                min_confidence = st.slider(
+                    "Min confidence",
+                    min_value=0.1,
+                    max_value=0.9,
+                    value=0.3,
+                    step=0.1,
+                    key="confidence_slider",
+                )
 
-                if errors:
-                    for err in errors:
-                        st.error(err)
+            if st.button("Execute Stage 3: Check Eligibility", key="btn_stage_3"):
+                # Check n_codes vs dataset size
+                n_samples = len(st.session_state["validated_df"])
+                if n_codes > n_samples:
+                    st.error(
+                        f"Cannot request {n_codes} codes with only {n_samples} samples. "
+                        f"Reduce n_codes to at most {n_samples}."
+                    )
                 else:
                     st.session_state["method"] = method
                     st.session_state["representation"] = representation
@@ -576,7 +594,7 @@ def main():
                     st.session_state["stage_3_complete"] = True
                     reset_downstream_stages(3)
 
-                    st.success("Method eligibility confirmed. Ready for model execution.")
+                    st.success(f"Configuration set: {ML_METHODS[method]}, {n_codes} codes")
 
         if st.session_state["stage_3_complete"]:
             st.markdown(f"**Method**: `{st.session_state['method']}`")
