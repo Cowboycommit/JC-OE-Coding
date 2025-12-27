@@ -762,33 +762,36 @@ def run_ml_analysis(
                 if self.method in ['lda', 'nmf']:
                     topic_weights = self.model.components_[code_idx]
                     top_indices = topic_weights.argsort()[-top_words:][::-1]
+                    weights = [topic_weights[i] for i in top_indices]
                 else:
                     cluster_center = self.model.cluster_centers_[code_idx]
                     top_indices = cluster_center.argsort()[-top_words:][::-1]
+                    weights = [cluster_center[i] for i in top_indices]
 
                 top_words_list = [feature_names[i] for i in top_indices]
 
                 # Filter stopwords from keywords
                 filtered_keywords = [w for w in top_words_list if w.lower().strip() not in stopwords]
 
-                # Build label word-by-word to avoid duplicates from n-gram overlap
-                # e.g., "Has Become" + "Cricket Has" should become "Has Become Cricket", not "Has Become Cricket Has"
+                # Build label word-by-word with weight tracking for semantic coherence
+                # Collect unique words with their weights, then sort by weight
                 seen_words = set()
-                label_words = []
-                for term in filtered_keywords:
+                word_weight_pairs = []
+                for term, term_weight in zip(top_words_list, weights):
                     # Split term into individual words and filter
                     for word in term.split():
                         word_lower = word.lower().strip()
                         # Skip stopwords and already-seen words
                         if word_lower not in stopwords and word_lower not in seen_words:
                             seen_words.add(word_lower)
-                            label_words.append(word)
-                    # Stop once we have enough unique words for the label
-                    if len(label_words) >= 3:
-                        break
+                            word_weight_pairs.append((word, term_weight))
 
-                # Join with space, take first 3 unique words
-                label = ' '.join(word.title() for word in label_words[:3])
+                # Sort by weight (highest first) for semantic coherence
+                word_weight_pairs.sort(key=lambda x: x[1], reverse=True)
+
+                # Take top 3 words by weight
+                label_words = [w for w, _ in word_weight_pairs[:3]]
+                label = ' '.join(word.title() for word in label_words)
 
                 self.codebook[code_id] = {
                     'label': label,
