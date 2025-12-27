@@ -37,12 +37,6 @@ import matplotlib.pyplot as plt
 
 # Optional imports for enhanced visualizations
 try:
-    from wordcloud import WordCloud
-    WORDCLOUD_AVAILABLE = True
-except ImportError:
-    WORDCLOUD_AVAILABLE = False
-
-try:
     import networkx as nx
     NETWORKX_AVAILABLE = True
 except ImportError:
@@ -1073,33 +1067,41 @@ def main():
             else:
                 st.markdown("*No co-occurrence pairs detected*")
 
-            # === VISUALIZATION 5: Word Cloud ===
-            st.markdown("**Word Cloud**:")
-            if WORDCLOUD_AVAILABLE:
-                text_col = st.session_state["text_column"]
-                all_text = ' '.join(results_df[text_col].astype(str).tolist())
-                if all_text.strip():
-                    try:
-                        wordcloud = WordCloud(
-                            width=800,
-                            height=400,
-                            background_color='white',
-                            colormap='viridis',
-                            max_words=100
-                        ).generate(all_text)
+            # === VISUALIZATION 5: Word Frequency Chart ===
+            st.markdown("**Top Words**:")
+            text_col = st.session_state["text_column"]
+            all_text = ' '.join(results_df[text_col].astype(str).tolist())
+            if all_text.strip():
+                try:
+                    # Simple word frequency using Counter
+                    from collections import Counter
+                    import re as re_module
+                    # Tokenize and clean
+                    words = re_module.findall(r'\b[a-zA-Z]{3,}\b', all_text.lower())
+                    # Remove common stop words
+                    stop_words = {'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'has', 'have', 'been', 'were', 'they', 'their', 'what', 'when', 'where', 'who', 'will', 'with', 'would', 'there', 'this', 'that', 'from', 'which', 'more', 'some', 'than', 'into', 'other', 'about', 'these', 'just', 'also', 'very', 'being', 'because'}
+                    words = [w for w in words if w not in stop_words]
+                    word_counts = Counter(words).most_common(30)
 
-                        fig, ax = plt.subplots(figsize=(10, 5))
-                        # Use to_array() for numpy 2.0+ compatibility
-                        ax.imshow(wordcloud.to_array(), interpolation='bilinear')
-                        ax.axis('off')
-                        st.pyplot(fig)
-                        plt.close(fig)
-                    except Exception as e:
-                        st.warning(f"Could not generate word cloud: {e}")
-                else:
-                    st.markdown("*No text content available for word cloud*")
+                    if word_counts:
+                        word_df = pd.DataFrame(word_counts, columns=['Word', 'Count'])
+                        fig = px.bar(
+                            word_df,
+                            x='Count',
+                            y='Word',
+                            orientation='h',
+                            title='Top 30 Words',
+                            color='Count',
+                            color_continuous_scale='viridis'
+                        )
+                        fig.update_layout(height=600, yaxis={'categoryorder': 'total ascending'})
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.markdown("*No words found after filtering*")
+                except Exception as e:
+                    st.warning(f"Could not generate word frequency chart: {e}")
             else:
-                st.info("Word cloud visualization requires the `wordcloud` package. Install with: `pip install wordcloud`")
+                st.markdown("*No text content available*")
 
             # === VISUALIZATION 6: Code Network Diagram ===
             st.markdown("**Code Co-occurrence Network**:")
