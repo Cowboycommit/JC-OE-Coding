@@ -33,6 +33,20 @@ from io import BytesIO
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
+# Optional imports for enhanced visualizations
+try:
+    from wordcloud import WordCloud
+    WORDCLOUD_AVAILABLE = True
+except ImportError:
+    WORDCLOUD_AVAILABLE = False
+
+try:
+    import networkx as nx
+    NETWORKX_AVAILABLE = True
+except ImportError:
+    NETWORKX_AVAILABLE = False
 
 # -----------------------------------------------------------------------------
 # PATH SETUP
@@ -59,25 +73,49 @@ from helpers.analysis import (
     export_results_package,
     generate_methods_documentation,
     generate_executive_summary,
+    find_optimal_codes,
 )
 
 # -----------------------------------------------------------------------------
 # CONSTANTS
 # -----------------------------------------------------------------------------
 
-# Available sample datasets in the project
-SAMPLE_DATASETS = {
-    "sample_responses.csv": "Sample Responses (General)",
-    "cricket_responses.csv": "Cricket Responses",
-    "fashion_responses.csv": "Fashion Responses",
-    "consumer_perspectives_responses.csv": "Consumer Perspectives",
-    "cultural_commentary_responses.csv": "Cultural Commentary",
-    "industry_professional_responses.csv": "Industry Professional",
-    "20_newsgroups.csv": "20 Newsgroups (Large)",
-    "reuters21578.csv": "Reuters (Large)",
-}
-
 DATA_DIR = Path(__file__).parent / "data"
+
+
+def get_available_datasets() -> Dict[str, str]:
+    """
+    Dynamically scan the data folder for available datasets.
+
+    Returns:
+        Dictionary mapping filename to display name.
+    """
+    datasets = {}
+
+    if not DATA_DIR.exists():
+        return datasets
+
+    # Scan for CSV, Excel, and JSON files
+    for ext in ['*.csv', '*.xlsx', '*.xls', '*.json']:
+        for filepath in DATA_DIR.glob(ext):
+            filename = filepath.name
+            # Skip README and hidden files
+            if filename.startswith('.') or filename.upper() == 'README.MD':
+                continue
+
+            # Generate display name from filename
+            # Remove extension and convert underscores to spaces
+            base_name = filepath.stem
+            display_name = base_name.replace('_', ' ').title()
+
+            # Add size indicator for large files (> 10MB)
+            file_size = filepath.stat().st_size
+            if file_size > 10 * 1024 * 1024:
+                display_name += " (Large)"
+
+            datasets[filename] = display_name
+
+    return datasets
 
 PIPELINE_STAGES = [
     {
@@ -382,21 +420,42 @@ def main():
         # Execution control - Dataset selection
         st.markdown("**Select a sample dataset or upload your own:**")
 
-        dataset_options = ["-- Select a sample dataset --"] + list(SAMPLE_DATASETS.keys())
-        selected_dataset = st.selectbox(
-            "Sample Dataset",
-            options=dataset_options,
-            format_func=lambda x: SAMPLE_DATASETS.get(x, x),
-            key="dataset_select",
-        )
+        # Dynamically scan data folder for available datasets
+        available_datasets = get_available_datasets()
+
+        if not available_datasets:
+            st.warning(f"No datasets found in {DATA_DIR}. Please add CSV, Excel, or JSON files.")
+            dataset_options = ["-- No datasets available --"]
+            selected_dataset = st.selectbox(
+                "Sample Dataset",
+                options=dataset_options,
+                key="dataset_select",
+            )
+        else:
+            dataset_options = ["-- Select a sample dataset --"] + list(available_datasets.keys())
+            selected_dataset = st.selectbox(
+                "Sample Dataset",
+                options=dataset_options,
+                format_func=lambda x: available_datasets.get(x, x),
+                key="dataset_select",
+            )
 
         if st.button("Execute Stage 1: Load Data", key="btn_stage_1"):
-            if selected_dataset != "-- Select a sample dataset --":
+            if selected_dataset not in ["-- Select a sample dataset --", "-- No datasets available --"]:
                 try:
                     # Load from project's data directory
                     filepath = DATA_DIR / selected_dataset
                     loader = DataLoader()
-                    df = loader.load_csv(str(filepath))
+
+                    # Handle different file types
+                    if selected_dataset.endswith('.csv'):
+                        df = loader.load_csv(str(filepath))
+                    elif selected_dataset.endswith(('.xlsx', '.xls')):
+                        df = loader.load_excel(str(filepath))
+                    elif selected_dataset.endswith('.json'):
+                        df = loader.load_json(str(filepath))
+                    else:
+                        df = loader.load_csv(str(filepath))  # Default to CSV
 
                     st.session_state["raw_df"] = df
                     st.session_state["stage_1_complete"] = True
@@ -558,30 +617,63 @@ def main():
         if status_3 == "BLOCKED":
             st.info("Complete Stage 2 first")
         else:
-            # Simplified configuration with sensible defaults
+            # Auto-selection options
+            st.markdown("**Auto-Selection Options**")
+            st.markdown("Enable these to automatically select optimal settings based on data characteristics:")
+
+            auto_col1, auto_col2 = st.columns(2)
+            with auto_col1:
+                auto_method = st.checkbox(
+                    "Auto-select best method",
+                    value=False,
+                    key="auto_method_checkbox",
+                    help="Automatically select the best ML method based on dataset size and text characteristics"
+                )
+            with auto_col2:
+                auto_n_codes = st.checkbox(
+                    "Auto-select number of codes",
+                    value=False,
+                    key="auto_n_codes_checkbox",
+                    help="Use silhouette analysis to find the optimal number of codes"
+                )
+
+            st.markdown("---")
+
+            # Manual configuration options
             col1, col2 = st.columns(2)
 
             with col1:
-                method = st.selectbox(
-                    "ML Method",
-                    options=list(ML_METHODS.keys()),
-                    format_func=lambda x: ML_METHODS[x],
-                    key="method_select",
-                )
+                if auto_method:
+                    st.info("Method will be auto-selected based on data characteristics")
+                    method = None  # Will be determined during execution
+                else:
+                    method = st.selectbox(
+                        "ML Method",
+                        options=list(ML_METHODS.keys()),
+                        format_func=lambda x: ML_METHODS[x],
+                        key="method_select",
+                    )
 
-                n_codes = st.slider(
-                    "Number of codes",
-                    min_value=3,
-                    max_value=20,
-                    value=8,
-                    key="n_codes_slider",
-                )
+                if auto_n_codes:
+                    st.info("Number of codes will be optimized using silhouette analysis")
+                    n_codes = None  # Will be determined during execution
+                else:
+                    n_codes = st.slider(
+                        "Number of codes",
+                        min_value=3,
+                        max_value=20,
+                        value=8,
+                        key="n_codes_slider",
+                    )
 
             with col2:
                 # Only show TF-IDF for LDA/NMF compatibility
                 if method in ["lda", "nmf"]:
                     representation = "tfidf"
                     st.info("Using TF-IDF (required for LDA/NMF)")
+                elif method is None:
+                    representation = "tfidf"
+                    st.info("Using TF-IDF (default for auto-selection)")
                 else:
                     representation = st.selectbox(
                         "Text Representation",
@@ -600,22 +692,67 @@ def main():
                 )
 
             if st.button("Execute Stage 3: Check Eligibility", key="btn_stage_3"):
-                # Check n_codes vs dataset size
-                n_samples = len(st.session_state["validated_df"])
-                if n_codes > n_samples:
-                    st.error(
-                        f"Cannot request {n_codes} codes with only {n_samples} samples. "
-                        f"Reduce n_codes to at most {n_samples}."
-                    )
-                else:
-                    st.session_state["method"] = method
-                    st.session_state["representation"] = representation
-                    st.session_state["n_codes"] = n_codes
-                    st.session_state["min_confidence"] = min_confidence
-                    st.session_state["stage_3_complete"] = True
-                    reset_downstream_stages(3)
+                try:
+                    validated_df = st.session_state["validated_df"]
+                    text_col = st.session_state["text_column"]
+                    n_samples = len(validated_df)
 
-                    st.success(f"Configuration set: {ML_METHODS[method]}, {n_codes} codes")
+                    # Auto-select method based on data characteristics
+                    if auto_method:
+                        with st.spinner("Analyzing data characteristics to select best method..."):
+                            # Use TF-IDF + KMeans as default - best for most cases
+                            # For larger datasets, consider LDA for topic modeling
+                            if n_samples > 500:
+                                selected_method = "lda"
+                                st.info(f"Auto-selected LDA for larger dataset ({n_samples} samples)")
+                            else:
+                                selected_method = "tfidf_kmeans"
+                                st.info(f"Auto-selected TF-IDF + K-Means for dataset ({n_samples} samples)")
+                    else:
+                        selected_method = method
+
+                    # Auto-select number of codes using silhouette analysis
+                    if auto_n_codes:
+                        with st.spinner("Running silhouette analysis to find optimal number of codes..."):
+                            try:
+                                optimal_n, analysis_results = find_optimal_codes(
+                                    df=validated_df,
+                                    text_column=text_col,
+                                    min_codes=3,
+                                    max_codes=min(15, n_samples - 1),
+                                    method=selected_method
+                                )
+                                selected_n_codes = optimal_n
+                                st.success(
+                                    f"Optimal number of codes: {optimal_n} "
+                                    f"(silhouette score: {analysis_results['best_silhouette_score']:.4f})"
+                                )
+                            except ValueError as e:
+                                st.error(f"Could not auto-select number of codes: {e}")
+                                return
+                    else:
+                        selected_n_codes = n_codes
+
+                    # Check n_codes vs dataset size
+                    if selected_n_codes and selected_n_codes > n_samples:
+                        st.error(
+                            f"Cannot request {selected_n_codes} codes with only {n_samples} samples. "
+                            f"Reduce n_codes to at most {n_samples}."
+                        )
+                    else:
+                        st.session_state["method"] = selected_method
+                        st.session_state["representation"] = representation
+                        st.session_state["n_codes"] = selected_n_codes
+                        st.session_state["min_confidence"] = min_confidence
+                        st.session_state["auto_method"] = auto_method
+                        st.session_state["auto_n_codes"] = auto_n_codes
+                        st.session_state["stage_3_complete"] = True
+                        reset_downstream_stages(3)
+
+                        st.success(f"Configuration set: {ML_METHODS[selected_method]}, {selected_n_codes} codes")
+
+                except Exception as e:
+                    st.error(f"Configuration failed: {e}")
 
         if st.session_state["stage_3_complete"]:
             st.markdown(f"**Method**: `{st.session_state['method']}`")
@@ -876,14 +1013,22 @@ def main():
             st.markdown("**Code Co-occurrence Matrix**:")
             cooccurrence_df = st.session_state["cooccurrence_df"]
             if cooccurrence_df is not None and not cooccurrence_df.empty:
-                # Build matrix for heatmap
+                # Build matrix for heatmap using code labels instead of code IDs
                 codes = list(coder.codebook.keys())
-                matrix = pd.DataFrame(0, index=codes, columns=codes)
+                # Create mapping from code ID to label
+                code_to_label = {code_id: info['label'] for code_id, info in coder.codebook.items()}
+                labels = [code_to_label[code] for code in codes]
+
+                # Use labels for both index and columns
+                matrix = pd.DataFrame(0, index=labels, columns=labels)
                 for _, row in cooccurrence_df.iterrows():
                     c1, c2 = row['Code 1'], row['Code 2']
-                    if c1 in matrix.index and c2 in matrix.columns:
-                        matrix.loc[c1, c2] = row['Count']
-                        matrix.loc[c2, c1] = row['Count']
+                    # Convert code IDs to labels
+                    label1 = code_to_label.get(c1, c1)
+                    label2 = code_to_label.get(c2, c2)
+                    if label1 in matrix.index and label2 in matrix.columns:
+                        matrix.loc[label1, label2] = row['Count']
+                        matrix.loc[label2, label1] = row['Count']
                 # Show as heatmap (using dataframe with background gradient)
                 st.dataframe(
                     matrix.style.background_gradient(cmap='Blues', axis=None),
@@ -891,6 +1036,124 @@ def main():
                 )
             else:
                 st.markdown("*No co-occurrence pairs detected*")
+
+            # === VISUALIZATION 5: Word Cloud ===
+            st.markdown("**Word Cloud**:")
+            if WORDCLOUD_AVAILABLE:
+                text_col = st.session_state["text_column"]
+                all_text = ' '.join(results_df[text_col].astype(str).tolist())
+                if all_text.strip():
+                    try:
+                        wordcloud = WordCloud(
+                            width=800,
+                            height=400,
+                            background_color='white',
+                            colormap='viridis',
+                            max_words=100
+                        ).generate(all_text)
+
+                        fig, ax = plt.subplots(figsize=(10, 5))
+                        ax.imshow(wordcloud, interpolation='bilinear')
+                        ax.axis('off')
+                        st.pyplot(fig)
+                        plt.close(fig)
+                    except Exception as e:
+                        st.warning(f"Could not generate word cloud: {e}")
+                else:
+                    st.markdown("*No text content available for word cloud*")
+            else:
+                st.info("Word cloud visualization requires the `wordcloud` package. Install with: `pip install wordcloud`")
+
+            # === VISUALIZATION 6: Code Network Diagram ===
+            st.markdown("**Code Co-occurrence Network**:")
+            if NETWORKX_AVAILABLE and cooccurrence_df is not None and not cooccurrence_df.empty:
+                try:
+                    # Build network graph
+                    G = nx.Graph()
+                    code_to_label = {code_id: info['label'] for code_id, info in coder.codebook.items()}
+
+                    # Add nodes with size based on count
+                    for code_id, info in coder.codebook.items():
+                        if info['count'] > 0:
+                            G.add_node(
+                                code_to_label[code_id],
+                                count=info['count']
+                            )
+
+                    # Add edges from co-occurrences
+                    for _, row in cooccurrence_df.iterrows():
+                        label1 = code_to_label.get(row['Code 1'], row['Code 1'])
+                        label2 = code_to_label.get(row['Code 2'], row['Code 2'])
+                        if label1 in G.nodes and label2 in G.nodes:
+                            G.add_edge(label1, label2, weight=row['Count'])
+
+                    if len(G.nodes) > 0 and len(G.edges) > 0:
+                        # Create visualization
+                        fig, ax = plt.subplots(figsize=(12, 8))
+
+                        # Layout
+                        pos = nx.spring_layout(G, k=2, iterations=50, seed=42)
+
+                        # Node sizes based on count
+                        node_sizes = [G.nodes[node].get('count', 1) * 100 + 300 for node in G.nodes]
+
+                        # Edge widths based on weight
+                        edge_weights = [G.edges[edge]['weight'] for edge in G.edges]
+                        max_weight = max(edge_weights) if edge_weights else 1
+                        edge_widths = [2 + (w / max_weight) * 4 for w in edge_weights]
+
+                        # Draw network
+                        nx.draw_networkx_nodes(G, pos, node_size=node_sizes, node_color='lightblue',
+                                               edgecolors='darkblue', linewidths=2, ax=ax)
+                        nx.draw_networkx_edges(G, pos, width=edge_widths, alpha=0.6,
+                                               edge_color='gray', ax=ax)
+                        nx.draw_networkx_labels(G, pos, font_size=8, font_weight='bold', ax=ax)
+
+                        ax.set_title("Code Co-occurrence Network", fontsize=14, fontweight='bold')
+                        ax.axis('off')
+                        plt.tight_layout()
+                        st.pyplot(fig)
+                        plt.close(fig)
+                    else:
+                        st.markdown("*Not enough co-occurrences to create network diagram*")
+                except Exception as e:
+                    st.warning(f"Could not generate network diagram: {e}")
+            elif not NETWORKX_AVAILABLE:
+                st.info("Network diagram requires the `networkx` package. Install with: `pip install networkx`")
+            else:
+                st.markdown("*No co-occurrence pairs for network visualization*")
+
+            # === VISUALIZATION 7: Theme Distribution Pie Chart ===
+            st.markdown("**Theme Distribution**:")
+            if top_codes_df is not None and not top_codes_df.empty:
+                # Get top 10 codes for pie chart
+                top_10 = top_codes_df.head(10)
+                if not top_10.empty and top_10['Count'].sum() > 0:
+                    fig, ax = plt.subplots(figsize=(10, 8))
+                    colors = plt.cm.viridis(np.linspace(0, 0.8, len(top_10)))
+
+                    wedges, texts, autotexts = ax.pie(
+                        top_10['Count'],
+                        labels=top_10['Label'],
+                        autopct='%1.1f%%',
+                        colors=colors,
+                        pctdistance=0.75,
+                        labeldistance=1.1
+                    )
+
+                    # Style the labels
+                    for text in texts:
+                        text.set_fontsize(9)
+                    for autotext in autotexts:
+                        autotext.set_fontsize(8)
+                        autotext.set_color('white')
+
+                    ax.set_title("Top 10 Themes by Frequency", fontsize=14, fontweight='bold')
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.close(fig)
+                else:
+                    st.markdown("*No data available for pie chart*")
 
             st.markdown("---")
 
@@ -901,7 +1164,19 @@ def main():
 
             st.markdown("**Co-occurrence Pairs Table**:")
             if cooccurrence_df is not None and not cooccurrence_df.empty:
-                st.dataframe(cooccurrence_df.head(15), use_container_width=True)
+                # Create a copy with labels instead of code IDs
+                display_df = cooccurrence_df.copy()
+                code_to_label = {code_id: info['label'] for code_id, info in coder.codebook.items()}
+
+                # Replace code IDs with labels
+                display_df['Code 1 Label'] = display_df['Code 1'].map(code_to_label)
+                display_df['Code 2 Label'] = display_df['Code 2'].map(code_to_label)
+
+                # Reorder columns to show labels prominently
+                display_cols = ['Code 1 Label', 'Code 2 Label', 'Count', 'Percentage']
+                # Only include columns that exist
+                display_cols = [col for col in display_cols if col in display_df.columns]
+                st.dataframe(display_df[display_cols].head(15), use_container_width=True)
             else:
                 st.markdown("*No co-occurrence pairs with min_count >= 2*")
 
