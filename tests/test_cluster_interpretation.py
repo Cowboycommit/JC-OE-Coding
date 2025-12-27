@@ -31,7 +31,7 @@ class TestClusterSummary:
         """Test basic summary creation."""
         summary = ClusterSummary(
             cluster_id="CLUSTER_01",
-            label="Technology / Innovation / Research",
+            label="Technology Innovation Research",
             top_terms=["technology", "innovation", "research", "development"],
             term_weights=[0.8, 0.6, 0.5, 0.4],
             document_count=50,
@@ -295,7 +295,7 @@ class TestClusterCodebook:
         summaries = {
             "CLUSTER_01": ClusterSummary(
                 cluster_id="CLUSTER_01",
-                label="Technology / AI",
+                label="Technology AI",
                 top_terms=["technology", "ai", "machine", "learning", "data"],
                 term_weights=[0.8, 0.7, 0.6, 0.5, 0.4],
                 document_count=30,
@@ -306,7 +306,7 @@ class TestClusterCodebook:
             ),
             "CLUSTER_02": ClusterSummary(
                 cluster_id="CLUSTER_02",
-                label="Sports / Athletics",
+                label="Sports Athletics",
                 top_terms=["sports", "team", "game", "player", "score"],
                 term_weights=[0.75, 0.65, 0.55, 0.45, 0.35],
                 document_count=25,
@@ -343,7 +343,7 @@ class TestClusterCodebook:
 
         assert "# Cluster Codebook" in md
         assert "CLUSTER_01" in md
-        assert "Technology / AI" in md
+        assert "Technology AI" in md
         assert "Keywords" in md
         assert "> **Note**:" in md
 
@@ -354,7 +354,7 @@ class TestClusterCodebook:
 
         assert "Cluster ID" in csv
         assert "CLUSTER_01" in csv
-        assert "Technology / AI" in csv
+        assert "Technology AI" in csv
 
     def test_disclaimer_included(self, sample_report):
         """Test that disclaimer about unsupervised nature is included."""

@@ -741,7 +741,7 @@ def run_ml_analysis(
 
         def _generate_codebook(self, top_words=15):
             """Generate codebook with clean 3-word labels (stopwords/duplicates removed)."""
-            # Stopwords to filter from labels
+            # Stopwords to filter from labels and keywords
             stopwords = {
                 'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
                 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
@@ -750,7 +750,10 @@ def run_ml_analysis(
                 'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
                 'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
                 've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
-                'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if'
+                'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
+                'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
+                'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
+                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which'
             }
 
             feature_names = self.vectorizer.get_feature_names_out()
@@ -765,26 +768,57 @@ def run_ml_analysis(
 
                 top_words_list = [feature_names[i] for i in top_indices]
 
+                # Filter stopwords from keywords
+                filtered_keywords = [w for w in top_words_list if w.lower().strip() not in stopwords]
+
                 # Filter stopwords and duplicates for label
                 seen = set()
                 label_terms = []
-                for word in top_words_list:
+                for word in filtered_keywords:
                     word_lower = word.lower().strip()
-                    if word_lower not in stopwords and word_lower not in seen:
+                    if word_lower not in seen:
                         seen.add(word_lower)
                         label_terms.append(word)
-                        if len(label_terms) >= 3:
+                        if len(label_terms) >= 5:  # Get more terms for subset filtering
                             break
 
-                label = ' / '.join(term.title() for term in label_terms)
+                # Remove subset phrases (e.g., "Hard" removed if "Hard To" exists)
+                label_terms = self._remove_subset_terms(label_terms)[:3]
+
+                # Join with space, no "/" separator
+                label = ' '.join(term.title() for term in label_terms)
 
                 self.codebook[code_id] = {
                     'label': label,
-                    'keywords': top_words_list,
+                    'keywords': filtered_keywords,
                     'count': 0,
                     'examples': [],
                     'avg_confidence': 0.0
                 }
+
+        def _remove_subset_terms(self, terms):
+            """Remove terms whose words are a subset of another term's words."""
+            if len(terms) <= 1:
+                return terms
+
+            # Convert each term to a set of words for comparison
+            term_words = []
+            for term in terms:
+                words = set(term.lower().split())
+                term_words.append((term, words))
+
+            # Find terms that are subsets of other terms
+            to_remove = set()
+            for i, (term_i, words_i) in enumerate(term_words):
+                for j, (term_j, words_j) in enumerate(term_words):
+                    if i != j:
+                        # If term_i's words are a proper subset of term_j's words,
+                        # mark term_i for removal
+                        if words_i < words_j:  # proper subset check
+                            to_remove.add(i)
+
+            # Return terms that are not subsets
+            return [term for i, (term, _) in enumerate(term_words) if i not in to_remove]
 
         def _assign_codes(self, doc_topic_matrix, responses):
             assignments = []
