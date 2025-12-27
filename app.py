@@ -1751,7 +1751,8 @@ def page_visualizations():
 
             # Create matplotlib figure
             fig, ax = plt.subplots(figsize=(12, 6))
-            ax.imshow(wordcloud, interpolation='bilinear')
+            # Use to_array() for numpy 2.0+ compatibility
+            ax.imshow(wordcloud.to_array(), interpolation='bilinear')
             ax.axis('off')
             plt.tight_layout()
 
