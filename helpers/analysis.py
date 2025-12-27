@@ -832,8 +832,18 @@ def run_ml_analysis(
                         doc_confidences.append(float(confidence))
                         self.codebook[code_id]['count'] += 1
 
-                        if confidence > 0.6 and len(self.codebook[code_id]['examples']) < 10:
-                            self.codebook[code_id]['examples'].append({
+                        # Store examples for representative quotes (min 5, max 10)
+                        # Lower threshold to ensure we get quotes for most codes
+                        current_examples = self.codebook[code_id]['examples']
+                        if len(current_examples) < 5:
+                            # Always store up to 5 examples regardless of confidence
+                            current_examples.append({
+                                'text': str(responses[doc_idx]),
+                                'confidence': float(confidence)
+                            })
+                        elif len(current_examples) < 10 and confidence > 0.5:
+                            # Store additional high-confidence examples up to 10
+                            current_examples.append({
                                 'text': str(responses[doc_idx]),
                                 'confidence': float(confidence)
                             })
@@ -1244,7 +1254,7 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True) -> pd.DataFra
     return df
 
 
-def get_code_summary_with_quotes(coder, n_quotes: int = 3) -> pd.DataFrame:
+def get_code_summary_with_quotes(coder, n_quotes: int = 5) -> pd.DataFrame:
     """
     Get comprehensive code summary with representative quotes.
 
@@ -1252,7 +1262,7 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 3) -> pd.DataFrame:
 
     Args:
         coder: Fitted MLOpenCoder instance
-        n_quotes: Number of representative quotes per code (default 3)
+        n_quotes: Number of representative quotes per code (default 5, or all if fewer)
 
     Returns:
         DataFrame with code summaries including representative quotes
@@ -1261,8 +1271,10 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 3) -> pd.DataFrame:
 
     for code_id, info in coder.codebook.items():
         # Get representative quotes (examples stored during assignment)
+        # Use all available examples up to n_quotes (ensures 5 or all if fewer)
+        examples = info.get('examples', [])
         quotes = []
-        for example in info.get('examples', [])[:n_quotes]:
+        for example in examples[:n_quotes]:
             text = example.get('text', '')
             # Truncate long quotes
             if len(text) > 150:
@@ -1274,7 +1286,7 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 3) -> pd.DataFrame:
             'Label': info['label'],
             'Keywords': ', '.join(info['keywords'][:10]),
             'Count': info['count'],
-            'Representative Quotes': ' | '.join(quotes) if quotes else '(no high-confidence examples)'
+            'Representative Quotes': ' | '.join(quotes) if quotes else '(no examples available)'
         })
 
     df = pd.DataFrame(code_data)
@@ -1557,15 +1569,27 @@ def export_results_package(coder, results_df: pd.DataFrame, format: str = 'excel
                 writer, sheet_name='Assignments', index=False
             )
 
-            # Codebook
+            # Codebook with representative quotes
             codebook_data = []
             for code_id, info in coder.codebook.items():
+                # Get up to 5 representative quotes (or all if fewer)
+                examples = info.get('examples', [])[:5]
+                quotes = [ex['text'][:200] for ex in examples]
+                # Pad with empty strings if fewer than 5 quotes
+                while len(quotes) < 5:
+                    quotes.append('')
+
                 codebook_data.append({
                     'Code': code_id,
                     'Label': info['label'],
                     'Keywords': ', '.join(info['keywords']),
                     'Count': info['count'],
-                    'Avg Confidence': info['avg_confidence']
+                    'Avg Confidence': info['avg_confidence'],
+                    'Quote 1': quotes[0],
+                    'Quote 2': quotes[1],
+                    'Quote 3': quotes[2],
+                    'Quote 4': quotes[3],
+                    'Quote 5': quotes[4]
                 })
             pd.DataFrame(codebook_data).to_excel(
                 writer, sheet_name='Codebook', index=False

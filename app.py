@@ -1472,10 +1472,11 @@ def page_results_overview():
                 with col1:
                     st.markdown(f"**Keywords:** {', '.join(info['keywords'][:10])}")
 
-                    # Show examples
+                    # Show examples (5 representative quotes or all if fewer)
                     if info['examples']:
                         st.markdown("**Example Responses:**")
-                        for i, example in enumerate(info['examples'][:3], 1):
+                        examples = info['examples'][:5]  # Show up to 5 quotes
+                        for i, example in enumerate(examples, 1):
                             st.text(f"{i}. {truncate_text(example['text'], 100)} [{example['confidence']:.2f}]")
 
                 with col2:
@@ -1938,15 +1939,27 @@ def page_export_results():
             use_container_width=True
         )
 
-        # Codebook
+        # Codebook with representative quotes
         codebook_data = []
         for code_id, info in coder.codebook.items():
+            # Get up to 5 representative quotes (or all if fewer)
+            examples = info.get('examples', [])[:5]
+            quotes = [ex['text'][:200] for ex in examples]
+            # Pad with empty strings if fewer than 5 quotes
+            while len(quotes) < 5:
+                quotes.append('')
+
             codebook_data.append({
                 'Code': code_id,
                 'Label': info['label'],
                 'Keywords': ', '.join(info['keywords']),
                 'Count': info['count'],
-                'Avg Confidence': info['avg_confidence']
+                'Avg Confidence': info['avg_confidence'],
+                'Quote 1': quotes[0],
+                'Quote 2': quotes[1],
+                'Quote 3': quotes[2],
+                'Quote 4': quotes[3],
+                'Quote 5': quotes[4]
             })
         codebook_df = pd.DataFrame(codebook_data)
         codebook_csv = codebook_df.to_csv(index=False).encode()
