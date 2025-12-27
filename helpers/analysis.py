@@ -693,7 +693,7 @@ def run_ml_analysis(
                 try:
                     interpreter = ClusterInterpreter(
                         n_top_terms=15,
-                        n_label_terms=5,
+                        n_label_terms=3,
                         n_representative_docs=5,
                         min_term_weight_threshold=0.005
                     )
@@ -740,7 +740,19 @@ def run_ml_analysis(
             return self
 
         def _generate_codebook(self, top_words=15):
-            """Generate codebook with more descriptive labels for survey data."""
+            """Generate codebook with clean 3-word labels (stopwords/duplicates removed)."""
+            # Stopwords to filter from labels
+            stopwords = {
+                'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+                'should', 'may', 'might', 'must', 'can', 'and', 'but', 'or', 'for',
+                'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
+                'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
+                'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
+                've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
+                'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if'
+            }
+
             feature_names = self.vectorizer.get_feature_names_out()
             for code_idx in range(self.n_codes):
                 code_id = f"CODE_{code_idx + 1:02d}"
@@ -752,8 +764,19 @@ def run_ml_analysis(
                     top_indices = cluster_center.argsort()[-top_words:][::-1]
 
                 top_words_list = [feature_names[i] for i in top_indices]
-                # Use 5 terms for more descriptive labels (optimized for survey data)
-                label = ' / '.join(top_words_list[:5]).title()
+
+                # Filter stopwords and duplicates for label
+                seen = set()
+                label_terms = []
+                for word in top_words_list:
+                    word_lower = word.lower().strip()
+                    if word_lower not in stopwords and word_lower not in seen:
+                        seen.add(word_lower)
+                        label_terms.append(word)
+                        if len(label_terms) >= 3:
+                            break
+
+                label = ' / '.join(term.title() for term in label_terms)
 
                 self.codebook[code_id] = {
                     'label': label,
@@ -1148,30 +1171,83 @@ def get_analysis_summary(coder, results_df: pd.DataFrame) -> str:
     return summary
 
 
-def get_top_codes(coder, n: int = 10) -> pd.DataFrame:
+def get_top_codes(coder, n: int = 10, include_quotes: bool = True) -> pd.DataFrame:
     """
-    Get top N codes by frequency.
+    Get top N codes by frequency with labels, keywords, and representative quotes.
 
     Args:
         coder: Fitted MLOpenCoder instance
         n: Number of codes to return
+        include_quotes: Include representative quotes (default True)
 
     Returns:
-        DataFrame with top codes
+        DataFrame with: Code, Label, Count, Keywords, Representative Quotes
     """
     code_data = []
 
     for code_id, info in coder.codebook.items():
-        code_data.append({
+        row = {
             'Code': code_id,
             'Label': info['label'],
             'Count': info['count'],
             'Avg Confidence': info['avg_confidence'],
-            'Keywords': ', '.join(info['keywords'][:5])
-        })
+            'Keywords': ', '.join(info['keywords'][:10])
+        }
+
+        if include_quotes:
+            # Get top representative quote
+            examples = info.get('examples', [])
+            if examples:
+                quote = examples[0].get('text', '')[:150]
+                if len(examples[0].get('text', '')) > 150:
+                    quote += '...'
+                row['Representative Quote'] = quote
+            else:
+                row['Representative Quote'] = ''
+
+        code_data.append(row)
 
     df = pd.DataFrame(code_data)
     df = df.sort_values('Count', ascending=False).head(n)
+
+    return df
+
+
+def get_code_summary_with_quotes(coder, n_quotes: int = 3) -> pd.DataFrame:
+    """
+    Get comprehensive code summary with representative quotes.
+
+    Returns DataFrame with: Code, Label, Keywords, Representative Quotes
+
+    Args:
+        coder: Fitted MLOpenCoder instance
+        n_quotes: Number of representative quotes per code (default 3)
+
+    Returns:
+        DataFrame with code summaries including representative quotes
+    """
+    code_data = []
+
+    for code_id, info in coder.codebook.items():
+        # Get representative quotes (examples stored during assignment)
+        quotes = []
+        for example in info.get('examples', [])[:n_quotes]:
+            text = example.get('text', '')
+            # Truncate long quotes
+            if len(text) > 150:
+                text = text[:150] + '...'
+            quotes.append(text)
+
+        code_data.append({
+            'Code': code_id,
+            'Label': info['label'],
+            'Keywords': ', '.join(info['keywords'][:10]),
+            'Count': info['count'],
+            'Representative Quotes': ' | '.join(quotes) if quotes else '(no high-confidence examples)'
+        })
+
+    df = pd.DataFrame(code_data)
+    df = df.sort_values('Count', ascending=False)
 
     return df
 
