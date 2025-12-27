@@ -441,24 +441,27 @@ class ClusterInterpreter:
                 filtered_terms, filtered_weights
             )
 
-            # Build label word-by-word to avoid duplicates from n-gram overlap
-            # e.g., "Has Become" + "Cricket Has" should become "Has Become Cricket"
+            # Build label word-by-word with weight tracking for semantic coherence
+            # Collect unique words with their weights, then sort by weight (highest first)
             seen_words = set()
-            label_words = []
-            for term in filtered_terms:
+            word_weight_pairs = []
+            for term, term_weight in zip(filtered_terms, filtered_weights):
                 # Split term into individual words and filter
                 for word in term.split():
                     word_lower = word.lower().strip()
                     # Skip stopwords and already-seen words
                     if word_lower not in LABEL_STOPWORDS and word_lower not in seen_words:
                         seen_words.add(word_lower)
-                        label_words.append(word)
-                # Stop once we have enough unique words for the label
-                if len(label_words) >= self.n_label_terms:
-                    break
+                        word_weight_pairs.append((word, term_weight))
+
+            # Sort by weight (highest first) for semantic coherence
+            word_weight_pairs.sort(key=lambda x: x[1], reverse=True)
+
+            # Take top N words by weight
+            label_words = [w for w, _ in word_weight_pairs[:self.n_label_terms]]
 
             if label_words:
-                label = " ".join(word.title() for word in label_words[:self.n_label_terms])
+                label = " ".join(word.title() for word in label_words)
             else:
                 label = f"Cluster {cluster_idx} (low confidence)"
 
