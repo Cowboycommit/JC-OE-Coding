@@ -424,11 +424,6 @@ def run_ml_analysis(
             preprocessing_override={'min_df': 5, 'sublinear_tf': True}
         )
     """
-    import sys
-    sys.path.insert(0, '.')
-
-    # Import from notebook (classes defined in cells)
-    # For now, we'll recreate the classes here
     from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
     from sklearn.decomposition import LatentDirichletAllocation, NMF
     from sklearn.cluster import KMeans
