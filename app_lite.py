@@ -83,7 +83,6 @@ from src.rigor_diagnostics import RigorDiagnostics
 from src.method_visualizations import (
     MethodVisualizer,
     get_visualization_availability,
-    create_method_visualizations,
 )
 from helpers.analysis import (
     validate_dataframe,
@@ -1069,39 +1068,42 @@ def main():
 
             # === VISUALIZATION 5: Word Frequency Chart ===
             st.markdown("**Top Words**:")
-            text_col = st.session_state["text_column"]
-            all_text = ' '.join(results_df[text_col].astype(str).tolist())
-            if all_text.strip():
-                try:
-                    # Simple word frequency using Counter
-                    from collections import Counter
-                    import re as re_module
-                    # Tokenize and clean
-                    words = re_module.findall(r'\b[a-zA-Z]{3,}\b', all_text.lower())
-                    # Remove common stop words
-                    stop_words = {'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'has', 'have', 'been', 'were', 'they', 'their', 'what', 'when', 'where', 'who', 'will', 'with', 'would', 'there', 'this', 'that', 'from', 'which', 'more', 'some', 'than', 'into', 'other', 'about', 'these', 'just', 'also', 'very', 'being', 'because'}
-                    words = [w for w in words if w not in stop_words]
-                    word_counts = Counter(words).most_common(30)
+            if PLOTLY_AVAILABLE:
+                text_col = st.session_state["text_column"]
+                all_text = ' '.join(results_df[text_col].astype(str).tolist())
+                if all_text.strip():
+                    try:
+                        # Simple word frequency using Counter
+                        from collections import Counter
+                        import re as re_module
+                        # Tokenize and clean
+                        words = re_module.findall(r'\b[a-zA-Z]{3,}\b', all_text.lower())
+                        # Remove common stop words
+                        stop_words = {'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'has', 'have', 'been', 'were', 'they', 'their', 'what', 'when', 'where', 'who', 'will', 'with', 'would', 'there', 'this', 'that', 'from', 'which', 'more', 'some', 'than', 'into', 'other', 'about', 'these', 'just', 'also', 'very', 'being', 'because'}
+                        words = [w for w in words if w not in stop_words]
+                        word_counts = Counter(words).most_common(30)
 
-                    if word_counts:
-                        word_df = pd.DataFrame(word_counts, columns=['Word', 'Count'])
-                        fig = px.bar(
-                            word_df,
-                            x='Count',
-                            y='Word',
-                            orientation='h',
-                            title='Top 30 Words',
-                            color='Count',
-                            color_continuous_scale='viridis'
-                        )
-                        fig.update_layout(height=600, yaxis={'categoryorder': 'total ascending'})
-                        st.plotly_chart(fig, use_container_width=True)
-                    else:
-                        st.markdown("*No words found after filtering*")
-                except Exception as e:
-                    st.warning(f"Could not generate word frequency chart: {e}")
+                        if word_counts:
+                            word_df = pd.DataFrame(word_counts, columns=['Word', 'Count'])
+                            fig = px.bar(
+                                word_df,
+                                x='Count',
+                                y='Word',
+                                orientation='h',
+                                title='Top 30 Words',
+                                color='Count',
+                                color_continuous_scale='viridis'
+                            )
+                            fig.update_layout(height=600, yaxis={'categoryorder': 'total ascending'})
+                            st.plotly_chart(fig, use_container_width=True)
+                        else:
+                            st.markdown("*No words found after filtering*")
+                    except Exception as e:
+                        st.warning(f"Could not generate word frequency chart: {e}")
+                else:
+                    st.markdown("*No text content available*")
             else:
-                st.markdown("*No text content available*")
+                st.info("Word frequency chart requires `plotly`. Install with: `pip install plotly`")
 
             # === VISUALIZATION 6: Code Network Diagram ===
             st.markdown("**Code Co-occurrence Network**:")
