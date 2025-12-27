@@ -529,14 +529,16 @@ class AdaptivePreprocessor:
             rationale_parts.append("max_df=0.8 (standard)")
 
         # Determine n-gram range
+        # Always enable bigrams to capture meaningful phrases (e.g., "customer service", "too expensive")
+        # This is especially important for focused survey responses where phrases carry more meaning
         if characteristics.is_long_form or characteristics.corpus_size_category == 'large':
             # Enable bigrams for long-form or large corpora
             config.ngram_range = (1, 2)
             rationale_parts.append("ngram_range=(1,2) (bigrams enabled)")
         elif characteristics.is_short_form and characteristics.corpus_size_category == 'small':
-            # Unigrams only for small short-form corpora
-            config.ngram_range = (1, 1)
-            rationale_parts.append("ngram_range=(1,1) (unigrams only for small short corpus)")
+            # Enable bigrams for small short-form corpora to capture key phrases
+            config.ngram_range = (1, 2)
+            rationale_parts.append("ngram_range=(1,2) (bigrams for focused survey phrases)")
         else:
             # Default: include bigrams
             config.ngram_range = (1, 2)
