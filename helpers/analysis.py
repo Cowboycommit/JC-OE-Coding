@@ -358,7 +358,7 @@ def run_ml_analysis(
     text_column: str,
     n_codes: int = 10,
     method: str = 'tfidf_kmeans',
-    min_confidence: float = 0.3,
+    min_confidence: float = 0.2,
     representation: str = 'tfidf',
     embedding_kwargs: Optional[Dict[str, Any]] = None,
     progress_callback=None,
@@ -692,9 +692,10 @@ def run_ml_analysis(
             if CLUSTER_INTERPRETATION_AVAILABLE and self.representation == 'tfidf':
                 try:
                     interpreter = ClusterInterpreter(
-                        n_top_terms=10,
-                        n_label_terms=3,
-                        n_representative_docs=5
+                        n_top_terms=15,
+                        n_label_terms=5,
+                        n_representative_docs=5,
+                        min_term_weight_threshold=0.005
                     )
                     self.cluster_interpretation = interpreter.interpret_clusters(
                         vectorizer=self.vectorizer,
@@ -738,7 +739,8 @@ def run_ml_analysis(
 
             return self
 
-        def _generate_codebook(self, top_words=10):
+        def _generate_codebook(self, top_words=15):
+            """Generate codebook with more descriptive labels for survey data."""
             feature_names = self.vectorizer.get_feature_names_out()
             for code_idx in range(self.n_codes):
                 code_id = f"CODE_{code_idx + 1:02d}"
@@ -750,7 +752,8 @@ def run_ml_analysis(
                     top_indices = cluster_center.argsort()[-top_words:][::-1]
 
                 top_words_list = [feature_names[i] for i in top_indices]
-                label = ' '.join(top_words_list[:3]).title()
+                # Use 5 terms for more descriptive labels (optimized for survey data)
+                label = ' / '.join(top_words_list[:5]).title()
 
                 self.codebook[code_id] = {
                     'label': label,

@@ -213,10 +213,10 @@ class ClusterInterpreter:
 
     def __init__(
         self,
-        n_top_terms: int = 10,
-        n_label_terms: int = 3,
+        n_top_terms: int = 15,
+        n_label_terms: int = 5,
         n_representative_docs: int = 5,
-        min_term_weight_threshold: float = 0.01,
+        min_term_weight_threshold: float = 0.005,
         low_interpretability_threshold: float = 0.3
     ):
         """
@@ -361,15 +361,17 @@ class ClusterInterpreter:
             if not filtered_terms:
                 warnings.append("No terms above weight threshold")
                 is_interpretable = False
-            elif len(filtered_terms) < 3:
+            elif len(filtered_terms) < 2:
+                # Reduced penalty threshold for survey-sized datasets
                 warnings.append("Few distinctive terms")
-                confidence *= 0.8
+                confidence *= 0.9
             if doc_count == 0:
                 warnings.append("Empty cluster")
                 is_interpretable = False
-            elif doc_count < 5:
-                warnings.append("Very small cluster (<5 docs)")
-                confidence *= 0.9
+            elif doc_count < 3:
+                # Reduced penalty threshold for survey-sized datasets (200-500 responses)
+                warnings.append("Very small cluster (<3 docs)")
+                confidence *= 0.95
 
             interpretability_scores.append(confidence)
 
