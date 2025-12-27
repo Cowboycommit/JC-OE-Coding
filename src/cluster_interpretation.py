@@ -661,12 +661,15 @@ class ClusterCodebook:
         """Convert codebook to dictionary format."""
         codes = {}
         for cluster_id, summary in self.report.summaries.items():
+            # Include up to 5 representative quotes (or all if fewer than 5)
+            representative_docs = summary.representative_docs
+            examples = [d['text'] for d in representative_docs[:5]]
             codes[cluster_id] = {
                 'name': summary.label,
                 'definition': f"Documents characterized by: {', '.join(summary.top_terms[:5])}",
                 'keywords': summary.top_terms,
                 'n_documents': summary.document_count,
-                'examples': [d['text'] for d in summary.representative_docs[:3]],
+                'examples': examples,
                 'confidence': summary.interpretation_confidence,
                 'notes': summary.interpretation_notes,
                 'warnings': summary.warnings
@@ -718,7 +721,8 @@ class ClusterCodebook:
 
             if summary.representative_docs:
                 lines.append("**Example Documents**:")
-                for doc in summary.representative_docs[:3]:
+                # Show up to 5 representative quotes (or all if fewer than 5)
+                for doc in summary.representative_docs[:5]:
                     text_preview = doc['text'][:200] + "..." if len(doc['text']) > 200 else doc['text']
                     lines.append(f"> {text_preview}")
                     lines.append("")
@@ -740,15 +744,17 @@ class ClusterCodebook:
         output = StringIO()
         writer = csv.writer(output)
 
-        # Header
+        # Header - include 5 example columns
         writer.writerow([
             'Cluster ID', 'Label', 'Documents', 'Keywords',
-            'Confidence', 'Example 1', 'Example 2', 'Warnings'
+            'Confidence', 'Example 1', 'Example 2', 'Example 3',
+            'Example 4', 'Example 5', 'Warnings'
         ])
 
         for cluster_id, summary in self.report.summaries.items():
-            examples = [d['text'][:200] for d in summary.representative_docs[:2]]
-            while len(examples) < 2:
+            # Get up to 5 examples (or all if fewer than 5)
+            examples = [d['text'][:200] for d in summary.representative_docs[:5]]
+            while len(examples) < 5:
                 examples.append('')
 
             writer.writerow([
@@ -759,6 +765,9 @@ class ClusterCodebook:
                 f"{summary.interpretation_confidence:.1%}",
                 examples[0],
                 examples[1],
+                examples[2],
+                examples[3],
+                examples[4],
                 '; '.join(summary.warnings)
             ])
 
