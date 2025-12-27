@@ -1053,7 +1053,8 @@ def main():
                         ).generate(all_text)
 
                         fig, ax = plt.subplots(figsize=(10, 5))
-                        ax.imshow(wordcloud, interpolation='bilinear')
+                        # Use to_array() for numpy 2.0+ compatibility
+                        ax.imshow(wordcloud.to_array(), interpolation='bilinear')
                         ax.axis('off')
                         st.pyplot(fig)
                         plt.close(fig)

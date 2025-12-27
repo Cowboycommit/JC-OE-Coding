@@ -545,7 +545,8 @@ class MethodVisualizer:
 
         # Create matplotlib figure
         fig, ax = plt.subplots(figsize=(width/100, height/100))
-        ax.imshow(wordcloud, interpolation='bilinear')
+        # Use to_array() for numpy 2.0+ compatibility
+        ax.imshow(wordcloud.to_array(), interpolation='bilinear')
         ax.axis('off')
         ax.set_title(f'Cluster {cluster_id + 1} Word Cloud')
 
@@ -603,7 +604,8 @@ class MethodVisualizer:
                     max_words=max_words
                 ).generate(cleaned_text)
 
-                ax.imshow(wordcloud, interpolation='bilinear')
+                # Use to_array() for numpy 2.0+ compatibility
+                ax.imshow(wordcloud.to_array(), interpolation='bilinear')
             except ValueError:
                 ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
 
