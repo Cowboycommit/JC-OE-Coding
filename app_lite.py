@@ -48,6 +48,31 @@ try:
 except ImportError:
     NETWORKX_AVAILABLE = False
 
+# Optional imports for advanced visualizations
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+    px = None
+    go = None
+
+try:
+    from sklearn.decomposition import PCA
+    from sklearn.manifold import TSNE
+    from sklearn.metrics import silhouette_samples, silhouette_score
+    SKLEARN_VIZ_AVAILABLE = True
+except ImportError:
+    SKLEARN_VIZ_AVAILABLE = False
+
+try:
+    import pyLDAvis
+    import pyLDAvis.lda_model
+    PYLDAVIS_AVAILABLE = True
+except ImportError:
+    PYLDAVIS_AVAILABLE = False
+
 # -----------------------------------------------------------------------------
 # PATH SETUP
 # Ensure src/ is importable for pipeline modules
@@ -61,6 +86,11 @@ sys.path.insert(0, str(Path(__file__).parent))
 # -----------------------------------------------------------------------------
 from src.data_loader import DataLoader
 from src.rigor_diagnostics import RigorDiagnostics
+from src.method_visualizations import (
+    MethodVisualizer,
+    get_visualization_availability,
+    create_method_visualizations,
+)
 from helpers.analysis import (
     validate_dataframe,
     preprocess_responses,
@@ -193,13 +223,19 @@ PIPELINE_STAGES = [
         "name": "Visualization Generation",
         "purpose": "Create visual representations of analysis results",
         "inputs": ["MLOpenCoder", "Results DataFrame", "Metrics"],
-        "module": "helpers.analysis (data prep), UI (rendering only)",
-        "function": "get_top_codes(), get_cooccurrence_pairs()",
-        "outputs": ["Frequency tables", "Co-occurrence data", "Chart data"],
+        "module": "helpers.analysis (data prep), src.method_visualizations, UI (rendering only)",
+        "function": "get_top_codes(), get_cooccurrence_pairs(), MethodVisualizer.create_*()",
+        "outputs": [
+            "Frequency tables", "Co-occurrence data", "Chart data",
+            "Cluster scatter (PCA/t-SNE)", "Silhouette plot (KMeans)",
+            "Topic-term heatmap", "Topic distribution (NMF/LDA)",
+            "Per-cluster wordclouds", "pyLDAvis (LDA)"
+        ],
         "mistakes": [
             "Computing chart data in Streamlit callbacks",
             "Not caching visualization data",
             "Putting Plotly/chart logic in analysis modules",
+            "Showing incompatible visualizations (e.g., silhouette for NMF)",
         ],
     },
     {
@@ -1155,6 +1191,193 @@ def main():
                     plt.close(fig)
                 else:
                     st.markdown("*No data available for pie chart*")
+
+            st.markdown("---")
+
+            # =================================================================
+            # ADVANCED METHOD-SPECIFIC VISUALIZATIONS
+            # These visualizations are from src.method_visualizations and
+            # provide deeper insights based on the ML method used.
+            # =================================================================
+            st.markdown("### Advanced Analytics Visualizations")
+
+            # Get method-specific recommendations
+            method = st.session_state.get("method", "tfidf_kmeans")
+            viz_availability = get_visualization_availability(method)
+
+            # Show method context
+            method_names = {
+                'tfidf_kmeans': 'TF-IDF + K-Means (Hard Clustering)',
+                'nmf': 'NMF - Non-negative Matrix Factorization (Topic Model)',
+                'lda': 'LDA - Latent Dirichlet Allocation (Topic Model)'
+            }
+            st.info(f"**Current Method**: {method_names.get(method, method)} - Visualizations below are tailored to this method.")
+
+            # Create MethodVisualizer instance
+            try:
+                visualizer = MethodVisualizer(
+                    coder=coder,
+                    results_df=results_df,
+                    text_column=st.session_state["text_column"],
+                    method=method
+                )
+
+                # === VISUALIZATION: Cluster Scatter (PCA/t-SNE) ===
+                st.markdown("**Cluster/Topic Scatter Plot**:")
+                if PLOTLY_AVAILABLE and SKLEARN_VIZ_AVAILABLE:
+                    col1, col2 = st.columns([3, 1])
+                    with col2:
+                        reduction_method = st.selectbox(
+                            "Reduction Method",
+                            options=['pca', 'tsne'],
+                            format_func=lambda x: 'PCA (Fast)' if x == 'pca' else 't-SNE (Better separation)',
+                            key="scatter_reduction_method"
+                        )
+
+                    scatter_fig = visualizer.create_cluster_scatter(reduction_method=reduction_method)
+                    if scatter_fig is not None:
+                        st.plotly_chart(scatter_fig, use_container_width=True)
+                        if method == 'tfidf_kmeans':
+                            st.caption("Shows cluster separation - well-separated clusters indicate good clustering quality.")
+                        else:
+                            st.caption("Shows document groupings by dominant topic. Less meaningful for topic models than for clustering.")
+                    else:
+                        st.warning("Could not generate cluster scatter plot.")
+                else:
+                    st.info("Cluster scatter plot requires `plotly` and `scikit-learn`. Install with: `pip install plotly scikit-learn`")
+
+                # === VISUALIZATION: Silhouette Plot (KMeans only) ===
+                if method == 'tfidf_kmeans':
+                    st.markdown("**Silhouette Analysis (Cluster Quality)**:")
+                    if PLOTLY_AVAILABLE and SKLEARN_VIZ_AVAILABLE:
+                        silhouette_fig = visualizer.create_silhouette_plot()
+                        if silhouette_fig is not None:
+                            st.plotly_chart(silhouette_fig, use_container_width=True)
+                            st.caption("Silhouette coefficients measure cluster cohesion. Values close to 1 indicate well-clustered points; values near 0 or negative indicate overlapping clusters.")
+                        else:
+                            st.warning("Could not generate silhouette plot.")
+                    else:
+                        st.info("Silhouette plot requires `plotly` and `scikit-learn`.")
+                else:
+                    with st.expander("Why no Silhouette Plot?"):
+                        st.markdown(f"""
+                        **Silhouette analysis is only available for K-Means clustering.**
+
+                        Your current method ({method_names.get(method, method)}) uses **soft topic assignments**
+                        where documents can belong to multiple topics with different weights.
+
+                        Silhouette scores require hard cluster assignments (each document in exactly one cluster),
+                        which is how K-Means works.
+                        """)
+
+                # === VISUALIZATION: Topic-Term Heatmap ===
+                st.markdown("**Topic-Term Heatmap**:")
+                if PLOTLY_AVAILABLE:
+                    col1, col2 = st.columns([3, 1])
+                    with col2:
+                        n_terms = st.slider("Terms per topic", min_value=5, max_value=25, value=15, key="heatmap_n_terms")
+
+                    heatmap_fig = visualizer.create_topic_term_heatmap(n_terms=n_terms)
+                    if heatmap_fig is not None:
+                        st.plotly_chart(heatmap_fig, use_container_width=True)
+                        if method in ['nmf', 'lda']:
+                            st.caption("Shows the weight/probability of each term within each topic. Higher values indicate more characteristic terms.")
+                        else:
+                            st.caption("Shows cluster centroid weights. Higher values indicate terms more central to the cluster definition.")
+                    else:
+                        st.warning("Could not generate topic-term heatmap.")
+                else:
+                    st.info("Topic-term heatmap requires `plotly`. Install with: `pip install plotly`")
+
+                # === VISUALIZATION: Topic Distribution (NMF/LDA only) ===
+                if method in ['nmf', 'lda']:
+                    st.markdown("**Topic Distribution per Document**:")
+                    if PLOTLY_AVAILABLE:
+                        topic_dist_fig = visualizer.create_topic_distribution_chart()
+                        if topic_dist_fig is not None:
+                            st.plotly_chart(topic_dist_fig, use_container_width=True)
+                            st.caption("Shows the topic composition of sampled documents. Each bar represents a document, with colors showing topic weights.")
+                        else:
+                            st.warning("Could not generate topic distribution chart.")
+                    else:
+                        st.info("Topic distribution chart requires `plotly`.")
+                else:
+                    with st.expander("Why no Topic Distribution Chart?"):
+                        st.markdown("""
+                        **Topic distribution is only available for NMF and LDA topic models.**
+
+                        K-Means uses **hard cluster assignments** where each document belongs to exactly one cluster.
+                        There are no "topic weights" to visualize - each document simply belongs to its assigned cluster.
+
+                        For K-Means, the cluster scatter plot and silhouette analysis provide better insights.
+                        """)
+
+                # === VISUALIZATION: Per-Cluster Word Clouds ===
+                st.markdown("**Per-Cluster/Topic Word Clouds**:")
+                if WORDCLOUD_AVAILABLE:
+                    cluster_wc_fig = visualizer.create_all_cluster_wordclouds(max_words=30, cols=3)
+                    if cluster_wc_fig is not None:
+                        st.pyplot(cluster_wc_fig)
+                        plt.close(cluster_wc_fig)
+                        st.caption("Word clouds for each cluster/topic showing the most frequent terms in documents assigned to that group.")
+                    else:
+                        st.warning("Could not generate per-cluster word clouds.")
+                else:
+                    st.info("Per-cluster word clouds require `wordcloud`. Install with: `pip install wordcloud`")
+
+                # === VISUALIZATION: pyLDAvis (LDA only) ===
+                if method == 'lda':
+                    st.markdown("**Interactive LDA Visualization (pyLDAvis)**:")
+                    if PYLDAVIS_AVAILABLE:
+                        with st.spinner("Generating interactive LDA visualization..."):
+                            lda_html = visualizer.create_lda_visualization()
+                        if lda_html is not None:
+                            import streamlit.components.v1 as components
+                            components.html(lda_html, height=800, scrolling=True)
+                            st.caption("Interactive exploration of LDA topics. Click on topics to see their top terms; adjust relevance slider to balance frequency vs. distinctiveness.")
+                        else:
+                            st.warning("Could not generate pyLDAvis visualization.")
+                    else:
+                        st.info("Interactive LDA visualization requires `pyLDAvis`. Install with: `pip install pyLDAvis`")
+                elif method == 'nmf':
+                    with st.expander("Why no pyLDAvis?"):
+                        st.markdown("""
+                        **pyLDAvis is specifically designed for LDA models.**
+
+                        While NMF and LDA both produce topic models, pyLDAvis relies on LDA's probabilistic
+                        structure (Dirichlet priors, document-topic distributions as probabilities summing to 1).
+
+                        NMF produces non-negative matrix factors which don't have the same probabilistic interpretation.
+                        The topic-term heatmap and topic distribution chart provide similar insights for NMF.
+                        """)
+
+                # === Method Recommendations Summary ===
+                with st.expander("Visualization Recommendations for Your Method"):
+                    recommendations = visualizer.get_method_recommendations()
+
+                    st.markdown(f"**Method**: {recommendations['method_description']}")
+                    st.markdown("---")
+
+                    st.markdown("**Available Visualizations:**")
+                    for viz_name, viz_info in recommendations['visualizations'].items():
+                        status = "Available" if viz_info['available'] else "Not installed"
+                        priority = viz_info['priority'].upper()
+                        st.markdown(f"- **{viz_name}** [{priority}] - {viz_info['description']}")
+                        st.markdown(f"  - _{viz_info['note']}_")
+
+                    if recommendations['not_available']:
+                        st.markdown("**Not Available for This Method:**")
+                        for viz_name, reason in recommendations['not_available'].items():
+                            st.markdown(f"- **{viz_name}**: {reason}")
+
+                    st.markdown("**Notes:**")
+                    for note in recommendations['notes']:
+                        st.markdown(f"- {note}")
+
+            except Exception as e:
+                st.error(f"Error creating advanced visualizations: {e}")
+                import traceback
+                st.code(traceback.format_exc())
 
             st.markdown("---")
 
