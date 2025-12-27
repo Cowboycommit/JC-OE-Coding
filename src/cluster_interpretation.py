@@ -259,13 +259,13 @@ class ClusterInterpreter:
 
     def _filter_label_terms(self, terms: List[str]) -> List[str]:
         """
-        Filter terms for use in labels: remove stopwords and duplicates.
+        Filter terms for use in labels: remove stopwords, duplicates, and subset phrases.
 
         Args:
             terms: List of terms to filter
 
         Returns:
-            Filtered list with stopwords removed and no duplicates
+            Filtered list with stopwords removed, no duplicates, and no subset phrases
         """
         seen = set()
         filtered = []
@@ -276,7 +276,47 @@ class ClusterInterpreter:
             if term_lower not in LABEL_STOPWORDS and term_lower not in seen:
                 seen.add(term_lower)
                 filtered.append(term)
+
+        # Remove terms that are subsets of other terms
+        # e.g., "Hard" is removed if "Hard To" exists
+        filtered = self._remove_subset_terms(filtered)
+
         return filtered
+
+    def _remove_subset_terms(self, terms: List[str]) -> List[str]:
+        """
+        Remove terms whose words are a subset of another term's words.
+
+        For example, if we have ["Hard", "Hard To", "Stay"], "Hard" will be
+        removed because all its words appear in "Hard To".
+
+        Args:
+            terms: List of terms to filter
+
+        Returns:
+            Filtered list with subset terms removed
+        """
+        if len(terms) <= 1:
+            return terms
+
+        # Convert each term to a set of words for comparison
+        term_words = []
+        for term in terms:
+            words = set(term.lower().split())
+            term_words.append((term, words))
+
+        # Find terms that are subsets of other terms
+        to_remove = set()
+        for i, (term_i, words_i) in enumerate(term_words):
+            for j, (term_j, words_j) in enumerate(term_words):
+                if i != j:
+                    # If term_i's words are a proper subset of term_j's words,
+                    # mark term_i for removal
+                    if words_i < words_j:  # proper subset check
+                        to_remove.add(i)
+
+        # Return terms that are not subsets
+        return [term for i, (term, _) in enumerate(term_words) if i not in to_remove]
 
     def interpret_clusters(
         self,
