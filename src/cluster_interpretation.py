@@ -30,13 +30,35 @@ Usage:
 
 import logging
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple, Set
 from collections import Counter
 
 import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# Stopwords to exclude from topic labels (common non-descriptive words)
+LABEL_STOPWORDS: Set[str] = {
+    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+    'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
+    'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used',
+    'and', 'but', 'or', 'nor', 'for', 'yet', 'so', 'both', 'either', 'neither',
+    'not', 'only', 'own', 'same', 'than', 'too', 'very', 'just', 'also',
+    'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
+    'through', 'during', 'before', 'after', 'above', 'below', 'between',
+    'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when',
+    'where', 'why', 'how', 'all', 'each', 'few', 'more', 'most', 'other',
+    'some', 'such', 'no', 'any', 'if', 'because', 'until', 'while',
+    'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which', 'who',
+    'whom', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves',
+    'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his',
+    'himself', 'she', 'her', 'hers', 'herself', 'they', 'them', 'their',
+    'theirs', 'themselves', 'am', 'about', 'against', 'over', 'out', 'up',
+    'down', 'off', 'on', 'over', 'under', 'again', 'get', 'got', 'getting',
+    'really', 'actually', 'basically', 'simply', 'even', 'still', 'already',
+    've', 'll', 're', 't', 's', 'd', 'm'  # Contractions
+}
 
 
 @dataclass
@@ -214,7 +236,7 @@ class ClusterInterpreter:
     def __init__(
         self,
         n_top_terms: int = 15,
-        n_label_terms: int = 5,
+        n_label_terms: int = 3,
         n_representative_docs: int = 5,
         min_term_weight_threshold: float = 0.005,
         low_interpretability_threshold: float = 0.3
@@ -234,6 +256,27 @@ class ClusterInterpreter:
         self.n_representative_docs = n_representative_docs
         self.min_term_weight_threshold = min_term_weight_threshold
         self.low_interpretability_threshold = low_interpretability_threshold
+
+    def _filter_label_terms(self, terms: List[str]) -> List[str]:
+        """
+        Filter terms for use in labels: remove stopwords and duplicates.
+
+        Args:
+            terms: List of terms to filter
+
+        Returns:
+            Filtered list with stopwords removed and no duplicates
+        """
+        seen = set()
+        filtered = []
+        for term in terms:
+            # Normalize for comparison
+            term_lower = term.lower().strip()
+            # Skip stopwords and duplicates
+            if term_lower not in LABEL_STOPWORDS and term_lower not in seen:
+                seen.add(term_lower)
+                filtered.append(term)
+        return filtered
 
     def interpret_clusters(
         self,
@@ -330,8 +373,9 @@ class ClusterInterpreter:
                     filtered_terms.append(term)
                     filtered_weights.append(weight)
 
-            # Generate label from top terms
-            label_terms = filtered_terms[:self.n_label_terms]
+            # Generate label from top terms (filter stopwords and duplicates)
+            clean_terms = self._filter_label_terms(filtered_terms)
+            label_terms = clean_terms[:self.n_label_terms]
             if label_terms:
                 label = " / ".join(term.title() for term in label_terms)
             else:
