@@ -223,7 +223,7 @@ PIPELINE_STAGES = [
             "Frequency tables", "Co-occurrence data", "Chart data",
             "Cluster scatter (PCA/t-SNE)", "Silhouette plot (KMeans)",
             "Topic-term heatmap", "Topic distribution (NMF/LDA)",
-            "Per-cluster wordclouds", "pyLDAvis (LDA)"
+            "pyLDAvis (LDA)"
         ],
         "mistakes": [
             "Computing chart data in Streamlit callbacks",
@@ -1313,19 +1313,6 @@ def main():
 
                         For K-Means, the cluster scatter plot and silhouette analysis provide better insights.
                         """)
-
-                # === VISUALIZATION: Per-Cluster Word Clouds ===
-                st.markdown("**Per-Cluster/Topic Word Clouds**:")
-                if WORDCLOUD_AVAILABLE:
-                    cluster_wc_fig = visualizer.create_all_cluster_wordclouds(max_words=30, cols=3)
-                    if cluster_wc_fig is not None:
-                        st.pyplot(cluster_wc_fig)
-                        plt.close(cluster_wc_fig)
-                        st.caption("Word clouds for each cluster/topic showing the most frequent terms in documents assigned to that group.")
-                    else:
-                        st.warning("Could not generate per-cluster word clouds.")
-                else:
-                    st.info("Per-cluster word clouds require `wordcloud`. Install with: `pip install wordcloud`")
 
                 # === VISUALIZATION: pyLDAvis (LDA only) ===
                 if method == 'lda':
