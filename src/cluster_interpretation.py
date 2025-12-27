@@ -441,12 +441,24 @@ class ClusterInterpreter:
                 filtered_terms, filtered_weights
             )
 
-            # Generate label from top terms (filter duplicates and subset phrases)
-            clean_terms = self._filter_label_terms(filtered_terms)
-            label_terms = clean_terms[:self.n_label_terms]
-            if label_terms:
-                # Join with space, no "/" separator to avoid duplicate appearance
-                label = " ".join(term.title() for term in label_terms)
+            # Build label word-by-word to avoid duplicates from n-gram overlap
+            # e.g., "Has Become" + "Cricket Has" should become "Has Become Cricket"
+            seen_words = set()
+            label_words = []
+            for term in filtered_terms:
+                # Split term into individual words and filter
+                for word in term.split():
+                    word_lower = word.lower().strip()
+                    # Skip stopwords and already-seen words
+                    if word_lower not in LABEL_STOPWORDS and word_lower not in seen_words:
+                        seen_words.add(word_lower)
+                        label_words.append(word)
+                # Stop once we have enough unique words for the label
+                if len(label_words) >= self.n_label_terms:
+                    break
+
+            if label_words:
+                label = " ".join(word.title() for word in label_words[:self.n_label_terms])
             else:
                 label = f"Cluster {cluster_idx} (low confidence)"
 

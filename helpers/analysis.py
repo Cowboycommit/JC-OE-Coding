@@ -766,22 +766,24 @@ def run_ml_analysis(
                 # Filter stopwords from keywords
                 filtered_keywords = [w for w in top_words_list if w.lower().strip() not in stopwords]
 
-                # Filter stopwords and duplicates for label
-                seen = set()
-                label_terms = []
-                for word in filtered_keywords:
-                    word_lower = word.lower().strip()
-                    if word_lower not in seen:
-                        seen.add(word_lower)
-                        label_terms.append(word)
-                        if len(label_terms) >= 5:  # Get more terms for subset filtering
-                            break
+                # Build label word-by-word to avoid duplicates from n-gram overlap
+                # e.g., "Has Become" + "Cricket Has" should become "Has Become Cricket", not "Has Become Cricket Has"
+                seen_words = set()
+                label_words = []
+                for term in filtered_keywords:
+                    # Split term into individual words and filter
+                    for word in term.split():
+                        word_lower = word.lower().strip()
+                        # Skip stopwords and already-seen words
+                        if word_lower not in stopwords and word_lower not in seen_words:
+                            seen_words.add(word_lower)
+                            label_words.append(word)
+                    # Stop once we have enough unique words for the label
+                    if len(label_words) >= 3:
+                        break
 
-                # Remove subset phrases (e.g., "Hard" removed if "Hard To" exists)
-                label_terms = self._remove_subset_terms(label_terms)[:3]
-
-                # Join with space, no "/" separator
-                label = ' '.join(term.title() for term in label_terms)
+                # Join with space, take first 3 unique words
+                label = ' '.join(word.title() for word in label_words[:3])
 
                 self.codebook[code_id] = {
                     'label': label,
