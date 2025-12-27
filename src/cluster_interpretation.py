@@ -257,23 +257,46 @@ class ClusterInterpreter:
         self.min_term_weight_threshold = min_term_weight_threshold
         self.low_interpretability_threshold = low_interpretability_threshold
 
+    def _filter_stopwords_with_weights(
+        self, terms: List[str], weights: List[float]
+    ) -> Tuple[List[str], List[float]]:
+        """
+        Filter out stopwords from terms list, keeping weights in sync.
+
+        Args:
+            terms: List of terms to filter
+            weights: Corresponding weights for each term
+
+        Returns:
+            Tuple of (filtered_terms, filtered_weights) with stopwords removed
+        """
+        filtered_terms = []
+        filtered_weights = []
+        for term, weight in zip(terms, weights):
+            if term.lower().strip() not in LABEL_STOPWORDS:
+                filtered_terms.append(term)
+                filtered_weights.append(weight)
+        return filtered_terms, filtered_weights
+
     def _filter_label_terms(self, terms: List[str]) -> List[str]:
         """
-        Filter terms for use in labels: remove stopwords, duplicates, and subset phrases.
+        Filter terms for use in labels: remove duplicates and subset phrases.
+
+        Note: Stopwords should already be filtered before calling this method.
 
         Args:
             terms: List of terms to filter
 
         Returns:
-            Filtered list with stopwords removed, no duplicates, and no subset phrases
+            Filtered list with no duplicates and no subset phrases
         """
         seen = set()
         filtered = []
         for term in terms:
             # Normalize for comparison
             term_lower = term.lower().strip()
-            # Skip stopwords and duplicates
-            if term_lower not in LABEL_STOPWORDS and term_lower not in seen:
+            # Skip duplicates
+            if term_lower not in seen:
                 seen.add(term_lower)
                 filtered.append(term)
 
@@ -413,11 +436,17 @@ class ClusterInterpreter:
                     filtered_terms.append(term)
                     filtered_weights.append(weight)
 
-            # Generate label from top terms (filter stopwords and duplicates)
+            # Filter stopwords from all terms (for keywords)
+            filtered_terms, filtered_weights = self._filter_stopwords_with_weights(
+                filtered_terms, filtered_weights
+            )
+
+            # Generate label from top terms (filter duplicates and subset phrases)
             clean_terms = self._filter_label_terms(filtered_terms)
             label_terms = clean_terms[:self.n_label_terms]
             if label_terms:
-                label = " / ".join(term.title() for term in label_terms)
+                # Join with space, no "/" separator to avoid duplicate appearance
+                label = " ".join(term.title() for term in label_terms)
             else:
                 label = f"Cluster {cluster_idx} (low confidence)"
 
