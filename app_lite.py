@@ -67,6 +67,13 @@ try:
 except ImportError:
     PYLDAVIS_AVAILABLE = False
 
+# Word cloud support (optional)
+try:
+    from wordcloud import WordCloud
+    WORDCLOUD_AVAILABLE = True
+except ImportError:
+    WORDCLOUD_AVAILABLE = False
+
 # -----------------------------------------------------------------------------
 # PATH SETUP
 # Ensure src/ is importable for pipeline modules
@@ -222,7 +229,7 @@ PIPELINE_STAGES = [
             "Frequency tables", "Co-occurrence data", "Chart data",
             "Cluster scatter (PCA/t-SNE)", "Silhouette plot (KMeans)",
             "Topic-term heatmap", "Topic distribution (NMF/LDA)",
-            "pyLDAvis (LDA)"
+            "Per-cluster wordclouds", "pyLDAvis (LDA)"
         ],
         "mistakes": [
             "Computing chart data in Streamlit callbacks",
@@ -1362,6 +1369,71 @@ def main():
                         NMF produces non-negative matrix factors which don't have the same probabilistic interpretation.
                         The topic-term heatmap and topic distribution chart provide similar insights for NMF.
                         """)
+
+                # === VISUALIZATION: Per-Cluster Word Clouds ===
+                st.markdown("**Per-Cluster/Topic Word Clouds**:")
+                if WORDCLOUD_AVAILABLE:
+                    try:
+                        # Use semantic wordclouds with color-coded meanings
+                        with st.spinner("Generating semantic word clouds..."):
+                            semantic_fig = visualizer.create_all_semantic_wordclouds(
+                                max_words=40,
+                                cols=3
+                            )
+
+                        if semantic_fig is not None:
+                            st.pyplot(semantic_fig, use_container_width=True)
+                            plt.close(semantic_fig)
+                            st.caption(
+                                "Word clouds for each topic/cluster. Word SIZE indicates frequency; "
+                                "word COLOR indicates semantic similarity (similar colors = similar meanings)."
+                            )
+
+                            # Option to view individual topic wordclouds
+                            with st.expander("View Individual Topic Word Cloud"):
+                                n_clusters = len(set(visualizer.assignments))
+                                topic_options = {}
+                                for i in range(n_clusters):
+                                    code_id = f"CODE_{i + 1:02d}"
+                                    if code_id in coder.codebook:
+                                        label = coder.codebook[code_id].get('label', f'Topic {i + 1}')
+                                    else:
+                                        label = f'Topic {i + 1}'
+                                    topic_options[f"{label} (Topic {i + 1})"] = i
+
+                                selected_topic = st.selectbox(
+                                    "Select a topic for detailed view:",
+                                    options=list(topic_options.keys()),
+                                    key="semantic_wc_topic_select"
+                                )
+
+                                if selected_topic:
+                                    topic_id = topic_options[selected_topic]
+                                    individual_fig = visualizer.create_semantic_wordcloud(
+                                        cluster_id=topic_id,
+                                        max_words=60,
+                                        width=1000,
+                                        height=500
+                                    )
+                                    if individual_fig:
+                                        st.pyplot(individual_fig, use_container_width=True)
+                                        plt.close(individual_fig)
+                        else:
+                            # Fallback to simple wordclouds
+                            simple_fig = visualizer.create_all_cluster_wordclouds(
+                                max_words=30,
+                                cols=3
+                            )
+                            if simple_fig is not None:
+                                st.pyplot(simple_fig, use_container_width=True)
+                                plt.close(simple_fig)
+                                st.caption("Word clouds for each topic/cluster. Larger words appear more frequently.")
+                            else:
+                                st.info("Unable to generate word clouds for this dataset.")
+                    except Exception as e:
+                        st.warning(f"Could not generate word clouds: {str(e)}")
+                else:
+                    st.info("Word clouds require the `wordcloud` package. Install with: `pip install wordcloud`")
 
                 # === Method Recommendations Summary ===
                 with st.expander("Visualization Recommendations for Your Method"):
