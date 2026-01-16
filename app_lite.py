@@ -870,13 +870,33 @@ def main():
             # Codebook preview
             st.markdown("**Discovered Codebook**:")
             codebook_data = []
+            total_responses = metrics.get('total_responses', len(coder.code_assignments) if coder.code_assignments else 1)
             for code_id, info in coder.codebook.items():
+                # Extract at least 3 sample texts from examples (original, not preprocessed)
+                examples = info.get('examples', [])
+                sample_texts = []
+                for ex in examples[:3]:
+                    text = ex.get('text', '')
+                    # Truncate long texts for display but keep original wording
+                    if len(text) > 100:
+                        text = text[:100] + "..."
+                    sample_texts.append(f'"{text}"')
+                # Pad with empty quotes if fewer than 3 samples
+                while len(sample_texts) < 3:
+                    sample_texts.append('""')
+                sample_text_display = " | ".join(sample_texts)
+
+                # Calculate % of total docs
+                pct_of_total = (info['count'] / total_responses * 100) if total_responses > 0 else 0
+
                 codebook_data.append({
                     "Code": code_id,
                     "Label": info['label'],
+                    "Keywords": ", ".join(info['keywords'][:5]),
+                    "Sample Text": sample_text_display,
                     "Count": info['count'],
-                    "Confidence": f"{info['avg_confidence']:.2f}",
-                    "Keywords": ", ".join(info['keywords'][:5])
+                    "% of Total": f"{pct_of_total:.1f}%",
+                    "Confidence": f"{info['avg_confidence']:.2f}"
                 })
             st.dataframe(pd.DataFrame(codebook_data), use_container_width=True)
 
