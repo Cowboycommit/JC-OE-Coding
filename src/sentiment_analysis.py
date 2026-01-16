@@ -29,6 +29,14 @@ Usage:
     results = analyzer.analyze(texts)
 """
 
+import os
+
+# Fix Keras 3 compatibility issue with HuggingFace Transformers
+# Keras 3 is not yet supported by transformers, so we configure TensorFlow
+# to use the backwards-compatible tf-keras package instead.
+# See: https://github.com/huggingface/transformers/issues/27850
+os.environ.setdefault('TF_USE_LEGACY_KERAS', '1')
+
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional, Tuple, Union
 from dataclasses import dataclass
