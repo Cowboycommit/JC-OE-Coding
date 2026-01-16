@@ -81,7 +81,9 @@ class MistralAPIClient:
         self,
         api_key: Optional[str] = None,
         model: Optional[str] = None,
-        timeout: int = 30
+        timeout: int = 30,
+        temperature: float = 0.1,
+        max_retries: int = 3
     ):
         """
         Initialize Mistral API client.
@@ -90,10 +92,14 @@ class MistralAPIClient:
             api_key: Mistral API key (defaults to MISTRAL_API_KEY env var)
             model: Model to use (defaults to MISTRAL_DEFAULT_MODEL env var)
             timeout: Request timeout in seconds
+            temperature: Sampling temperature (lower = more consistent)
+            max_retries: Maximum number of retry attempts on failure
         """
         self.api_key = api_key or os.getenv("MISTRAL_API_KEY")
         self.model = model or os.getenv("MISTRAL_DEFAULT_MODEL", "open-mixtral-8x7b")
         self.timeout = timeout
+        self.temperature = temperature
+        self.max_retries = max_retries
         self._client = None
         self._available = None
 
@@ -129,7 +135,7 @@ class MistralAPIClient:
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> Optional[str]:
         """
-        Generate a response from the Mistral API.
+        Generate a response from the Mistral API with retry logic.
 
         Args:
             prompt: User prompt
@@ -141,24 +147,35 @@ class MistralAPIClient:
         if not self._init_client():
             return None
 
-        try:
-            messages = []
-            if system_prompt:
-                messages.append({"role": "system", "content": system_prompt})
-            messages.append({"role": "user", "content": prompt})
+        import time
 
-            response = self._client.chat.complete(
-                model=self.model,
-                messages=messages
-            )
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
 
-            if response and response.choices:
-                return response.choices[0].message.content
-            return None
+        last_error = None
+        for attempt in range(self.max_retries):
+            try:
+                response = self._client.chat.complete(
+                    model=self.model,
+                    messages=messages,
+                    temperature=self.temperature
+                )
 
-        except Exception as e:
-            logger.warning(f"Mistral API call failed: {e}")
-            return None
+                if response and response.choices:
+                    return response.choices[0].message.content
+                return None
+
+            except Exception as e:
+                last_error = e
+                if attempt < self.max_retries - 1:
+                    wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
+                    logger.debug(f"Mistral API call failed (attempt {attempt + 1}), retrying in {wait_time}s: {e}")
+                    time.sleep(wait_time)
+
+        logger.warning(f"Mistral API call failed after {self.max_retries} attempts: {last_error}")
+        return None
 
 
 class LocalMistralClient:
@@ -304,7 +321,7 @@ class LocalMistralClient:
             response = self._model(
                 full_prompt,
                 max_tokens=1024,
-                temperature=0.3,
+                temperature=0.1,  # Lower temperature for more consistent labels
                 top_p=0.9,
                 stop=["</s>", "[INST]"]
             )
@@ -340,18 +357,30 @@ class LLMClusterInterpreter:
     # System prompt for cluster interpretation
     SYSTEM_PROMPT = """You are an expert qualitative researcher specializing in thematic analysis and coding of open-ended survey responses.
 
-Your task is to interpret clusters of similar survey responses and generate:
-1. A clear, concise primary label (2-4 words) that captures the main theme
-2. Alternative label suggestions (2-3 alternatives)
-3. A detailed description (2-3 sentences) explaining what this cluster represents
-4. Brief reasoning for your interpretation
+Your task is to analyze a cluster of similar survey responses and generate an accurate, specific label that captures the core theme.
 
-Guidelines:
-- Labels should be human-readable and meaningful to non-technical stakeholders
-- Focus on the underlying theme or sentiment, not just the keywords
-- Consider the context of survey responses
-- Be objective and neutral in your interpretations
-- Descriptions should explain what types of responses fall into this cluster"""
+CRITICAL REQUIREMENTS FOR GOOD LABELS:
+1. Be SPECIFIC, not generic - avoid vague labels like "General Feedback", "Various Issues", "Multiple Topics"
+2. Labels must be 2-4 words that capture the DISTINCTIVE theme of this cluster
+3. Focus on WHAT people are saying, not HOW they're saying it
+4. Identify the specific subject matter (e.g., "Slow Response Times" not "Service Issues")
+5. If the cluster discusses a problem, name the specific problem
+6. If discussing positive feedback, name what's being praised specifically
+
+EXAMPLES OF BAD vs GOOD LABELS:
+- BAD: "Customer Service" → GOOD: "Long Wait Times" or "Helpful Staff"
+- BAD: "Product Issues" → GOOD: "Battery Life Problems" or "Confusing Interface"
+- BAD: "General Satisfaction" → GOOD: "Easy Setup Process" or "Reliable Performance"
+- BAD: "Negative Feedback" → GOOD: "Billing Errors" or "Shipping Delays"
+
+Your output must include:
+1. primary_label: A specific 2-4 word label capturing the unique theme
+2. alternative_labels: REQUIRED - provide exactly 3 alternative labels that capture the theme from different angles or emphasize different aspects. These are important for giving users options.
+3. description: 2-3 sentences explaining what responses in this cluster share
+4. reasoning: Brief explanation of why you chose this interpretation
+5. confidence: Score 0-1 based on how clear/coherent the cluster theme is
+
+IMPORTANT: You MUST provide exactly 3 alternative_labels. Each alternative should be a valid 2-4 word label that could work as the primary label but approaches the theme differently."""
 
     def __init__(
         self,
@@ -422,47 +451,64 @@ Guidelines:
         current_label: str,
         document_count: int
     ) -> str:
-        """Build the prompt for cluster interpretation."""
-        # Format top terms with weights
+        """Build the prompt for cluster interpretation with rich context."""
+        # Format top terms with weights - include more terms for better context
         terms_with_weights = []
-        for term, weight in zip(top_terms[:10], term_weights[:10]):
-            terms_with_weights.append(f"  - {term} (weight: {weight:.3f})")
+        for term, weight in zip(top_terms[:15], term_weights[:15]):
+            terms_with_weights.append(f"  - \"{term}\" (weight: {weight:.3f})")
         terms_str = "\n".join(terms_with_weights)
 
-        # Format sample texts
+        # Format sample texts - include more samples with longer text
         samples_str = ""
         if sample_texts:
             samples = []
-            for i, text in enumerate(sample_texts[:5], 1):
-                # Truncate long texts
-                truncated = text[:300] + "..." if len(text) > 300 else text
+            for i, text in enumerate(sample_texts[:8], 1):
+                # Allow longer texts for better context
+                truncated = text[:500] + "..." if len(text) > 500 else text
                 samples.append(f"  {i}. \"{truncated}\"")
             samples_str = "\n".join(samples)
 
-        prompt = f"""Analyze this cluster of survey responses and provide interpretation.
+        prompt = f"""Analyze this cluster of survey responses and provide a SPECIFIC, ACCURATE label.
 
-CLUSTER INFORMATION:
-- Current auto-generated label: "{current_label}"
-- Number of responses: {document_count}
+CLUSTER STATISTICS:
+- Total responses in cluster: {document_count}
+- Auto-generated keyword label: "{current_label}"
 
-TOP KEYWORDS (by importance):
+TOP KEYWORDS BY TF-IDF WEIGHT (these indicate frequent/distinctive terms):
 {terms_str}
 
-SAMPLE RESPONSES FROM THIS CLUSTER:
+REPRESENTATIVE SAMPLE RESPONSES (read these carefully to understand the theme):
 {samples_str if samples_str else "  (No samples available)"}
 
-Please respond in the following JSON format:
+ANALYSIS INSTRUCTIONS:
+1. Read ALL sample responses carefully - the label must fit ALL of them, not just one
+2. Identify the COMMON THEME across all samples - what specific topic/issue/feedback do they share?
+3. The keywords show what terms are frequent, but the samples show the actual meaning
+4. Avoid generic labels - be as specific as possible about the actual content
+
+Based on your analysis, provide your response in this exact JSON format:
 {{
-    "primary_label": "Your 2-4 word label",
-    "alternative_labels": ["Alt 1", "Alt 2", "Alt 3"],
-    "description": "2-3 sentence description of what this cluster represents",
-    "reasoning": "Brief explanation of why you chose this interpretation",
+    "primary_label": "Specific 2-4 word label",
+    "alternative_labels": ["Different Angle Label", "Another Perspective", "Third Option"],
+    "description": "2-3 sentences explaining what these responses have in common and what distinguishes this cluster from others",
+    "reasoning": "Brief explanation of how you determined the common theme from the samples",
     "confidence": 0.85
 }}
 
-Respond ONLY with the JSON, no additional text."""
+CRITICAL REQUIREMENTS:
+- Respond with ONLY the JSON object, no other text
+- You MUST provide exactly 3 alternative_labels - this is required, not optional
+- Each alternative should be a different but valid way to label this cluster"""
 
         return prompt
+
+    # List of vague labels to avoid - if LLM returns these, we should penalize confidence
+    VAGUE_LABELS = {
+        "general feedback", "various issues", "multiple topics", "other responses",
+        "miscellaneous", "general comments", "mixed feedback", "general concerns",
+        "customer feedback", "user feedback", "general", "various", "other",
+        "feedback", "comments", "issues", "concerns", "responses", "topics"
+    }
 
     def _parse_llm_response(self, response: str) -> Optional[Dict[str, Any]]:
         """Parse the LLM response into structured data."""
@@ -480,12 +526,112 @@ Respond ONLY with the JSON, no additional text."""
 
             if start_idx >= 0 and end_idx > start_idx:
                 json_str = response[start_idx:end_idx]
-                return json.loads(json_str)
+                parsed = json.loads(json_str)
+
+                # Validate and potentially adjust the parsed response
+                parsed = self._validate_and_adjust_label(parsed)
+                return parsed
             return None
 
         except json.JSONDecodeError as e:
             logger.warning(f"Failed to parse LLM response as JSON: {e}")
             return None
+
+    def _validate_and_adjust_label(self, parsed: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate the LLM-generated label and adjust confidence if it's too vague."""
+        primary_label = parsed.get("primary_label", "").lower().strip()
+
+        # Check if the label is too vague
+        is_vague = (
+            primary_label in self.VAGUE_LABELS or
+            any(vague in primary_label for vague in self.VAGUE_LABELS if len(vague) > 5)
+        )
+
+        if is_vague:
+            # Reduce confidence significantly for vague labels
+            current_confidence = float(parsed.get("confidence", 0.8))
+            parsed["confidence"] = min(current_confidence, 0.4)
+            logger.debug(f"Vague label detected: '{parsed.get('primary_label')}' - reducing confidence")
+
+            # If there are alternative labels, see if any are better
+            alternatives = parsed.get("alternative_labels", [])
+            for alt in alternatives:
+                alt_lower = alt.lower().strip()
+                if alt_lower not in self.VAGUE_LABELS and not any(
+                    vague in alt_lower for vague in self.VAGUE_LABELS if len(vague) > 5
+                ):
+                    # Use the better alternative as primary
+                    logger.debug(f"Swapping vague label '{parsed['primary_label']}' with better alternative '{alt}'")
+                    old_primary = parsed["primary_label"]
+                    parsed["primary_label"] = alt
+                    parsed["alternative_labels"] = [old_primary] + [a for a in alternatives if a != alt]
+                    parsed["confidence"] = min(current_confidence, 0.7)  # Still slightly lower confidence
+                    break
+
+        # Validate label length (should be 2-4 words)
+        word_count = len(parsed.get("primary_label", "").split())
+        if word_count < 2:
+            parsed["confidence"] = min(float(parsed.get("confidence", 0.8)), 0.5)
+            logger.debug(f"Label too short ({word_count} words): '{parsed.get('primary_label')}'")
+        elif word_count > 5:
+            parsed["confidence"] = min(float(parsed.get("confidence", 0.8)), 0.6)
+            logger.debug(f"Label too long ({word_count} words): '{parsed.get('primary_label')}'")
+
+        # Ensure alternative_labels is a list
+        if not isinstance(parsed.get("alternative_labels"), list):
+            parsed["alternative_labels"] = []
+
+        # Filter out empty or invalid alternatives
+        parsed["alternative_labels"] = [
+            alt for alt in parsed.get("alternative_labels", [])
+            if alt and isinstance(alt, str) and len(alt.strip()) > 0
+        ]
+
+        return parsed
+
+    def _generate_alternative_from_terms(
+        self,
+        top_terms: List[str],
+        primary_label: str,
+        existing_alternatives: List[str]
+    ) -> List[str]:
+        """
+        Generate alternative labels from top terms when LLM doesn't provide enough.
+
+        This creates synthetic alternatives by combining top terms in different ways.
+        """
+        alternatives = list(existing_alternatives)  # Copy existing
+        used_words = set(primary_label.lower().split())
+        for alt in alternatives:
+            used_words.update(alt.lower().split())
+
+        # Try to create alternatives from top terms that aren't already used
+        candidate_words = []
+        for term in top_terms[:10]:
+            for word in term.split():
+                word_lower = word.lower().strip()
+                if (word_lower not in used_words and
+                    word_lower not in self.VAGUE_LABELS and
+                    len(word_lower) > 2):
+                    candidate_words.append(word.title())
+                    used_words.add(word_lower)
+
+        # Generate alternatives by pairing terms
+        while len(alternatives) < 3 and len(candidate_words) >= 2:
+            # Take pairs of words to form alternatives
+            alt = f"{candidate_words[0]} {candidate_words[1]}"
+            if alt.lower() != primary_label.lower() and alt not in alternatives:
+                alternatives.append(alt)
+            candidate_words = candidate_words[2:]  # Remove used words
+
+        # If still not enough, try single descriptive terms with modifiers
+        if len(alternatives) < 3 and candidate_words:
+            for word in candidate_words[:3 - len(alternatives)]:
+                alt = f"{word} Related"
+                if alt not in alternatives:
+                    alternatives.append(alt)
+
+        return alternatives[:3]
 
     def _generate_with_fallback(self, prompt: str) -> Tuple[Optional[str], str]:
         """
@@ -533,9 +679,15 @@ Respond ONLY with the JSON, no additional text."""
         """
         # Return fallback if LLM not enabled or available
         if not self.enabled or not self.is_available:
+            # Still generate alternatives from terms even without LLM
+            fallback_alternatives = self._generate_alternative_from_terms(
+                top_terms=top_terms,
+                primary_label=current_label,
+                existing_alternatives=[]
+            )
             return LLMEnhancedLabel(
                 primary_label=current_label,
-                alternative_labels=[],
+                alternative_labels=fallback_alternatives,
                 description=f"Cluster characterized by: {', '.join(top_terms[:5])}",
                 reasoning="Generated from top weighted terms (LLM not available)",
                 confidence=0.5,
@@ -557,20 +709,37 @@ Respond ONLY with the JSON, no additional text."""
         if response:
             parsed = self._parse_llm_response(response)
             if parsed:
+                primary_label = parsed.get("primary_label", current_label)
+                alternatives = parsed.get("alternative_labels", [])[:3]
+
+                # Ensure we have at least one alternative - generate from terms if needed
+                if len(alternatives) < 1:
+                    logger.debug(f"LLM provided no alternatives for '{primary_label}', generating from terms")
+                    alternatives = self._generate_alternative_from_terms(
+                        top_terms=top_terms,
+                        primary_label=primary_label,
+                        existing_alternatives=alternatives
+                    )
+
                 return LLMEnhancedLabel(
-                    primary_label=parsed.get("primary_label", current_label),
-                    alternative_labels=parsed.get("alternative_labels", [])[:3],
+                    primary_label=primary_label,
+                    alternative_labels=alternatives,
                     description=parsed.get("description", ""),
                     reasoning=parsed.get("reasoning", ""),
                     confidence=float(parsed.get("confidence", 0.8)),
                     source=source
                 )
 
-        # Fallback to term-based label
+        # Fallback to term-based label with generated alternatives
         logger.info("LLM interpretation failed, using term-based fallback")
+        fallback_alternatives = self._generate_alternative_from_terms(
+            top_terms=top_terms,
+            primary_label=current_label,
+            existing_alternatives=[]
+        )
         return LLMEnhancedLabel(
             primary_label=current_label,
-            alternative_labels=[],
+            alternative_labels=fallback_alternatives,
             description=f"Cluster characterized by: {', '.join(top_terms[:5])}",
             reasoning="Fallback to term-based interpretation",
             confidence=0.5,
@@ -596,30 +765,51 @@ Respond ONLY with the JSON, no additional text."""
         """
         enhanced_labels = {}
 
-        # Group texts by cluster for sampling
-        cluster_texts = {}
+        # Group texts by cluster with their indices for sampling
+        cluster_texts_with_indices = {}
         for idx, cluster_id in enumerate(cluster_assignments):
             cluster_key = f"CLUSTER_{cluster_id + 1:02d}"
-            if cluster_key not in cluster_texts:
-                cluster_texts[cluster_key] = []
-            cluster_texts[cluster_key].append(texts[idx])
+            if cluster_key not in cluster_texts_with_indices:
+                cluster_texts_with_indices[cluster_key] = []
+            cluster_texts_with_indices[cluster_key].append((idx, texts[idx]))
 
         # Process each cluster
         for cluster_id, summary in cluster_summaries.items():
-            # Get sample texts for this cluster
-            sample_texts = cluster_texts.get(cluster_id, [])[:5]
-
             # Handle both ClusterSummary objects and dicts
             if hasattr(summary, 'top_terms'):
                 top_terms = summary.top_terms
                 term_weights = summary.term_weights
                 current_label = summary.label
                 doc_count = summary.document_count
+                representative_docs = getattr(summary, 'representative_docs', [])
             else:
                 top_terms = summary.get('top_terms', [])
                 term_weights = summary.get('term_weights', [])
                 current_label = summary.get('label', '')
                 doc_count = summary.get('document_count', 0)
+                representative_docs = summary.get('representative_docs', [])
+
+            # Get sample texts - prefer representative docs (closest to cluster center)
+            sample_texts = []
+            if representative_docs:
+                # Use representative docs - these are selected by similarity to cluster center
+                for doc in representative_docs[:8]:
+                    if isinstance(doc, dict) and 'text' in doc:
+                        sample_texts.append(doc['text'])
+                    elif isinstance(doc, str):
+                        sample_texts.append(doc)
+
+            # If not enough representative docs, supplement with cluster texts
+            if len(sample_texts) < 8:
+                cluster_text_list = cluster_texts_with_indices.get(cluster_id, [])
+                # Get diverse samples: pick from beginning, middle, and end of cluster
+                if cluster_text_list:
+                    n_texts = len(cluster_text_list)
+                    # Sample indices spread across the cluster
+                    sample_indices = self._get_diverse_sample_indices(n_texts, 8 - len(sample_texts))
+                    for idx in sample_indices:
+                        if idx < n_texts:
+                            sample_texts.append(cluster_text_list[idx][1])
 
             enhanced = self.enhance_cluster_summary(
                 top_terms=top_terms,
@@ -633,6 +823,33 @@ Respond ONLY with the JSON, no additional text."""
             logger.debug(f"Enhanced {cluster_id}: {enhanced.primary_label} (source: {enhanced.source})")
 
         return enhanced_labels
+
+    def _get_diverse_sample_indices(self, n_total: int, n_samples: int) -> List[int]:
+        """
+        Get diverse sample indices spread across a collection.
+
+        Instead of just taking the first N items, this spreads samples
+        across the entire collection for better representation.
+        """
+        if n_total <= n_samples:
+            return list(range(n_total))
+
+        # Spread samples evenly across the collection
+        step = n_total / (n_samples + 1)
+        indices = []
+        for i in range(1, n_samples + 1):
+            idx = int(step * i)
+            if idx < n_total and idx not in indices:
+                indices.append(idx)
+
+        # If we still need more, add from the beginning
+        while len(indices) < n_samples and len(indices) < n_total:
+            for i in range(n_total):
+                if i not in indices:
+                    indices.append(i)
+                    break
+
+        return indices[:n_samples]
 
 
 def get_llm_interpreter() -> LLMClusterInterpreter:
