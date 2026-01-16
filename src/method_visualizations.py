@@ -37,14 +37,30 @@ except ImportError:
     px = None
     logger.warning("Plotly not available. Visualizations will be disabled.")
 
+# Separate imports for wordcloud and matplotlib for better fallback handling
 try:
     from wordcloud import WordCloud
-    import matplotlib.pyplot as plt
     WORDCLOUD_AVAILABLE = True
 except ImportError:
     WORDCLOUD_AVAILABLE = False
-    plt = None  # Placeholder for type hints
-    logger.warning("WordCloud not available.")
+    WordCloud = None
+    logger.warning("WordCloud not available. Please ensure the wordcloud package is installed.")
+
+try:
+    import matplotlib.pyplot as plt
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
+    plt = None
+    logger.warning("matplotlib not available. Will use PIL for wordcloud images.")
+
+# PIL is bundled with wordcloud, use as fallback for image handling
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    Image = None
 
 try:
     from sklearn.decomposition import PCA
@@ -668,7 +684,7 @@ class MethodVisualizer:
             height: Image height
 
         Returns:
-            Matplotlib Figure or None if not available
+            Matplotlib Figure, PIL Image, or None if not available
         """
         if not WORDCLOUD_AVAILABLE:
             return None
@@ -697,15 +713,17 @@ class MethodVisualizer:
             max_font_size=100
         ).generate(cleaned_text)
 
-        # Create matplotlib figure
-        fig, ax = plt.subplots(figsize=(width/100, height/100))
-        # Use to_image() PIL method for numpy compatibility
-        ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-        ax.axis('off')
-        ax.set_title(f'{self._get_topic_label(cluster_id)} Word Cloud')
-
-        plt.tight_layout()
-        return fig
+        # Use matplotlib if available, otherwise return PIL image directly
+        if MATPLOTLIB_AVAILABLE:
+            fig, ax = plt.subplots(figsize=(width/100, height/100))
+            ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+            ax.axis('off')
+            ax.set_title(f'{self._get_topic_label(cluster_id)} Word Cloud')
+            plt.tight_layout()
+            return fig
+        else:
+            # Return PIL image directly when matplotlib is not available
+            return wordcloud.to_image()
 
     def create_all_cluster_wordclouds(
         self,
@@ -720,7 +738,7 @@ class MethodVisualizer:
             cols: Number of columns in grid
 
         Returns:
-            Matplotlib Figure or None if not available
+            Matplotlib Figure, PIL Image, or None if not available
         """
         if not WORDCLOUD_AVAILABLE:
             return None
@@ -728,50 +746,94 @@ class MethodVisualizer:
         n_clusters = len(set(self.assignments))
         rows = (n_clusters + cols - 1) // cols
 
-        fig, axes = plt.subplots(rows, cols, figsize=(cols * 5, rows * 3))
-        axes = axes.flatten() if n_clusters > 1 else [axes]
-
         import re
 
-        for cluster_id in range(n_clusters):
-            ax = axes[cluster_id]
+        # Use matplotlib if available
+        if MATPLOTLIB_AVAILABLE:
+            fig, axes = plt.subplots(rows, cols, figsize=(cols * 5, rows * 3))
+            axes = axes.flatten() if n_clusters > 1 else [axes]
 
-            # Get documents in this cluster
-            mask = self.assignments == cluster_id
-            cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+            for cluster_id in range(n_clusters):
+                ax = axes[cluster_id]
 
-            if not cluster_texts:
-                ax.text(0.5, 0.5, 'No documents', ha='center', va='center')
+                # Get documents in this cluster
+                mask = self.assignments == cluster_id
+                cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+
+                if not cluster_texts:
+                    ax.text(0.5, 0.5, 'No documents', ha='center', va='center')
+                    ax.axis('off')
+                    continue
+
+                # Generate word cloud
+                combined_text = ' '.join(str(t) for t in cluster_texts)
+                cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+
+                try:
+                    wordcloud = WordCloud(
+                        width=400,
+                        height=200,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=max_words
+                    ).generate(cleaned_text)
+
+                    # Use to_image() PIL method for numpy compatibility
+                    ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+                except ValueError:
+                    ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
+
                 ax.axis('off')
-                continue
+                ax.set_title(f'{self._get_topic_label(cluster_id)} ({sum(mask)} docs)')
 
-            # Generate word cloud
-            combined_text = ' '.join(str(t) for t in cluster_texts)
-            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+            # Hide unused axes
+            for idx in range(n_clusters, len(axes)):
+                axes[idx].axis('off')
 
-            try:
-                wordcloud = WordCloud(
-                    width=400,
-                    height=200,
-                    background_color='white',
-                    colormap='viridis',
-                    max_words=max_words
-                ).generate(cleaned_text)
+            plt.tight_layout()
+            return fig
+        else:
+            # PIL fallback: create a combined image grid
+            wordcloud_images = []
+            cell_width, cell_height = 400, 200
 
-                # Use to_image() PIL method for numpy compatibility
-                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-            except ValueError:
-                ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
+            for cluster_id in range(n_clusters):
+                mask = self.assignments == cluster_id
+                cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
 
-            ax.axis('off')
-            ax.set_title(f'{self._get_topic_label(cluster_id)} ({sum(mask)} docs)')
+                if not cluster_texts:
+                    # Create blank image for empty clusters
+                    img = Image.new('RGB', (cell_width, cell_height), 'white')
+                    wordcloud_images.append(img)
+                    continue
 
-        # Hide unused axes
-        for idx in range(n_clusters, len(axes)):
-            axes[idx].axis('off')
+                combined_text = ' '.join(str(t) for t in cluster_texts)
+                cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
-        plt.tight_layout()
-        return fig
+                try:
+                    wordcloud = WordCloud(
+                        width=cell_width,
+                        height=cell_height,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=max_words
+                    ).generate(cleaned_text)
+                    wordcloud_images.append(wordcloud.to_image())
+                except ValueError:
+                    img = Image.new('RGB', (cell_width, cell_height), 'white')
+                    wordcloud_images.append(img)
+
+            # Combine images into a grid
+            grid_width = cols * cell_width
+            grid_height = rows * cell_height
+            grid_image = Image.new('RGB', (grid_width, grid_height), 'white')
+
+            for idx, img in enumerate(wordcloud_images):
+                row_idx = idx // cols
+                col_idx = idx % cols
+                grid_image.paste(img, (col_idx * cell_width, row_idx * cell_height))
+
+            return grid_image
 
     def create_semantic_wordcloud(
         self,
@@ -795,7 +857,7 @@ class MethodVisualizer:
             colormap_name: Optional colormap override. If None, auto-selects based on cluster_id
 
         Returns:
-            Matplotlib Figure or None if not available
+            Matplotlib Figure, PIL Image, or None if not available
         """
         if not WORDCLOUD_AVAILABLE:
             return None
@@ -841,7 +903,7 @@ class MethodVisualizer:
         # Get top words by frequency
         top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
 
-        # Compute semantic colors
+        # Compute semantic colors (uses matplotlib.colors internally, falls back gracefully)
         word_colors = self._compute_semantic_colors(
             list(top_words.keys()),
             cluster_texts,
@@ -865,23 +927,26 @@ class MethodVisualizer:
             prefer_horizontal=0.7
         ).generate_from_frequencies(top_words)
 
-        # Create matplotlib figure
-        fig, ax = plt.subplots(figsize=(width/100, height/100))
-        # Use to_image() PIL method for numpy compatibility
-        ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-        ax.axis('off')
+        # Use matplotlib if available, otherwise return PIL image directly
+        if MATPLOTLIB_AVAILABLE:
+            fig, ax = plt.subplots(figsize=(width/100, height/100))
+            ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+            ax.axis('off')
 
-        # Get cluster label if available
-        code_id = f"CODE_{cluster_id + 1:02d}"
-        if code_id in self.codebook:
-            label = self.codebook[code_id].get('label', f'Cluster {cluster_id + 1}')
+            # Get cluster label if available
+            code_id = f"CODE_{cluster_id + 1:02d}"
+            if code_id in self.codebook:
+                label = self.codebook[code_id].get('label', f'Cluster {cluster_id + 1}')
+            else:
+                label = f'Cluster {cluster_id + 1}'
+
+            ax.set_title(f'{label}\n(colors show semantic similarity)', fontsize=12)
+
+            plt.tight_layout()
+            return fig
         else:
-            label = f'Cluster {cluster_id + 1}'
-
-        ax.set_title(f'{label}\n(colors show semantic similarity)', fontsize=12)
-
-        plt.tight_layout()
-        return fig
+            # Return PIL image directly when matplotlib is not available
+            return wordcloud.to_image()
 
     def _compute_semantic_colors(
         self,
@@ -905,38 +970,74 @@ class MethodVisualizer:
         Returns:
             Dictionary mapping words to RGB color strings
         """
-        import matplotlib.colors as mcolors
-
-        # Define distinct colormaps for each cluster
-        cluster_colormaps = [
-            'Blues',      # Cluster 0 - Blue shades
-            'Oranges',    # Cluster 1 - Orange shades
-            'Greens',     # Cluster 2 - Green shades
-            'Purples',    # Cluster 3 - Purple shades
-            'Reds',       # Cluster 4 - Red shades
-            'YlOrBr',     # Cluster 5 - Yellow-Orange-Brown
-            'BuGn',       # Cluster 6 - Blue-Green
-            'RdPu',       # Cluster 7 - Red-Purple
-            'YlGn',       # Cluster 8 - Yellow-Green
-            'OrRd',       # Cluster 9 - Orange-Red
-            'PuBu',       # Cluster 10 - Purple-Blue
-            'GnBu',       # Cluster 11 - Green-Blue
-            'BuPu',       # Cluster 12 - Blue-Purple
-            'PuRd',       # Cluster 13 - Purple-Red
-            'YlGnBu',     # Cluster 14 - Yellow-Green-Blue
+        # Define fallback color palettes when matplotlib is not available
+        fallback_palettes = [
+            # Blues (Cluster 0)
+            [(198, 219, 239), (107, 174, 214), (33, 113, 181), (8, 69, 148)],
+            # Oranges (Cluster 1)
+            [(253, 208, 162), (253, 141, 60), (230, 85, 13), (166, 54, 3)],
+            # Greens (Cluster 2)
+            [(199, 233, 192), (116, 196, 118), (35, 139, 69), (0, 90, 50)],
+            # Purples (Cluster 3)
+            [(218, 218, 235), (158, 154, 200), (106, 81, 163), (63, 0, 125)],
+            # Reds (Cluster 4)
+            [(252, 187, 161), (251, 106, 74), (222, 45, 38), (165, 15, 21)],
+            # YlOrBr (Cluster 5)
+            [(255, 247, 188), (254, 196, 79), (217, 95, 14), (153, 52, 4)],
+            # BuGn (Cluster 6)
+            [(204, 236, 230), (102, 194, 164), (35, 139, 69), (0, 88, 36)],
+            # RdPu (Cluster 7)
+            [(253, 224, 221), (250, 159, 181), (197, 27, 138), (122, 1, 119)],
         ]
 
-        # Select colormap
-        if colormap_name:
-            cmap = plt.cm.get_cmap(colormap_name)
+        if MATPLOTLIB_AVAILABLE:
+            # Define distinct colormaps for each cluster
+            cluster_colormaps = [
+                'Blues',      # Cluster 0 - Blue shades
+                'Oranges',    # Cluster 1 - Orange shades
+                'Greens',     # Cluster 2 - Green shades
+                'Purples',    # Cluster 3 - Purple shades
+                'Reds',       # Cluster 4 - Red shades
+                'YlOrBr',     # Cluster 5 - Yellow-Orange-Brown
+                'BuGn',       # Cluster 6 - Blue-Green
+                'RdPu',       # Cluster 7 - Red-Purple
+                'YlGn',       # Cluster 8 - Yellow-Green
+                'OrRd',       # Cluster 9 - Orange-Red
+                'PuBu',       # Cluster 10 - Purple-Blue
+                'GnBu',       # Cluster 11 - Green-Blue
+                'BuPu',       # Cluster 12 - Blue-Purple
+                'PuRd',       # Cluster 13 - Purple-Red
+                'YlGnBu',     # Cluster 14 - Yellow-Green-Blue
+            ]
+
+            # Select colormap
+            if colormap_name:
+                cmap = plt.cm.get_cmap(colormap_name)
+            else:
+                cmap_idx = cluster_id % len(cluster_colormaps)
+                cmap = plt.cm.get_cmap(cluster_colormaps[cmap_idx])
+
+            def get_color(pos):
+                color = cmap(pos)
+                return f'rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})'
         else:
-            cmap_idx = cluster_id % len(cluster_colormaps)
-            cmap = plt.cm.get_cmap(cluster_colormaps[cmap_idx])
+            # Use fallback palette without matplotlib
+            palette_idx = cluster_id % len(fallback_palettes)
+            palette = fallback_palettes[palette_idx]
+
+            def get_color(pos):
+                # Interpolate within the palette
+                idx = min(int(pos * (len(palette) - 1)), len(palette) - 2)
+                frac = pos * (len(palette) - 1) - idx
+                c1, c2 = palette[idx], palette[min(idx + 1, len(palette) - 1)]
+                r = int(c1[0] + frac * (c2[0] - c1[0]))
+                g = int(c1[1] + frac * (c2[1] - c1[1]))
+                b = int(c1[2] + frac * (c2[2] - c1[2]))
+                return f'rgb({r},{g},{b})'
 
         if len(words) <= 1:
             # Only one word - use middle color
-            color = cmap(0.6)
-            rgb = f'rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})'
+            rgb = get_color(0.6)
             return {words[0]: rgb} if words else {}
 
         # Try to compute semantic embeddings
@@ -959,8 +1060,7 @@ class MethodVisualizer:
         for word, pos in word_positions.items():
             # Scale position to colormap range (avoid very light colors)
             color_pos = 0.25 + pos * 0.65
-            color = cmap(color_pos)
-            rgb = f'rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})'
+            rgb = get_color(color_pos)
             word_colors[word] = rgb
 
         return word_colors
@@ -1062,7 +1162,7 @@ class MethodVisualizer:
             cols: Number of columns in grid
 
         Returns:
-            Matplotlib Figure or None if not available
+            Matplotlib Figure, PIL Image, or None if not available
         """
         if not WORDCLOUD_AVAILABLE:
             return None
@@ -1070,33 +1170,22 @@ class MethodVisualizer:
         n_clusters = len(set(self.assignments))
         rows = (n_clusters + cols - 1) // cols
 
-        # Larger figure for semantic wordclouds
-        fig, axes = plt.subplots(rows, cols, figsize=(cols * 6, rows * 4))
-        axes = axes.flatten() if n_clusters > 1 else [axes]
-
         import re
 
-        for cluster_id in range(n_clusters):
-            ax = axes[cluster_id]
-
-            # Get documents in this cluster
+        # Helper to generate wordcloud for a cluster
+        def generate_cluster_wordcloud(cluster_id, cell_width=500, cell_height=300):
             mask = self.assignments == cluster_id
             cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
 
             if not cluster_texts:
-                ax.text(0.5, 0.5, 'No documents', ha='center', va='center')
-                ax.axis('off')
-                continue
+                return None, 0
 
-            # Combine and clean text
             combined_text = ' '.join(str(t) for t in cluster_texts)
             cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
-            # Get word frequencies
             words = cleaned_text.split()
             word_freq = Counter(words)
 
-            # Remove common stopwords
             stopwords = {
                 'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
                 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
@@ -1114,21 +1203,16 @@ class MethodVisualizer:
                          if w not in stopwords and len(w) > 2}
 
             if not word_freq:
-                ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
-                ax.axis('off')
-                continue
+                return None, sum(mask)
 
-            # Get top words by frequency
             top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
 
-            # Compute semantic colors
             word_colors = self._compute_semantic_colors(
                 list(top_words.keys()),
                 cluster_texts,
                 cluster_id
             )
 
-            # Create color function for WordCloud
             def make_color_func(colors):
                 def color_func(word, font_size, position, orientation, random_state=None, **kwargs):
                     return colors.get(word.lower(), 'gray')
@@ -1136,8 +1220,8 @@ class MethodVisualizer:
 
             try:
                 wordcloud = WordCloud(
-                    width=500,
-                    height=300,
+                    width=cell_width,
+                    height=cell_height,
                     background_color='white',
                     max_words=max_words,
                     min_font_size=8,
@@ -1145,38 +1229,69 @@ class MethodVisualizer:
                     color_func=make_color_func(word_colors),
                     prefer_horizontal=0.7
                 ).generate_from_frequencies(top_words)
+                return wordcloud.to_image(), sum(mask)
+            except ValueError:
+                return None, sum(mask)
 
-                # Use to_image() PIL method for numpy compatibility
-                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-            except ValueError as e:
-                ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
+        if MATPLOTLIB_AVAILABLE:
+            # Larger figure for semantic wordclouds
+            fig, axes = plt.subplots(rows, cols, figsize=(cols * 6, rows * 4))
+            axes = axes.flatten() if n_clusters > 1 else [axes]
 
-            ax.axis('off')
+            for cluster_id in range(n_clusters):
+                ax = axes[cluster_id]
+                img, doc_count = generate_cluster_wordcloud(cluster_id)
 
-            # Get cluster label if available
-            code_id = f"CODE_{cluster_id + 1:02d}"
-            if code_id in self.codebook:
-                label = self.codebook[code_id].get('label', f'Cluster {cluster_id + 1}')
-            else:
-                label = f'Cluster {cluster_id + 1}'
+                if img is None:
+                    ax.text(0.5, 0.5, 'No documents' if doc_count == 0 else 'Insufficient text',
+                            ha='center', va='center')
+                else:
+                    ax.imshow(img, interpolation='bilinear')
 
-            ax.set_title(f'{label}\n({sum(mask)} docs)', fontsize=10)
+                ax.axis('off')
 
-        # Hide unused axes
-        for idx in range(n_clusters, len(axes)):
-            axes[idx].axis('off')
+                code_id = f"CODE_{cluster_id + 1:02d}"
+                if code_id in self.codebook:
+                    label = self.codebook[code_id].get('label', f'Cluster {cluster_id + 1}')
+                else:
+                    label = f'Cluster {cluster_id + 1}'
 
-        # Add overall title
-        fig.suptitle(
-            'Semantic Word Clouds by Topic\n'
-            '(Word size = frequency, Color shade = semantic similarity)',
-            fontsize=14,
-            fontweight='bold',
-            y=1.02
-        )
+                ax.set_title(f'{label}\n({doc_count} docs)', fontsize=10)
 
-        plt.tight_layout()
-        return fig
+            for idx in range(n_clusters, len(axes)):
+                axes[idx].axis('off')
+
+            fig.suptitle(
+                'Semantic Word Clouds by Topic\n'
+                '(Word size = frequency, Color shade = semantic similarity)',
+                fontsize=14,
+                fontweight='bold',
+                y=1.02
+            )
+
+            plt.tight_layout()
+            return fig
+        else:
+            # PIL fallback: create a combined image grid
+            cell_width, cell_height = 500, 300
+            wordcloud_images = []
+
+            for cluster_id in range(n_clusters):
+                img, _ = generate_cluster_wordcloud(cluster_id, cell_width, cell_height)
+                if img is None:
+                    img = Image.new('RGB', (cell_width, cell_height), 'white')
+                wordcloud_images.append(img)
+
+            grid_width = cols * cell_width
+            grid_height = rows * cell_height
+            grid_image = Image.new('RGB', (grid_width, grid_height), 'white')
+
+            for idx, img in enumerate(wordcloud_images):
+                row_idx = idx // cols
+                col_idx = idx % cols
+                grid_image.paste(img, (col_idx * cell_width, row_idx * cell_height))
+
+            return grid_image
 
     def create_lda_visualization(self) -> Optional[str]:
         """
