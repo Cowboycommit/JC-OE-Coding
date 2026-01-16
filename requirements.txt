@@ -13,6 +13,11 @@ gensim>=4.3.0,<5.0.0
 # sentence-transformers>=2.2.0,<3.0.0
 # torch>=2.0.0,<3.0.0  # Required by sentence-transformers
 
+# Optional: Sentiment Analysis (for Twitter/Social Media data)
+# Uncomment to enable sentiment analysis with CardiffNLP Twitter-RoBERTa
+# transformers>=4.30.0,<5.0.0
+# torch>=2.0.0,<3.0.0  # Required by transformers
+
 # Visualization
 matplotlib>=3.7.0,<4.0.0
 seaborn>=0.12.0,<1.0.0
