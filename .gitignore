@@ -79,3 +79,7 @@ docs/_build/
 *.tmp
 *.bak
 temp/
+
+# LLM models (large binary files)
+models/*.gguf
+models/*.bin
