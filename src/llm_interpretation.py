@@ -115,7 +115,10 @@ class MistralAPIClient:
 
         try:
             from mistralai import Mistral
-            self._client = Mistral(api_key=self.api_key)
+            self._client = Mistral(
+                api_key=self.api_key,
+                timeout_ms=self.timeout * 1000  # Convert seconds to milliseconds
+            )
             self._available = True
             logger.info(f"Mistral API client initialized with model: {self.model}")
             return True
@@ -157,24 +160,29 @@ class MistralAPIClient:
         last_error = None
         for attempt in range(self.max_retries):
             try:
+                logger.debug(f"Mistral API call attempt {attempt + 1}/{self.max_retries} with model: {self.model}")
                 response = self._client.chat.complete(
                     model=self.model,
                     messages=messages,
-                    temperature=self.temperature
+                    temperature=self.temperature,
+                    stream=False
                 )
 
                 if response and response.choices:
-                    return response.choices[0].message.content
+                    content = response.choices[0].message.content
+                    logger.debug(f"Mistral API call successful, response length: {len(content) if content else 0}")
+                    return content
+                logger.warning("Mistral API returned empty response or no choices")
                 return None
 
             except Exception as e:
                 last_error = e
                 if attempt < self.max_retries - 1:
                     wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
-                    logger.debug(f"Mistral API call failed (attempt {attempt + 1}), retrying in {wait_time}s: {e}")
+                    logger.warning(f"Mistral API call failed (attempt {attempt + 1}), retrying in {wait_time}s: {e}")
                     time.sleep(wait_time)
 
-        logger.warning(f"Mistral API call failed after {self.max_retries} attempts: {last_error}")
+        logger.error(f"Mistral API call failed after {self.max_retries} attempts: {last_error}")
         return None
 
 
@@ -642,18 +650,27 @@ CRITICAL REQUIREMENTS:
         """
         # Try API first
         if self._api_client and self._api_client.is_available:
+            logger.info("Attempting LLM interpretation via Mistral API...")
             response = self._api_client.generate(prompt, self.SYSTEM_PROMPT)
             if response:
+                logger.info("Mistral API returned successful response for topic refinement")
                 return response, "api"
-            logger.debug("API call failed, trying local model")
+            logger.warning("Mistral API call returned no response, trying local model fallback")
+        else:
+            logger.info("Mistral API not available, trying local model")
 
         # Fall back to local model
         if self._local_client and self._local_client.is_available:
+            logger.info("Attempting LLM interpretation via local model...")
             response = self._local_client.generate(prompt, self.SYSTEM_PROMPT)
             if response:
+                logger.info("Local model returned successful response for topic refinement")
                 return response, "local"
-            logger.debug("Local model failed")
+            logger.warning("Local model returned no response")
+        else:
+            logger.info("Local model not available")
 
+        logger.warning("No LLM backend available for topic refinement, using term-based fallback")
         return None, "none"
 
     def enhance_cluster_summary(
