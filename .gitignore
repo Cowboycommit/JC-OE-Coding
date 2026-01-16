@@ -48,7 +48,8 @@ htmlcov/
 *.log
 
 # Environment variables
-.env
+# .env is tracked for this project (contains shared API config)
+!.env
 .env.local
 
 # Data (uncomment if you want to ignore data files)
