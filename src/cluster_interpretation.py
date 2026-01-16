@@ -84,6 +84,13 @@ class ClusterSummary:
         is_interpretable: Whether cluster has clear interpretation
         interpretation_confidence: Confidence in the interpretation (0-1)
         warnings: Any warnings about interpretation quality
+
+        # LLM-enhanced fields
+        llm_label: LLM-refined label (if available)
+        llm_alternative_labels: Alternative label suggestions from LLM
+        llm_description: Detailed description from LLM
+        llm_reasoning: LLM's reasoning for the interpretation
+        llm_source: Source of LLM interpretation ('api', 'local', or 'fallback')
     """
     cluster_id: Any
     label: str
@@ -100,9 +107,16 @@ class ClusterSummary:
     interpretation_confidence: float = 1.0
     warnings: List[str] = field(default_factory=list)
 
+    # LLM-enhanced fields
+    llm_label: Optional[str] = None
+    llm_alternative_labels: List[str] = field(default_factory=list)
+    llm_description: Optional[str] = None
+    llm_reasoning: Optional[str] = None
+    llm_source: Optional[str] = None
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
-        return {
+        result = {
             'cluster_id': self.cluster_id,
             'label': self.label,
             'top_terms': self.top_terms,
@@ -113,17 +127,52 @@ class ClusterSummary:
             'interpretation_notes': self.interpretation_notes,
             'is_interpretable': self.is_interpretable,
             'interpretation_confidence': round(self.interpretation_confidence, 3),
-            'warnings': self.warnings
+            'warnings': self.warnings,
         }
+        # Include LLM-enhanced fields if available
+        if self.llm_label:
+            result['llm_label'] = self.llm_label
+            result['llm_alternative_labels'] = self.llm_alternative_labels
+            result['llm_description'] = self.llm_description
+            result['llm_reasoning'] = self.llm_reasoning
+            result['llm_source'] = self.llm_source
+        return result
 
-    def get_display_string(self, include_terms: bool = True) -> str:
+    @property
+    def display_label(self) -> str:
+        """Get the best available label (LLM if available, otherwise term-based)."""
+        return self.llm_label if self.llm_label else self.label
+
+    def get_display_string(self, include_terms: bool = True, include_llm: bool = True) -> str:
         """Get a formatted display string for this cluster."""
-        parts = [f"{self.cluster_id}: {self.label} ({self.document_count} docs)"]
+        # Use LLM label if available
+        display_label = self.display_label
+        parts = [f"{self.cluster_id}: {display_label} ({self.document_count} docs)"]
+
+        # Show original term-based label if LLM label is different
+        if include_llm and self.llm_label and self.llm_label != self.label:
+            parts.append(f"  Original label: {self.label}")
+
         if include_terms and self.top_terms:
             terms_str = ", ".join(self.top_terms[:5])
             parts.append(f"  Terms: {terms_str}")
+
+        # Show LLM description if available
+        if include_llm and self.llm_description:
+            parts.append(f"  Description: {self.llm_description}")
+
+        # Show alternative labels if available
+        if include_llm and self.llm_alternative_labels:
+            alts_str = ", ".join(self.llm_alternative_labels[:3])
+            parts.append(f"  Alternatives: {alts_str}")
+
         if self.warnings:
             parts.append(f"  Warnings: {'; '.join(self.warnings)}")
+
+        # Show LLM source
+        if include_llm and self.llm_source:
+            parts.append(f"  [LLM: {self.llm_source}]")
+
         return "\n".join(parts)
 
 
@@ -142,6 +191,8 @@ class ClusterInterpretationReport:
         overall_interpretability: Average interpretability across clusters
         method_used: Description of clustering method
         warnings: Global warnings about interpretation
+        llm_enhanced: Whether LLM enhancement was applied
+        llm_backend: Backend used for LLM ('api', 'local', or None)
     """
     summaries: Dict[Any, ClusterSummary]
     n_clusters: int
@@ -149,6 +200,8 @@ class ClusterInterpretationReport:
     overall_interpretability: float
     method_used: str = ""
     warnings: List[str] = field(default_factory=list)
+    llm_enhanced: bool = False
+    llm_backend: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -158,6 +211,8 @@ class ClusterInterpretationReport:
             'overall_interpretability': round(self.overall_interpretability, 3),
             'method_used': self.method_used,
             'warnings': self.warnings,
+            'llm_enhanced': self.llm_enhanced,
+            'llm_backend': self.llm_backend,
             'cluster_summaries': {
                 k: v.to_dict() for k, v in self.summaries.items()
             }
@@ -174,8 +229,14 @@ class ClusterInterpretationReport:
             f"Total Documents: {self.n_documents}",
             f"Number of Clusters: {self.n_clusters}",
             f"Overall Interpretability: {self.overall_interpretability:.1%}",
-            ""
         ]
+
+        # Show LLM enhancement status
+        if self.llm_enhanced:
+            lines.append(f"LLM Enhancement: Enabled ({self.llm_backend})")
+        else:
+            lines.append("LLM Enhancement: Disabled (using term-based labels)")
+        lines.append("")
 
         if self.warnings:
             lines.append("WARNINGS:")
@@ -196,12 +257,15 @@ class ClusterInterpretationReport:
         )
 
         for summary in sorted_summaries:
-            lines.append(summary.get_display_string(include_terms=True))
+            lines.append(summary.get_display_string(include_terms=True, include_llm=self.llm_enhanced))
             lines.append("")
 
         lines.append("=" * 60)
         lines.append("NOTE: Cluster IDs are internal identifiers, not semantic labels.")
-        lines.append("Use the 'label' and 'top_terms' for interpretation.")
+        if self.llm_enhanced:
+            lines.append("Labels have been refined by LLM for improved readability.")
+        else:
+            lines.append("Use the 'label' and 'top_terms' for interpretation.")
         lines.append("=" * 60)
 
         return "\n".join(lines)
@@ -608,6 +672,71 @@ class ClusterInterpreter:
 
         return representative_docs
 
+    def apply_llm_enhancement(
+        self,
+        report: ClusterInterpretationReport,
+        texts: List[str],
+        cluster_assignments: List[int]
+    ) -> ClusterInterpretationReport:
+        """
+        Apply LLM-based enhancement to cluster labels and descriptions.
+
+        This method uses the LLM interpretation module to generate more
+        human-readable labels, alternative suggestions, and detailed
+        descriptions for each cluster.
+
+        Args:
+            report: Existing cluster interpretation report
+            texts: Original text documents
+            cluster_assignments: Cluster assignment for each document
+
+        Returns:
+            Enhanced ClusterInterpretationReport with LLM-generated content
+
+        Notes:
+            - Gracefully falls back to term-based labels if LLM unavailable
+            - Uses Mistral API first, then local model, then fallback
+            - Does not modify the original report, returns a new one
+        """
+        try:
+            from src.llm_interpretation import LLMClusterInterpreter
+        except ImportError:
+            logger.warning("LLM interpretation module not available")
+            return report
+
+        # Initialize LLM interpreter
+        llm_interpreter = LLMClusterInterpreter()
+
+        if not llm_interpreter.is_available:
+            logger.info("LLM interpretation not available, using term-based labels")
+            return report
+
+        logger.info(f"Applying LLM enhancement using {llm_interpreter.backend_type} backend")
+
+        # Enhance all clusters
+        enhanced_labels = llm_interpreter.enhance_all_clusters(
+            cluster_summaries=report.summaries,
+            texts=texts,
+            cluster_assignments=cluster_assignments
+        )
+
+        # Update summaries with LLM-enhanced content
+        for cluster_id, enhanced in enhanced_labels.items():
+            if cluster_id in report.summaries:
+                summary = report.summaries[cluster_id]
+                summary.llm_label = enhanced.primary_label
+                summary.llm_alternative_labels = enhanced.alternative_labels
+                summary.llm_description = enhanced.description
+                summary.llm_reasoning = enhanced.reasoning
+                summary.llm_source = enhanced.source
+
+        # Update report metadata
+        report.llm_enhanced = True
+        report.llm_backend = llm_interpreter.backend_type
+
+        logger.info(f"LLM enhancement complete for {len(enhanced_labels)} clusters")
+        return report
+
     def get_cluster_comparison(
         self,
         report: ClusterInterpretationReport
@@ -623,15 +752,22 @@ class ClusterInterpreter:
         """
         rows = []
         for cluster_id, summary in report.summaries.items():
-            rows.append({
+            row = {
                 'Cluster ID': cluster_id,
-                'Label': summary.label,
+                'Label': summary.display_label,  # Use LLM label if available
                 'Documents': summary.document_count,
                 'Top Terms': ', '.join(summary.top_terms[:5]),
                 'Confidence': f"{summary.interpretation_confidence:.1%}",
                 'Interpretable': 'Yes' if summary.is_interpretable else 'No',
                 'Warnings': '; '.join(summary.warnings) if summary.warnings else ''
-            })
+            }
+            # Add LLM-specific columns if enhanced
+            if report.llm_enhanced and summary.llm_label:
+                row['Term-Based Label'] = summary.label
+                row['LLM Description'] = summary.llm_description or ''
+                row['Alternative Labels'] = ', '.join(summary.llm_alternative_labels[:3])
+                row['LLM Source'] = summary.llm_source or ''
+            rows.append(row)
 
         df = pd.DataFrame(rows)
         df = df.sort_values('Documents', ascending=False)
@@ -667,26 +803,53 @@ class ClusterCodebook:
             # Include up to 5 representative quotes (or all if fewer than 5)
             representative_docs = summary.representative_docs
             examples = [d['text'] for d in representative_docs[:5]]
+
+            # Use LLM-enhanced content if available
+            if summary.llm_label:
+                name = summary.llm_label
+                definition = summary.llm_description or f"Documents characterized by: {', '.join(summary.top_terms[:5])}"
+            else:
+                name = summary.label
+                definition = f"Documents characterized by: {', '.join(summary.top_terms[:5])}"
+
             codes[cluster_id] = {
-                'name': summary.label,
-                'definition': f"Documents characterized by: {', '.join(summary.top_terms[:5])}",
+                'name': name,
+                'term_based_name': summary.label,
+                'definition': definition,
                 'keywords': summary.top_terms,
                 'n_documents': summary.document_count,
                 'examples': examples,
                 'confidence': summary.interpretation_confidence,
                 'notes': summary.interpretation_notes,
-                'warnings': summary.warnings
+                'warnings': summary.warnings,
+                # LLM-enhanced fields
+                'llm_label': summary.llm_label,
+                'llm_alternative_labels': summary.llm_alternative_labels,
+                'llm_description': summary.llm_description,
+                'llm_reasoning': summary.llm_reasoning,
+                'llm_source': summary.llm_source
             }
+
+        disclaimer = (
+            "These codes were generated through unsupervised machine learning (clustering). "
+            "Cluster IDs are arbitrary identifiers. "
+        )
+        if self.report.llm_enhanced:
+            disclaimer += (
+                f"Labels have been refined using LLM ({self.report.llm_backend}) for improved readability. "
+            )
+        else:
+            disclaimer += "Labels are derived from term frequencies. "
+        disclaimer += "Human review is recommended."
+
         return {
             'method': self.report.method_used,
             'n_clusters': self.report.n_clusters,
             'n_documents': self.report.n_documents,
+            'llm_enhanced': self.report.llm_enhanced,
+            'llm_backend': self.report.llm_backend,
             'codes': codes,
-            'disclaimer': (
-                "These codes were generated through unsupervised machine learning (clustering). "
-                "Cluster IDs are arbitrary identifiers. Labels are derived from term frequencies "
-                "and do not represent predefined categories. Human review is recommended."
-            )
+            'disclaimer': disclaimer
         }
 
     def to_markdown(self) -> str:
@@ -697,14 +860,21 @@ class ClusterCodebook:
             f"**Method**: {self.report.method_used}",
             f"**Documents**: {self.report.n_documents}",
             f"**Codes Discovered**: {self.report.n_clusters}",
-            "",
-            "> **Note**: These codes were generated through unsupervised clustering. ",
-            "> Cluster IDs are internal identifiers, not semantic categories. ",
-            "> Labels are derived from term frequencies. Human validation recommended.",
-            "",
-            "---",
-            ""
         ]
+
+        if self.report.llm_enhanced:
+            lines.append(f"**LLM Enhancement**: Enabled ({self.report.llm_backend})")
+            lines.append("")
+            lines.append("> **Note**: These codes were generated through unsupervised clustering. ")
+            lines.append("> Labels have been refined by LLM for improved human readability. ")
+            lines.append("> Alternative labels and descriptions are provided. Human validation recommended.")
+        else:
+            lines.append("")
+            lines.append("> **Note**: These codes were generated through unsupervised clustering. ")
+            lines.append("> Cluster IDs are internal identifiers, not semantic categories. ")
+            lines.append("> Labels are derived from term frequencies. Human validation recommended.")
+
+        lines.extend(["", "---", ""])
 
         # Sort by document count
         sorted_summaries = sorted(
@@ -714,11 +884,31 @@ class ClusterCodebook:
         )
 
         for cluster_id, summary in sorted_summaries:
-            lines.append(f"## {cluster_id}: {summary.label}")
+            # Use LLM label if available
+            display_label = summary.display_label
+            lines.append(f"## {cluster_id}: {display_label}")
             lines.append("")
+
+            # Show original term-based label if different
+            if summary.llm_label and summary.llm_label != summary.label:
+                lines.append(f"*Term-based label: {summary.label}*")
+                lines.append("")
+
             lines.append(f"**Documents**: {summary.document_count}")
             lines.append(f"**Confidence**: {summary.interpretation_confidence:.1%}")
             lines.append("")
+
+            # Show LLM description if available
+            if summary.llm_description:
+                lines.append(f"**Description**: {summary.llm_description}")
+                lines.append("")
+
+            # Show alternative labels if available
+            if summary.llm_alternative_labels:
+                alts = ", ".join(summary.llm_alternative_labels[:3])
+                lines.append(f"**Alternative Labels**: {alts}")
+                lines.append("")
+
             lines.append("**Keywords**: " + ", ".join(summary.top_terms[:7]))
             lines.append("")
 
@@ -734,6 +924,11 @@ class ClusterCodebook:
                 lines.append("**Warnings**: " + "; ".join(summary.warnings))
                 lines.append("")
 
+            # Show LLM reasoning if available
+            if summary.llm_reasoning:
+                lines.append(f"*LLM Reasoning: {summary.llm_reasoning}*")
+                lines.append("")
+
             lines.append("---")
             lines.append("")
 
@@ -747,12 +942,20 @@ class ClusterCodebook:
         output = StringIO()
         writer = csv.writer(output)
 
-        # Header - include 5 example columns
-        writer.writerow([
-            'Cluster ID', 'Label', 'Documents', 'Keywords',
-            'Confidence', 'Example 1', 'Example 2', 'Example 3',
-            'Example 4', 'Example 5', 'Warnings'
-        ])
+        # Header - include LLM fields if enhanced
+        if self.report.llm_enhanced:
+            writer.writerow([
+                'Cluster ID', 'LLM Label', 'Term-Based Label', 'Description',
+                'Alternative Labels', 'Documents', 'Keywords', 'Confidence',
+                'Example 1', 'Example 2', 'Example 3', 'Example 4', 'Example 5',
+                'LLM Source', 'Warnings'
+            ])
+        else:
+            writer.writerow([
+                'Cluster ID', 'Label', 'Documents', 'Keywords',
+                'Confidence', 'Example 1', 'Example 2', 'Example 3',
+                'Example 4', 'Example 5', 'Warnings'
+            ])
 
         for cluster_id, summary in self.report.summaries.items():
             # Get up to 5 examples (or all if fewer than 5)
@@ -760,18 +963,37 @@ class ClusterCodebook:
             while len(examples) < 5:
                 examples.append('')
 
-            writer.writerow([
-                cluster_id,
-                summary.label,
-                summary.document_count,
-                '; '.join(summary.top_terms[:5]),
-                f"{summary.interpretation_confidence:.1%}",
-                examples[0],
-                examples[1],
-                examples[2],
-                examples[3],
-                examples[4],
-                '; '.join(summary.warnings)
-            ])
+            if self.report.llm_enhanced:
+                writer.writerow([
+                    cluster_id,
+                    summary.llm_label or summary.label,
+                    summary.label,
+                    summary.llm_description or '',
+                    '; '.join(summary.llm_alternative_labels[:3]),
+                    summary.document_count,
+                    '; '.join(summary.top_terms[:5]),
+                    f"{summary.interpretation_confidence:.1%}",
+                    examples[0],
+                    examples[1],
+                    examples[2],
+                    examples[3],
+                    examples[4],
+                    summary.llm_source or '',
+                    '; '.join(summary.warnings)
+                ])
+            else:
+                writer.writerow([
+                    cluster_id,
+                    summary.label,
+                    summary.document_count,
+                    '; '.join(summary.top_terms[:5]),
+                    f"{summary.interpretation_confidence:.1%}",
+                    examples[0],
+                    examples[1],
+                    examples[2],
+                    examples[3],
+                    examples[4],
+                    '; '.join(summary.warnings)
+                ])
 
         return output.getvalue()

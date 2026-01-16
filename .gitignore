@@ -48,7 +48,8 @@ htmlcov/
 *.log
 
 # Environment variables
-.env
+# .env is tracked for this project (contains shared API config)
+!.env
 .env.local
 
 # Data (uncomment if you want to ignore data files)
@@ -79,3 +80,7 @@ docs/_build/
 *.tmp
 *.bak
 temp/
+
+# LLM models (large binary files)
+models/*.gguf
+models/*.bin
