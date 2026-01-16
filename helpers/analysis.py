@@ -706,6 +706,38 @@ def run_ml_analysis(
                         f"{self.cluster_interpretation.n_clusters} clusters, "
                         f"interpretability={self.cluster_interpretation.overall_interpretability:.1%}"
                     )
+
+                    # Apply LLM enhancement using Mistral API (from .env)
+                    # This refines labels, adds alternative topic suggestions, and descriptions
+                    cluster_assignments = (
+                        labels if hasattr(self.model, 'labels_') else
+                        doc_topic_matrix.argmax(axis=1).tolist()
+                    )
+                    try:
+                        self.cluster_interpretation = interpreter.apply_llm_enhancement(
+                            report=self.cluster_interpretation,
+                            texts=responses,
+                            cluster_assignments=cluster_assignments
+                        )
+                        if self.cluster_interpretation.llm_enhanced:
+                            logger.info(
+                                f"LLM enhancement applied using {self.cluster_interpretation.llm_backend} backend"
+                            )
+                            # Sync LLM-enhanced labels to codebook for export
+                            for cluster_id, summary in self.cluster_interpretation.summaries.items():
+                                # Map CLUSTER_XX to CODE_XX (same numbering)
+                                code_id = cluster_id.replace('CLUSTER_', 'CODE_')
+                                if code_id in self.codebook:
+                                    # Add LLM-enhanced fields to codebook
+                                    if summary.llm_label:
+                                        self.codebook[code_id]['llm_label'] = summary.llm_label
+                                    if summary.llm_alternative_labels:
+                                        self.codebook[code_id]['alternative_labels'] = summary.llm_alternative_labels
+                                    if summary.llm_description:
+                                        self.codebook[code_id]['llm_description'] = summary.llm_description
+                    except Exception as llm_err:
+                        logger.warning(f"LLM enhancement failed (using term-based labels): {llm_err}")
+
                 except Exception as e:
                     logger.warning(f"Cluster interpretation failed: {e}")
                     self.cluster_interpretation = None

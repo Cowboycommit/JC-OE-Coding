@@ -891,7 +891,8 @@ def main():
 
                 codebook_data.append({
                     "Code": code_id,
-                    "Label": info['label'],
+                    "Label": info.get('llm_label', info['label']),  # Use LLM label if available
+                    "Alternative Labels": ", ".join(info.get('alternative_labels', [])[:3]),
                     "Keywords": ", ".join(info['keywords'][:5]),
                     "Sample Text": sample_text_display,
                     "Count": info['count'],
