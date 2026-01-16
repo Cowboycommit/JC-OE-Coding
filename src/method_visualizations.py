@@ -197,6 +197,24 @@ class MethodVisualizer:
                 for codes in results_df['assigned_codes']
             ])
 
+    def _get_topic_label(self, cluster_idx: int) -> str:
+        """
+        Get human-readable topic label for a cluster/topic index.
+
+        Args:
+            cluster_idx: Zero-based cluster/topic index
+
+        Returns:
+            Human-readable label from codebook, or fallback to "Topic N"
+        """
+        # Try to get label from codebook (CODE_01, CODE_02, etc.)
+        code_id = f"CODE_{cluster_idx + 1:02d}"
+        if self.codebook and code_id in self.codebook:
+            label = self.codebook[code_id].get('label', '')
+            if label:
+                return label
+        return f"Topic {cluster_idx + 1}"
+
     def create_cluster_scatter(
         self,
         reduction_method: str = 'pca',
@@ -252,8 +270,8 @@ class MethodVisualizer:
             reduced = reducer.fit_transform(dense_matrix)
             axis_labels = [f't-SNE {i+1}' for i in range(n_components)]
 
-        # Create labels for coloring
-        cluster_labels = [f'Cluster {i+1}' for i in self.assignments]
+        # Create labels for coloring using topic labels from codebook
+        cluster_labels = [self._get_topic_label(i) for i in self.assignments]
 
         # Create DataFrame for plotting
         plot_df = pd.DataFrame({
@@ -302,7 +320,7 @@ class MethodVisualizer:
                             fill='toself',
                             fillcolor=f'rgba{tuple(list(px.colors.hex_to_rgb(colors[i % len(colors)])) + [overlay_opacity])}',
                             line=dict(color=colors[i % len(colors)], width=2),
-                            name=f'Cluster {cluster_id + 1} boundary',
+                            name=f'{self._get_topic_label(cluster_id)} boundary',
                             showlegend=False,
                             hoverinfo='skip'
                         ))
@@ -324,7 +342,7 @@ class MethodVisualizer:
                     opacity=0.7,
                     color=colors[i % len(colors)]
                 ),
-                name=f'Cluster {cluster_id + 1}',
+                name=self._get_topic_label(cluster_id),
                 text=cluster_data['Text'],
                 hovertemplate='<b>%{text}</b><extra></extra>'
             ))
@@ -333,7 +351,7 @@ class MethodVisualizer:
             title=f'Document Clusters ({reduction_method.upper()})',
             xaxis_title=axis_labels[0],
             yaxis_title=axis_labels[1],
-            legend_title='Cluster',
+            legend_title='Topic',
             hovermode='closest'
         )
 
@@ -396,7 +414,7 @@ class MethodVisualizer:
                 x=cluster_silhouette_values,
                 y=list(range(y_lower, y_upper)),
                 orientation='h',
-                name=f'Cluster {i+1}',
+                name=self._get_topic_label(i),
                 showlegend=True
             ))
 
@@ -487,8 +505,8 @@ class MethodVisualizer:
         if normalize and matrix.max() > 0:
             matrix = matrix / matrix.max()
 
-        # Create heatmap
-        topic_labels = [f'Topic {i+1}' for i in range(n_topics)]
+        # Create heatmap using topic labels from codebook
+        topic_labels = [self._get_topic_label(i) for i in range(n_topics)]
 
         fig = go.Figure()
 
@@ -592,7 +610,7 @@ class MethodVisualizer:
 
         for topic_idx in range(n_topics):
             fig.add_trace(go.Bar(
-                name=f'Topic {topic_idx + 1}',
+                name=self._get_topic_label(topic_idx),
                 x=[f'Doc {i+1}' for i in range(n_docs)],
                 y=doc_topics[:, topic_idx],
             ))
@@ -658,7 +676,7 @@ class MethodVisualizer:
         # Use to_array() for numpy 2.0+ compatibility
         ax.imshow(wordcloud.to_array(), interpolation='bilinear')
         ax.axis('off')
-        ax.set_title(f'Cluster {cluster_id + 1} Word Cloud')
+        ax.set_title(f'{self._get_topic_label(cluster_id)} Word Cloud')
 
         plt.tight_layout()
         return fig
@@ -720,7 +738,7 @@ class MethodVisualizer:
                 ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
 
             ax.axis('off')
-            ax.set_title(f'Cluster {cluster_id + 1} ({sum(mask)} docs)')
+            ax.set_title(f'{self._get_topic_label(cluster_id)} ({sum(mask)} docs)')
 
         # Hide unused axes
         for idx in range(n_clusters, len(axes)):
