@@ -185,7 +185,7 @@ PIPELINE_STAGES = [
         "function": "MLOpenCoder._validate_method_compatibility()",
         "outputs": ["Eligibility confirmation or error"],
         "mistakes": [
-            "Using LDA/NMF with semantic embeddings (incompatible)",
+            "Using LDA with semantic embeddings (incompatible)",
             "Requesting more codes than samples",
             "Not checking vocabulary size after vectorization",
         ],
@@ -228,14 +228,14 @@ PIPELINE_STAGES = [
         "outputs": [
             "Frequency tables", "Co-occurrence data", "Chart data",
             "Cluster scatter (PCA/t-SNE)", "Silhouette plot (KMeans)",
-            "Topic-term heatmap", "Topic distribution (NMF/LDA)",
+            "Topic-term heatmap", "Topic distribution (LDA)",
             "Per-cluster wordclouds", "pyLDAvis (LDA)"
         ],
         "mistakes": [
             "Computing chart data in Streamlit callbacks",
             "Not caching visualization data",
             "Putting Plotly/chart logic in analysis modules",
-            "Showing incompatible visualizations (e.g., silhouette for NMF)",
+            "Showing incompatible visualizations for methods",
         ],
     },
     {
@@ -257,12 +257,15 @@ PIPELINE_STAGES = [
 ML_METHODS = {
     "tfidf_kmeans": "TF-IDF + K-Means (Fast, bag-of-words)",
     "lda": "LDA - Latent Dirichlet Allocation (Topic modeling)",
-    "nmf": "NMF - Non-negative Matrix Factorization (Topic modeling)",
+    "lstm_kmeans": "LSTM + K-Means (Sequential patterns)",
+    "bert_kmeans": "BERT + K-Means (Semantic understanding)",
 }
 
 REPRESENTATIONS = {
     "tfidf": "TF-IDF (Default, fast, bag-of-words)",
     "sbert": "SentenceBERT (Semantic, offline)",
+    "lstm": "LSTM (Sequential patterns)",
+    "bert": "BERT (Semantic, same as SentenceBERT)",
     "word2vec": "Word2Vec (Trains on your data)",
     "fasttext": "FastText (Handles typos)",
 }
@@ -712,10 +715,16 @@ def main():
                     )
 
             with col2:
-                # Only show TF-IDF for LDA/NMF compatibility
-                if method in ["lda", "nmf"]:
+                # Set representation based on method
+                if method == "lda":
                     representation = "tfidf"
-                    st.info("Using TF-IDF (required for LDA/NMF)")
+                    st.info("Using TF-IDF (required for LDA)")
+                elif method == "lstm_kmeans":
+                    representation = "lstm"
+                    st.info("Using LSTM embeddings")
+                elif method == "bert_kmeans":
+                    representation = "bert"
+                    st.info("Using BERT embeddings")
                 elif method is None:
                     representation = "tfidf"
                     st.info("Using TF-IDF (default for auto-selection)")
@@ -736,15 +745,8 @@ def main():
                     key="confidence_slider",
                 )
 
-            # Advanced options
-            with st.expander("Advanced Options"):
-                stop_words = st.selectbox(
-                    "Stop words language",
-                    options=['english', 'spanish', 'french', 'german'],
-                    index=0,
-                    key="stop_words_select",
-                    help="Language for stop words removal during text processing"
-                )
+            # Language is hardcoded to English
+            stop_words = "english"
 
             if st.button("Execute Stage 3: Check Eligibility", key="btn_stage_3"):
                 try:
@@ -1235,8 +1237,9 @@ def main():
             # Show method context
             method_names = {
                 'tfidf_kmeans': 'TF-IDF + K-Means (Hard Clustering)',
-                'nmf': 'NMF - Non-negative Matrix Factorization (Topic Model)',
-                'lda': 'LDA - Latent Dirichlet Allocation (Topic Model)'
+                'lda': 'LDA - Latent Dirichlet Allocation (Topic Model)',
+                'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
+                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)'
             }
             st.info(f"**Current Method**: {method_names.get(method, method)} - Visualizations below are tailored to this method.")
 
@@ -1307,7 +1310,7 @@ def main():
                     heatmap_fig = visualizer.create_topic_term_heatmap(n_terms=n_terms)
                     if heatmap_fig is not None:
                         st.plotly_chart(heatmap_fig, use_container_width=True)
-                        if method in ['nmf', 'lda']:
+                        if method == 'lda':
                             st.caption("Shows the weight/probability of each term within each topic. Higher values indicate more characteristic terms.")
                         else:
                             st.caption("Shows cluster centroid weights. Higher values indicate terms more central to the cluster definition.")
@@ -1316,8 +1319,8 @@ def main():
                 else:
                     st.info("Topic-term heatmap requires `plotly`. Install with: `pip install plotly`")
 
-                # === VISUALIZATION: Topic Distribution (NMF/LDA only) ===
-                if method in ['nmf', 'lda']:
+                # === VISUALIZATION: Topic Distribution (LDA only) ===
+                if method == 'lda':
                     st.markdown("**Topic Distribution per Document**:")
                     if PLOTLY_AVAILABLE:
                         topic_dist_fig = visualizer.create_topic_distribution_chart()
@@ -1331,12 +1334,12 @@ def main():
                 else:
                     with st.expander("Why no Topic Distribution Chart?"):
                         st.markdown("""
-                        **Topic distribution is only available for NMF and LDA topic models.**
+                        **Topic distribution is only available for LDA topic models.**
 
-                        K-Means uses **hard cluster assignments** where each document belongs to exactly one cluster.
+                        K-Means based methods (TF-IDF, LSTM, BERT) use **hard cluster assignments** where each document belongs to exactly one cluster.
                         There are no "topic weights" to visualize - each document simply belongs to its assigned cluster.
 
-                        For K-Means, the cluster scatter plot and silhouette analysis provide better insights.
+                        For clustering methods, the cluster scatter plot and silhouette analysis provide better insights.
                         """)
 
                 # === VISUALIZATION: pyLDAvis (LDA only) ===
@@ -1353,16 +1356,18 @@ def main():
                             st.warning("Could not generate pyLDAvis visualization.")
                     else:
                         st.info("Interactive LDA visualization requires `pyLDAvis`. Install with: `pip install pyLDAvis`")
-                elif method == 'nmf':
+                else:
                     with st.expander("Why no pyLDAvis?"):
                         st.markdown("""
                         **pyLDAvis is specifically designed for LDA models.**
 
-                        While NMF and LDA both produce topic models, pyLDAvis relies on LDA's probabilistic
-                        structure (Dirichlet priors, document-topic distributions as probabilities summing to 1).
+                        pyLDAvis relies on LDA's probabilistic structure (Dirichlet priors, document-topic distributions
+                        as probabilities summing to 1).
 
-                        NMF produces non-negative matrix factors which don't have the same probabilistic interpretation.
-                        The topic-term heatmap and topic distribution chart provide similar insights for NMF.
+                        K-Means based methods (TF-IDF, LSTM, BERT) produce hard cluster assignments rather than
+                        probabilistic topic distributions.
+
+                        The topic-term heatmap and cluster scatter plot provide similar insights for these methods.
                         """)
 
                 # === VISUALIZATION: Per-Cluster Word Clouds ===

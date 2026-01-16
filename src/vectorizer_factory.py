@@ -2,16 +2,18 @@
 VectorizerFactory for ensuring vectorization parity across clustering methods.
 
 This module provides a factory that ensures identical tokenisation and filtering
-across all clustering methods (KMeans, NMF, LDA), with the ONLY difference being
+across all clustering methods (KMeans, LDA, LSTM, BERT), with the ONLY difference being
 term weighting:
 - TF-IDF + KMeans: TF-IDF weighted matrix
-- NMF: Same TF-IDF matrix as KMeans
 - LDA: CountVectorizer with identical settings (counts instead of TF-IDF weights)
+- LSTM + KMeans: LSTM embeddings (via embeddings.py), TF-IDF for term extraction
+- BERT + KMeans: BERT embeddings (via embeddings.py), TF-IDF for term extraction
 
 Key principles:
-- All methods share the same vocabulary, stopwords, min_df/max_df, ngram_range
+- All methods share the same vocabulary, stopwords, min_df/max_df, ngram_range for term extraction
 - Preprocessing outputs are reused across methods where possible
 - The only difference for LDA is term weighting (counts vs TF-IDF)
+- LSTM and BERT use their own embedding methods for clustering
 - Factory integrates with existing adaptive preprocessing
 
 Classes:
@@ -21,10 +23,10 @@ Classes:
 Usage:
     >>> factory = VectorizerFactory()
     >>> vectorizer, matrix = factory.create_for_method('tfidf_kmeans', texts, config)
-    >>> # For NMF, reuse the same TF-IDF matrix
-    >>> vectorizer, matrix = factory.create_for_method('nmf', texts, config)
     >>> # For LDA, uses CountVectorizer with same settings
     >>> vectorizer, matrix = factory.create_for_method('lda', texts, config)
+    >>> # For LSTM/BERT, returns TF-IDF for term extraction (embeddings handled separately)
+    >>> vectorizer, matrix = factory.create_for_method('lstm_kmeans', texts, config)
 """
 
 import logging
@@ -137,20 +139,22 @@ class VectorizerFactory:
 
     This factory ensures that:
     1. All methods use identical tokenisation and filtering
-    2. NMF reuses the same TF-IDF matrix as KMeans
+    2. TF-IDF matrix is created for tfidf_kmeans, lstm_kmeans, bert_kmeans (for term extraction)
     3. LDA uses CountVectorizer with identical vocabulary settings
-    4. The ONLY difference is term weighting (TF-IDF vs counts)
+    4. The ONLY difference for LDA is term weighting (TF-IDF vs counts)
 
     Example:
         >>> factory = VectorizerFactory()
         >>> config = VectorizerConfig(max_features=1000, min_df=2)
         >>>
-        >>> # KMeans and NMF share the same TF-IDF matrix
+        >>> # TF-IDF based methods
         >>> tfidf_vec, tfidf_matrix = factory.create_for_method('tfidf_kmeans', texts, config)
-        >>> nmf_vec, nmf_matrix = factory.create_for_method('nmf', texts, config)
         >>>
         >>> # LDA uses CountVectorizer with same settings
         >>> count_vec, count_matrix = factory.create_for_method('lda', texts, config)
+        >>>
+        >>> # LSTM/BERT use TF-IDF for term extraction (embeddings handled separately)
+        >>> term_vec, term_matrix = factory.create_for_method('lstm_kmeans', texts, config)
     """
 
     def __init__(self):
@@ -174,7 +178,7 @@ class VectorizerFactory:
         Create vectorizer and matrix for the specified method.
 
         Args:
-            method: Clustering method ('tfidf_kmeans', 'nmf', 'lda')
+            method: Clustering method ('tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans')
             texts: List of preprocessed text documents
             config: Optional vectorizer configuration (uses defaults if None)
             force_refit: If True, force refit even if cached
@@ -186,9 +190,10 @@ class VectorizerFactory:
             ValueError: If method is not supported
 
         Notes:
-            - TF-IDF matrix is cached and reused for nmf method
+            - TF-IDF matrix is used for tfidf_kmeans
             - Count matrix is created with identical settings for lda
-            - Vocabulary is shared across all methods
+            - LSTM and BERT methods use their respective embedders
+            - Vocabulary is shared across TF-IDF methods
         """
         if config is None:
             config = VectorizerConfig()
@@ -213,14 +218,18 @@ class VectorizerFactory:
 
         method = method.lower().strip()
 
-        if method in ['tfidf_kmeans', 'nmf']:
+        if method == 'tfidf_kmeans':
             return self._get_tfidf_vectorizer_and_matrix(texts, config)
         elif method == 'lda':
             return self._get_count_vectorizer_and_matrix(texts, config)
+        elif method in ['lstm_kmeans', 'bert_kmeans']:
+            # LSTM and BERT methods handle their own embeddings via embeddings.py
+            # Return TF-IDF for term extraction (used in cluster interpretation)
+            return self._get_tfidf_vectorizer_and_matrix(texts, config)
         else:
             raise ValueError(
                 f"Unsupported method: '{method}'. "
-                f"Supported methods: 'tfidf_kmeans', 'nmf', 'lda'"
+                f"Supported methods: 'tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans'"
             )
 
     def _get_tfidf_vectorizer_and_matrix(
@@ -231,7 +240,7 @@ class VectorizerFactory:
         """
         Get or create TF-IDF vectorizer and matrix.
 
-        The matrix is cached for reuse between tfidf_kmeans and nmf methods.
+        The matrix is cached for reuse between tfidf_kmeans, lstm_kmeans, and bert_kmeans methods.
 
         Args:
             texts: List of preprocessed text documents
@@ -425,7 +434,7 @@ def create_vectorizer_for_method(
     to benefit from caching.
 
     Args:
-        method: Clustering method ('tfidf_kmeans', 'nmf', 'lda')
+        method: Clustering method ('tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans')
         texts: List of preprocessed text documents
         config: Optional VectorizerConfig (uses defaults if None)
         preprocessing_config: Optional PreprocessingConfig from adaptive preprocessing

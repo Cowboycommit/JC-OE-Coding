@@ -1720,12 +1720,13 @@ def page_configuration():
 
         method = st.selectbox(
             "ML Algorithm",
-            options=['tfidf_kmeans', 'lda', 'nmf'],
+            options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans'],
             index=0,
             format_func=lambda x: {
                 'tfidf_kmeans': 'TF-IDF + K-Means (Fast, Recommended)',
                 'lda': 'Latent Dirichlet Allocation (Topic Modeling)',
-                'nmf': 'Non-negative Matrix Factorization'
+                'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
+                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)'
             }[x],
             help="Choose the machine learning algorithm"
         )
@@ -1744,11 +1745,17 @@ def page_configuration():
                 'good_for': "Good for discovering overlapping themes",
                 'watch_out': "Watch out for slower performance with large datasets"
             },
-            'nmf': {
-                'description': "**Non-negative Matrix Factorization** decomposes text into parts-based representations. Produces sparse, interpretable results.",
-                'runtime': "⚡ **Fast** (~5-15s for 1000 responses)",
-                'good_for': "Good for sparse, interpretable results",
-                'watch_out': "Watch out for sensitivity to n_codes parameter"
+            'lstm_kmeans': {
+                'description': "**LSTM + K-Means** uses a recurrent neural network to capture sequential patterns in text, then clusters the learned representations.",
+                'runtime': "🐢 **Slow** (~2-5 min for 1000 responses)",
+                'good_for': "Good for capturing word order and context",
+                'watch_out': "Watch out for longer training time; requires TensorFlow"
+            },
+            'bert_kmeans': {
+                'description': "**BERT + K-Means** uses transformer-based embeddings to capture deep semantic meaning, then clusters semantically similar responses.",
+                'runtime': "🐢 **Moderate** (~1-2 min for 1000 responses)",
+                'good_for': "Good for semantic similarity and nuanced meanings",
+                'watch_out': "Watch out for requiring sentence-transformers package"
             }
         }
         
@@ -1772,13 +1779,8 @@ def page_configuration():
             help="Minimum confidence score for code assignment (lower = more codes per response)"
         )
 
-        # Advanced options
-        with st.expander("🔧 Advanced Options"):
-            stop_words = st.selectbox(
-                "Stop words language",
-                options=['english', 'spanish', 'french', 'german'],
-                index=0
-            )
+        # Language is hardcoded to English (non-English text is filtered out)
+        stop_words = 'english'
 
     # Save configuration
     st.session_state.config = {
