@@ -375,10 +375,12 @@ EXAMPLES OF BAD vs GOOD LABELS:
 
 Your output must include:
 1. primary_label: A specific 2-4 word label capturing the unique theme
-2. alternative_labels: 2-3 alternative labels from different angles
+2. alternative_labels: REQUIRED - provide exactly 3 alternative labels that capture the theme from different angles or emphasize different aspects. These are important for giving users options.
 3. description: 2-3 sentences explaining what responses in this cluster share
 4. reasoning: Brief explanation of why you chose this interpretation
-5. confidence: Score 0-1 based on how clear/coherent the cluster theme is"""
+5. confidence: Score 0-1 based on how clear/coherent the cluster theme is
+
+IMPORTANT: You MUST provide exactly 3 alternative_labels. Each alternative should be a valid 2-4 word label that could work as the primary label but approaches the theme differently."""
 
     def __init__(
         self,
@@ -487,13 +489,16 @@ ANALYSIS INSTRUCTIONS:
 Based on your analysis, provide your response in this exact JSON format:
 {{
     "primary_label": "Specific 2-4 word label",
-    "alternative_labels": ["Alternative 1", "Alternative 2", "Alternative 3"],
+    "alternative_labels": ["Different Angle Label", "Another Perspective", "Third Option"],
     "description": "2-3 sentences explaining what these responses have in common and what distinguishes this cluster from others",
     "reasoning": "Brief explanation of how you determined the common theme from the samples",
     "confidence": 0.85
 }}
 
-IMPORTANT: Respond with ONLY the JSON object, no other text."""
+CRITICAL REQUIREMENTS:
+- Respond with ONLY the JSON object, no other text
+- You MUST provide exactly 3 alternative_labels - this is required, not optional
+- Each alternative should be a different but valid way to label this cluster"""
 
         return prompt
 
@@ -572,7 +577,61 @@ IMPORTANT: Respond with ONLY the JSON object, no other text."""
             parsed["confidence"] = min(float(parsed.get("confidence", 0.8)), 0.6)
             logger.debug(f"Label too long ({word_count} words): '{parsed.get('primary_label')}'")
 
+        # Ensure alternative_labels is a list
+        if not isinstance(parsed.get("alternative_labels"), list):
+            parsed["alternative_labels"] = []
+
+        # Filter out empty or invalid alternatives
+        parsed["alternative_labels"] = [
+            alt for alt in parsed.get("alternative_labels", [])
+            if alt and isinstance(alt, str) and len(alt.strip()) > 0
+        ]
+
         return parsed
+
+    def _generate_alternative_from_terms(
+        self,
+        top_terms: List[str],
+        primary_label: str,
+        existing_alternatives: List[str]
+    ) -> List[str]:
+        """
+        Generate alternative labels from top terms when LLM doesn't provide enough.
+
+        This creates synthetic alternatives by combining top terms in different ways.
+        """
+        alternatives = list(existing_alternatives)  # Copy existing
+        used_words = set(primary_label.lower().split())
+        for alt in alternatives:
+            used_words.update(alt.lower().split())
+
+        # Try to create alternatives from top terms that aren't already used
+        candidate_words = []
+        for term in top_terms[:10]:
+            for word in term.split():
+                word_lower = word.lower().strip()
+                if (word_lower not in used_words and
+                    word_lower not in self.VAGUE_LABELS and
+                    len(word_lower) > 2):
+                    candidate_words.append(word.title())
+                    used_words.add(word_lower)
+
+        # Generate alternatives by pairing terms
+        while len(alternatives) < 3 and len(candidate_words) >= 2:
+            # Take pairs of words to form alternatives
+            alt = f"{candidate_words[0]} {candidate_words[1]}"
+            if alt.lower() != primary_label.lower() and alt not in alternatives:
+                alternatives.append(alt)
+            candidate_words = candidate_words[2:]  # Remove used words
+
+        # If still not enough, try single descriptive terms with modifiers
+        if len(alternatives) < 3 and candidate_words:
+            for word in candidate_words[:3 - len(alternatives)]:
+                alt = f"{word} Related"
+                if alt not in alternatives:
+                    alternatives.append(alt)
+
+        return alternatives[:3]
 
     def _generate_with_fallback(self, prompt: str) -> Tuple[Optional[str], str]:
         """
@@ -620,9 +679,15 @@ IMPORTANT: Respond with ONLY the JSON object, no other text."""
         """
         # Return fallback if LLM not enabled or available
         if not self.enabled or not self.is_available:
+            # Still generate alternatives from terms even without LLM
+            fallback_alternatives = self._generate_alternative_from_terms(
+                top_terms=top_terms,
+                primary_label=current_label,
+                existing_alternatives=[]
+            )
             return LLMEnhancedLabel(
                 primary_label=current_label,
-                alternative_labels=[],
+                alternative_labels=fallback_alternatives,
                 description=f"Cluster characterized by: {', '.join(top_terms[:5])}",
                 reasoning="Generated from top weighted terms (LLM not available)",
                 confidence=0.5,
@@ -644,20 +709,37 @@ IMPORTANT: Respond with ONLY the JSON object, no other text."""
         if response:
             parsed = self._parse_llm_response(response)
             if parsed:
+                primary_label = parsed.get("primary_label", current_label)
+                alternatives = parsed.get("alternative_labels", [])[:3]
+
+                # Ensure we have at least one alternative - generate from terms if needed
+                if len(alternatives) < 1:
+                    logger.debug(f"LLM provided no alternatives for '{primary_label}', generating from terms")
+                    alternatives = self._generate_alternative_from_terms(
+                        top_terms=top_terms,
+                        primary_label=primary_label,
+                        existing_alternatives=alternatives
+                    )
+
                 return LLMEnhancedLabel(
-                    primary_label=parsed.get("primary_label", current_label),
-                    alternative_labels=parsed.get("alternative_labels", [])[:3],
+                    primary_label=primary_label,
+                    alternative_labels=alternatives,
                     description=parsed.get("description", ""),
                     reasoning=parsed.get("reasoning", ""),
                     confidence=float(parsed.get("confidence", 0.8)),
                     source=source
                 )
 
-        # Fallback to term-based label
+        # Fallback to term-based label with generated alternatives
         logger.info("LLM interpretation failed, using term-based fallback")
+        fallback_alternatives = self._generate_alternative_from_terms(
+            top_terms=top_terms,
+            primary_label=current_label,
+            existing_alternatives=[]
+        )
         return LLMEnhancedLabel(
             primary_label=current_label,
-            alternative_labels=[],
+            alternative_labels=fallback_alternatives,
             description=f"Cluster characterized by: {', '.join(top_terms[:5])}",
             reasoning="Fallback to term-based interpretation",
             confidence=0.5,
