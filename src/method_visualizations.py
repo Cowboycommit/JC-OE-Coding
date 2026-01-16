@@ -236,7 +236,7 @@ class MethodVisualizer:
                 n_components=n_components,
                 perplexity=min(perplexity, len(dense_matrix) - 1),
                 random_state=random_state,
-                n_iter=1000
+                max_iter=1000
             )
             reduced = reducer.fit_transform(dense_matrix)
             axis_labels = [f't-SNE {i+1}' for i in range(n_components)]
