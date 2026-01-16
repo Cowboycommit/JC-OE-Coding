@@ -5,6 +5,15 @@ A comprehensive web interface for automatic qualitative data analysis
 using machine learning algorithms.
 """
 
+import os
+
+# Fix Keras 3 compatibility issue with HuggingFace Transformers
+# Must be set BEFORE importing tensorflow or transformers
+# Keras 3 is not yet supported by transformers, so we configure TensorFlow
+# to use the backwards-compatible tf-keras package instead.
+# See: https://github.com/huggingface/transformers/issues/27850
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
+
 import streamlit as st
 import pandas as pd
 import numpy as np

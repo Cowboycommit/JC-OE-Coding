@@ -15,6 +15,7 @@ torch>=2.0.0,<3.0.0  # Required by sentence-transformers
 
 # Required for LSTM + K-Means method
 tensorflow>=2.13.0,<3.0.0
+tf-keras>=2.13.0,<3.0.0  # Backwards-compatible Keras for Transformers (Keras 3 not yet supported)
 
 # Optional: Sentiment Analysis (for Twitter/Social Media data)
 # Uncomment to enable sentiment analysis with CardiffNLP Twitter-RoBERTa
