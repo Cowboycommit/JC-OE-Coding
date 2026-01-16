@@ -25,6 +25,13 @@ try:
 except ImportError:
     WORDCLOUD_AVAILABLE = False
 
+# Method visualizations (includes semantic wordclouds)
+try:
+    from src.method_visualizations import MethodVisualizer
+    METHOD_VISUALIZER_AVAILABLE = True
+except ImportError:
+    METHOD_VISUALIZER_AVAILABLE = False
+
 # Import helper modules
 from helpers.formatting import (
     format_number,
@@ -2053,42 +2060,170 @@ def page_visualizations():
     # TAB 5: Word Cloud (uses pre-computed text)
     # =========================================================================
     with tab5:
-        st.markdown("### Word Cloud")
+        st.markdown("### Word Cloud Visualizations")
 
-        with st.expander("ℹ️ What am I seeing?", expanded=False):
-            st.markdown("""
-            **What this shows:** Visual representation of the most frequent words in responses.
+        # Create sub-tabs for different wordcloud types
+        wc_tab1, wc_tab2, wc_tab3 = st.tabs([
+            "📊 Overall Word Cloud",
+            "🎨 Semantic Word Clouds by Topic",
+            "📝 Topic Word Clouds (Simple)"
+        ])
 
-            **How to interpret:** Larger words = more frequent. Colors are for visual distinction.
-            """)
+        # Sub-tab 1: Overall Word Cloud
+        with wc_tab1:
+            st.markdown("#### Overall Word Cloud")
 
-        if viz_data.get('wordcloud_available', False):
-            wordcloud_text = viz_data['wordcloud_text']
+            with st.expander("ℹ️ What am I seeing?", expanded=False):
+                st.markdown("""
+                **What this shows:** Visual representation of the most frequent words across ALL responses.
 
-            # Generate word cloud (lightweight - just rendering pre-cleaned text)
-            wordcloud = WordCloud(
-                width=800,
-                height=400,
-                background_color='white',
-                colormap='viridis',
-                max_words=100,
-                min_font_size=10,
-                max_font_size=100
-            ).generate(wordcloud_text)
+                **How to interpret:** Larger words = more frequent. Colors are for visual distinction only.
+                """)
 
-            # Create matplotlib figure
-            fig, ax = plt.subplots(figsize=(12, 6))
-            # Use to_array() for numpy 2.0+ compatibility
-            ax.imshow(wordcloud.to_array(), interpolation='bilinear')
-            ax.axis('off')
-            plt.tight_layout()
+            if viz_data.get('wordcloud_available', False):
+                wordcloud_text = viz_data['wordcloud_text']
 
-            st.pyplot(fig, use_container_width=True)
-            plt.close(fig)  # Clean up to prevent memory leaks
+                # Generate word cloud (lightweight - just rendering pre-cleaned text)
+                wordcloud = WordCloud(
+                    width=800,
+                    height=400,
+                    background_color='white',
+                    colormap='viridis',
+                    max_words=100,
+                    min_font_size=10,
+                    max_font_size=100
+                ).generate(wordcloud_text)
 
-            st.caption("Word cloud generated from all response text")
-        else:
-            st.warning("⚠️ Word cloud not available. Please ensure the `wordcloud` package is installed.")
+                # Create matplotlib figure
+                fig, ax = plt.subplots(figsize=(12, 6))
+                # Use to_array() for numpy 2.0+ compatibility
+                ax.imshow(wordcloud.to_array(), interpolation='bilinear')
+                ax.axis('off')
+                plt.tight_layout()
+
+                st.pyplot(fig, use_container_width=True)
+                plt.close(fig)  # Clean up to prevent memory leaks
+
+                st.caption("Word cloud generated from all response text")
+            else:
+                st.warning("⚠️ Word cloud not available. Please ensure the `wordcloud` package is installed.")
+
+        # Sub-tab 2: Semantic Word Clouds by Topic
+        with wc_tab2:
+            st.markdown("#### Semantic Word Clouds by Topic")
+
+            with st.expander("ℹ️ What am I seeing?", expanded=False):
+                st.markdown("""
+                **What this shows:** Word clouds for each discovered topic/cluster with **semantic coloring**.
+
+                **How to interpret:**
+                - **Word SIZE** = frequency (larger = more common in that topic)
+                - **Word COLOR** = semantic similarity (words with similar colors have similar meanings)
+                - Each topic has its own **unique color scheme** (Blues, Oranges, Greens, etc.)
+                - Within each topic, similar shades indicate semantically related words
+
+                **Example:** In a topic about "work", words like "job", "career", and "employment"
+                would have similar color shades because they're semantically related.
+                """)
+
+            if METHOD_VISUALIZER_AVAILABLE and WORDCLOUD_AVAILABLE:
+                try:
+                    results_df = st.session_state.results_df
+                    text_column = viz_data.get('text_column', 'response')
+
+                    # Create visualizer
+                    visualizer = MethodVisualizer(coder, results_df, text_column)
+
+                    # Generate semantic wordclouds
+                    with st.spinner("Generating semantic word clouds (analyzing word meanings)..."):
+                        semantic_fig = visualizer.create_all_semantic_wordclouds(
+                            max_words=40,
+                            cols=3
+                        )
+
+                    if semantic_fig:
+                        st.pyplot(semantic_fig, use_container_width=True)
+                        plt.close(semantic_fig)
+
+                        st.caption(
+                            "💡 **Color Legend:** Words with similar colors within each topic "
+                            "have similar semantic meanings. Different topics use different color schemes."
+                        )
+
+                        # Option to view individual topic wordclouds
+                        st.markdown("---")
+                        st.markdown("##### View Individual Topic")
+
+                        n_clusters = len(set(visualizer.assignments))
+                        topic_options = {}
+                        for i in range(n_clusters):
+                            code_id = f"CODE_{i + 1:02d}"
+                            if code_id in coder.codebook:
+                                label = coder.codebook[code_id].get('label', f'Topic {i + 1}')
+                            else:
+                                label = f'Topic {i + 1}'
+                            topic_options[f"{label} (Topic {i + 1})"] = i
+
+                        selected_topic = st.selectbox(
+                            "Select a topic for detailed view:",
+                            options=list(topic_options.keys()),
+                            key="semantic_wc_topic_select"
+                        )
+
+                        if selected_topic:
+                            topic_id = topic_options[selected_topic]
+                            individual_fig = visualizer.create_semantic_wordcloud(
+                                cluster_id=topic_id,
+                                max_words=60,
+                                width=1000,
+                                height=500
+                            )
+                            if individual_fig:
+                                st.pyplot(individual_fig, use_container_width=True)
+                                plt.close(individual_fig)
+                    else:
+                        st.info("Unable to generate semantic wordclouds. This may happen with very small datasets.")
+                except Exception as e:
+                    st.error(f"Error generating semantic wordclouds: {str(e)}")
+                    st.info("Falling back to simple wordclouds in the next tab.")
+            else:
+                st.warning(
+                    "⚠️ Semantic word clouds require additional packages. "
+                    "Please ensure `wordcloud` and `gensim` are installed."
+                )
+
+        # Sub-tab 3: Simple Topic Word Clouds (fallback)
+        with wc_tab3:
+            st.markdown("#### Simple Topic Word Clouds")
+
+            with st.expander("ℹ️ What am I seeing?", expanded=False):
+                st.markdown("""
+                **What this shows:** Word clouds for each topic using standard viridis coloring.
+
+                **How to interpret:** Larger words = more frequent within that topic.
+                Colors are random and do not indicate meaning.
+                """)
+
+            if METHOD_VISUALIZER_AVAILABLE and WORDCLOUD_AVAILABLE:
+                try:
+                    results_df = st.session_state.results_df
+                    text_column = viz_data.get('text_column', 'response')
+
+                    visualizer = MethodVisualizer(coder, results_df, text_column)
+                    simple_fig = visualizer.create_all_cluster_wordclouds(
+                        max_words=30,
+                        cols=3
+                    )
+
+                    if simple_fig:
+                        st.pyplot(simple_fig, use_container_width=True)
+                        plt.close(simple_fig)
+                    else:
+                        st.info("Unable to generate wordclouds.")
+                except Exception as e:
+                    st.error(f"Error generating wordclouds: {str(e)}")
+            else:
+                st.warning("⚠️ Word clouds not available.")
 
     # =========================================================================
     # TAB 6: Sunburst Chart (hierarchical code structure)
