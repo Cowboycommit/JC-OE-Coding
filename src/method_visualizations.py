@@ -57,10 +57,19 @@ except ImportError:
 
 try:
     from scipy.spatial import ConvexHull
+    from scipy.spatial.distance import cosine, pdist, squareform
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
     logger.warning("scipy not available. Cluster boundary overlays will be disabled.")
+
+try:
+    from gensim.models import Word2Vec
+    from gensim.utils import simple_preprocess
+    GENSIM_AVAILABLE = True
+except ImportError:
+    GENSIM_AVAILABLE = False
+    logger.warning("gensim not available. Semantic wordclouds will use fallback coloring.")
 
 try:
     import pyLDAvis
@@ -113,6 +122,12 @@ VISUALIZATION_COMPATIBILITY = {
         'recommended': ['tfidf_kmeans', 'nmf', 'lda'],
         'description': 'Word cloud for cluster/topic',
         'note': 'Available for all methods.'
+    },
+    'semantic_wordcloud': {
+        'compatible': ['tfidf_kmeans', 'nmf', 'lda'],
+        'recommended': ['tfidf_kmeans', 'nmf', 'lda'],
+        'description': 'Semantic word cloud with color-coded word meanings',
+        'note': 'Colors represent semantic similarity - similar colors mean similar meanings.'
     }
 }
 
@@ -747,6 +762,409 @@ class MethodVisualizer:
         plt.tight_layout()
         return fig
 
+    def create_semantic_wordcloud(
+        self,
+        cluster_id: int,
+        max_words: int = 50,
+        width: int = 800,
+        height: int = 400,
+        colormap_name: Optional[str] = None
+    ) -> Optional[Any]:
+        """
+        Create word cloud for a specific cluster/topic with semantic coloring.
+
+        Words are sized by frequency and colored by semantic similarity.
+        Similar colors indicate similar word meanings (based on word embeddings).
+
+        Args:
+            cluster_id: Cluster/topic index (0-based)
+            max_words: Maximum words in cloud
+            width: Image width
+            height: Image height
+            colormap_name: Optional colormap override. If None, auto-selects based on cluster_id
+
+        Returns:
+            Matplotlib Figure or None if not available
+        """
+        if not WORDCLOUD_AVAILABLE:
+            return None
+
+        # Get documents in this cluster
+        mask = self.assignments == cluster_id
+        cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+
+        if not cluster_texts:
+            logger.warning(f"No documents in cluster {cluster_id}")
+            return None
+
+        # Combine and clean text
+        combined_text = ' '.join(str(t) for t in cluster_texts)
+        import re
+        cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+
+        # Get word frequencies
+        words = cleaned_text.split()
+        word_freq = Counter(words)
+
+        # Remove common stopwords
+        stopwords = {
+            'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+            'should', 'may', 'might', 'must', 'can', 'and', 'but', 'or', 'for',
+            'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
+            'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
+            'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
+            've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
+            'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
+            'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
+            'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
+            'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
+        }
+        word_freq = {w: f for w, f in word_freq.items()
+                     if w not in stopwords and len(w) > 2}
+
+        if not word_freq:
+            logger.warning(f"No valid words in cluster {cluster_id} after filtering")
+            return None
+
+        # Get top words by frequency
+        top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
+
+        # Compute semantic colors
+        word_colors = self._compute_semantic_colors(
+            list(top_words.keys()),
+            cluster_texts,
+            cluster_id,
+            colormap_name
+        )
+
+        # Create color function for WordCloud
+        def color_func(word, font_size, position, orientation, random_state=None, **kwargs):
+            return word_colors.get(word.lower(), 'gray')
+
+        # Generate word cloud
+        wordcloud = WordCloud(
+            width=width,
+            height=height,
+            background_color='white',
+            max_words=max_words,
+            min_font_size=10,
+            max_font_size=100,
+            color_func=color_func,
+            prefer_horizontal=0.7
+        ).generate_from_frequencies(top_words)
+
+        # Create matplotlib figure
+        fig, ax = plt.subplots(figsize=(width/100, height/100))
+        ax.imshow(wordcloud.to_array(), interpolation='bilinear')
+        ax.axis('off')
+
+        # Get cluster label if available
+        code_id = f"CODE_{cluster_id + 1:02d}"
+        if code_id in self.codebook:
+            label = self.codebook[code_id].get('label', f'Cluster {cluster_id + 1}')
+        else:
+            label = f'Cluster {cluster_id + 1}'
+
+        ax.set_title(f'{label}\n(colors show semantic similarity)', fontsize=12)
+
+        plt.tight_layout()
+        return fig
+
+    def _compute_semantic_colors(
+        self,
+        words: List[str],
+        texts: List[str],
+        cluster_id: int,
+        colormap_name: Optional[str] = None
+    ) -> Dict[str, str]:
+        """
+        Compute colors for words based on semantic similarity.
+
+        Uses word embeddings to place semantically similar words
+        at similar positions on a color gradient.
+
+        Args:
+            words: List of words to color
+            texts: Cluster texts for training word embeddings
+            cluster_id: Cluster ID (used to select colormap)
+            colormap_name: Optional colormap override
+
+        Returns:
+            Dictionary mapping words to RGB color strings
+        """
+        import matplotlib.colors as mcolors
+
+        # Define distinct colormaps for each cluster
+        cluster_colormaps = [
+            'Blues',      # Cluster 0 - Blue shades
+            'Oranges',    # Cluster 1 - Orange shades
+            'Greens',     # Cluster 2 - Green shades
+            'Purples',    # Cluster 3 - Purple shades
+            'Reds',       # Cluster 4 - Red shades
+            'YlOrBr',     # Cluster 5 - Yellow-Orange-Brown
+            'BuGn',       # Cluster 6 - Blue-Green
+            'RdPu',       # Cluster 7 - Red-Purple
+            'YlGn',       # Cluster 8 - Yellow-Green
+            'OrRd',       # Cluster 9 - Orange-Red
+            'PuBu',       # Cluster 10 - Purple-Blue
+            'GnBu',       # Cluster 11 - Green-Blue
+            'BuPu',       # Cluster 12 - Blue-Purple
+            'PuRd',       # Cluster 13 - Purple-Red
+            'YlGnBu',     # Cluster 14 - Yellow-Green-Blue
+        ]
+
+        # Select colormap
+        if colormap_name:
+            cmap = plt.cm.get_cmap(colormap_name)
+        else:
+            cmap_idx = cluster_id % len(cluster_colormaps)
+            cmap = plt.cm.get_cmap(cluster_colormaps[cmap_idx])
+
+        if len(words) <= 1:
+            # Only one word - use middle color
+            color = cmap(0.6)
+            rgb = f'rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})'
+            return {words[0]: rgb} if words else {}
+
+        # Try to compute semantic embeddings
+        word_positions = None
+
+        if GENSIM_AVAILABLE:
+            try:
+                word_positions = self._get_semantic_positions(words, texts)
+            except Exception as e:
+                logger.debug(f"Semantic embedding failed: {e}, using fallback")
+
+        # Fallback: use lexicographic ordering (words starting with similar letters get similar colors)
+        if word_positions is None:
+            # Sort words alphabetically and assign positions
+            sorted_words = sorted(words)
+            word_positions = {w: i / max(1, len(sorted_words) - 1) for i, w in enumerate(sorted_words)}
+
+        # Map positions to colors (use range 0.2-0.9 for better visibility)
+        word_colors = {}
+        for word, pos in word_positions.items():
+            # Scale position to colormap range (avoid very light colors)
+            color_pos = 0.25 + pos * 0.65
+            color = cmap(color_pos)
+            rgb = f'rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})'
+            word_colors[word] = rgb
+
+        return word_colors
+
+    def _get_semantic_positions(
+        self,
+        words: List[str],
+        texts: List[str]
+    ) -> Dict[str, float]:
+        """
+        Get 1D positions for words based on semantic similarity using embeddings.
+
+        Uses Word2Vec trained on cluster texts to create embeddings,
+        then reduces to 1D using PCA for color mapping.
+
+        Args:
+            words: List of words to position
+            texts: Texts to train word embeddings on
+
+        Returns:
+            Dictionary mapping words to positions in [0, 1] range
+        """
+        if not GENSIM_AVAILABLE:
+            return None
+
+        # Tokenize all texts
+        tokenized = [simple_preprocess(str(text)) for text in texts]
+
+        # Flatten to get all tokens
+        all_tokens = [token for tokens in tokenized for token in tokens]
+
+        # Only proceed if we have enough tokens
+        if len(all_tokens) < 20:
+            return None
+
+        # Train a small Word2Vec model on the cluster texts
+        try:
+            model = Word2Vec(
+                sentences=tokenized,
+                vector_size=50,  # Small dimension for speed
+                window=5,
+                min_count=1,  # Include all words
+                workers=2,
+                epochs=20,  # More epochs for small corpus
+                seed=42
+            )
+        except Exception as e:
+            logger.debug(f"Word2Vec training failed: {e}")
+            return None
+
+        # Get embeddings for words that are in vocabulary
+        word_vectors = []
+        valid_words = []
+
+        for word in words:
+            if word in model.wv:
+                word_vectors.append(model.wv[word])
+                valid_words.append(word)
+
+        if len(valid_words) < 2:
+            return None
+
+        word_vectors = np.array(word_vectors)
+
+        # Reduce to 1D using PCA
+        if SKLEARN_AVAILABLE and len(valid_words) >= 2:
+            try:
+                pca = PCA(n_components=1, random_state=42)
+                positions_1d = pca.fit_transform(word_vectors).flatten()
+
+                # Normalize to [0, 1]
+                min_pos = positions_1d.min()
+                max_pos = positions_1d.max()
+                if max_pos > min_pos:
+                    positions_1d = (positions_1d - min_pos) / (max_pos - min_pos)
+                else:
+                    positions_1d = np.full_like(positions_1d, 0.5)
+
+                return {word: pos for word, pos in zip(valid_words, positions_1d)}
+            except Exception as e:
+                logger.debug(f"PCA failed: {e}")
+                return None
+
+        return None
+
+    def create_all_semantic_wordclouds(
+        self,
+        max_words: int = 40,
+        cols: int = 3
+    ) -> Optional[Any]:
+        """
+        Create grid of semantic word clouds for all clusters/topics.
+
+        Each wordcloud has a unique color scheme, with word colors
+        representing semantic similarity within that cluster.
+
+        Args:
+            max_words: Maximum words per cloud
+            cols: Number of columns in grid
+
+        Returns:
+            Matplotlib Figure or None if not available
+        """
+        if not WORDCLOUD_AVAILABLE:
+            return None
+
+        n_clusters = len(set(self.assignments))
+        rows = (n_clusters + cols - 1) // cols
+
+        # Larger figure for semantic wordclouds
+        fig, axes = plt.subplots(rows, cols, figsize=(cols * 6, rows * 4))
+        axes = axes.flatten() if n_clusters > 1 else [axes]
+
+        import re
+
+        for cluster_id in range(n_clusters):
+            ax = axes[cluster_id]
+
+            # Get documents in this cluster
+            mask = self.assignments == cluster_id
+            cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+
+            if not cluster_texts:
+                ax.text(0.5, 0.5, 'No documents', ha='center', va='center')
+                ax.axis('off')
+                continue
+
+            # Combine and clean text
+            combined_text = ' '.join(str(t) for t in cluster_texts)
+            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+
+            # Get word frequencies
+            words = cleaned_text.split()
+            word_freq = Counter(words)
+
+            # Remove common stopwords
+            stopwords = {
+                'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+                'should', 'may', 'might', 'must', 'can', 'and', 'but', 'or', 'for',
+                'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
+                'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
+                'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
+                've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
+                'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
+                'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
+                'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
+                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
+            }
+            word_freq = {w: f for w, f in word_freq.items()
+                         if w not in stopwords and len(w) > 2}
+
+            if not word_freq:
+                ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
+                ax.axis('off')
+                continue
+
+            # Get top words by frequency
+            top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
+
+            # Compute semantic colors
+            word_colors = self._compute_semantic_colors(
+                list(top_words.keys()),
+                cluster_texts,
+                cluster_id
+            )
+
+            # Create color function for WordCloud
+            def make_color_func(colors):
+                def color_func(word, font_size, position, orientation, random_state=None, **kwargs):
+                    return colors.get(word.lower(), 'gray')
+                return color_func
+
+            try:
+                wordcloud = WordCloud(
+                    width=500,
+                    height=300,
+                    background_color='white',
+                    max_words=max_words,
+                    min_font_size=8,
+                    max_font_size=80,
+                    color_func=make_color_func(word_colors),
+                    prefer_horizontal=0.7
+                ).generate_from_frequencies(top_words)
+
+                ax.imshow(wordcloud.to_array(), interpolation='bilinear')
+            except ValueError as e:
+                ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
+
+            ax.axis('off')
+
+            # Get cluster label if available
+            code_id = f"CODE_{cluster_id + 1:02d}"
+            if code_id in self.codebook:
+                label = self.codebook[code_id].get('label', f'Cluster {cluster_id + 1}')
+            else:
+                label = f'Cluster {cluster_id + 1}'
+
+            ax.set_title(f'{label}\n({sum(mask)} docs)', fontsize=10)
+
+        # Hide unused axes
+        for idx in range(n_clusters, len(axes)):
+            axes[idx].axis('off')
+
+        # Add overall title
+        fig.suptitle(
+            'Semantic Word Clouds by Topic\n'
+            '(Word size = frequency, Color shade = semantic similarity)',
+            fontsize=14,
+            fontweight='bold',
+            y=1.02
+        )
+
+        plt.tight_layout()
+        return fig
+
     def create_lda_visualization(self) -> Optional[str]:
         """
         Create pyLDAvis visualization for LDA model.
@@ -944,7 +1362,8 @@ class MethodVisualizer:
 def create_method_visualizations(
     coder,
     results_df: pd.DataFrame,
-    text_column: str
+    text_column: str,
+    include_semantic_wordclouds: bool = True
 ) -> Dict[str, Any]:
     """
     Convenience function to create all appropriate visualizations.
@@ -953,6 +1372,7 @@ def create_method_visualizations(
         coder: Fitted MLOpenCoder instance
         results_df: Results DataFrame
         text_column: Name of text column
+        include_semantic_wordclouds: Whether to include semantic wordclouds (default True)
 
     Returns:
         Dictionary of visualization name -> figure/html
@@ -965,6 +1385,10 @@ def create_method_visualizations(
     # Common visualizations
     if WORDCLOUD_AVAILABLE:
         figures['cluster_wordclouds'] = viz.create_all_cluster_wordclouds()
+
+        # Add semantic wordclouds (color-coded by word meaning)
+        if include_semantic_wordclouds:
+            figures['semantic_wordclouds'] = viz.create_all_semantic_wordclouds()
 
     # Method-specific
     if method == 'tfidf_kmeans':
