@@ -1061,34 +1061,7 @@ def main():
                 chart_data = top_codes_df.set_index('Label')['Count'].head(15)
                 st.bar_chart(chart_data)
 
-            # === VISUALIZATION 2: Codes per Response Distribution ===
-            st.markdown("**Codes per Response Distribution**:")
-            codes_per_response = results_df['num_codes'].value_counts().sort_index()
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                st.bar_chart(codes_per_response)
-            with col2:
-                st.markdown(f"- **Mean**: {results_df['num_codes'].mean():.2f}")
-                st.markdown(f"- **Median**: {results_df['num_codes'].median():.0f}")
-                st.markdown(f"- **Max**: {results_df['num_codes'].max()}")
-                uncoded = (results_df['num_codes'] == 0).sum()
-                st.markdown(f"- **Uncoded**: {uncoded}")
-
-            # === VISUALIZATION 3: Confidence Score Distribution ===
-            st.markdown("**Confidence Score Distribution**:")
-            all_confidences = []
-            for confs in results_df['confidence_scores']:
-                all_confidences.extend(confs)
-            if all_confidences:
-                # Create histogram buckets
-                conf_df = pd.DataFrame({'confidence': all_confidences})
-                conf_df['bucket'] = pd.cut(conf_df['confidence'],
-                                           bins=[0, 0.3, 0.5, 0.7, 0.9, 1.0],
-                                           labels=['0-0.3', '0.3-0.5', '0.5-0.7', '0.7-0.9', '0.9-1.0'])
-                bucket_counts = conf_df['bucket'].value_counts().sort_index()
-                st.bar_chart(bucket_counts)
-
-            # === VISUALIZATION 4: Code Co-occurrence Heatmap ===
+            # === VISUALIZATION 2: Code Co-occurrence Heatmap ===
             st.markdown("**Code Co-occurrence Matrix**:")
             cooccurrence_df = st.session_state["cooccurrence_df"]
             if cooccurrence_df is not None and not cooccurrence_df.empty:
