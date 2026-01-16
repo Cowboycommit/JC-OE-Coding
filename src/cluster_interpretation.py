@@ -301,7 +301,7 @@ class ClusterInterpreter:
         self,
         n_top_terms: int = 15,
         n_label_terms: int = 3,
-        n_representative_docs: int = 5,
+        n_representative_docs: int = 10,  # Increased from 5 to provide more context for LLM
         min_term_weight_threshold: float = 0.005,
         low_interpretability_threshold: float = 0.3
     ):
@@ -311,7 +311,7 @@ class ClusterInterpreter:
         Args:
             n_top_terms: Number of top terms to extract per cluster
             n_label_terms: Number of terms to use in generated labels
-            n_representative_docs: Number of example documents to include
+            n_representative_docs: Number of example documents to include (used by LLM for context)
             min_term_weight_threshold: Minimum weight for terms to be considered
             low_interpretability_threshold: Threshold below which to warn about interpretability
         """
