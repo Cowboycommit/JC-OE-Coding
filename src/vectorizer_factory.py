@@ -178,7 +178,7 @@ class VectorizerFactory:
         Create vectorizer and matrix for the specified method.
 
         Args:
-            method: Clustering method ('tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans')
+            method: Clustering method ('tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm')
             texts: List of preprocessed text documents
             config: Optional vectorizer configuration (uses defaults if None)
             force_refit: If True, force refit even if cached
@@ -190,7 +190,7 @@ class VectorizerFactory:
             ValueError: If method is not supported
 
         Notes:
-            - TF-IDF matrix is used for tfidf_kmeans
+            - TF-IDF matrix is used for tfidf_kmeans and svm
             - Count matrix is created with identical settings for lda
             - LSTM and BERT methods use their respective embedders
             - Vocabulary is shared across TF-IDF methods
@@ -226,10 +226,13 @@ class VectorizerFactory:
             # LSTM and BERT methods handle their own embeddings via embeddings.py
             # Return TF-IDF for term extraction (used in cluster interpretation)
             return self._get_tfidf_vectorizer_and_matrix(texts, config)
+        elif method == 'svm':
+            # SVM Spectral Clustering uses TF-IDF features
+            return self._get_tfidf_vectorizer_and_matrix(texts, config)
         else:
             raise ValueError(
                 f"Unsupported method: '{method}'. "
-                f"Supported methods: 'tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans'"
+                f"Supported methods: 'tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'"
             )
 
     def _get_tfidf_vectorizer_and_matrix(
@@ -434,7 +437,7 @@ def create_vectorizer_for_method(
     to benefit from caching.
 
     Args:
-        method: Clustering method ('tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans')
+        method: Clustering method ('tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm')
         texts: List of preprocessed text documents
         config: Optional VectorizerConfig (uses defaults if None)
         preprocessing_config: Optional PreprocessingConfig from adaptive preprocessing

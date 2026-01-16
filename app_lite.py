@@ -259,6 +259,7 @@ ML_METHODS = {
     "lda": "LDA - Latent Dirichlet Allocation (Topic modeling)",
     "lstm_kmeans": "LSTM + K-Means (Sequential patterns)",
     "bert_kmeans": "BERT + K-Means (Semantic understanding)",
+    "svm": "SVM Spectral Clustering (Kernel-based)",
 }
 
 REPRESENTATIONS = {
@@ -1239,7 +1240,8 @@ def main():
                 'tfidf_kmeans': 'TF-IDF + K-Means (Hard Clustering)',
                 'lda': 'LDA - Latent Dirichlet Allocation (Topic Model)',
                 'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
-                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)'
+                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)',
+                'svm': 'SVM Spectral Clustering (Kernel-based)'
             }
             st.info(f"**Current Method**: {method_names.get(method, method)} - Visualizations below are tailored to this method.")
 
@@ -1276,8 +1278,8 @@ def main():
                 else:
                     st.info("Cluster scatter plot requires `plotly` and `scikit-learn`. Install with: `pip install plotly scikit-learn`")
 
-                # === VISUALIZATION: Silhouette Plot (KMeans only) ===
-                if method == 'tfidf_kmeans':
+                # === VISUALIZATION: Silhouette Plot (Hard clustering methods) ===
+                if method in ['tfidf_kmeans', 'lstm_kmeans', 'bert_kmeans', 'svm']:
                     st.markdown("**Silhouette Analysis (Cluster Quality)**:")
                     if PLOTLY_AVAILABLE and SKLEARN_VIZ_AVAILABLE:
                         silhouette_fig = visualizer.create_silhouette_plot()
@@ -1291,13 +1293,13 @@ def main():
                 else:
                     with st.expander("Why no Silhouette Plot?"):
                         st.markdown(f"""
-                        **Silhouette analysis is only available for K-Means clustering.**
+                        **Silhouette analysis is only available for hard clustering methods.**
 
                         Your current method ({method_names.get(method, method)}) uses **soft topic assignments**
                         where documents can belong to multiple topics with different weights.
 
                         Silhouette scores require hard cluster assignments (each document in exactly one cluster),
-                        which is how K-Means works.
+                        which is how K-Means and SVM clustering work.
                         """)
 
                 # === VISUALIZATION: Topic-Term Heatmap ===

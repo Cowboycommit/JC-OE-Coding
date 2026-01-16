@@ -1720,13 +1720,14 @@ def page_configuration():
 
         method = st.selectbox(
             "ML Algorithm",
-            options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans'],
+            options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'],
             index=0,
             format_func=lambda x: {
                 'tfidf_kmeans': 'TF-IDF + K-Means (Fast, Recommended)',
                 'lda': 'Latent Dirichlet Allocation (Topic Modeling)',
                 'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
-                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)'
+                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)',
+                'svm': 'SVM Spectral Clustering (Kernel-based)'
             }[x],
             help="Choose the machine learning algorithm"
         )
@@ -1756,6 +1757,12 @@ def page_configuration():
                 'runtime': "🐢 **Moderate** (~1-2 min for 1000 responses)",
                 'good_for': "Good for semantic similarity and nuanced meanings",
                 'watch_out': "Watch out for requiring sentence-transformers package"
+            },
+            'svm': {
+                'description': "**SVM Spectral Clustering** uses kernel methods (like SVM) to find non-linear cluster boundaries in the feature space.",
+                'runtime': "🐢 **Moderate** (~30-60s for 1000 responses)",
+                'good_for': "Good for finding complex, non-linear cluster boundaries",
+                'watch_out': "Watch out for memory usage with large datasets"
             }
         }
         

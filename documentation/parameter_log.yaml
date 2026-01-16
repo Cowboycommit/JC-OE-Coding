@@ -46,7 +46,7 @@ data_preparation:
 # ML Method Configuration
 ml_method:
   # Primary method
-  name: "tfidf_kmeans"  # Options: tfidf_kmeans, lda, lstm_kmeans, bert_kmeans
+  name: "tfidf_kmeans"  # Options: tfidf_kmeans, lda, lstm_kmeans, bert_kmeans, svm
 
   # Code discovery
   n_codes: 10
@@ -114,6 +114,13 @@ model_specific:
     model_name: "all-MiniLM-L6-v2"  # SentenceTransformer model
     batch_size: 32  # Batch size for encoding
     # Note: Uses KMeans with same settings as tfidf_kmeans
+
+  # SVM Spectral Clustering
+  svm:
+    affinity: "rbf"  # Kernel type (rbf = RBF kernel, same as SVM)
+    n_init: 10  # Number of initializations for K-Means assignment
+    assign_labels: "kmeans"  # How to assign labels after spectral embedding
+    # Note: Uses TF-IDF features for spectral clustering
 
 # Multi-Label Coding
 multi_label:
