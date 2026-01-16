@@ -75,6 +75,19 @@ except ImportError:
     logging.warning("Sentiment analysis module not available. Install transformers and torch.")
 
 
+# Cache sentiment analyzer to avoid reloading models on every analysis run
+# This prevents the hang that occurs when transformer models are loaded from scratch
+@st.cache_resource
+def get_cached_sentiment_analyzer(data_type: str):
+    """
+    Get a cached sentiment analyzer instance.
+
+    Uses Streamlit's cache_resource to ensure the model is only loaded once
+    per session, preventing long load times on subsequent analyses.
+    """
+    return get_sentiment_analyzer(data_type)
+
+
 # ============================================================================
 # VISUALIZATION PRE-COMPUTATION SYSTEM
 # ============================================================================
@@ -1403,8 +1416,8 @@ def page_run_analysis():
                     update_progress(0.92, "Running sentiment analysis...", len(stages) - 1)
                     status_text.text(f"🔄 Loading {data_type} sentiment model...")
 
-                    # Get the appropriate analyzer for the data type
-                    analyzer = get_sentiment_analyzer(data_type)
+                    # Get the appropriate analyzer for the data type (cached to avoid reload)
+                    analyzer = get_cached_sentiment_analyzer(data_type)
 
                     # Run sentiment analysis
                     texts = df[config['text_column']].tolist()
