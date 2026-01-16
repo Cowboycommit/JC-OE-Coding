@@ -1225,29 +1225,41 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True) -> pd.DataFra
         include_quotes: Include representative quotes (default True)
 
     Returns:
-        DataFrame with: Code, Label, Count, Keywords, Representative Quotes
+        DataFrame with: Code, Label, Keywords, Sample Text, Count, % of Total, Confidence
     """
     code_data = []
 
+    # Calculate total responses for percentage
+    total_responses = len(coder.code_assignments) if coder.code_assignments else 1
+
     for code_id, info in coder.codebook.items():
+        # Calculate % of total docs
+        pct_of_total = (info['count'] / total_responses * 100) if total_responses > 0 else 0
+
         row = {
             'Code': code_id,
             'Label': info['label'],
-            'Count': info['count'],
-            'Avg Confidence': info['avg_confidence'],
-            'Keywords': ', '.join(info['keywords'][:10])
+            'Keywords': ', '.join(info['keywords'][:10]),
         }
 
         if include_quotes:
-            # Get top representative quote
+            # Get at least 3 representative quotes from original text
             examples = info.get('examples', [])
-            if examples:
-                quote = examples[0].get('text', '')[:150]
-                if len(examples[0].get('text', '')) > 150:
-                    quote += '...'
-                row['Representative Quote'] = quote
-            else:
-                row['Representative Quote'] = ''
+            sample_texts = []
+            for ex in examples[:3]:
+                text = ex.get('text', '')
+                # Truncate long texts for display but keep original wording
+                if len(text) > 100:
+                    text = text[:100] + '...'
+                sample_texts.append(f'"{text}"')
+            # Pad with empty quotes if fewer than 3 samples
+            while len(sample_texts) < 3:
+                sample_texts.append('""')
+            row['Sample Text'] = ' | '.join(sample_texts)
+
+        row['Count'] = info['count']
+        row['% of Total'] = f"{pct_of_total:.1f}%"
+        row['Confidence'] = f"{info['avg_confidence']:.2f}"
 
         code_data.append(row)
 
@@ -1261,7 +1273,7 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 5) -> pd.DataFrame:
     """
     Get comprehensive code summary with representative quotes.
 
-    Returns DataFrame with: Code, Label, Keywords, Representative Quotes
+    Returns DataFrame with: Code, Label, Keywords, Sample Text, Count, % of Total, Confidence
 
     Args:
         coder: Fitted MLOpenCoder instance
@@ -1272,24 +1284,35 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 5) -> pd.DataFrame:
     """
     code_data = []
 
+    # Calculate total responses for percentage
+    total_responses = len(coder.code_assignments) if coder.code_assignments else 1
+
     for code_id, info in coder.codebook.items():
         # Get representative quotes (examples stored during assignment)
-        # Use all available examples up to n_quotes (ensures 5 or all if fewer)
+        # Use all available examples up to n_quotes (ensures at least 3 or all if fewer)
         examples = info.get('examples', [])
-        quotes = []
-        for example in examples[:n_quotes]:
+        sample_texts = []
+        for example in examples[:max(n_quotes, 3)]:
             text = example.get('text', '')
             # Truncate long quotes
-            if len(text) > 150:
-                text = text[:150] + '...'
-            quotes.append(text)
+            if len(text) > 100:
+                text = text[:100] + '...'
+            sample_texts.append(f'"{text}"')
+        # Pad with empty quotes if fewer than 3 samples
+        while len(sample_texts) < 3:
+            sample_texts.append('""')
+
+        # Calculate % of total docs
+        pct_of_total = (info['count'] / total_responses * 100) if total_responses > 0 else 0
 
         code_data.append({
             'Code': code_id,
             'Label': info['label'],
             'Keywords': ', '.join(info['keywords'][:10]),
+            'Sample Text': ' | '.join(sample_texts) if sample_texts else '(no examples available)',
             'Count': info['count'],
-            'Representative Quotes': ' | '.join(quotes) if quotes else '(no examples available)'
+            '% of Total': f"{pct_of_total:.1f}%",
+            'Confidence': f"{info['avg_confidence']:.2f}"
         })
 
     df = pd.DataFrame(code_data)
