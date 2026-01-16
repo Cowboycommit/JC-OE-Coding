@@ -688,8 +688,8 @@ class MethodVisualizer:
 
         # Create matplotlib figure
         fig, ax = plt.subplots(figsize=(width/100, height/100))
-        # Use to_array() for numpy 2.0+ compatibility
-        ax.imshow(wordcloud.to_array(), interpolation='bilinear')
+        # Use to_image() PIL method for numpy compatibility
+        ax.imshow(wordcloud.to_image(), interpolation='bilinear')
         ax.axis('off')
         ax.set_title(f'{self._get_topic_label(cluster_id)} Word Cloud')
 
@@ -747,8 +747,8 @@ class MethodVisualizer:
                     max_words=max_words
                 ).generate(cleaned_text)
 
-                # Use to_array() for numpy 2.0+ compatibility
-                ax.imshow(wordcloud.to_array(), interpolation='bilinear')
+                # Use to_image() PIL method for numpy compatibility
+                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
             except ValueError:
                 ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
 
@@ -856,7 +856,8 @@ class MethodVisualizer:
 
         # Create matplotlib figure
         fig, ax = plt.subplots(figsize=(width/100, height/100))
-        ax.imshow(wordcloud.to_array(), interpolation='bilinear')
+        # Use to_image() PIL method for numpy compatibility
+        ax.imshow(wordcloud.to_image(), interpolation='bilinear')
         ax.axis('off')
 
         # Get cluster label if available
@@ -1134,7 +1135,8 @@ class MethodVisualizer:
                     prefer_horizontal=0.7
                 ).generate_from_frequencies(top_words)
 
-                ax.imshow(wordcloud.to_array(), interpolation='bilinear')
+                # Use to_image() PIL method for numpy compatibility
+                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
             except ValueError as e:
                 ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
 
