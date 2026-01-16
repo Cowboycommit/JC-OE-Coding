@@ -74,6 +74,27 @@ except ImportError:
     import logging
     logging.warning("Sentiment analysis module not available. Install transformers and torch.")
 
+# Import text preprocessing modules
+try:
+    from src.gold_standard_preprocessing import (
+        GoldStandardTextProcessor,
+        DataQualityMetrics,
+        PreprocessingConfig,
+        normalize_for_nlp,
+        preprocess_dataframe,
+        create_processor_for_dataset
+    )
+    from src.text_preprocessor import (
+        TextPreprocessor,
+        DataCleaningPipeline,
+        TextPreprocessingError
+    )
+    TEXT_PREPROCESSOR_AVAILABLE = True
+except ImportError:
+    TEXT_PREPROCESSOR_AVAILABLE = False
+    import logging
+    logging.warning("Text preprocessing modules not available.")
+
 
 # Cache sentiment analyzer to avoid reloading models on every analysis run
 # This prevents the hang that occurs when transformer models are loaded from scratch
@@ -470,12 +491,13 @@ def render_stepper_navigation():
     # Define pages with their prerequisites
     pages = [
         {"name": "📤 Data Upload", "step": 1, "requires": None},
-        {"name": "⚙️ Configuration", "step": 2, "requires": "data"},
-        {"name": "🚀 Run Analysis", "step": 3, "requires": "config"},
-        {"name": "📊 Results Overview", "step": 4, "requires": "analysis"},
-        {"name": "📈 Visualizations", "step": 5, "requires": "analysis"},
-        {"name": "💾 Export Results", "step": 6, "requires": "analysis"},
-        {"name": "ℹ️ About", "step": 7, "requires": None},
+        {"name": "🔧 Text Processor", "step": 2, "requires": "data"},
+        {"name": "⚙️ Configuration", "step": 3, "requires": "data"},
+        {"name": "🚀 Run Analysis", "step": 4, "requires": "config"},
+        {"name": "📊 Results Overview", "step": 5, "requires": "analysis"},
+        {"name": "📈 Visualizations", "step": 6, "requires": "analysis"},
+        {"name": "💾 Export Results", "step": 7, "requires": "analysis"},
+        {"name": "ℹ️ About", "step": 8, "requires": None},
     ]
 
     # Determine which steps are accessible
@@ -505,9 +527,11 @@ def render_stepper_navigation():
         is_completed = False
         if page["step"] == 1 and has_data:
             is_completed = True
-        elif page["step"] == 2 and has_config:
+        elif page["step"] == 2 and has_data:  # Text Processor (optional but accessible)
+            is_completed = False  # Optional step, not required for completion
+        elif page["step"] == 3 and has_config:
             is_completed = True
-        elif page["step"] == 3 and has_analysis:
+        elif page["step"] == 4 and has_analysis:
             is_completed = True
 
         is_active = current_page == page["name"]
@@ -675,6 +699,8 @@ def main():
     # Page routing
     if page == "📤 Data Upload":
         page_data_upload()
+    elif page == "🔧 Text Processor":
+        page_text_processor()
     elif page == "⚙️ Configuration":
         page_configuration()
     elif page == "🚀 Run Analysis":
@@ -981,7 +1007,566 @@ def page_data_upload():
 
     # Next button - show when data is loaded
     if st.session_state.uploaded_df is not None:
-        render_next_button("⚙️ Configuration")
+        render_next_button("🔧 Text Processor")
+
+
+def page_text_processor():
+    """
+    Text Processor page - comprehensive text preprocessing with quality metrics.
+
+    Features:
+    - GoldStandardTextProcessor: Unicode normalization, HTML decoding, contraction expansion,
+      URL/mention/hashtag standardization, elongation normalization, punctuation normalization,
+      slang expansion, spam detection, duplicate detection, quality filtering
+    - TextPreprocessor: NLTK-based stopword removal, lemmatization, domain-specific cleaning,
+      long document handling, language detection
+    - DataCleaningPipeline: Batch DataFrame processing with dataset type presets
+    - DataQualityMetrics: Detailed preprocessing statistics with human-readable reports
+    """
+    st.markdown('<h2 class="sub-header">🔧 Text Processor</h2>', unsafe_allow_html=True)
+
+    if st.session_state.uploaded_df is None:
+        st.warning("⚠️ Please upload data first in the 'Data Upload' section")
+        return
+
+    if not TEXT_PREPROCESSOR_AVAILABLE:
+        st.error("❌ Text preprocessing modules not available. Please check your installation.")
+        return
+
+    df = st.session_state.uploaded_df.copy()
+
+    st.markdown("""
+    <div class="info-box">
+    <strong>Text Preprocessing</strong> cleans and normalizes your text data before analysis.
+    This can improve the quality of topic modeling and sentiment analysis results.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Get text columns
+    text_columns = df.select_dtypes(include=['object']).columns.tolist()
+    if not text_columns:
+        st.error("❌ No text columns found in the data")
+        return
+
+    # Text column selector
+    st.markdown("### 📝 Select Text Column")
+    selected_column = st.selectbox(
+        "Choose the column to preprocess:",
+        text_columns,
+        index=text_columns.index(st.session_state.get('text_column', text_columns[0]))
+            if st.session_state.get('text_column') in text_columns else 0,
+        key="preprocess_text_column"
+    )
+
+    # Show sample of original text
+    st.markdown("#### Original Text Sample")
+    sample_texts = df[selected_column].dropna().head(3).tolist()
+    for i, text in enumerate(sample_texts, 1):
+        st.text(f"{i}. {truncate_text(str(text), 150)}")
+
+    st.markdown("---")
+
+    # Create tabs for different processing options
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🎯 Quick Presets",
+        "⚙️ Gold Standard Options",
+        "🔬 Advanced Processing",
+        "📊 Quality Report"
+    ])
+
+    # ==========================================================================
+    # TAB 1: Quick Presets (DataCleaningPipeline)
+    # ==========================================================================
+    with tab1:
+        st.markdown("### Quick Dataset Presets")
+        st.markdown("""
+        Select a preset optimized for your data type. Each preset configures
+        all preprocessing options automatically.
+        """)
+
+        preset_options = {
+            "general": {
+                "name": "📋 General Text",
+                "description": "Standard preprocessing for most text data",
+                "features": ["Contraction expansion", "Spam detection", "Min 3 tokens"]
+            },
+            "social_media": {
+                "name": "🐦 Social Media (Twitter/X)",
+                "description": "Optimized for short, informal text with slang and emojis",
+                "features": ["Slang expansion", "URL/mention handling", "Hashtag processing", "Emoji tolerance", "Min 2 tokens"]
+            },
+            "reviews": {
+                "name": "⭐ Product Reviews",
+                "description": "For customer reviews with elongated expressions",
+                "features": ["Elongation normalization", "Contraction expansion", "Spam detection", "Min 5 tokens"]
+            },
+            "news": {
+                "name": "📰 News Articles",
+                "description": "Minimal preprocessing for formal, well-written text",
+                "features": ["Minimal normalization", "No spam detection", "Min 10 tokens", "Max 2000 tokens"]
+            }
+        }
+
+        selected_preset = st.radio(
+            "Select a preset:",
+            options=list(preset_options.keys()),
+            format_func=lambda x: preset_options[x]["name"],
+            horizontal=True,
+            key="dataset_preset"
+        )
+
+        # Show preset details
+        preset = preset_options[selected_preset]
+        st.markdown(f"""
+        <div class="info-box" style="padding: 15px;">
+        <strong>{preset['name']}</strong><br>
+        <em>{preset['description']}</em><br><br>
+        <strong>Features:</strong>
+        <ul style="margin: 5px 0 0 15px;">
+        {''.join([f"<li>{f}</li>" for f in preset['features']])}
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Processing options for preset
+        col1, col2 = st.columns(2)
+        with col1:
+            preset_remove_stopwords = st.checkbox("Remove stopwords", value=True, key="preset_stopwords")
+            preset_lemmatize = st.checkbox("Lemmatize words", value=True, key="preset_lemmatize")
+        with col2:
+            preset_lowercase = st.checkbox("Convert to lowercase", value=True, key="preset_lowercase")
+            preset_drop_filtered = st.checkbox("Drop filtered rows", value=False, key="preset_drop")
+
+        if st.button("🚀 Apply Preset", use_container_width=True, key="apply_preset_btn"):
+            with st.spinner(f"Applying {preset['name']} preprocessing..."):
+                try:
+                    # Create pipeline with selected preset
+                    pipeline = DataCleaningPipeline(
+                        dataset_type=selected_preset,
+                        remove_stopwords=preset_remove_stopwords,
+                        lemmatize=preset_lemmatize,
+                        lowercase=preset_lowercase
+                    )
+
+                    # Process the data
+                    processed_df = pipeline.clean_dataframe(
+                        df,
+                        text_column=selected_column,
+                        output_column=f"{selected_column}_processed",
+                        drop_filtered=preset_drop_filtered
+                    )
+
+                    # Store results
+                    st.session_state.uploaded_df = processed_df
+                    st.session_state.preprocessing_report = pipeline.get_quality_report()
+                    st.session_state.preprocessing_summary = pipeline.get_summary()
+
+                    st.success(f"✅ Preprocessing complete! Processed {len(processed_df):,} rows.")
+
+                    # Show before/after comparison
+                    st.markdown("#### Before/After Comparison")
+                    comparison_df = processed_df[[selected_column, f"{selected_column}_processed"]].head(5)
+                    comparison_df.columns = ["Original", "Processed"]
+                    st.dataframe(comparison_df, use_container_width=True)
+
+                    # Show summary metrics
+                    summary = pipeline.get_summary()
+                    if summary:
+                        col1, col2, col3 = st.columns(3)
+                        col1.metric("Valid Records", f"{summary.get('valid_records', 0):,}")
+                        col2.metric("Avg Token Count", f"{summary.get('avg_token_count', 0):.1f}")
+                        col3.metric("Valid Ratio", f"{summary.get('valid_ratio', 0):.1%}")
+
+                except Exception as e:
+                    st.error(f"❌ Preprocessing failed: {str(e)}")
+
+    # ==========================================================================
+    # TAB 2: Gold Standard Options
+    # ==========================================================================
+    with tab2:
+        st.markdown("### Gold Standard Text Processor")
+        st.markdown("""
+        Configure individual preprocessing steps for fine-grained control.
+        The Gold Standard processor implements industry best practices for text normalization.
+        """)
+
+        # Normalization options
+        st.markdown("#### Normalization Options")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            gs_unicode = st.checkbox("Unicode normalization (NFKC)", value=True,
+                help="Normalize Unicode characters to standard form", key="gs_unicode")
+            gs_html = st.checkbox("Decode HTML entities", value=True,
+                help="Convert &amp; to &, &lt; to <, etc.", key="gs_html")
+            gs_contractions = st.checkbox("Expand contractions", value=True,
+                help="Convert don't to do not, I'm to I am, etc.", key="gs_contractions")
+            gs_elongation = st.checkbox("Normalize elongations", value=True,
+                help="Convert loooove to loove, etc.", key="gs_elongation")
+            gs_punctuation = st.checkbox("Normalize punctuation", value=True,
+                help="Convert !!! to !, etc.", key="gs_punctuation")
+
+        with col2:
+            gs_urls = st.checkbox("Standardize URLs", value=True,
+                help="Replace URLs with <URL> token", key="gs_urls")
+            gs_mentions = st.checkbox("Standardize @mentions", value=True,
+                help="Replace @user with <USER> token", key="gs_mentions")
+            gs_hashtags = st.checkbox("Process hashtags", value=True,
+                help="Remove # from hashtags", key="gs_hashtags")
+            gs_slang = st.checkbox("Expand slang", value=False,
+                help="Convert lol to laughing out loud, brb to be right back, etc.", key="gs_slang")
+
+        # Quality filtering options
+        st.markdown("#### Quality Filtering")
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            gs_min_tokens = st.number_input("Min tokens", min_value=1, max_value=50, value=3,
+                help="Minimum number of tokens required", key="gs_min_tokens")
+            gs_max_tokens = st.number_input("Max tokens", min_value=50, max_value=5000, value=512,
+                help="Maximum number of tokens allowed", key="gs_max_tokens")
+
+        with col2:
+            gs_max_emoji_ratio = st.slider("Max emoji ratio", min_value=0.0, max_value=1.0, value=0.7,
+                help="Maximum ratio of emojis to characters", key="gs_emoji_ratio")
+            gs_max_char_repeat = st.number_input("Max char repeat", min_value=1, max_value=5, value=2,
+                help="Maximum character repetitions (e.g., 2 keeps 'oo' in 'loooove')", key="gs_char_repeat")
+
+        with col3:
+            gs_spam = st.checkbox("Detect spam", value=True,
+                help="Filter out spam-like text patterns", key="gs_spam")
+            gs_duplicates = st.checkbox("Detect duplicates", value=True,
+                help="Filter out duplicate texts using MD5 hash", key="gs_duplicates")
+
+        # Custom tokens
+        with st.expander("🏷️ Custom Replacement Tokens"):
+            col1, col2 = st.columns(2)
+            with col1:
+                gs_url_token = st.text_input("URL replacement token", value="<URL>", key="gs_url_token")
+            with col2:
+                gs_user_token = st.text_input("User replacement token", value="<USER>", key="gs_user_token")
+
+        if st.button("🚀 Apply Gold Standard Processing", use_container_width=True, key="apply_gs_btn"):
+            with st.spinner("Applying Gold Standard preprocessing..."):
+                try:
+                    # Create config
+                    config = PreprocessingConfig(
+                        normalize_unicode=gs_unicode,
+                        decode_html_entities=gs_html,
+                        expand_contractions=gs_contractions,
+                        normalize_elongations=gs_elongation,
+                        normalize_punctuation=gs_punctuation,
+                        standardize_urls=gs_urls,
+                        standardize_mentions=gs_mentions,
+                        process_hashtags=gs_hashtags,
+                        expand_slang=gs_slang,
+                        min_tokens=gs_min_tokens,
+                        max_tokens=gs_max_tokens,
+                        max_emoji_ratio=gs_max_emoji_ratio,
+                        max_char_repeat=gs_max_char_repeat,
+                        detect_spam=gs_spam,
+                        detect_duplicates=gs_duplicates,
+                        url_token=gs_url_token,
+                        user_token=gs_user_token
+                    )
+
+                    # Create processor
+                    processor = GoldStandardTextProcessor(config=config)
+
+                    # Process data
+                    processed_df, metrics = preprocess_dataframe(
+                        df,
+                        text_column=selected_column,
+                        output_column=f"{selected_column}_processed",
+                        processor=processor,
+                        drop_filtered=False
+                    )
+
+                    # Store results
+                    st.session_state.uploaded_df = processed_df
+                    st.session_state.preprocessing_metrics = metrics
+                    st.session_state.preprocessing_report = metrics.generate_report()
+
+                    st.success(f"✅ Gold Standard preprocessing complete!")
+
+                    # Show metrics
+                    col1, col2, col3, col4 = st.columns(4)
+                    col1.metric("Total Records", f"{metrics.total_records:,}")
+                    col2.metric("Valid Records", f"{metrics.valid_records:,}")
+                    col3.metric("Filtered", f"{metrics.filtered_records:,}")
+                    col4.metric("Valid Ratio", f"{metrics.valid_ratio:.1%}")
+
+                    # Show normalization counts
+                    st.markdown("#### Normalization Statistics")
+                    norm_data = {
+                        "Operation": ["Unicode", "HTML", "URLs", "Mentions", "Hashtags",
+                                     "Contractions", "Elongations", "Punctuation", "Slang"],
+                        "Count": [metrics.unicode_normalized, metrics.html_decoded,
+                                 metrics.urls_replaced, metrics.mentions_replaced,
+                                 metrics.hashtags_processed, metrics.contractions_expanded,
+                                 metrics.elongations_normalized, metrics.punctuation_normalized,
+                                 metrics.slang_expanded]
+                    }
+                    st.dataframe(pd.DataFrame(norm_data), use_container_width=True)
+
+                    # Show before/after comparison
+                    st.markdown("#### Before/After Comparison")
+                    comparison_df = processed_df[[selected_column, f"{selected_column}_processed"]].dropna().head(5)
+                    comparison_df.columns = ["Original", "Processed"]
+                    st.dataframe(comparison_df, use_container_width=True)
+
+                except Exception as e:
+                    st.error(f"❌ Preprocessing failed: {str(e)}")
+
+    # ==========================================================================
+    # TAB 3: Advanced Processing (TextPreprocessor)
+    # ==========================================================================
+    with tab3:
+        st.markdown("### Advanced Text Processing")
+        st.markdown("""
+        Additional processing options using NLTK including stopword removal,
+        lemmatization, domain-specific cleaning, and long document handling.
+        """)
+
+        # NLTK options
+        st.markdown("#### NLTK Processing")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            adv_stopwords = st.checkbox("Remove stopwords", value=True,
+                help="Remove common English stopwords", key="adv_stopwords")
+            adv_lemmatize = st.checkbox("Lemmatize", value=True,
+                help="Reduce words to their base form (running -> run)", key="adv_lemmatize")
+            adv_lowercase = st.checkbox("Convert to lowercase", value=True, key="adv_lowercase")
+
+        with col2:
+            adv_min_token_len = st.number_input("Min token length", min_value=1, max_value=10, value=2,
+                help="Minimum character length for tokens", key="adv_min_token_len")
+
+        # Domain-specific cleaning
+        st.markdown("#### Domain-Specific Cleaning")
+        domain_options = {
+            "general": "General (no special handling)",
+            "medical": "Medical (preserve mg, ml, patient, diagnosis, etc.)",
+            "legal": "Legal (preserve plaintiff, defendant, pursuant, etc.)",
+            "technical": "Technical (preserve api, sdk, cpu, gpu, etc.)"
+        }
+
+        adv_domain = st.selectbox(
+            "Select domain:",
+            options=list(domain_options.keys()),
+            format_func=lambda x: domain_options[x],
+            key="adv_domain"
+        )
+
+        # Preserve custom terms
+        adv_preserve_terms = st.text_input(
+            "Additional terms to preserve (comma-separated):",
+            placeholder="e.g., COVID-19, AI, ML",
+            key="adv_preserve_terms"
+        )
+
+        # Long document handling
+        st.markdown("#### Long Document Handling")
+        adv_long_doc_strategy = st.selectbox(
+            "Strategy for long documents:",
+            options=["none", "truncate", "chunk"],
+            format_func=lambda x: {
+                "none": "None (process as-is)",
+                "truncate": "Truncate to max tokens",
+                "chunk": "Split into chunks"
+            }[x],
+            key="adv_long_doc"
+        )
+
+        if adv_long_doc_strategy in ["truncate", "chunk"]:
+            col1, col2 = st.columns(2)
+            with col1:
+                adv_chunk_size = st.number_input("Chunk/max size (tokens)", min_value=50, max_value=2000, value=512,
+                    key="adv_chunk_size")
+            with col2:
+                if adv_long_doc_strategy == "chunk":
+                    adv_chunk_overlap = st.number_input("Chunk overlap (tokens)", min_value=0, max_value=200, value=50,
+                        key="adv_chunk_overlap")
+
+        if st.button("🚀 Apply Advanced Processing", use_container_width=True, key="apply_adv_btn"):
+            with st.spinner("Applying advanced preprocessing..."):
+                try:
+                    # Create TextPreprocessor
+                    preprocessor = TextPreprocessor(
+                        use_gold_standard=True,
+                        expand_slang=False,
+                        detect_spam=True,
+                        detect_duplicates=True
+                    )
+
+                    # Parse preserve terms
+                    preserve_terms = None
+                    if adv_preserve_terms.strip():
+                        preserve_terms = [t.strip() for t in adv_preserve_terms.split(",")]
+
+                    # Process each text
+                    processed_texts = []
+                    for text in df[selected_column]:
+                        if pd.isna(text):
+                            processed_texts.append(None)
+                            continue
+
+                        text = str(text)
+
+                        # Handle long documents first if needed
+                        if adv_long_doc_strategy == "truncate":
+                            text = preprocessor.handle_long_documents(
+                                text, strategy="truncate", chunk_size=adv_chunk_size
+                            )
+                        elif adv_long_doc_strategy == "chunk":
+                            chunks = preprocessor.handle_long_documents(
+                                text, strategy="chunk",
+                                chunk_size=adv_chunk_size,
+                                chunk_overlap=adv_chunk_overlap
+                            )
+                            text = chunks[0] if isinstance(chunks, list) and chunks else text
+
+                        # Apply domain-specific cleaning if not general
+                        if adv_domain != "general":
+                            text = preprocessor.clean_domain_specific(
+                                text, domain=adv_domain, preserve_terms=preserve_terms
+                            )
+
+                        # Apply main preprocessing
+                        try:
+                            result = preprocessor.preprocess(
+                                text,
+                                remove_stopwords=adv_stopwords,
+                                lemmatize=adv_lemmatize,
+                                lowercase=adv_lowercase,
+                                min_token_length=adv_min_token_len,
+                                track_metrics=True
+                            )
+                            processed_texts.append(result)
+                        except TextPreprocessingError:
+                            processed_texts.append(None)
+
+                    # Update dataframe
+                    processed_df = df.copy()
+                    processed_df[f"{selected_column}_processed"] = processed_texts
+
+                    # Store results
+                    st.session_state.uploaded_df = processed_df
+                    st.session_state.preprocessing_report = preprocessor.get_quality_report()
+
+                    st.success(f"✅ Advanced preprocessing complete!")
+
+                    # Show quality metrics
+                    metrics = preprocessor.get_quality_metrics()
+                    if metrics:
+                        col1, col2, col3 = st.columns(3)
+                        col1.metric("Total Records", f"{metrics.total_records:,}")
+                        col2.metric("Valid Records", f"{metrics.valid_records:,}")
+                        col3.metric("Avg Token Count", f"{metrics.avg_token_count:.1f}")
+
+                    # Show before/after comparison
+                    st.markdown("#### Before/After Comparison")
+                    comparison_df = processed_df[[selected_column, f"{selected_column}_processed"]].dropna().head(5)
+                    comparison_df.columns = ["Original", "Processed"]
+                    st.dataframe(comparison_df, use_container_width=True)
+
+                except Exception as e:
+                    st.error(f"❌ Preprocessing failed: {str(e)}")
+
+    # ==========================================================================
+    # TAB 4: Quality Report
+    # ==========================================================================
+    with tab4:
+        st.markdown("### Data Quality Report")
+
+        if 'preprocessing_report' in st.session_state and st.session_state.preprocessing_report:
+            # Display the report
+            st.code(st.session_state.preprocessing_report, language=None)
+
+            # Download button
+            st.download_button(
+                "📥 Download Quality Report",
+                data=st.session_state.preprocessing_report,
+                file_name="data_quality_report.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
+
+            # Show metrics visualization if available
+            if 'preprocessing_metrics' in st.session_state:
+                metrics = st.session_state.preprocessing_metrics
+
+                st.markdown("---")
+                st.markdown("#### Visual Summary")
+
+                # Filter reasons chart
+                if metrics.filter_reasons:
+                    st.markdown("##### Filter Reasons")
+                    filter_df = pd.DataFrame([
+                        {"Reason": k, "Count": v}
+                        for k, v in sorted(metrics.filter_reasons.items(), key=lambda x: -x[1])
+                    ])
+                    fig = px.bar(filter_df, x="Reason", y="Count", title="Records Filtered by Reason")
+                    fig.update_layout(xaxis_tickangle=-45)
+                    st.plotly_chart(fig, use_container_width=True)
+
+                # Text length distribution
+                if metrics.text_lengths:
+                    st.markdown("##### Text Length Distribution")
+                    fig = px.histogram(x=metrics.text_lengths, nbins=30,
+                                      title="Distribution of Text Lengths (characters)",
+                                      labels={"x": "Text Length", "y": "Count"})
+                    st.plotly_chart(fig, use_container_width=True)
+
+                # Token count distribution
+                if metrics.token_counts:
+                    st.markdown("##### Token Count Distribution")
+                    fig = px.histogram(x=metrics.token_counts, nbins=30,
+                                      title="Distribution of Token Counts",
+                                      labels={"x": "Token Count", "y": "Count"})
+                    st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("📊 No preprocessing has been run yet. Use one of the preprocessing tabs to generate a quality report.")
+
+            # Show convenience functions
+            st.markdown("---")
+            st.markdown("### Convenience Functions")
+            st.markdown("""
+            The text processing module also provides these convenience functions:
+
+            - **`normalize_for_nlp(text)`**: Quick NLP-safe normalization
+            - **`preprocess_dataframe(df, text_column)`**: Apply preprocessing to a DataFrame
+            - **`create_processor_for_dataset(dataset_type)`**: Get a pre-configured processor
+
+            These are used internally by the preset options above.
+            """)
+
+    # ==========================================================================
+    # Show processed column info and next steps
+    # ==========================================================================
+    st.markdown("---")
+
+    # Check if processed column exists
+    if f"{selected_column}_processed" in st.session_state.uploaded_df.columns:
+        st.markdown("### ✅ Processed Data Ready")
+
+        processed_col = f"{selected_column}_processed"
+        valid_count = st.session_state.uploaded_df[processed_col].notna().sum()
+        total_count = len(st.session_state.uploaded_df)
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Processed Column", processed_col)
+        col2.metric("Valid Entries", f"{valid_count:,}")
+        col3.metric("Coverage", f"{valid_count/total_count:.1%}")
+
+        st.info(f"""
+        💡 **Tip:** In the Configuration page, you can now select **'{processed_col}'**
+        as your text column to run analysis on the preprocessed data.
+        """)
+
+    # Next button
+    render_next_button("⚙️ Configuration")
 
 
 def page_configuration():
