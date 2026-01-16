@@ -682,12 +682,18 @@ def page_data_upload():
 
     # Define available sample datasets
     sample_datasets = {
-        "Remote Work Experiences": "data/sample_responses.csv",
-        "Fashion Industry Perspectives": "data/fashion_responses.csv",
-        "Cricket Commentary": "data/cricket_responses.csv",
-        "Cultural Commentary": "data/cultural_commentary_responses.csv",
-        "Consumer Perspectives": "data/consumer_perspectives_responses.csv",
-        "Industry Professional Responses": "data/industry_professional_responses.csv"
+        # Original survey datasets
+        "Remote Work Experiences": "data/Remote Work Survey Data.csv",
+        "Fashion Industry Perspectives": "data/Fashion Trends Survey Data.csv",
+        "Cricket Commentary": "data/Cricket Lovers Survey Data.csv",
+        # Sentiment analysis benchmark datasets
+        "SST-2 (Binary Sentiment)": "data/SST-2 Sentiment Dataset.csv",
+        "SST-5 (Fine-grained Sentiment)": "data/SST-5 Sentiment Dataset.csv",
+        "IMDB Movie Reviews": "data/IMDB Movie Reviews.csv",
+        "Twitter Sentiment (SemEval)": "data/SemEval Twitter Sentiment.csv",
+        "GoEmotions (Multi-label)": "data/GoEmotions Multi-Label.csv",
+        "AG News Classification": "data/AG News Classification.csv",
+        "SNIPS Intent Classification": "data/SNIPS Intent Classification.csv",
     }
 
     # Dropdown to select sample dataset
