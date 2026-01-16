@@ -516,6 +516,13 @@ class MethodVisualizer:
                 if term in topic_term_weights[topic_idx]:
                     matrix[topic_idx, j] = topic_term_weights[topic_idx][term]
 
+        # Filter out terms (columns) that have zero co-occurrence with all topics
+        # Keep all topics but drop terms where max value across all topics is 0
+        term_max_values = matrix.max(axis=0)
+        non_zero_term_mask = term_max_values > 0
+        matrix = matrix[:, non_zero_term_mask]
+        terms = [t for t, keep in zip(terms, non_zero_term_mask) if keep]
+
         # Normalize if requested
         if normalize and matrix.max() > 0:
             matrix = matrix / matrix.max()
@@ -525,14 +532,18 @@ class MethodVisualizer:
 
         fig = go.Figure()
 
-        # Add the main heatmap
+        # Add the main heatmap - only show cells with score > 0
+        # Create a masked version where zeros become None for display
+        display_matrix = np.where(matrix > 0, matrix, np.nan)
+
         fig.add_trace(go.Heatmap(
-            z=matrix,
+            z=display_matrix,
             x=terms,
             y=topic_labels,
             colorscale='Viridis',
             colorbar=dict(title='Weight'),
-            hovertemplate='Topic: %{y}<br>Term: %{x}<br>Weight: %{z:.3f}<extra></extra>'
+            hovertemplate='Topic: %{y}<br>Term: %{x}<br>Weight: %{z:.3f}<extra></extra>',
+            zmin=0
         ))
 
         # Add color-coded row boundary overlays
