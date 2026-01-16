@@ -296,6 +296,7 @@ def init_session_state():
         "representation": "tfidf",
         "n_codes": 10,
         "min_confidence": 0.3,
+        "stop_words": "english",
         # Analysis artifacts
         "coder": None,
         "results_df": None,
@@ -565,12 +566,20 @@ def main():
                     key="text_col_select",
                 )
 
-                # Simplified preprocessing with sensible defaults
-                col1, col2 = st.columns(2)
+                # Data cleaning options
+                col1, col2, col3 = st.columns(3)
                 with col1:
                     remove_nulls = st.checkbox("Remove null responses", value=True)
                 with col2:
                     remove_duplicates = st.checkbox("Remove duplicates", value=False)
+                with col3:
+                    min_length = st.number_input(
+                        "Min response length",
+                        min_value=0,
+                        max_value=100,
+                        value=5,
+                        help="Responses shorter than this will be removed"
+                    )
 
                 if st.button("Execute Stage 2: Validate & Preprocess", key="btn_stage_2"):
                     try:
@@ -592,7 +601,7 @@ def main():
                                 text_column=text_col,
                                 remove_nulls=remove_nulls,
                                 remove_duplicates=remove_duplicates,
-                                min_length=5,  # Sensible default
+                                min_length=min_length,
                             )
 
                             st.session_state["validated_df"] = processed_df
@@ -727,6 +736,16 @@ def main():
                     key="confidence_slider",
                 )
 
+            # Advanced options
+            with st.expander("Advanced Options"):
+                stop_words = st.selectbox(
+                    "Stop words language",
+                    options=['english', 'spanish', 'french', 'german'],
+                    index=0,
+                    key="stop_words_select",
+                    help="Language for stop words removal during text processing"
+                )
+
             if st.button("Execute Stage 3: Check Eligibility", key="btn_stage_3"):
                 try:
                     validated_df = st.session_state["validated_df"]
@@ -756,7 +775,8 @@ def main():
                                     text_column=text_col,
                                     min_codes=3,
                                     max_codes=min(15, n_samples - 1),
-                                    method=selected_method
+                                    method=selected_method,
+                                    stop_words=stop_words
                                 )
                                 selected_n_codes = optimal_n
                                 st.success(
@@ -780,6 +800,7 @@ def main():
                         st.session_state["representation"] = representation
                         st.session_state["n_codes"] = selected_n_codes
                         st.session_state["min_confidence"] = min_confidence
+                        st.session_state["stop_words"] = stop_words
                         st.session_state["auto_method"] = auto_method
                         st.session_state["auto_n_codes"] = auto_n_codes
                         st.session_state["stage_3_complete"] = True
@@ -795,6 +816,7 @@ def main():
             st.markdown(f"**Representation**: `{st.session_state['representation']}`")
             st.markdown(f"**N Codes**: `{st.session_state['n_codes']}`")
             st.markdown(f"**Min Confidence**: `{st.session_state['min_confidence']}`")
+            st.markdown(f"**Stop Words**: `{st.session_state['stop_words']}`")
 
     # --------------------------------------------------------------------------
     # STAGE 4: Model Execution
