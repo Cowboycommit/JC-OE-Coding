@@ -2400,7 +2400,7 @@ def page_export_results():
             use_container_width=True
         )
 
-        # Codebook with representative quotes
+        # Codebook with representative quotes and LLM-enhanced labels
         codebook_data = []
         for code_id, info in coder.codebook.items():
             # Get up to 5 representative quotes (or all if fewer)
@@ -2410,9 +2410,12 @@ def page_export_results():
             while len(quotes) < 5:
                 quotes.append('')
 
-            codebook_data.append({
+            row = {
                 'Code': code_id,
-                'Label': info['label'],
+                'Label': info.get('llm_label', info['label']),  # Use LLM label if available
+                'Term-Based Label': info['label'],
+                'Alternative Labels': ', '.join(info.get('alternative_labels', [])[:3]),
+                'LLM Description': info.get('llm_description', ''),
                 'Keywords': ', '.join(info['keywords']),
                 'Count': info['count'],
                 'Avg Confidence': info['avg_confidence'],
@@ -2421,7 +2424,8 @@ def page_export_results():
                 'Quote 3': quotes[2],
                 'Quote 4': quotes[3],
                 'Quote 5': quotes[4]
-            })
+            }
+            codebook_data.append(row)
         codebook_df = pd.DataFrame(codebook_data)
         codebook_csv = codebook_df.to_csv(index=False).encode()
 
