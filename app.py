@@ -51,6 +51,22 @@ from helpers.analysis import (
 )
 from itertools import combinations
 
+# Import sentiment analysis module
+try:
+    from src.sentiment_analysis import (
+        get_sentiment_analyzer,
+        TwitterSentimentAnalyzer,
+        SurveySentimentAnalyzer,
+        LongFormSentimentAnalyzer,
+        DATA_TYPE_INFO
+    )
+    SENTIMENT_ANALYSIS_AVAILABLE = True
+except ImportError:
+    SENTIMENT_ANALYSIS_AVAILABLE = False
+    DATA_TYPE_INFO = {}
+    import logging
+    logging.warning("Sentiment analysis module not available. Install transformers and torch.")
+
 
 # ============================================================================
 # VISUALIZATION PRE-COMPUTATION SYSTEM
@@ -915,6 +931,73 @@ def page_configuration():
 
     st.markdown("---")
 
+    # Data Type Selection for Sentiment Analysis
+    if SENTIMENT_ANALYSIS_AVAILABLE:
+        st.markdown("### 📱 Data Type Selection")
+        st.markdown("""
+        <div class="info-box" style="padding: 10px; margin-bottom: 15px;">
+        <strong>Select your data type</strong> to optimize text processing and enable specialized sentiment analysis.
+        Different data types use different models optimized for their specific characteristics.
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Radio buttons for data type selection
+        data_type_options = {
+            'twitter': '🐦 X (Twitter) / Stream Data',
+            'survey': '📋 Survey Response Data',
+            'longform': '📄 Long Form Data (Product Reviews)'
+        }
+
+        selected_data_type = st.radio(
+            "Select your data type:",
+            options=list(data_type_options.keys()),
+            format_func=lambda x: data_type_options[x],
+            index=1,  # Default to survey
+            horizontal=True,
+            help="Choose the type of data you're analyzing for optimized processing"
+        )
+
+        # Show data type info
+        if selected_data_type in DATA_TYPE_INFO:
+            info = DATA_TYPE_INFO[selected_data_type]
+            features_list = ''.join([f"<li>{f}</li>" for f in info['features']])
+
+            st.markdown(f"""
+            <div class="info-box" style="padding: 15px; margin: 10px 0;">
+                <strong>{info['name']}</strong><br>
+                <em>{info['description']}</em><br><br>
+                <strong>Model:</strong> <code>{info['model']}</code><br>
+                <strong>Best for:</strong> {info['best_for']}<br><br>
+                <strong>Features:</strong>
+                <ul style="margin: 5px 0 0 15px;">{features_list}</ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Enable sentiment analysis checkbox
+        enable_sentiment = st.checkbox(
+            "Enable Sentiment Analysis",
+            value=selected_data_type == 'twitter',
+            help="Run sentiment analysis using the appropriate model for your data type"
+        )
+
+        # Twitter-specific note
+        if selected_data_type == 'twitter' and enable_sentiment:
+            st.success("✅ Using **CardiffNLP Twitter-RoBERTa** model optimized for messy social media text")
+
+        st.session_state.data_type = selected_data_type
+        st.session_state.enable_sentiment = enable_sentiment
+    else:
+        st.markdown("""
+        <div class="warning-box" style="padding: 10px; margin-bottom: 15px;">
+        ⚠️ <strong>Sentiment analysis not available.</strong><br>
+        Install transformers and torch: <code>pip install transformers torch</code>
+        </div>
+        """, unsafe_allow_html=True)
+        st.session_state.data_type = 'survey'
+        st.session_state.enable_sentiment = False
+
+    st.markdown("---")
+
     # ML Configuration
     st.markdown("### 🤖 ML Algorithm Settings")
 
@@ -1031,7 +1114,9 @@ def page_configuration():
         'auto_optimal_codes': auto_optimal_codes,
         'method': method,
         'min_confidence': min_confidence,
-        'stop_words': stop_words
+        'stop_words': stop_words,
+        'data_type': st.session_state.get('data_type', 'survey'),
+        'enable_sentiment': st.session_state.get('enable_sentiment', False)
     }
 
     # Show configuration summary
@@ -1112,7 +1197,11 @@ def page_run_analysis():
 
     auto_optimal = config.get('auto_optimal_codes', False)
 
-    col1, col2, col3, col4 = st.columns(4)
+    # Check if sentiment analysis is enabled
+    enable_sentiment = config.get('enable_sentiment', False)
+    data_type = config.get('data_type', 'survey')
+
+    col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         st.metric("Responses", f"{len(df):,}")
     with col2:
@@ -1121,15 +1210,22 @@ def page_run_analysis():
         st.metric("Codes", "Auto" if auto_optimal else config['n_codes'])
     with col4:
         st.metric("Method", config['method'].upper())
+    with col5:
+        st.metric("Data Type", data_type.title())
 
     if auto_optimal:
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
+
+    if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+        data_type_labels = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT'}
+        model_label = data_type_labels.get(data_type, 'Standard')
+        st.success(f"📊 **Sentiment Analysis Enabled** - Using {model_label} model for {data_type} data")
 
     st.markdown("---")
 
     # Run button
     if st.button("🚀 Start Analysis", use_container_width=True, type="primary"):
-        # Define analysis stages
+        # Define analysis stages (include sentiment if enabled)
         stages = [
             "Data Preparation",
             "Feature Extraction",
@@ -1137,6 +1233,8 @@ def page_run_analysis():
             "Code Labeling",
             "Generating Insights"
         ]
+        if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+            stages.append("Sentiment Analysis")
 
         # Progress tracking UI elements
         progress_bar = st.progress(0)
@@ -1223,11 +1321,49 @@ def page_run_analysis():
                 metrics['auto_optimal'] = True
                 metrics['optimal_analysis'] = optimal_results
 
+            # Run sentiment analysis if enabled
+            sentiment_results = None
+            if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+                try:
+                    update_progress(0.92, "Running sentiment analysis...", len(stages) - 1)
+                    status_text.text(f"🔄 Loading {data_type} sentiment model...")
+
+                    # Get the appropriate analyzer for the data type
+                    analyzer = get_sentiment_analyzer(data_type)
+
+                    # Run sentiment analysis
+                    texts = df[config['text_column']].tolist()
+                    sentiment_results = analyzer.analyze(texts)
+
+                    # Add sentiment columns to results_df
+                    results_df['sentiment_label'] = [r.label for r in sentiment_results]
+                    results_df['sentiment_score'] = [r.score for r in sentiment_results]
+                    results_df['sentiment_positive'] = [r.scores.get('positive', 0) for r in sentiment_results]
+                    results_df['sentiment_negative'] = [r.scores.get('negative', 0) for r in sentiment_results]
+                    results_df['sentiment_neutral'] = [r.scores.get('neutral', 0) for r in sentiment_results]
+
+                    # Store sentiment metrics
+                    sentiment_counts = pd.Series([r.label for r in sentiment_results]).value_counts()
+                    metrics['sentiment_enabled'] = True
+                    metrics['sentiment_model'] = analyzer.get_model_info()['model_name']
+                    metrics['sentiment_distribution'] = sentiment_counts.to_dict()
+                    metrics['sentiment_avg_confidence'] = float(np.mean([r.score for r in sentiment_results]))
+
+                    status_text.text("✅ Sentiment analysis complete!")
+
+                except Exception as e:
+                    st.warning(f"⚠️ Sentiment analysis failed: {str(e)}. Continuing without sentiment.")
+                    metrics['sentiment_enabled'] = False
+                    metrics['sentiment_error'] = str(e)
+            else:
+                metrics['sentiment_enabled'] = False
+
             # Save to session state
             st.session_state.coder = coder
             st.session_state.results_df = results_df
             st.session_state.metrics = metrics
             st.session_state.analysis_complete = True
+            st.session_state.sentiment_results = sentiment_results
 
             # Pre-compute all visualization data upfront (prevents viz page hangs)
             st.session_state.viz_data = precompute_all_visualizations(coder, results_df)
@@ -1242,6 +1378,19 @@ def page_run_analysis():
             # Show success
             execution_time = time.time() - start_time
 
+            # Build success message with optional sentiment info
+            sentiment_info = ""
+            if metrics.get('sentiment_enabled', False):
+                sentiment_dist = metrics.get('sentiment_distribution', {})
+                sentiment_info = f"""
+                <hr style="margin: 10px 0;">
+                <p><strong>Sentiment Analysis:</strong> ✅ Complete</p>
+                <p><strong>Model:</strong> {metrics.get('sentiment_model', 'N/A')}</p>
+                <p><strong>Distribution:</strong> 😊 {sentiment_dist.get('positive', 0)} positive,
+                   😐 {sentiment_dist.get('neutral', 0)} neutral,
+                   😞 {sentiment_dist.get('negative', 0)} negative</p>
+                """
+
             st.markdown(f"""
             <div class="success-box">
             <h3>✅ Analysis Complete!</h3>
@@ -1249,6 +1398,7 @@ def page_run_analysis():
             <p><strong>Codes Found:</strong> {metrics['n_codes']}</p>
             <p><strong>Total Assignments:</strong> {metrics.get('total_assignments', 0):,}</p>
             <p><strong>Coverage:</strong> {metrics.get('coverage_pct', 0):.1f}%</p>
+            {sentiment_info}
             </div>
             """, unsafe_allow_html=True)
 
@@ -1257,6 +1407,20 @@ def page_run_analysis():
             insights = generate_insights(coder, results_df)
             for insight in insights:
                 st.markdown(insight)
+
+            # Show sentiment summary if enabled
+            if metrics.get('sentiment_enabled', False):
+                st.markdown("### 📊 Sentiment Summary")
+                sentiment_dist = metrics.get('sentiment_distribution', {})
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("😊 Positive", sentiment_dist.get('positive', 0))
+                with col2:
+                    st.metric("😐 Neutral", sentiment_dist.get('neutral', 0))
+                with col3:
+                    st.metric("😞 Negative", sentiment_dist.get('negative', 0))
+                with col4:
+                    st.metric("Avg Confidence", f"{metrics.get('sentiment_avg_confidence', 0):.2f}")
 
             st.info("👉 Go to 'Results Overview' to see detailed results")
 
@@ -1386,9 +1550,16 @@ def page_results_overview():
         except Exception as e:
             st.error(f"Export error: {str(e)}")
 
-    # Tabs for Insights, Top Codes, and Assignments
+    # Tabs for Insights, Top Codes, Assignments, and Sentiment (if enabled)
     st.markdown("---")
-    tab1, tab2, tab3 = st.tabs(["💡 Insights", "🏆 Top Codes", "📋 Assignments"])
+
+    # Check if sentiment analysis was enabled
+    sentiment_enabled = metrics.get('sentiment_enabled', False)
+
+    if sentiment_enabled:
+        tab1, tab2, tab3, tab4 = st.tabs(["💡 Insights", "🏆 Top Codes", "📋 Assignments", "😊 Sentiment"])
+    else:
+        tab1, tab2, tab3 = st.tabs(["💡 Insights", "🏆 Top Codes", "📋 Assignments"])
 
     with tab1:
         # Key insights
@@ -1459,6 +1630,93 @@ def page_results_overview():
             st.dataframe(display_df, use_container_width=True, height=400)
         else:
             st.info("No uncertain rows found (all rows have confidence ≥ 0.5)")
+
+    # Sentiment tab (only if enabled)
+    if sentiment_enabled:
+        with tab4:
+            st.markdown("### 😊 Sentiment Analysis Results")
+
+            # Show model info
+            model_name = metrics.get('sentiment_model', 'Unknown')
+            st.markdown(f"""
+            <div class="info-box" style="padding: 10px; margin-bottom: 15px;">
+            <strong>Model Used:</strong> <code>{model_name}</code><br>
+            <strong>Avg Confidence:</strong> {metrics.get('sentiment_avg_confidence', 0):.2f}
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Sentiment distribution chart
+            sentiment_dist = metrics.get('sentiment_distribution', {})
+            if sentiment_dist:
+                col1, col2 = st.columns([2, 1])
+
+                with col1:
+                    # Create pie chart
+                    labels = list(sentiment_dist.keys())
+                    values = list(sentiment_dist.values())
+                    colors = {'positive': '#28a745', 'neutral': '#6c757d', 'negative': '#dc3545'}
+
+                    fig = px.pie(
+                        values=values,
+                        names=labels,
+                        title='Sentiment Distribution',
+                        color=labels,
+                        color_discrete_map=colors
+                    )
+                    fig.update_traces(textinfo='percent+label')
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col2:
+                    # Show metrics
+                    total = sum(sentiment_dist.values())
+                    st.metric("😊 Positive", f"{sentiment_dist.get('positive', 0)} ({sentiment_dist.get('positive', 0)/total*100:.1f}%)" if total > 0 else "0")
+                    st.metric("😐 Neutral", f"{sentiment_dist.get('neutral', 0)} ({sentiment_dist.get('neutral', 0)/total*100:.1f}%)" if total > 0 else "0")
+                    st.metric("😞 Negative", f"{sentiment_dist.get('negative', 0)} ({sentiment_dist.get('negative', 0)/total*100:.1f}%)" if total > 0 else "0")
+
+            # Sample responses by sentiment
+            st.markdown("#### Sample Responses by Sentiment")
+
+            sentiment_filter = st.selectbox(
+                "Filter by sentiment:",
+                options=['All', 'Positive', 'Neutral', 'Negative'],
+                index=0
+            )
+
+            # Filter and display
+            sentiment_df = results_df.copy()
+            if sentiment_filter != 'All':
+                sentiment_df = sentiment_df[sentiment_df['sentiment_label'] == sentiment_filter.lower()]
+
+            # Select columns to display
+            text_col = st.session_state.config['text_column']
+            display_cols_sentiment = [text_col, 'sentiment_label', 'sentiment_score']
+            if 'assigned_codes' in sentiment_df.columns:
+                display_cols_sentiment.append('assigned_codes')
+
+            sample_sentiment_df = sentiment_df[display_cols_sentiment].head(20).copy()
+
+            # Format assigned_codes if present
+            if 'assigned_codes' in sample_sentiment_df.columns:
+                sample_sentiment_df['assigned_codes'] = sample_sentiment_df['assigned_codes'].apply(
+                    lambda x: ', '.join(x) if x else 'None'
+                )
+
+            # Format sentiment score
+            sample_sentiment_df['sentiment_score'] = sample_sentiment_df['sentiment_score'].apply(
+                lambda x: f"{x:.3f}"
+            )
+
+            st.dataframe(sample_sentiment_df, use_container_width=True, height=400)
+
+            # Download sentiment results
+            sentiment_csv = results_df[[text_col, 'sentiment_label', 'sentiment_score',
+                                        'sentiment_positive', 'sentiment_negative', 'sentiment_neutral']].to_csv(index=False).encode()
+            st.download_button(
+                label="📥 Download Sentiment Results (CSV)",
+                data=sentiment_csv,
+                file_name="sentiment_results.csv",
+                mime="text/csv"
+            )
 
     # Detailed codebook
     st.markdown("---")

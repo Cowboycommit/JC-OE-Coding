@@ -13,6 +13,11 @@ gensim>=4.3.0,<5.0.0
 # sentence-transformers>=2.2.0,<3.0.0
 # torch>=2.0.0,<3.0.0  # Required by sentence-transformers
 
+# Optional: Sentiment Analysis (for Twitter/Social Media data)
+# Uncomment to enable sentiment analysis with CardiffNLP Twitter-RoBERTa
+# transformers>=4.30.0,<5.0.0
+# torch>=2.0.0,<3.0.0  # Required by transformers
+
 # LLM-assisted cluster interpretation
 # Mistral API client for cloud-based interpretation
 mistralai>=1.0.0,<2.0.0
