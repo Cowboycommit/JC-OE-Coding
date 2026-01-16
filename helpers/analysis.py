@@ -684,7 +684,8 @@ def run_ml_analysis(
 
             # NEW: Mandatory cluster interpretation layer
             # This ensures cluster IDs are never exposed without human-readable explanations
-            if CLUSTER_INTERPRETATION_AVAILABLE and self.representation == 'tfidf':
+            # Works for ALL representations - uses TF-IDF for term extraction if needed
+            if CLUSTER_INTERPRETATION_AVAILABLE:
                 try:
                     interpreter = ClusterInterpreter(
                         n_top_terms=15,
@@ -692,13 +693,30 @@ def run_ml_analysis(
                         n_representative_docs=5,
                         min_term_weight_threshold=0.005
                     )
+
+                    # For TF-IDF, use existing vectorizer; for embeddings, create one for term extraction
+                    if self.representation == 'tfidf':
+                        term_vectorizer = self.vectorizer
+                        term_feature_matrix = self.feature_matrix
+                    else:
+                        # Create TF-IDF vectorizer just for term extraction (not for clustering)
+                        from sklearn.feature_extraction.text import TfidfVectorizer
+                        term_vectorizer = TfidfVectorizer(
+                            max_features=5000,
+                            stop_words='english',
+                            max_df=0.95,
+                            min_df=2
+                        )
+                        term_feature_matrix = term_vectorizer.fit_transform(responses)
+                        logger.info(f"Created TF-IDF vectorizer for term extraction (representation={self.representation})")
+
                     self.cluster_interpretation = interpreter.interpret_clusters(
-                        vectorizer=self.vectorizer,
+                        vectorizer=term_vectorizer,
                         cluster_model=self.model,
                         texts=responses,
                         cluster_assignments=labels if hasattr(self.model, 'labels_') else
                             doc_topic_matrix.argmax(axis=1).tolist(),
-                        feature_matrix=self.feature_matrix,
+                        feature_matrix=term_feature_matrix,
                         method_name=self.method
                     )
                     logger.info(
