@@ -404,6 +404,191 @@ class Word2VecEmbedder(BaseEmbedder):
         return self.vector_size
 
 
+class LSTMEmbedder(BaseEmbedder):
+    """
+    LSTM-based text embeddings using a sequence autoencoder.
+
+    This embedder trains an LSTM autoencoder on the corpus and uses the
+    encoder's output as document representations. It captures sequential
+    patterns and context in text that bag-of-words methods miss.
+
+    Attributes:
+        embedding_dim: Dimension of word embeddings
+        lstm_units: Number of LSTM units (output dimension)
+        max_sequence_length: Maximum sequence length for padding
+        model: Trained Keras LSTM autoencoder
+
+    Performance:
+        - Speed: Moderate (requires training)
+        - Quality: Good for capturing sequential patterns
+        - Memory: Moderate (depends on vocabulary size)
+        - Offline: Yes (trains on your data)
+
+    Trade-offs:
+        - Requires TensorFlow/Keras
+        - Needs sufficient training data (ideally 500+ responses)
+        - Captures word order (unlike bag-of-words methods)
+        - Better for longer texts with sequential structure
+
+    Example:
+        >>> embedder = LSTMEmbedder(lstm_units=128, embedding_dim=100)
+        >>> vectors = embedder.fit_transform(texts)
+    """
+
+    def __init__(
+        self,
+        embedding_dim: int = 100,
+        lstm_units: int = 128,
+        max_sequence_length: int = 100,
+        max_vocab_size: int = 10000,
+        epochs: int = 10,
+        batch_size: int = 32
+    ):
+        """
+        Initialize LSTM embedder.
+
+        Args:
+            embedding_dim: Dimension of word embeddings (50-200 typical)
+            lstm_units: Number of LSTM units (64-256 typical)
+            max_sequence_length: Maximum sequence length (100-500 typical)
+            max_vocab_size: Maximum vocabulary size
+            epochs: Number of training epochs
+            batch_size: Batch size for training
+
+        Raises:
+            ImportError: If TensorFlow/Keras is not installed
+        """
+        super().__init__()
+
+        try:
+            import tensorflow as tf
+            from tensorflow import keras
+        except ImportError:
+            raise ImportError(
+                "TensorFlow is required for LSTMEmbedder. "
+                "Install with: pip install tensorflow"
+            )
+
+        self.embedding_dim = embedding_dim
+        self.lstm_units = lstm_units
+        self.max_sequence_length = max_sequence_length
+        self.max_vocab_size = max_vocab_size
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.model = None
+        self.encoder = None
+        self.tokenizer = None
+
+    def fit(self, texts: List[str]) -> 'LSTMEmbedder':
+        """
+        Fit LSTM autoencoder on the corpus.
+
+        Args:
+            texts: List of text strings
+
+        Returns:
+            Self (fitted embedder)
+        """
+        import tensorflow as tf
+        from tensorflow import keras
+        from tensorflow.keras.preprocessing.text import Tokenizer
+        from tensorflow.keras.preprocessing.sequence import pad_sequences
+        from tensorflow.keras.layers import (
+            Input, Embedding, LSTM, Dense, RepeatVector, TimeDistributed
+        )
+        from tensorflow.keras.models import Model
+
+        logger.info(f"Training LSTM embedder (units={self.lstm_units}, epochs={self.epochs})")
+
+        # Tokenize texts
+        self.tokenizer = Tokenizer(num_words=self.max_vocab_size, oov_token='<OOV>')
+        self.tokenizer.fit_on_texts(texts)
+
+        sequences = self.tokenizer.texts_to_sequences(texts)
+        padded_sequences = pad_sequences(
+            sequences,
+            maxlen=self.max_sequence_length,
+            padding='post',
+            truncating='post'
+        )
+
+        vocab_size = min(len(self.tokenizer.word_index) + 1, self.max_vocab_size)
+        logger.info(f"Vocabulary size: {vocab_size}")
+
+        # Build LSTM autoencoder
+        # Encoder
+        encoder_input = Input(shape=(self.max_sequence_length,))
+        x = Embedding(vocab_size, self.embedding_dim, mask_zero=True)(encoder_input)
+        x = LSTM(self.lstm_units, return_sequences=False)(x)
+        encoder_output = Dense(self.lstm_units, activation='relu')(x)
+
+        # Decoder
+        x = RepeatVector(self.max_sequence_length)(encoder_output)
+        x = LSTM(self.lstm_units, return_sequences=True)(x)
+        decoder_output = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
+
+        # Full autoencoder
+        self.model = Model(encoder_input, decoder_output)
+        self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
+
+        # Encoder-only model for embeddings
+        self.encoder = Model(encoder_input, encoder_output)
+
+        # Train autoencoder
+        target = padded_sequences.reshape((*padded_sequences.shape, 1))
+
+        # Suppress verbose output
+        self.model.fit(
+            padded_sequences,
+            target,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            validation_split=0.1,
+            verbose=0
+        )
+
+        self.is_fitted_ = True
+        logger.info(f"LSTM embedder trained. Output dimension: {self.lstm_units}")
+
+        return self
+
+    def transform(self, texts: List[str]) -> np.ndarray:
+        """
+        Transform texts into LSTM embeddings.
+
+        Args:
+            texts: List of text strings
+
+        Returns:
+            Array of shape (n_samples, lstm_units)
+
+        Raises:
+            ValueError: If embedder is not fitted
+        """
+        if not self.is_fitted_:
+            raise ValueError("LSTMEmbedder must be fitted before transform")
+
+        from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+        # Convert to strings and handle None/NaN
+        texts = [str(t) if pd.notna(t) else "" for t in texts]
+
+        sequences = self.tokenizer.texts_to_sequences(texts)
+        padded_sequences = pad_sequences(
+            sequences,
+            maxlen=self.max_sequence_length,
+            padding='post',
+            truncating='post'
+        )
+
+        embeddings = self.encoder.predict(padded_sequences, verbose=0)
+        return embeddings
+
+    def _get_n_features(self) -> int:
+        """Get the number of features (LSTM units)."""
+        return self.lstm_units
+
+
 class FastTextEmbedder(BaseEmbedder):
     """
     Subword-aware embeddings using FastText, averaged per document.
@@ -592,6 +777,11 @@ def get_embedder(
         return None
     elif representation == 'sbert':
         return SentenceBERTEmbedder(**kwargs)
+    elif representation == 'bert':
+        # BERT is an alias for SentenceBERT (uses BERT-based transformers)
+        return SentenceBERTEmbedder(**kwargs)
+    elif representation == 'lstm':
+        return LSTMEmbedder(**kwargs)
     elif representation == 'word2vec':
         return Word2VecEmbedder(**kwargs)
     elif representation == 'fasttext':
@@ -599,7 +789,7 @@ def get_embedder(
     else:
         raise ValueError(
             f"Unknown representation: {representation}. "
-            f"Choose from: 'tfidf', 'sbert', 'word2vec', 'fasttext'"
+            f"Choose from: 'tfidf', 'sbert', 'bert', 'lstm', 'word2vec', 'fasttext'"
         )
 
 

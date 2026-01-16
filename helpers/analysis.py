@@ -210,7 +210,7 @@ def find_optimal_codes(
     import re
     from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
     from sklearn.cluster import KMeans
-    from sklearn.decomposition import LatentDirichletAllocation, NMF
+    from sklearn.decomposition import LatentDirichletAllocation
     from sklearn.metrics import silhouette_score, calinski_harabasz_score
 
     # Validate dataset is not empty
@@ -302,17 +302,21 @@ def find_optimal_codes(
             progress_callback(progress, f"Testing {n} codes...")
 
         try:
-            if method == 'tfidf_kmeans':
-                model = KMeans(n_clusters=n, random_state=42, n_init=10)
-                labels = model.fit_predict(feature_matrix)
-            elif method == 'lda':
+            if method == 'lda':
                 model = LatentDirichletAllocation(n_components=n, random_state=42, max_iter=10)
                 doc_topics = model.fit_transform(feature_matrix)
                 labels = doc_topics.argmax(axis=1)
-            else:  # nmf
-                model = NMF(n_components=n, random_state=42, max_iter=100)
-                doc_topics = model.fit_transform(feature_matrix)
-                labels = doc_topics.argmax(axis=1)
+            elif method == 'svm':
+                from sklearn.cluster import SpectralClustering
+                model = SpectralClustering(n_clusters=n, affinity='rbf', random_state=42, n_init=10)
+                # SpectralClustering needs dense matrix
+                if hasattr(feature_matrix, 'toarray'):
+                    labels = model.fit_predict(feature_matrix.toarray())
+                else:
+                    labels = model.fit_predict(feature_matrix)
+            else:  # tfidf_kmeans, lstm_kmeans, bert_kmeans all use KMeans
+                model = KMeans(n_clusters=n, random_state=42, n_init=10)
+                labels = model.fit_predict(feature_matrix)
 
             # Calculate silhouette score (only if we have more than 1 unique label)
             if len(set(labels)) > 1:
@@ -373,11 +377,18 @@ def run_ml_analysis(
         df: DataFrame with responses
         text_column: Name of the text column
         n_codes: Number of codes to discover
-        method: ML method ('tfidf_kmeans', 'lda', 'nmf')
+        method: ML method:
+            - 'tfidf_kmeans': TF-IDF + K-Means (fast, keyword-based)
+            - 'lda': Latent Dirichlet Allocation (topic modeling)
+            - 'lstm_kmeans': LSTM autoencoder + K-Means (sequential patterns)
+            - 'bert_kmeans': BERT embeddings + K-Means (semantic understanding)
+            - 'svm': SVM-based Spectral Clustering (kernel-based boundaries)
         min_confidence: Minimum confidence threshold
         representation: Text representation method:
             - 'tfidf' (default): TF-IDF vectorization (bag-of-words, fast)
             - 'sbert': SentenceBERT embeddings (semantic, offline, slower)
+            - 'lstm': LSTM autoencoder embeddings (sequential patterns)
+            - 'bert': BERT-based embeddings (same as sbert)
             - 'word2vec': Word2Vec embeddings (semantic, trains on data)
             - 'fasttext': FastText embeddings (handles typos, trains on data)
         embedding_kwargs: Additional kwargs for embedding methods (e.g., model_name for SBERT)
@@ -425,7 +436,7 @@ def run_ml_analysis(
         )
     """
     from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-    from sklearn.decomposition import LatentDirichletAllocation, NMF
+    from sklearn.decomposition import LatentDirichletAllocation
     from sklearn.cluster import KMeans
     from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
     import re
@@ -464,11 +475,18 @@ def run_ml_analysis(
 
             Args:
                 n_codes: Number of codes to discover
-                method: ML method ('tfidf_kmeans', 'lda', 'nmf')
+                method: ML method:
+                    - 'tfidf_kmeans': TF-IDF + K-Means (fast, keyword-based)
+                    - 'lda': Latent Dirichlet Allocation (topic modeling)
+                    - 'lstm_kmeans': LSTM autoencoder + K-Means (sequential patterns)
+                    - 'bert_kmeans': BERT embeddings + K-Means (semantic understanding)
+                    - 'svm': SVM-based Spectral Clustering (kernel-based boundaries)
                 min_confidence: Minimum confidence threshold for code assignment
                 representation: Text representation method:
                     - 'tfidf' (default): TF-IDF vectorization (bag-of-words)
                     - 'sbert': SentenceBERT embeddings (semantic, offline)
+                    - 'lstm': LSTM autoencoder embeddings (sequential)
+                    - 'bert': BERT-based embeddings (semantic, same as sbert)
                     - 'word2vec': Word2Vec embeddings (semantic, trains on data)
                     - 'fasttext': FastText embeddings (handles typos, trains on data)
                 embedding_kwargs: Additional kwargs for embedding methods
@@ -530,17 +548,25 @@ def run_ml_analysis(
         def fit(self, responses, stop_words='english'):
             processed = [self.preprocess_text(r) for r in responses]
 
-            # Validate LDA/NMF compatibility with representation
-            # LDA and NMF require non-negative count/frequency matrices (TF-IDF or CountVectorizer)
-            # Semantic embeddings (SBERT, Word2Vec, FastText) produce dense vectors with negative values
-            if self.method in ['lda', 'nmf'] and self.representation != 'tfidf':
+            # Validate LDA compatibility with representation
+            # LDA requires non-negative count/frequency matrices (TF-IDF or CountVectorizer)
+            # Semantic embeddings (SBERT, Word2Vec, FastText, LSTM) produce dense vectors with negative values
+            if self.method == 'lda' and self.representation != 'tfidf':
                 raise ValueError(
-                    f"Method '{self.method.upper()}' is incompatible with '{self.representation}' representation. "
-                    f"LDA and NMF require non-negative count/frequency matrices (bag-of-words). "
-                    f"Semantic embeddings like SBERT, Word2Vec, and FastText produce vectors with negative values. "
-                    f"Please use representation='tfidf' with LDA/NMF, or switch to method='tfidf_kmeans' "
-                    f"for clustering with semantic embeddings."
+                    f"Method 'LDA' is incompatible with '{self.representation}' representation. "
+                    f"LDA requires non-negative count/frequency matrices (bag-of-words). "
+                    f"Semantic embeddings like SBERT, BERT, LSTM, Word2Vec, and FastText produce vectors with negative values. "
+                    f"Please use representation='tfidf' with LDA, or switch to method='tfidf_kmeans', "
+                    f"'lstm_kmeans', or 'bert_kmeans' for clustering with semantic embeddings."
                 )
+
+            # For LSTM and BERT methods, automatically set the appropriate representation
+            if self.method == 'lstm_kmeans' and self.representation == 'tfidf':
+                logger.info("LSTM method selected - switching to LSTM representation")
+                self.representation = 'lstm'
+            elif self.method == 'bert_kmeans' and self.representation == 'tfidf':
+                logger.info("BERT method selected - switching to BERT representation")
+                self.representation = 'bert'
 
             # Choose vectorization method based on representation
             if self.representation == 'tfidf':
@@ -665,14 +691,33 @@ def run_ml_analysis(
                 self.model = LatentDirichletAllocation(
                     n_components=self.n_codes, random_state=42, max_iter=20
                 )
-            elif self.method == 'nmf':
-                self.model = NMF(n_components=self.n_codes, random_state=42, max_iter=200)
-            else:  # tfidf_kmeans or any kmeans-based
+            elif self.method == 'svm':
+                # SVM-based Spectral Clustering uses kernel methods similar to SVM
+                from sklearn.cluster import SpectralClustering
+                self.model = SpectralClustering(
+                    n_clusters=self.n_codes,
+                    affinity='rbf',  # RBF kernel (same as SVM)
+                    random_state=42,
+                    n_init=10,
+                    assign_labels='kmeans'
+                )
+            else:  # tfidf_kmeans, lstm_kmeans, bert_kmeans - all use KMeans
                 self.model = KMeans(n_clusters=self.n_codes, random_state=42, n_init=10)
 
             # Fit model and get document-topic distributions
-            if self.method in ['lda', 'nmf']:
+            if self.method == 'lda':
                 doc_topic_matrix = self.model.fit_transform(self.feature_matrix)
+            elif self.method == 'svm':
+                # SpectralClustering uses fit_predict
+                # Convert sparse matrix to dense for spectral clustering
+                if hasattr(self.feature_matrix, 'toarray'):
+                    feature_dense = self.feature_matrix.toarray()
+                else:
+                    feature_dense = self.feature_matrix
+                labels = self.model.fit_predict(feature_dense)
+                doc_topic_matrix = np.zeros((len(responses), self.n_codes))
+                for i, label in enumerate(labels):
+                    doc_topic_matrix[i, label] = 1.0
             else:
                 labels = self.model.fit_predict(self.feature_matrix)
                 doc_topic_matrix = np.zeros((len(responses), self.n_codes))
@@ -802,12 +847,34 @@ def run_ml_analysis(
             }
 
             feature_names = self.vectorizer.get_feature_names_out()
+
+            # For SVM (SpectralClustering), compute cluster centers manually
+            if self.method == 'svm':
+                # Get labels from the model
+                labels = self.model.labels_
+                # Convert sparse matrix to dense if needed
+                if hasattr(self.feature_matrix, 'toarray'):
+                    feature_dense = self.feature_matrix.toarray()
+                else:
+                    feature_dense = self.feature_matrix
+                # Compute cluster centers as mean of each cluster
+                svm_cluster_centers = np.zeros((self.n_codes, feature_dense.shape[1]))
+                for idx in range(self.n_codes):
+                    mask = labels == idx
+                    if mask.sum() > 0:
+                        svm_cluster_centers[idx] = feature_dense[mask].mean(axis=0)
+
             for code_idx in range(self.n_codes):
                 code_id = f"CODE_{code_idx + 1:02d}"
-                if self.method in ['lda', 'nmf']:
+                if self.method == 'lda':
                     topic_weights = self.model.components_[code_idx]
                     top_indices = topic_weights.argsort()[-top_words:][::-1]
                     weights = [topic_weights[i] for i in top_indices]
+                elif self.method == 'svm':
+                    # Use precomputed cluster centers for SVM
+                    cluster_center = svm_cluster_centers[code_idx]
+                    top_indices = cluster_center.argsort()[-top_words:][::-1]
+                    weights = [cluster_center[i] for i in top_indices]
                 else:
                     cluster_center = self.model.cluster_centers_[code_idx]
                     top_indices = cluster_center.argsort()[-top_words:][::-1]
