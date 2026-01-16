@@ -680,20 +680,77 @@ def page_data_upload():
     # Sample data option with dropdown
     st.markdown("### 📊 Select a Sample Dataset")
 
-    # Define available sample datasets
+    # Define available sample datasets with metadata
     sample_datasets = {
         # Original survey datasets
-        "Remote Work Experiences": "data/Remote Work Survey Data.csv",
-        "Fashion Industry Perspectives": "data/Fashion Trends Survey Data.csv",
-        "Cricket Commentary": "data/Cricket Lovers Survey Data.csv",
+        "Remote Work Experiences": {
+            "path": "data/Remote Work Survey Data.csv",
+            "description": "Survey responses about remote work experiences, challenges, and preferences. Open-ended qualitative data ideal for thematic analysis.",
+            "text_column": "response",
+            "type": "Survey"
+        },
+        "Fashion Industry Perspectives": {
+            "path": "data/Fashion Trends Survey Data.csv",
+            "description": "Consumer opinions on fashion trends, sustainability, and shopping behaviors. Rich qualitative responses for coding analysis.",
+            "text_column": "response",
+            "type": "Survey"
+        },
+        "Cricket Commentary": {
+            "path": "data/Cricket Lovers Survey Data.csv",
+            "description": "Fan perspectives on cricket matches, players, and the sport's cultural significance. Diverse opinions and commentary.",
+            "text_column": "response",
+            "type": "Survey"
+        },
         # Sentiment analysis benchmark datasets
-        "SST-2 (Binary Sentiment)": "data/SST-2 Sentiment Dataset.csv",
-        "SST-5 (Fine-grained Sentiment)": "data/SST-5 Sentiment Dataset.csv",
-        "IMDB Movie Reviews": "data/IMDB Movie Reviews.csv",
-        "Twitter Sentiment (SemEval)": "data/SemEval Twitter Sentiment.csv",
-        "GoEmotions (Multi-label)": "data/GoEmotions Multi-Label.csv",
-        "AG News Classification": "data/AG News Classification.csv",
-        "SNIPS Intent Classification": "data/SNIPS Intent Classification.csv",
+        "SST-2 (Binary Sentiment)": {
+            "path": "data/SST-2 Sentiment Dataset.csv",
+            "description": "Stanford Sentiment Treebank - Binary classification. Expert-labeled movie review sentences with positive/negative sentiment labels. Industry standard benchmark.",
+            "text_column": "text",
+            "type": "Sentiment",
+            "labels": "positive, negative"
+        },
+        "SST-5 (Fine-grained Sentiment)": {
+            "path": "data/SST-5 Sentiment Dataset.csv",
+            "description": "Stanford Sentiment Treebank - 5-class sentiment. Fine-grained labels from very negative to very positive. Tests nuanced sentiment detection.",
+            "text_column": "text",
+            "type": "Sentiment",
+            "labels": "very negative, negative, neutral, positive, very positive"
+        },
+        "IMDB Movie Reviews": {
+            "path": "data/IMDB Movie Reviews.csv",
+            "description": "Classic movie review sentiment corpus. Longer-form reviews with binary sentiment labels. Tests analysis on paragraph-length text.",
+            "text_column": "text",
+            "type": "Sentiment",
+            "labels": "positive, negative"
+        },
+        "Twitter Sentiment (SemEval)": {
+            "path": "data/SemEval Twitter Sentiment.csv",
+            "description": "SemEval Twitter sentiment benchmark. Professionally annotated tweets with 3-class sentiment. Tests short, informal text analysis.",
+            "text_column": "text",
+            "type": "Sentiment",
+            "labels": "positive, neutral, negative"
+        },
+        "GoEmotions (Multi-label)": {
+            "path": "data/GoEmotions Multi-Label.csv",
+            "description": "Google's emotion dataset with 27 emotion categories. Multi-label annotations from Reddit comments. Tests fine-grained emotion detection.",
+            "text_column": "text",
+            "type": "Emotion",
+            "labels": "admiration, amusement, anger, joy, sadness, fear, surprise, + 21 more"
+        },
+        "AG News Classification": {
+            "path": "data/AG News Classification.csv",
+            "description": "News article classification benchmark. Clean, human-curated news snippets in 4 categories. Tests topic/domain classification.",
+            "text_column": "text",
+            "type": "Topic",
+            "labels": "World, Sports, Business, Sci/Tech"
+        },
+        "SNIPS Intent Classification": {
+            "path": "data/SNIPS Intent Classification.csv",
+            "description": "Voice assistant intent dataset. Human-annotated queries across 7 intent categories. Tests command/intent understanding.",
+            "text_column": "text",
+            "type": "Intent",
+            "labels": "PlayMusic, BookRestaurant, GetWeather, + 4 more"
+        },
     }
 
     # Dropdown to select sample dataset
@@ -703,16 +760,21 @@ def page_data_upload():
         help="Select from pre-loaded sample datasets to explore the tool"
     )
 
+    # Show dataset description
+    dataset_info = sample_datasets[selected_dataset]
+    st.info(f"**{dataset_info['type']}** · {dataset_info['description']}")
+    if "labels" in dataset_info:
+        st.caption(f"Labels: {dataset_info['labels']}")
+
     # Load button
     if st.button("Load Selected Dataset", use_container_width=True):
         try:
-            dataset_path = sample_datasets[selected_dataset]
+            dataset_path = dataset_info["path"]
             df = pd.read_csv(dataset_path)
 
             st.session_state.uploaded_df = df
-            st.success("Selected data loaded")
             st.success(f"✅ {selected_dataset} loaded successfully! ({len(df)} responses)")
-            st.info("👉 **Next step:** Go to '⚙️ Configuration' in the sidebar to select your text column and set up analysis parameters.")
+            st.info(f"👉 **Next step:** Go to '⚙️ Configuration' and select **'{dataset_info['text_column']}'** as your text column.")
             st.rerun()
         except FileNotFoundError:
             st.error(f"❌ Dataset file not found: {dataset_path}")
