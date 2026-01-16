@@ -56,6 +56,13 @@ except ImportError:
     logger.warning("sklearn dimensionality reduction not available.")
 
 try:
+    from scipy.spatial import ConvexHull
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+    logger.warning("scipy not available. Cluster boundary overlays will be disabled.")
+
+try:
     import pyLDAvis
     import pyLDAvis.lda_model
     PYLDAVIS_AVAILABLE = True
@@ -195,7 +202,9 @@ class MethodVisualizer:
         reduction_method: str = 'pca',
         n_components: int = 2,
         perplexity: int = 30,
-        random_state: int = 42
+        random_state: int = 42,
+        show_cluster_overlay: bool = True,
+        overlay_opacity: float = 0.15
     ) -> Optional[Any]:
         """
         Create 2D scatter plot of documents colored by cluster/topic.
@@ -208,6 +217,8 @@ class MethodVisualizer:
             n_components: Number of dimensions (2 or 3)
             perplexity: t-SNE perplexity (ignored for PCA)
             random_state: Random seed for reproducibility
+            show_cluster_overlay: Whether to show semi-transparent convex hull overlays
+            overlay_opacity: Opacity of the cluster boundary overlays (0.0-1.0)
 
         Returns:
             Plotly Figure or None if not available
@@ -256,23 +267,75 @@ class MethodVisualizer:
         texts = self.results_df[self.text_column].astype(str).tolist()
         plot_df['Text'] = [t[:100] + '...' if len(t) > 100 else t for t in texts]
 
-        # Create scatter plot
-        fig = px.scatter(
-            plot_df,
-            x='x',
-            y='y',
-            color='Cluster',
-            hover_data=['Text'],
-            title=f'Document Clusters ({reduction_method.upper()})',
-            labels={'x': axis_labels[0], 'y': axis_labels[1]}
-        )
+        # Create figure with graph_objects for more control
+        fig = go.Figure()
+
+        # Get unique clusters and assign colors
+        unique_clusters = sorted(plot_df['Cluster_ID'].unique())
+        n_clusters = len(unique_clusters)
+
+        # Use Plotly's qualitative color palette
+        colors = px.colors.qualitative.Plotly
+        if n_clusters > len(colors):
+            # Extend colors if needed
+            colors = colors * (n_clusters // len(colors) + 1)
+
+        # Add cluster boundary overlays first (so they appear behind points)
+        if show_cluster_overlay and SCIPY_AVAILABLE:
+            for i, cluster_id in enumerate(unique_clusters):
+                cluster_mask = plot_df['Cluster_ID'] == cluster_id
+                cluster_points = plot_df[cluster_mask][['x', 'y']].values
+
+                # Need at least 3 points for convex hull
+                if len(cluster_points) >= 3:
+                    try:
+                        hull = ConvexHull(cluster_points)
+                        # Get hull vertices in order
+                        hull_points = cluster_points[hull.vertices]
+                        # Close the polygon by repeating the first point
+                        hull_x = np.append(hull_points[:, 0], hull_points[0, 0])
+                        hull_y = np.append(hull_points[:, 1], hull_points[0, 1])
+
+                        fig.add_trace(go.Scatter(
+                            x=hull_x,
+                            y=hull_y,
+                            fill='toself',
+                            fillcolor=f'rgba{tuple(list(px.colors.hex_to_rgb(colors[i % len(colors)])) + [overlay_opacity])}',
+                            line=dict(color=colors[i % len(colors)], width=2),
+                            name=f'Cluster {cluster_id + 1} boundary',
+                            showlegend=False,
+                            hoverinfo='skip'
+                        ))
+                    except Exception as e:
+                        # ConvexHull can fail for collinear points
+                        logger.debug(f"Could not create convex hull for cluster {cluster_id}: {e}")
+
+        # Add scatter points for each cluster
+        for i, cluster_id in enumerate(unique_clusters):
+            cluster_mask = plot_df['Cluster_ID'] == cluster_id
+            cluster_data = plot_df[cluster_mask]
+
+            fig.add_trace(go.Scatter(
+                x=cluster_data['x'],
+                y=cluster_data['y'],
+                mode='markers',
+                marker=dict(
+                    size=8,
+                    opacity=0.7,
+                    color=colors[i % len(colors)]
+                ),
+                name=f'Cluster {cluster_id + 1}',
+                text=cluster_data['Text'],
+                hovertemplate='<b>%{text}</b><extra></extra>'
+            ))
 
         fig.update_layout(
+            title=f'Document Clusters ({reduction_method.upper()})',
+            xaxis_title=axis_labels[0],
+            yaxis_title=axis_labels[1],
             legend_title='Cluster',
             hovermode='closest'
         )
-
-        fig.update_traces(marker=dict(size=8, opacity=0.7))
 
         return fig
 
@@ -360,7 +423,9 @@ class MethodVisualizer:
     def create_topic_term_heatmap(
         self,
         n_terms: int = 15,
-        normalize: bool = True
+        normalize: bool = True,
+        show_cluster_overlay: bool = True,
+        overlay_opacity: float = 0.3
     ) -> Optional[Any]:
         """
         Create heatmap showing top terms per topic.
@@ -371,6 +436,8 @@ class MethodVisualizer:
         Args:
             n_terms: Number of top terms to show per topic
             normalize: Normalize weights to 0-1 range
+            show_cluster_overlay: Whether to show color-coded row boundary overlays
+            overlay_opacity: Opacity of the row boundary overlays (0.0-1.0)
 
         Returns:
             Plotly Figure or None if not available
@@ -423,18 +490,61 @@ class MethodVisualizer:
         # Create heatmap
         topic_labels = [f'Topic {i+1}' for i in range(n_topics)]
 
-        fig = px.imshow(
-            matrix,
-            labels=dict(x='Terms', y='Topics', color='Weight'),
+        fig = go.Figure()
+
+        # Add the main heatmap
+        fig.add_trace(go.Heatmap(
+            z=matrix,
             x=terms,
             y=topic_labels,
-            title=f'Topic-Term Heatmap (Top {n_terms} Terms)',
-            color_continuous_scale='Viridis',
-            aspect='auto'
-        )
+            colorscale='Viridis',
+            colorbar=dict(title='Weight'),
+            hovertemplate='Topic: %{y}<br>Term: %{x}<br>Weight: %{z:.3f}<extra></extra>'
+        ))
 
-        fig.update_xaxes(tickangle=45)
-        fig.update_layout(height=max(400, n_topics * 40))
+        # Add color-coded row boundary overlays
+        if show_cluster_overlay:
+            colors = px.colors.qualitative.Plotly
+            if n_topics > len(colors):
+                colors = colors * (n_topics // len(colors) + 1)
+
+            n_terms_total = len(terms)
+
+            for topic_idx in range(n_topics):
+                # Create a rectangle shape for each topic row
+                # y coordinates: topic rows are at 0, 1, 2, ... so boundaries are at -0.5, 0.5, 1.5, etc.
+                y0 = topic_idx - 0.5
+                y1 = topic_idx + 0.5
+
+                # Add left edge colored bar as cluster indicator
+                fig.add_shape(
+                    type='rect',
+                    x0=-0.5,
+                    x1=n_terms_total - 0.5,
+                    y0=y0,
+                    y1=y1,
+                    line=dict(color=colors[topic_idx % len(colors)], width=3),
+                    fillcolor=f'rgba{tuple(list(px.colors.hex_to_rgb(colors[topic_idx % len(colors)])) + [overlay_opacity])}',
+                    layer='below'
+                )
+
+                # Add a colored indicator bar on the left side
+                fig.add_annotation(
+                    x=-1.5,
+                    y=topic_idx,
+                    text='▌',
+                    font=dict(color=colors[topic_idx % len(colors)], size=20),
+                    showarrow=False,
+                    xanchor='right'
+                )
+
+        fig.update_layout(
+            title=f'Topic-Term Heatmap (Top {n_terms} Terms)',
+            xaxis_title='Terms',
+            yaxis_title='Topics',
+            height=max(400, n_topics * 50),
+            xaxis=dict(tickangle=45)
+        )
 
         return fig
 
