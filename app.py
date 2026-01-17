@@ -2073,14 +2073,10 @@ def page_run_analysis():
             sentiment_info = ""
             if metrics.get('sentiment_enabled', False):
                 sentiment_dist = metrics.get('sentiment_distribution', {})
-                sentiment_info = f"""
-                <hr style="margin: 10px 0;">
-                <p><strong>Sentiment Analysis:</strong> ✅ Complete</p>
-                <p><strong>Model:</strong> {metrics.get('sentiment_model', 'N/A')}</p>
-                <p><strong>Distribution:</strong> 😊 {sentiment_dist.get('positive', 0)} positive,
-                   😐 {sentiment_dist.get('neutral', 0)} neutral,
-                   😞 {sentiment_dist.get('negative', 0)} negative</p>
-                """
+                sentiment_info = f"""<hr style="margin: 10px 0;">
+<p><strong>Sentiment Analysis:</strong> ✅ Complete</p>
+<p><strong>Model:</strong> {metrics.get('sentiment_model', 'N/A')}</p>
+<p><strong>Distribution:</strong> 😊 {sentiment_dist.get('positive', 0)} positive, 😐 {sentiment_dist.get('neutral', 0)} neutral, 😞 {sentiment_dist.get('negative', 0)} negative</p>"""
 
             st.markdown(f"""
             <div class="success-box">
