@@ -2287,9 +2287,9 @@ def page_results_overview():
         # Format for display
         display_df = sample_df.copy()
 
-        # Format assigned_codes as Label
+        # Format assigned_codes as Label (lookup actual labels from codebook)
         display_df['Label'] = display_df['assigned_codes'].apply(
-            lambda x: ', '.join(x) if x else 'None'
+            lambda codes: ', '.join([coder.codebook[code]['label'] for code in codes if code in coder.codebook]) if codes else 'None'
         )
 
         # Add Prevalence column
