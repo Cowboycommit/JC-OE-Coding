@@ -1078,7 +1078,7 @@ def page_text_processor():
     # Create tabs for different processing options
     tab1, tab2, tab3, tab4 = st.tabs([
         "🎯 Quick Presets",
-        "⚙️ Gold Standard Options",
+        "⚙️ Social Media Options",
         "🔬 Advanced Processing",
         "📊 Quality Report"
     ])
@@ -1205,142 +1205,161 @@ def page_text_processor():
                     st.error(f"❌ Preprocessing failed: {str(e)}")
 
     # ==========================================================================
-    # TAB 2: Gold Standard Options
+    # TAB 2: Gold Standard Options (Social Media Only)
     # ==========================================================================
     with tab2:
-        st.markdown("### Gold Standard Text Processor")
-        st.markdown("""
-        Configure individual preprocessing steps for fine-grained control.
-        The Gold Standard processor implements industry best practices for text normalization.
-        """)
+        # Check if social media preset is selected
+        current_preset = st.session_state.get('dataset_preset', 'general')
 
-        # Normalization options
-        st.markdown("#### Normalization Options")
-        col1, col2 = st.columns(2)
+        if current_preset != 'social_media':
+            st.markdown("### Gold Standard Text Processor")
+            st.info("""
+            **This tab is designed for Social Media data only.**
 
-        with col1:
-            gs_unicode = st.checkbox("Unicode normalization (NFKC)", value=True,
-                help="Normalize Unicode characters to standard form", key="gs_unicode")
-            gs_html = st.checkbox("Decode HTML entities", value=True,
-                help="Convert &amp; to &, &lt; to <, etc.", key="gs_html")
-            gs_contractions = st.checkbox("Expand contractions", value=True,
-                help="Convert don't to do not, I'm to I am, etc.", key="gs_contractions")
-            gs_elongation = st.checkbox("Normalize elongations", value=True,
-                help="Convert loooove to loove, etc.", key="gs_elongation")
-            gs_punctuation = st.checkbox("Normalize punctuation", value=True,
-                help="Convert !!! to !, etc.", key="gs_punctuation")
+            The Gold Standard Text Processor provides specialized options for handling
+            social media content including:
+            - URL and @mention standardization
+            - Hashtag processing
+            - Slang expansion (lol → laughing out loud)
+            - Emoji ratio filtering
 
-        with col2:
-            gs_urls = st.checkbox("Standardize URLs", value=True,
-                help="Replace URLs with <URL> token", key="gs_urls")
-            gs_mentions = st.checkbox("Standardize @mentions", value=True,
-                help="Replace @user with <USER> token", key="gs_mentions")
-            gs_hashtags = st.checkbox("Process hashtags", value=True,
-                help="Remove # from hashtags", key="gs_hashtags")
-            gs_slang = st.checkbox("Expand slang", value=False,
-                help="Convert lol to laughing out loud, brb to be right back, etc.", key="gs_slang")
+            To use these options, please select **🐦 Social Media (Twitter/X)**
+            in the Quick Presets tab first.
+            """)
+        else:
+            st.markdown("### Gold Standard Text Processor")
+            st.markdown("""
+            Configure individual preprocessing steps for fine-grained control.
+            The Gold Standard processor implements industry best practices for text normalization.
+            """)
 
-        # Quality filtering options
-        st.markdown("#### Quality Filtering")
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            gs_min_tokens = st.number_input("Min tokens", min_value=1, max_value=50, value=3,
-                help="Minimum number of tokens required", key="gs_min_tokens")
-            gs_max_tokens = st.number_input("Max tokens", min_value=50, max_value=5000, value=512,
-                help="Maximum number of tokens allowed", key="gs_max_tokens")
-
-        with col2:
-            gs_max_emoji_ratio = st.slider("Max emoji ratio", min_value=0.0, max_value=1.0, value=0.7,
-                help="Maximum ratio of emojis to characters", key="gs_emoji_ratio")
-            gs_max_char_repeat = st.number_input("Max char repeat", min_value=1, max_value=5, value=2,
-                help="Maximum character repetitions (e.g., 2 keeps 'oo' in 'loooove')", key="gs_char_repeat")
-
-        with col3:
-            gs_spam = st.checkbox("Detect spam", value=True,
-                help="Filter out spam-like text patterns", key="gs_spam")
-            gs_duplicates = st.checkbox("Detect duplicates", value=True,
-                help="Filter out duplicate texts using MD5 hash", key="gs_duplicates")
-
-        # Custom tokens
-        with st.expander("🏷️ Custom Replacement Tokens"):
+            # Normalization options
+            st.markdown("#### Normalization Options")
             col1, col2 = st.columns(2)
+
             with col1:
-                gs_url_token = st.text_input("URL replacement token", value="<URL>", key="gs_url_token")
+                gs_unicode = st.checkbox("Unicode normalization (NFKC)", value=True,
+                    help="Normalize Unicode characters to standard form", key="gs_unicode")
+                gs_html = st.checkbox("Decode HTML entities", value=True,
+                    help="Convert &amp; to &, &lt; to <, etc.", key="gs_html")
+                gs_contractions = st.checkbox("Expand contractions", value=True,
+                    help="Convert don't to do not, I'm to I am, etc.", key="gs_contractions")
+                gs_elongation = st.checkbox("Normalize elongations", value=True,
+                    help="Convert loooove to loove, etc.", key="gs_elongation")
+                gs_punctuation = st.checkbox("Normalize punctuation", value=True,
+                    help="Convert !!! to !, etc.", key="gs_punctuation")
+
             with col2:
-                gs_user_token = st.text_input("User replacement token", value="<USER>", key="gs_user_token")
+                gs_urls = st.checkbox("Standardize URLs", value=True,
+                    help="Replace URLs with <URL> token", key="gs_urls")
+                gs_mentions = st.checkbox("Standardize @mentions", value=True,
+                    help="Replace @user with <USER> token", key="gs_mentions")
+                gs_hashtags = st.checkbox("Process hashtags", value=True,
+                    help="Remove # from hashtags", key="gs_hashtags")
+                gs_slang = st.checkbox("Expand slang", value=False,
+                    help="Convert lol to laughing out loud, brb to be right back, etc.", key="gs_slang")
 
-        if st.button("🚀 Apply Gold Standard Processing", use_container_width=True, key="apply_gs_btn"):
-            with st.spinner("Applying Gold Standard preprocessing..."):
-                try:
-                    # Create config
-                    config = PreprocessingConfig(
-                        normalize_unicode=gs_unicode,
-                        decode_html_entities=gs_html,
-                        expand_contractions=gs_contractions,
-                        normalize_elongations=gs_elongation,
-                        normalize_punctuation=gs_punctuation,
-                        standardize_urls=gs_urls,
-                        standardize_mentions=gs_mentions,
-                        process_hashtags=gs_hashtags,
-                        expand_slang=gs_slang,
-                        min_tokens=gs_min_tokens,
-                        max_tokens=gs_max_tokens,
-                        max_emoji_ratio=gs_max_emoji_ratio,
-                        max_char_repeat=gs_max_char_repeat,
-                        detect_spam=gs_spam,
-                        detect_duplicates=gs_duplicates,
-                        url_token=gs_url_token,
-                        user_token=gs_user_token
-                    )
+            # Quality filtering options
+            st.markdown("#### Quality Filtering")
+            col1, col2, col3 = st.columns(3)
 
-                    # Create processor
-                    processor = GoldStandardTextProcessor(config=config)
+            with col1:
+                gs_min_tokens = st.number_input("Min tokens", min_value=1, max_value=50, value=3,
+                    help="Minimum number of tokens required", key="gs_min_tokens")
+                gs_max_tokens = st.number_input("Max tokens", min_value=50, max_value=5000, value=512,
+                    help="Maximum number of tokens allowed", key="gs_max_tokens")
 
-                    # Process data
-                    processed_df, metrics = preprocess_dataframe(
-                        df,
-                        text_column=selected_column,
-                        output_column=f"{selected_column}_processed",
-                        processor=processor,
-                        drop_filtered=False
-                    )
+            with col2:
+                gs_max_emoji_ratio = st.slider("Max emoji ratio", min_value=0.0, max_value=1.0, value=0.7,
+                    help="Maximum ratio of emojis to characters", key="gs_emoji_ratio")
+                gs_max_char_repeat = st.number_input("Max char repeat", min_value=1, max_value=5, value=2,
+                    help="Maximum character repetitions (e.g., 2 keeps 'oo' in 'loooove')", key="gs_char_repeat")
 
-                    # Store results
-                    st.session_state.uploaded_df = processed_df
-                    st.session_state.preprocessing_metrics = metrics
-                    st.session_state.preprocessing_report = metrics.generate_report()
+            with col3:
+                gs_spam = st.checkbox("Detect spam", value=True,
+                    help="Filter out spam-like text patterns", key="gs_spam")
+                gs_duplicates = st.checkbox("Detect duplicates", value=True,
+                    help="Filter out duplicate texts using MD5 hash", key="gs_duplicates")
 
-                    st.success(f"✅ Gold Standard preprocessing complete!")
+            # Custom tokens
+            with st.expander("🏷️ Custom Replacement Tokens"):
+                col1, col2 = st.columns(2)
+                with col1:
+                    gs_url_token = st.text_input("URL replacement token", value="<URL>", key="gs_url_token")
+                with col2:
+                    gs_user_token = st.text_input("User replacement token", value="<USER>", key="gs_user_token")
 
-                    # Show metrics
-                    col1, col2, col3, col4 = st.columns(4)
-                    col1.metric("Total Records", f"{metrics.total_records:,}")
-                    col2.metric("Valid Records", f"{metrics.valid_records:,}")
-                    col3.metric("Filtered", f"{metrics.filtered_records:,}")
-                    col4.metric("Valid Ratio", f"{metrics.valid_ratio:.1%}")
+            if st.button("🚀 Apply Gold Standard Processing", use_container_width=True, key="apply_gs_btn"):
+                with st.spinner("Applying Gold Standard preprocessing..."):
+                    try:
+                        # Create config
+                        config = PreprocessingConfig(
+                            normalize_unicode=gs_unicode,
+                            decode_html_entities=gs_html,
+                            expand_contractions=gs_contractions,
+                            normalize_elongations=gs_elongation,
+                            normalize_punctuation=gs_punctuation,
+                            standardize_urls=gs_urls,
+                            standardize_mentions=gs_mentions,
+                            process_hashtags=gs_hashtags,
+                            expand_slang=gs_slang,
+                            min_tokens=gs_min_tokens,
+                            max_tokens=gs_max_tokens,
+                            max_emoji_ratio=gs_max_emoji_ratio,
+                            max_char_repeat=gs_max_char_repeat,
+                            detect_spam=gs_spam,
+                            detect_duplicates=gs_duplicates,
+                            url_token=gs_url_token,
+                            user_token=gs_user_token
+                        )
 
-                    # Show normalization counts
-                    st.markdown("#### Normalization Statistics")
-                    norm_data = {
-                        "Operation": ["Unicode", "HTML", "URLs", "Mentions", "Hashtags",
-                                     "Contractions", "Elongations", "Punctuation", "Slang"],
-                        "Count": [metrics.unicode_normalized, metrics.html_decoded,
-                                 metrics.urls_replaced, metrics.mentions_replaced,
-                                 metrics.hashtags_processed, metrics.contractions_expanded,
-                                 metrics.elongations_normalized, metrics.punctuation_normalized,
-                                 metrics.slang_expanded]
-                    }
-                    st.dataframe(pd.DataFrame(norm_data), use_container_width=True)
+                        # Create processor
+                        processor = GoldStandardTextProcessor(config=config)
 
-                    # Show before/after comparison
-                    st.markdown("#### Before/After Comparison")
-                    comparison_df = processed_df[[selected_column, f"{selected_column}_processed"]].dropna().head(5)
-                    comparison_df.columns = ["Original", "Processed"]
-                    st.dataframe(comparison_df, use_container_width=True)
+                        # Process data
+                        processed_df, metrics = preprocess_dataframe(
+                            df,
+                            text_column=selected_column,
+                            output_column=f"{selected_column}_processed",
+                            processor=processor,
+                            drop_filtered=False
+                        )
 
-                except Exception as e:
-                    st.error(f"❌ Preprocessing failed: {str(e)}")
+                        # Store results
+                        st.session_state.uploaded_df = processed_df
+                        st.session_state.preprocessing_metrics = metrics
+                        st.session_state.preprocessing_report = metrics.generate_report()
+
+                        st.success(f"✅ Gold Standard preprocessing complete!")
+
+                        # Show metrics
+                        col1, col2, col3, col4 = st.columns(4)
+                        col1.metric("Total Records", f"{metrics.total_records:,}")
+                        col2.metric("Valid Records", f"{metrics.valid_records:,}")
+                        col3.metric("Filtered", f"{metrics.filtered_records:,}")
+                        col4.metric("Valid Ratio", f"{metrics.valid_ratio:.1%}")
+
+                        # Show normalization counts
+                        st.markdown("#### Normalization Statistics")
+                        norm_data = {
+                            "Operation": ["Unicode", "HTML", "URLs", "Mentions", "Hashtags",
+                                         "Contractions", "Elongations", "Punctuation", "Slang"],
+                            "Count": [metrics.unicode_normalized, metrics.html_decoded,
+                                     metrics.urls_replaced, metrics.mentions_replaced,
+                                     metrics.hashtags_processed, metrics.contractions_expanded,
+                                     metrics.elongations_normalized, metrics.punctuation_normalized,
+                                     metrics.slang_expanded]
+                        }
+                        st.dataframe(pd.DataFrame(norm_data), use_container_width=True)
+
+                        # Show before/after comparison
+                        st.markdown("#### Before/After Comparison")
+                        comparison_df = processed_df[[selected_column, f"{selected_column}_processed"]].dropna().head(5)
+                        comparison_df.columns = ["Original", "Processed"]
+                        st.dataframe(comparison_df, use_container_width=True)
+
+                    except Exception as e:
+                        st.error(f"❌ Preprocessing failed: {str(e)}")
 
     # ==========================================================================
     # TAB 3: Advanced Processing (TextPreprocessor)
