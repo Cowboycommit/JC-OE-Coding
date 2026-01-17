@@ -1097,22 +1097,34 @@ def page_text_processor():
             "general": {
                 "name": "📋 General Text",
                 "description": "Standard preprocessing for most text data",
-                "features": ["Contraction expansion", "Spam detection", "Min 3 tokens"]
+                "features": ["Contraction expansion", "Spam detection", "Min 3 tokens"],
+                "remove_stopwords": True,
+                "lemmatize": True,
+                "lowercase": True
             },
             "social_media": {
                 "name": "🐦 Social Media (Twitter/X)",
                 "description": "Optimized for short, informal text with slang and emojis",
-                "features": ["Slang expansion", "URL/mention handling", "Hashtag processing", "Emoji tolerance", "Min 2 tokens"]
+                "features": ["Slang expansion", "URL/mention handling", "Hashtag processing", "Emoji tolerance", "Min 2 tokens"],
+                "remove_stopwords": True,
+                "lemmatize": True,
+                "lowercase": True
             },
             "reviews": {
                 "name": "⭐ Product Reviews",
                 "description": "For customer reviews with elongated expressions",
-                "features": ["Elongation normalization", "Contraction expansion", "Spam detection", "Min 5 tokens"]
+                "features": ["Elongation normalization", "Contraction expansion", "Spam detection", "Min 5 tokens"],
+                "remove_stopwords": True,
+                "lemmatize": True,
+                "lowercase": True
             },
             "news": {
                 "name": "📰 News Articles",
                 "description": "Minimal preprocessing for formal, well-written text",
-                "features": ["Minimal normalization", "No spam detection", "Min 10 tokens", "Max 2000 tokens"]
+                "features": ["Minimal normalization", "No spam detection", "Min 10 tokens", "Max 2000 tokens"],
+                "remove_stopwords": False,
+                "lemmatize": False,
+                "lowercase": True
             }
         }
 
@@ -1137,24 +1149,18 @@ def page_text_processor():
         </div>
         """, unsafe_allow_html=True)
 
-        # Processing options for preset
-        col1, col2 = st.columns(2)
-        with col1:
-            preset_remove_stopwords = st.checkbox("Remove stopwords", value=True, key="preset_stopwords")
-            preset_lemmatize = st.checkbox("Lemmatize words", value=True, key="preset_lemmatize")
-        with col2:
-            preset_lowercase = st.checkbox("Convert to lowercase", value=True, key="preset_lowercase")
-            preset_drop_filtered = st.checkbox("Drop filtered rows", value=False, key="preset_drop")
+        # Option to drop filtered rows
+        preset_drop_filtered = st.checkbox("Drop filtered rows", value=False, key="preset_drop")
 
         if st.button("🚀 Apply Preset", use_container_width=True, key="apply_preset_btn"):
             with st.spinner(f"Applying {preset['name']} preprocessing..."):
                 try:
-                    # Create pipeline with selected preset
+                    # Create pipeline with selected preset (using preset-specific settings)
                     pipeline = DataCleaningPipeline(
                         dataset_type=selected_preset,
-                        remove_stopwords=preset_remove_stopwords,
-                        lemmatize=preset_lemmatize,
-                        lowercase=preset_lowercase
+                        remove_stopwords=preset['remove_stopwords'],
+                        lemmatize=preset['lemmatize'],
+                        lowercase=preset['lowercase']
                     )
 
                     # Process the data
