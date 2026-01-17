@@ -724,7 +724,7 @@ def run_ml_analysis(
                 for i, label in enumerate(labels):
                     doc_topic_matrix[i, label] = 1.0
 
-            self._generate_codebook()
+            self._generate_codebook(texts=processed)
             self._assign_codes(doc_topic_matrix, responses)
 
             # NEW: Mandatory cluster interpretation layer
@@ -829,7 +829,7 @@ def run_ml_analysis(
 
             return self
 
-        def _generate_codebook(self, top_words=15):
+        def _generate_codebook(self, top_words=15, texts=None):
             """Generate codebook with clean 3-word labels (stopwords/duplicates removed)."""
             # Stopwords to filter from labels and keywords
             stopwords = {
@@ -846,7 +846,42 @@ def run_ml_analysis(
                 'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which'
             }
 
-            feature_names = self.vectorizer.get_feature_names_out()
+            # For embedding-based representations (BERT, LSTM, etc.), create TF-IDF for term extraction
+            # Embeddings give generic names like "embedding_0", so we need TF-IDF for meaningful keywords
+            embedding_representations = {'bert', 'sbert', 'lstm', 'word2vec', 'fasttext'}
+            if self.representation in embedding_representations and texts is not None:
+                from sklearn.feature_extraction.text import TfidfVectorizer
+                term_vectorizer = TfidfVectorizer(
+                    max_features=5000,
+                    stop_words='english',
+                    max_df=0.95,
+                    min_df=2
+                )
+                term_feature_matrix = term_vectorizer.fit_transform(texts)
+                feature_names = term_vectorizer.get_feature_names_out()
+
+                # Get cluster labels from the model
+                if hasattr(self.model, 'labels_'):
+                    cluster_labels = self.model.labels_
+                else:
+                    cluster_labels = self.model.predict(self.feature_matrix)
+
+                # Compute cluster centers in TF-IDF space using cluster assignments
+                if hasattr(term_feature_matrix, 'toarray'):
+                    term_feature_dense = term_feature_matrix.toarray()
+                else:
+                    term_feature_dense = term_feature_matrix
+
+                embedding_cluster_centers = np.zeros((self.n_codes, term_feature_dense.shape[1]))
+                for idx in range(self.n_codes):
+                    mask = cluster_labels == idx
+                    if mask.sum() > 0:
+                        embedding_cluster_centers[idx] = term_feature_dense[mask].mean(axis=0)
+
+                logger.info(f"Created TF-IDF vectorizer for term extraction in codebook (representation={self.representation})")
+            else:
+                feature_names = self.vectorizer.get_feature_names_out()
+                embedding_cluster_centers = None
 
             # For SVM (SpectralClustering), compute cluster centers manually
             if self.method == 'svm':
@@ -873,6 +908,11 @@ def run_ml_analysis(
                 elif self.method == 'svm':
                     # Use precomputed cluster centers for SVM
                     cluster_center = svm_cluster_centers[code_idx]
+                    top_indices = cluster_center.argsort()[-top_words:][::-1]
+                    weights = [cluster_center[i] for i in top_indices]
+                elif embedding_cluster_centers is not None:
+                    # Use TF-IDF cluster centers for embedding representations
+                    cluster_center = embedding_cluster_centers[code_idx]
                     top_indices = cluster_center.argsort()[-top_words:][::-1]
                     weights = [cluster_center[i] for i in top_indices]
                 else:
