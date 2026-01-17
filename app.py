@@ -2200,24 +2200,18 @@ def page_results_overview():
         except Exception as e:
             st.error(f"Export error: {str(e)}")
 
-    # Tabs for Insights, Top Codes, Assignments, and Sentiment (if enabled)
+    # Tabs for Extracted Codes, Assignments, and Sentiment (if enabled)
     st.markdown("---")
 
     # Check if sentiment analysis was enabled
     sentiment_enabled = metrics.get('sentiment_enabled', False)
 
     if sentiment_enabled:
-        tab1, tab2, tab3, tab4 = st.tabs(["💡 Insights", "🏆 Top Codes", "📋 Assignments", "😊 Sentiment"])
+        tab1, tab2, tab3 = st.tabs(["Extracted Codes", "Label and Sentiment Assignments", "😊 Sentiment"])
     else:
-        tab1, tab2, tab3 = st.tabs(["💡 Insights", "🏆 Top Codes", "📋 Assignments"])
+        tab1, tab2 = st.tabs(["Extracted Codes", "Label and Sentiment Assignments"])
 
     with tab1:
-        # Key insights
-        insights = generate_insights(coder, results_df)
-        for insight in insights:
-            st.markdown(insight)
-
-    with tab2:
         # Top codes
         top_codes_df = get_top_codes(coder, n=10)
 
@@ -2228,71 +2222,77 @@ def page_results_overview():
             height=400
         )
 
-    with tab3:
-        # Code assignments with uncertainty filter
-        st.markdown("#### Sample Code Assignments")
-
-        # Add checkbox for filtering uncertain rows
-        show_uncertain_only = st.checkbox(
-            "Show only uncertain rows (low confidence)",
-            value=False,
-            help="Filter to show only rows where maximum confidence < 0.5"
-        )
-
-        # Prepare assignments dataframe with confidence
+    with tab2:
+        # Label and Sentiment Assignments
+        # Prepare assignments dataframe
         assignments_df = results_df.copy()
+        total_responses = len(assignments_df)
 
-        # Calculate max confidence for each row
-        if 'confidence_scores' in assignments_df.columns:
-            assignments_df['max_confidence'] = assignments_df['confidence_scores'].apply(
-                lambda x: max(x) if x and len(x) > 0 else 0.0
-            )
-        else:
-            assignments_df['max_confidence'] = 1.0
+        # Calculate prevalence for each code
+        code_counts = {}
+        for codes in assignments_df['assigned_codes']:
+            if codes:
+                for code in codes:
+                    code_counts[code] = code_counts.get(code, 0) + 1
 
-        # Sort by confidence (ascending - lowest confidence first)
-        assignments_df = assignments_df.sort_values('max_confidence', ascending=True)
+        # Create prevalence lookup
+        def get_prevalence(codes):
+            if not codes or len(codes) == 0:
+                return "0.0%"
+            # Use the first code's prevalence for display
+            first_code = codes[0]
+            count = code_counts.get(first_code, 0)
+            prevalence = (count / total_responses) * 100 if total_responses > 0 else 0
+            return f"{prevalence:.1f}%"
 
-        # Apply filter if checkbox is selected
-        if show_uncertain_only:
-            assignments_df = assignments_df[assignments_df['max_confidence'] < 0.5]
+        # Build display columns: Response, Label, Sentiment (if available), Prevalence
+        text_col = st.session_state.config['text_column']
+        display_cols = [text_col, 'assigned_codes']
 
-        # Select columns and limit rows
-        sample_size = min(20, len(assignments_df))
-        display_cols = [
-            st.session_state.config['text_column'],
-            'assigned_codes',
-            'num_codes',
-            'max_confidence'
-        ]
-        # Add sentiment column if sentiment analysis was enabled
-        if sentiment_enabled and 'sentiment_label' in assignments_df.columns:
+        # Check if sentiment data is available
+        has_sentiment = 'sentiment_label' in assignments_df.columns
+
+        if has_sentiment:
             display_cols.append('sentiment_label')
-        sample_df = assignments_df[display_cols].head(sample_size)
+
+        # Select sample
+        sample_size = min(20, len(assignments_df))
+        sample_df = assignments_df[display_cols].head(sample_size).copy()
 
         # Format for display
         display_df = sample_df.copy()
-        display_df['assigned_codes'] = display_df['assigned_codes'].apply(
+
+        # Format assigned_codes as Label
+        display_df['Label'] = display_df['assigned_codes'].apply(
             lambda x: ', '.join(x) if x else 'None'
         )
-        display_df['max_confidence'] = display_df['max_confidence'].apply(
-            lambda x: f"{x:.3f}"
-        )
-        # Format sentiment label with emoji if present
-        if 'sentiment_label' in display_df.columns:
-            sentiment_emoji = {'positive': '😊', 'neutral': '😐', 'negative': '😞'}
-            display_df['sentiment_label'] = display_df['sentiment_label'].apply(
-                lambda x: f"{sentiment_emoji.get(x, '')} {x.capitalize()}" if x else 'N/A'
+
+        # Add Prevalence column
+        display_df['Prevalence'] = sample_df['assigned_codes'].apply(get_prevalence)
+
+        # Rename columns for display
+        display_df = display_df.rename(columns={text_col: 'Response'})
+
+        if has_sentiment:
+            display_df = display_df.rename(columns={'sentiment_label': 'Sentiment'})
+            # Capitalize sentiment values
+            display_df['Sentiment'] = display_df['Sentiment'].apply(
+                lambda x: x.capitalize() if isinstance(x, str) else 'N/A'
             )
+            final_cols = ['Response', 'Label', 'Sentiment', 'Prevalence']
+        else:
+            final_cols = ['Response', 'Label', 'Prevalence']
+
+        display_df = display_df[final_cols]
 
         if len(display_df) > 0:
             st.dataframe(display_df, use_container_width=True, height=400)
         else:
-            st.info("No uncertain rows found (all rows have confidence ≥ 0.5)")
+            st.info("No assignments to display")
 
     # Sentiment tab (only if enabled)
     if sentiment_enabled:
-        with tab4:
+        with tab3:
             st.markdown("### 😊 Sentiment Analysis Results")
 
             # Show model info
