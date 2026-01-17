@@ -470,9 +470,9 @@ IMPORTANT: You MUST provide exactly 3 alternative_labels. Each alternative shoul
         samples_str = ""
         if sample_texts:
             samples = []
-            for i, text in enumerate(sample_texts[:8], 1):
+            for i, text in enumerate(sample_texts[:12], 1):
                 # Allow longer texts for better context
-                truncated = text[:500] + "..." if len(text) > 500 else text
+                truncated = text[:800] + "..." if len(text) > 800 else text
                 samples.append(f"  {i}. \"{truncated}\"")
             samples_str = "\n".join(samples)
 

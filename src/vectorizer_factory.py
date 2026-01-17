@@ -63,7 +63,7 @@ class VectorizerConfig:
     max_features: int = 1000
     min_df: Union[int, float] = 2
     max_df: float = 0.8
-    ngram_range: Tuple[int, int] = (1, 2)
+    ngram_range: Tuple[int, int] = (1, 3)
     stop_words: Optional[Union[str, List[str]]] = 'english'
     sublinear_tf: bool = False
     lowercase: bool = True
