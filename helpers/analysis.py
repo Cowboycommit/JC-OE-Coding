@@ -735,7 +735,7 @@ def run_ml_analysis(
                     interpreter = ClusterInterpreter(
                         n_top_terms=15,
                         n_label_terms=3,
-                        n_representative_docs=5,
+                        n_representative_docs=12,
                         min_term_weight_threshold=0.005
                     )
 
