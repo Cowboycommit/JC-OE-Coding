@@ -1170,6 +1170,15 @@ def page_text_processor():
                     st.session_state.preprocessing_report = pipeline.get_quality_report()
                     st.session_state.preprocessing_summary = pipeline.get_summary()
 
+                    # Map preset to data_type for sentiment analysis
+                    preset_to_data_type = {
+                        'general': 'survey',
+                        'social_media': 'twitter',
+                        'reviews': 'longform',
+                        'news': 'survey'
+                    }
+                    st.session_state.data_type = preset_to_data_type.get(selected_preset, 'survey')
+
                     st.success(f"✅ Preprocessing complete! Processed {len(processed_df):,} rows.")
 
                     # Show before/after comparison
@@ -1613,73 +1622,6 @@ def page_configuration():
 
     st.markdown("---")
 
-    # Data Type Selection for Sentiment Analysis
-    if SENTIMENT_ANALYSIS_AVAILABLE:
-        st.markdown("### 📱 Data Type Selection")
-        st.markdown("""
-        <div class="info-box" style="padding: 10px; margin-bottom: 15px;">
-        <strong>Select your data type</strong> to optimize text processing and enable specialized sentiment analysis.
-        Different data types use different models optimized for their specific characteristics.
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Radio buttons for data type selection
-        data_type_options = {
-            'twitter': '🐦 X (Twitter) / Stream Data',
-            'survey': '📋 Survey Response Data',
-            'longform': '📄 Long Form Data (Product Reviews)'
-        }
-
-        selected_data_type = st.radio(
-            "Select your data type:",
-            options=list(data_type_options.keys()),
-            format_func=lambda x: data_type_options[x],
-            index=1,  # Default to survey
-            horizontal=True,
-            help="Choose the type of data you're analyzing for optimized processing"
-        )
-
-        # Show data type info
-        if selected_data_type in DATA_TYPE_INFO:
-            info = DATA_TYPE_INFO[selected_data_type]
-            features_list = ''.join([f"<li>{f}</li>" for f in info['features']])
-
-            st.markdown(f"""
-            <div class="info-box" style="padding: 15px; margin: 10px 0;">
-                <strong>{info['name']}</strong><br>
-                <em>{info['description']}</em><br><br>
-                <strong>Model:</strong> <code>{info['model']}</code><br>
-                <strong>Best for:</strong> {info['best_for']}<br><br>
-                <strong>Features:</strong>
-                <ul style="margin: 5px 0 0 15px;">{features_list}</ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Enable sentiment analysis checkbox
-        enable_sentiment = st.checkbox(
-            "Enable Sentiment Analysis",
-            value=selected_data_type == 'twitter',
-            help="Run sentiment analysis using the appropriate model for your data type"
-        )
-
-        # Twitter-specific note
-        if selected_data_type == 'twitter' and enable_sentiment:
-            st.success("✅ Using **CardiffNLP Twitter-RoBERTa** model optimized for messy social media text")
-
-        st.session_state.data_type = selected_data_type
-        st.session_state.enable_sentiment = enable_sentiment
-    else:
-        st.markdown("""
-        <div class="warning-box" style="padding: 10px; margin-bottom: 15px;">
-        ⚠️ <strong>Sentiment analysis not available.</strong><br>
-        Install transformers and torch: <code>pip install transformers torch</code>
-        </div>
-        """, unsafe_allow_html=True)
-        st.session_state.data_type = 'survey'
-        st.session_state.enable_sentiment = False
-
-    st.markdown("---")
-
     # ML Configuration
     st.markdown("### 🤖 ML Algorithm Settings")
 
@@ -1795,8 +1737,29 @@ def page_configuration():
             help="Minimum confidence score for code assignment (lower = more codes per response)"
         )
 
+        # Enable sentiment analysis checkbox
+        if SENTIMENT_ANALYSIS_AVAILABLE:
+            enable_sentiment = st.checkbox(
+                "Enable Sentiment Analysis",
+                value=st.session_state.get('data_type', 'survey') == 'twitter',
+                help="Run sentiment analysis to detect positive, neutral, or negative sentiment in each response"
+            )
+            st.session_state.enable_sentiment = enable_sentiment
+        else:
+            st.markdown("""
+            <div class="warning-box" style="padding: 10px; font-size: 0.9em;">
+            ⚠️ Sentiment analysis not available.<br>
+            <code>pip install transformers torch</code>
+            </div>
+            """, unsafe_allow_html=True)
+            st.session_state.enable_sentiment = False
+
         # Language is hardcoded to English (non-English text is filtered out)
         stop_words = 'english'
+
+    # Set default data_type if not already set (from Text Processor presets)
+    if 'data_type' not in st.session_state:
+        st.session_state.data_type = 'survey'
 
     # Save configuration
     st.session_state.config = {
@@ -2302,6 +2265,9 @@ def page_results_overview():
             'num_codes',
             'max_confidence'
         ]
+        # Add sentiment column if sentiment analysis was enabled
+        if sentiment_enabled and 'sentiment_label' in assignments_df.columns:
+            display_cols.append('sentiment_label')
         sample_df = assignments_df[display_cols].head(sample_size)
 
         # Format for display
@@ -2312,6 +2278,12 @@ def page_results_overview():
         display_df['max_confidence'] = display_df['max_confidence'].apply(
             lambda x: f"{x:.3f}"
         )
+        # Format sentiment label with emoji if present
+        if 'sentiment_label' in display_df.columns:
+            sentiment_emoji = {'positive': '😊', 'neutral': '😐', 'negative': '😞'}
+            display_df['sentiment_label'] = display_df['sentiment_label'].apply(
+                lambda x: f"{sentiment_emoji.get(x, '')} {x.capitalize()}" if x else 'N/A'
+            )
 
         if len(display_df) > 0:
             st.dataframe(display_df, use_container_width=True, height=400)
