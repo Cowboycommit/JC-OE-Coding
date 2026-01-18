@@ -745,15 +745,17 @@ def run_ml_analysis(
                         term_feature_matrix = self.feature_matrix
                     else:
                         # Create TF-IDF vectorizer just for term extraction (not for clustering)
+                        # Include bigrams and trigrams for meaningful multi-word phrases in labels
                         from sklearn.feature_extraction.text import TfidfVectorizer
                         term_vectorizer = TfidfVectorizer(
                             max_features=5000,
                             stop_words='english',
                             max_df=0.95,
-                            min_df=2
+                            min_df=2,
+                            ngram_range=(1, 3)  # Capture phrases like "customer service", "easy to use"
                         )
                         term_feature_matrix = term_vectorizer.fit_transform(responses)
-                        logger.info(f"Created TF-IDF vectorizer for term extraction (representation={self.representation})")
+                        logger.info(f"Created TF-IDF vectorizer for term extraction with trigrams (representation={self.representation})")
 
                     self.cluster_interpretation = interpreter.interpret_clusters(
                         vectorizer=term_vectorizer,
@@ -848,6 +850,7 @@ def run_ml_analysis(
 
             # For embedding-based representations (BERT, LSTM, etc.), create TF-IDF for term extraction
             # Embeddings give generic names like "embedding_0", so we need TF-IDF for meaningful keywords
+            # Include trigrams to capture multi-word phrases for better topic labels
             embedding_representations = {'bert', 'sbert', 'lstm', 'word2vec', 'fasttext'}
             if self.representation in embedding_representations and texts is not None:
                 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -855,7 +858,8 @@ def run_ml_analysis(
                     max_features=5000,
                     stop_words='english',
                     max_df=0.95,
-                    min_df=2
+                    min_df=2,
+                    ngram_range=(1, 3)  # Capture phrases like "customer service", "out of stock"
                 )
                 term_feature_matrix = term_vectorizer.fit_transform(texts)
                 feature_names = term_vectorizer.get_feature_names_out()
