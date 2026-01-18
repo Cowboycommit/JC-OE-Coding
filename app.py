@@ -230,7 +230,8 @@ def precompute_all_visualizations(coder, results_df):
     cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
     cleaned_text = ' '.join(cleaned_text.split())  # Normalize whitespace
     viz_data['wordcloud_text'] = cleaned_text
-    viz_data['wordcloud_available'] = WORDCLOUD_AVAILABLE and len(cleaned_text) > 0
+    # Wordcloud is available if either wordcloud package OR PIL fallback is available
+    viz_data['wordcloud_available'] = (WORDCLOUD_AVAILABLE or (PIL_AVAILABLE and PILWordCloud is not None)) and len(cleaned_text) > 0
 
     # 8. Sunburst chart data (hierarchical code structure)
     sunburst_data = []
@@ -2514,6 +2515,62 @@ def page_results_overview():
                 file_name="sentiment_results.csv",
                 mime="text/csv"
             )
+
+    # Word Cloud Visualization (directly after results table, before codebook)
+    st.markdown("---")
+    st.markdown("### ☁️ Word Cloud")
+
+    # Ensure visualization data is pre-computed
+    if ensure_viz_data_ready():
+        viz_data = st.session_state.viz_data
+
+        if viz_data.get('wordcloud_available', False):
+            wordcloud_text = viz_data['wordcloud_text']
+
+            # Generate word cloud
+            wordcloud = None
+            try:
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=800,
+                        height=400,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=100,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(wordcloud_text)
+                elif PILWordCloud is not None:
+                    wordcloud = PILWordCloud(
+                        width=800,
+                        height=400,
+                        background_color='white',
+                        max_words=100,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(wordcloud_text)
+            except ValueError:
+                # WordCloud raises ValueError if text is empty or only stopwords
+                st.info("📝 Not enough text content to generate word cloud. The text may contain only common words (stopwords) that are filtered out.")
+                wordcloud = None
+
+            if wordcloud is not None:
+                # Create matplotlib figure
+                fig, ax = plt.subplots(figsize=(12, 6))
+                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+                ax.axis('off')
+                plt.tight_layout()
+
+                st.pyplot(fig, use_container_width=True)
+                plt.close(fig)  # Clean up to prevent memory leaks
+
+                st.caption("Word cloud generated from all response text - larger words appear more frequently")
+            elif wordcloud_text.strip():
+                st.warning("⚠️ Word cloud generation failed. PIL library may not be available.")
+        else:
+            st.info("📝 Word cloud not available. Please ensure the `wordcloud` or `PIL` package is installed.")
+    else:
+        st.info("📝 Visualization data not ready. Please re-run analysis.")
 
     # Detailed codebook
     st.markdown("---")
