@@ -177,6 +177,82 @@ class TestClusterScatter:
         assert 't-SNE' in fig.layout.title.text.upper() or 'TSNE' in fig.layout.title.text.upper()
 
 
+class TestClusterNetwork:
+    """Tests for cluster network diagram."""
+
+    @pytest.mark.skipif(not PLOTLY_AVAILABLE, reason="Plotly not available")
+    def test_network_spring_layout(self, kmeans_coder, sample_results_df):
+        """Test network diagram with spring layout."""
+        viz = MethodVisualizer(kmeans_coder, sample_results_df, 'text')
+        fig = viz.create_cluster_network(layout='spring')
+
+        assert fig is not None
+        assert 'Network' in fig.layout.title.text
+
+    @pytest.mark.skipif(not PLOTLY_AVAILABLE, reason="Plotly not available")
+    def test_network_circular_layout(self, kmeans_coder, sample_results_df):
+        """Test network diagram with circular layout."""
+        viz = MethodVisualizer(kmeans_coder, sample_results_df, 'text')
+        fig = viz.create_cluster_network(layout='circular')
+
+        assert fig is not None
+        assert 'Network' in fig.layout.title.text
+
+    @pytest.mark.skipif(not PLOTLY_AVAILABLE, reason="Plotly not available")
+    def test_network_kamada_kawai_layout(self, kmeans_coder, sample_results_df):
+        """Test network diagram with Kamada-Kawai layout."""
+        viz = MethodVisualizer(kmeans_coder, sample_results_df, 'text')
+        fig = viz.create_cluster_network(layout='kamada_kawai')
+
+        assert fig is not None
+        assert 'Network' in fig.layout.title.text
+
+    @pytest.mark.skipif(not PLOTLY_AVAILABLE, reason="Plotly not available")
+    def test_network_nmf(self, nmf_coder):
+        """Test network diagram for NMF model."""
+        results_df = pd.DataFrame({
+            'text': nmf_coder.texts,
+            'assigned_codes': [[f'CODE_{l+1:02d}'] for l in nmf_coder.labels_]
+        })
+        viz = MethodVisualizer(nmf_coder, results_df, 'text')
+        fig = viz.create_cluster_network()
+
+        assert fig is not None
+
+    @pytest.mark.skipif(not PLOTLY_AVAILABLE, reason="Plotly not available")
+    def test_network_lda(self, lda_coder):
+        """Test network diagram for LDA model."""
+        results_df = pd.DataFrame({
+            'text': lda_coder.texts,
+            'assigned_codes': [[f'CODE_{l+1:02d}'] for l in lda_coder.labels_]
+        })
+        viz = MethodVisualizer(lda_coder, results_df, 'text')
+        fig = viz.create_cluster_network()
+
+        assert fig is not None
+
+    @pytest.mark.skipif(not PLOTLY_AVAILABLE, reason="Plotly not available")
+    def test_network_with_edge_labels(self, kmeans_coder, sample_results_df):
+        """Test network diagram with edge labels shown."""
+        viz = MethodVisualizer(kmeans_coder, sample_results_df, 'text')
+        fig = viz.create_cluster_network(show_edge_labels=True)
+
+        assert fig is not None
+
+    @pytest.mark.skipif(not PLOTLY_AVAILABLE, reason="Plotly not available")
+    def test_network_similarity_threshold(self, kmeans_coder, sample_results_df):
+        """Test network diagram with different similarity thresholds."""
+        viz = MethodVisualizer(kmeans_coder, sample_results_df, 'text')
+
+        # Low threshold should show more edges
+        fig_low = viz.create_cluster_network(similarity_threshold=0.0)
+        # High threshold should show fewer edges
+        fig_high = viz.create_cluster_network(similarity_threshold=0.9)
+
+        assert fig_low is not None
+        assert fig_high is not None
+
+
 class TestSilhouettePlot:
     """Tests for silhouette plot."""
 

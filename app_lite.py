@@ -1262,29 +1262,52 @@ def main():
                     method=method
                 )
 
-                # === VISUALIZATION: Cluster Scatter (PCA/t-SNE) ===
-                st.markdown("**Cluster/Topic Scatter Plot**:")
+                # === VISUALIZATION: Cluster Visualization (Scatter or Network) ===
+                st.markdown("**Cluster/Topic Visualization**:")
                 if PLOTLY_AVAILABLE and SKLEARN_VIZ_AVAILABLE:
-                    col1, col2 = st.columns([3, 1])
+                    col1, col2, col3 = st.columns([2, 1, 1])
                     with col2:
-                        reduction_method = st.selectbox(
-                            "Reduction Method",
-                            options=['pca', 'tsne'],
-                            format_func=lambda x: 'PCA (Fast)' if x == 'pca' else 't-SNE (Better separation)',
-                            key="scatter_reduction_method"
+                        viz_type = st.selectbox(
+                            "Visualization Type",
+                            options=['scatter', 'network'],
+                            format_func=lambda x: 'Scatter Plot' if x == 'scatter' else 'Network Diagram',
+                            key="cluster_viz_type"
                         )
-
-                    scatter_fig = visualizer.create_cluster_scatter(reduction_method=reduction_method)
-                    if scatter_fig is not None:
-                        st.plotly_chart(scatter_fig, use_container_width=True)
-                        if method == 'tfidf_kmeans':
-                            st.caption("Shows cluster separation - well-separated clusters indicate good clustering quality.")
+                    with col3:
+                        if viz_type == 'scatter':
+                            reduction_method = st.selectbox(
+                                "Reduction Method",
+                                options=['pca', 'tsne'],
+                                format_func=lambda x: 'PCA (Fast)' if x == 'pca' else 't-SNE (Better separation)',
+                                key="scatter_reduction_method"
+                            )
                         else:
-                            st.caption("Shows document groupings by dominant topic. Less meaningful for topic models than for clustering.")
-                    else:
-                        st.warning("Could not generate cluster scatter plot.")
+                            network_layout = st.selectbox(
+                                "Layout",
+                                options=['spring', 'circular', 'kamada_kawai'],
+                                format_func=lambda x: {'spring': 'Spring (Force-directed)', 'circular': 'Circular', 'kamada_kawai': 'Kamada-Kawai'}[x],
+                                key="network_layout"
+                            )
+
+                    if viz_type == 'scatter':
+                        scatter_fig = visualizer.create_cluster_scatter(reduction_method=reduction_method)
+                        if scatter_fig is not None:
+                            st.plotly_chart(scatter_fig, use_container_width=True)
+                            if method == 'tfidf_kmeans':
+                                st.caption("Shows cluster separation - well-separated clusters indicate good clustering quality.")
+                            else:
+                                st.caption("Shows document groupings by dominant topic. Less meaningful for topic models than for clustering.")
+                        else:
+                            st.warning("Could not generate cluster scatter plot.")
+                    else:  # network diagram
+                        network_fig = visualizer.create_cluster_network(layout=network_layout)
+                        if network_fig is not None:
+                            st.plotly_chart(network_fig, use_container_width=True)
+                            st.caption("Network diagram showing cluster relationships. Node size represents document count, edges show inter-cluster similarity.")
+                        else:
+                            st.warning("Could not generate network diagram. Need at least 2 clusters.")
                 else:
-                    st.info("Cluster scatter plot requires `plotly` and `scikit-learn`. Install with: `pip install plotly scikit-learn`")
+                    st.info("Cluster visualization requires `plotly` and `scikit-learn`. Install with: `pip install plotly scikit-learn`")
 
                 # === VISUALIZATION: Silhouette Plot (Hard clustering methods) ===
                 if method in ['tfidf_kmeans', 'lstm_kmeans', 'bert_kmeans', 'svm']:
