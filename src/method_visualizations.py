@@ -1054,7 +1054,11 @@ class MethodVisualizer:
         # Use matplotlib if available
         if MATPLOTLIB_AVAILABLE:
             fig, axes = plt.subplots(rows, cols, figsize=(cols * 5, rows * 3))
-            axes = axes.flatten() if n_clusters > 1 else [axes]
+            # Handle axes array: single axis becomes [axis], 1D stays 1D, 2D gets flattened
+            if isinstance(axes, np.ndarray):
+                axes = axes.flatten()
+            else:
+                axes = [axes]
 
             for cluster_id in range(n_clusters):
                 ax = axes[cluster_id]
@@ -1551,7 +1555,11 @@ class MethodVisualizer:
         if MATPLOTLIB_AVAILABLE:
             # Larger figure for semantic wordclouds
             fig, axes = plt.subplots(rows, cols, figsize=(cols * 6, rows * 4))
-            axes = axes.flatten() if n_clusters > 1 else [axes]
+            # Handle axes array: single axis becomes [axis], 1D stays 1D, 2D gets flattened
+            if isinstance(axes, np.ndarray):
+                axes = axes.flatten()
+            else:
+                axes = [axes]
 
             for cluster_id in range(n_clusters):
                 ax = axes[cluster_id]
