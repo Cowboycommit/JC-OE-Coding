@@ -529,20 +529,20 @@ class AdaptivePreprocessor:
             rationale_parts.append("max_df=0.8 (standard)")
 
         # Determine n-gram range
-        # Always enable bigrams to capture meaningful phrases (e.g., "customer service", "too expensive")
-        # This is especially important for focused survey responses where phrases carry more meaning
+        # Enable trigrams to capture meaningful phrases (e.g., "customer service", "out of stock", "easy to use")
+        # Trigrams improve topic label clarity by capturing multi-word concepts
         if characteristics.is_long_form or characteristics.corpus_size_category == 'large':
-            # Enable bigrams for long-form or large corpora
-            config.ngram_range = (1, 2)
-            rationale_parts.append("ngram_range=(1,2) (bigrams enabled)")
+            # Enable trigrams for long-form or large corpora - more vocabulary to capture
+            config.ngram_range = (1, 3)
+            rationale_parts.append("ngram_range=(1,3) (trigrams for rich vocabulary)")
         elif characteristics.is_short_form and characteristics.corpus_size_category == 'small':
-            # Enable bigrams for small short-form corpora to capture key phrases
-            config.ngram_range = (1, 2)
-            rationale_parts.append("ngram_range=(1,2) (bigrams for focused survey phrases)")
+            # Enable trigrams for small short-form corpora to capture key phrases
+            config.ngram_range = (1, 3)
+            rationale_parts.append("ngram_range=(1,3) (trigrams for focused survey phrases)")
         else:
-            # Default: include bigrams
-            config.ngram_range = (1, 2)
-            rationale_parts.append("ngram_range=(1,2) (default)")
+            # Default: include trigrams for better semantic understanding
+            config.ngram_range = (1, 3)
+            rationale_parts.append("ngram_range=(1,3) (default with trigrams)")
 
         # Determine max_features based on vocabulary and corpus size
         if characteristics.vocabulary_size > 10000:

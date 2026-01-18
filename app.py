@@ -1400,6 +1400,16 @@ def page_text_processor():
             adv_min_token_len = st.number_input("Min token length", min_value=1, max_value=10, value=2,
                 help="Minimum character length for tokens", key="adv_min_token_len")
 
+        # Token count filtering
+        st.markdown("#### Token Count Filtering")
+        col1, col2 = st.columns(2)
+        with col1:
+            adv_min_tokens = st.number_input("Min tokens per response", min_value=1, max_value=50, value=3,
+                help="Responses with fewer tokens will be filtered out", key="adv_min_tokens")
+        with col2:
+            adv_max_tokens = st.number_input("Max tokens per response", min_value=50, max_value=5000, value=512,
+                help="Responses exceeding this limit will be filtered out", key="adv_max_tokens")
+
         # Domain-specific cleaning
         st.markdown("#### Domain-Specific Cleaning")
         domain_options = {
@@ -1449,12 +1459,14 @@ def page_text_processor():
         if st.button("🚀 Apply Advanced Processing", use_container_width=True, key="apply_adv_btn"):
             with st.spinner("Applying advanced preprocessing..."):
                 try:
-                    # Create TextPreprocessor
+                    # Create TextPreprocessor with token limits
                     preprocessor = TextPreprocessor(
                         use_gold_standard=True,
                         expand_slang=False,
                         detect_spam=True,
-                        detect_duplicates=True
+                        detect_duplicates=True,
+                        min_tokens=adv_min_tokens,
+                        max_tokens=adv_max_tokens
                     )
 
                     # Parse preserve terms
@@ -1838,13 +1850,18 @@ def page_configuration():
     """, unsafe_allow_html=True)
 
     # Enable sentiment analysis checkbox
+    # Use a single session state key to avoid conflicts between widget key and manual state
     if SENTIMENT_ANALYSIS_AVAILABLE:
+        # Initialize if not set
+        if 'enable_sentiment' not in st.session_state:
+            st.session_state.enable_sentiment = False
+
         enable_sentiment = st.checkbox(
             "Enable Sentiment Analysis",
-            value=st.session_state.get('enable_sentiment', False),
-            help="Run sentiment analysis to detect positive, neutral, or negative sentiment in each response",
-            key="config_enable_sentiment"
+            value=st.session_state.enable_sentiment,
+            help="Run sentiment analysis to detect positive, neutral, or negative sentiment in each response"
         )
+        # Update session state when checkbox changes
         st.session_state.enable_sentiment = enable_sentiment
 
         if enable_sentiment:
