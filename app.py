@@ -2557,15 +2557,14 @@ def page_visualizations():
     viz_data = st.session_state.viz_data
     coder = st.session_state.coder
 
-    # 8-tab layout with new visualizations (word cloud, sunburst, scatter, network)
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+    # 7-tab layout with visualizations (word cloud, sunburst, network)
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "📊 Frequency",
         "🔥 Heatmap",
         "📉 Stats",
         "💬 Quotes",
         "☁️ Word Cloud",
         "🌞 Sunburst",
-        "🔵 Scatter",
         "🔗 Network"
     ])
 
@@ -3041,71 +3040,9 @@ def page_visualizations():
             st.info("No code data available for sunburst chart.")
 
     # =========================================================================
-    # TAB 7: Scatter Plot (Frequency vs Confidence)
+    # TAB 7: Cluster Network Diagram
     # =========================================================================
     with tab7:
-        st.markdown("### Frequency vs Confidence")
-
-        with st.expander("ℹ️ What am I seeing?", expanded=False):
-            st.markdown("""
-            **What this shows:** Scatter plot comparing code frequency (how often a code appears)
-            vs. average confidence (how certain the model is when assigning this code).
-
-            **How to interpret:**
-            - **Top-right:** High frequency, high confidence = strong, reliable codes
-            - **Top-left:** Low frequency, high confidence = specialized but reliable codes
-            - **Bottom-right:** High frequency, low confidence = common but uncertain codes
-            - **Bottom-left:** Low frequency, low confidence = weak codes to review
-            """)
-
-        top_codes_df = viz_data['top_codes_df']
-
-        if not top_codes_df.empty:
-            fig = px.scatter(
-                top_codes_df,
-                x='Count',
-                y='Avg Confidence',
-                text='Label',
-                size='Count',
-                color='Avg Confidence',
-                color_continuous_scale='Viridis',
-                title='Code Frequency vs. Average Confidence',
-                labels={
-                    'Count': 'Frequency (Number of Responses)',
-                    'Avg Confidence': 'Average Confidence Score'
-                }
-            )
-            fig.update_traces(
-                textposition='top center',
-                marker=dict(sizemin=10, sizeref=2.*max(top_codes_df['Count'])/(40.**2)),
-                hovertemplate='<b>%{text}</b><br>Count: %{x}<br>Confidence: %{y:.2f}<extra></extra>'
-            )
-            fig.update_layout(
-                height=550,
-                xaxis=dict(title='Frequency (Count)'),
-                yaxis=dict(title='Average Confidence', range=[0, 1.05])
-            )
-
-            st.plotly_chart(fig, use_container_width=True, key="scatter_chart")
-
-            # Insights
-            st.markdown("#### Quick Insights")
-            if len(top_codes_df) >= 2:
-                highest_conf = top_codes_df.loc[top_codes_df['Avg Confidence'].idxmax()]
-                highest_freq = top_codes_df.loc[top_codes_df['Count'].idxmax()]
-
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.info(f"**Highest Confidence:** {highest_conf['Label']} ({highest_conf['Avg Confidence']:.2f})")
-                with col2:
-                    st.info(f"**Most Frequent:** {highest_freq['Label']} ({highest_freq['Count']} responses)")
-        else:
-            st.info("No code data available for scatter plot.")
-
-    # =========================================================================
-    # TAB 8: Cluster Network Diagram
-    # =========================================================================
-    with tab8:
         st.markdown("### Cluster Network Diagram")
 
         with st.expander("ℹ️ What am I seeing?", expanded=False):
