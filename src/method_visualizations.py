@@ -476,7 +476,7 @@ class MethodVisualizer:
             method: Override method detection ('tfidf_kmeans', 'nmf', 'lda')
         """
         self.coder = coder
-        self.results_df = results_df
+        self.results_df = results_df.reset_index(drop=True)  # Ensure clean index for mask operations
         self.text_column = text_column
         self.method = method or getattr(coder, 'method', 'tfidf_kmeans')
 
@@ -498,7 +498,18 @@ class MethodVisualizer:
             # Fallback to code assignments
             self.assignments = np.array([
                 int(codes[0].split('_')[1]) - 1 if codes else -1
-                for codes in results_df['assigned_codes']
+                for codes in self.results_df['assigned_codes']
+            ])
+
+        # Validate assignments length matches DataFrame
+        if len(self.assignments) != len(self.results_df):
+            logger.warning(
+                f"Assignments length ({len(self.assignments)}) != DataFrame length ({len(self.results_df)}). "
+                "Using fallback from assigned_codes."
+            )
+            self.assignments = np.array([
+                int(codes[0].split('_')[1]) - 1 if codes else -1
+                for codes in self.results_df['assigned_codes']
             ])
 
     def _get_topic_label(self, cluster_idx: int) -> str:
