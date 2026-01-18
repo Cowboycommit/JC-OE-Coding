@@ -2596,8 +2596,50 @@ def page_results_overview():
         except Exception as e:
             st.warning(f"⚠️ Word cloud generation failed: {str(e)}")
 
+    # Final fallback: pure matplotlib word frequency chart (no wordcloud/PIL needed)
     if not wordcloud_generated:
-        st.info("📝 Word cloud not available. Please ensure the `wordcloud` or `PIL` package is installed.")
+        try:
+            results_df = st.session_state.results_df
+            # Find text column
+            text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes', 'sentiment_label', 'sentiment_score', 'sentiment_positive', 'sentiment_negative', 'sentiment_neutral']][0]
+            all_text = ' '.join(results_df[text_col].dropna().astype(str).tolist())
+            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
+            words = cleaned_text.split()
+
+            # Count word frequencies (exclude common stopwords)
+            stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs', 'what', 'which', 'who', 'whom', 'whose', 'where', 'when', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'here', 'there', 'then', 'once', 'if', 'because', 'until', 'while', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 'over', 'under', 'again', 'further', 'am', 'being', 'dont', 'didnt', 'doesnt', 'dont', 'hadnt', 'hasnt', 'havent', 'isnt', 'mightnt', 'mustnt', 'neednt', 'shant', 'shouldnt', 'wasnt', 'werent', 'wont', 'wouldnt', 'ive', 'youve', 'weve', 'theyve', 'id', 'youd', 'hed', 'shed', 'wed', 'theyd', 'ill', 'youll', 'hell', 'shell', 'well', 'theyll', 'im', 'youre', 'hes', 'shes', 'its', 'were', 'theyre', 'get', 'got', 'getting', 'really', 'like', 'just', 'know', 'think', 'make', 'go', 'see', 'come', 'want', 'look', 'use', 'find', 'give', 'tell', 'work', 'feel', 'try', 'leave', 'call', 'good', 'new', 'first', 'last', 'long', 'great', 'little', 'own', 'old', 'right', 'big', 'high', 'different', 'small', 'large', 'next', 'early', 'young', 'important', 'public', 'bad', 'same', 'able'}
+            word_counts = {}
+            for word in words:
+                if len(word) > 2 and word not in stopwords:
+                    word_counts[word] = word_counts.get(word, 0) + 1
+
+            if word_counts:
+                # Get top 30 words
+                top_words = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)[:30]
+                words_list = [w[0] for w in top_words]
+                counts_list = [w[1] for w in top_words]
+
+                # Create horizontal bar chart
+                fig, ax = plt.subplots(figsize=(10, 8))
+                colors = plt.cm.viridis(np.linspace(0.2, 0.8, len(words_list)))
+                bars = ax.barh(range(len(words_list)), counts_list, color=colors)
+                ax.set_yticks(range(len(words_list)))
+                ax.set_yticklabels(words_list)
+                ax.invert_yaxis()  # Largest at top
+                ax.set_xlabel('Frequency')
+                ax.set_title('Top 30 Most Frequent Words')
+                plt.tight_layout()
+
+                st.pyplot(fig, use_container_width=True)
+                plt.close(fig)
+
+                st.caption("Word frequency chart - showing the most common words in response text")
+                wordcloud_generated = True
+        except Exception as e:
+            st.warning(f"⚠️ Word frequency visualization failed: {str(e)}")
+
+    if not wordcloud_generated:
+        st.info("📝 Word visualization not available. No text data found.")
 
     # Detailed codebook
     st.markdown("---")
