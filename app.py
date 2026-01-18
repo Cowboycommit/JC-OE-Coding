@@ -745,24 +745,24 @@ def page_data_upload():
 
     # Define available sample datasets with metadata
     sample_datasets = {
-        # Original survey datasets
-        "Remote Work Experiences": {
-            "path": "data/Remote Work Survey Data.csv",
-            "description": "Survey responses about remote work experiences, challenges, and preferences. Open-ended qualitative data ideal for thematic analysis.",
+        # Primary demo datasets - qualitative survey data
+        "Healthcare Patient Feedback": {
+            "path": "data/Healthcare_Patient_Feedback_300.csv",
+            "description": "Patient feedback across hospital departments (Emergency, Cardiology, etc.). Rich qualitative data ideal for thematic analysis and department-based segmentation.",
             "text_column": "response",
-            "type": "Survey"
+            "type": "Healthcare"
         },
-        "Fashion Industry Perspectives": {
-            "path": "data/Fashion Trends Survey Data.csv",
-            "description": "Consumer opinions on fashion trends, sustainability, and shopping behaviors. Rich qualitative responses for coding analysis.",
+        "Market Research Survey": {
+            "path": "data/Market_Research_Survey_300.csv",
+            "description": "Consumer insights survey with demographic segmentation. Open-ended responses about products, services, and customer experiences.",
             "text_column": "response",
-            "type": "Survey"
+            "type": "Market Research"
         },
-        "Cricket Commentary": {
-            "path": "data/Cricket Lovers Survey Data.csv",
-            "description": "Fan perspectives on cricket matches, players, and the sport's cultural significance. Diverse opinions and commentary.",
+        "Psychology Wellbeing Study": {
+            "path": "data/Psychology_Wellbeing_Study_300.csv",
+            "description": "Wellbeing and mental health study responses. Complex emotional themes around burnout, work-life balance, and personal challenges.",
             "text_column": "response",
-            "type": "Survey"
+            "type": "Psychology"
         },
         # Sentiment analysis benchmark datasets
         "SST-2 (Binary Sentiment)": {
@@ -778,13 +778,6 @@ def page_data_upload():
             "text_column": "text",
             "type": "Sentiment",
             "labels": "very negative, negative, neutral, positive, very positive"
-        },
-        "IMDB Movie Reviews": {
-            "path": "data/IMDB Movie Reviews.csv",
-            "description": "Classic movie review sentiment corpus. Longer-form reviews with binary sentiment labels. Tests analysis on paragraph-length text.",
-            "text_column": "text",
-            "type": "Sentiment",
-            "labels": "positive, negative"
         },
         "Twitter Sentiment (SemEval)": {
             "path": "data/SemEval Twitter Sentiment.csv",
