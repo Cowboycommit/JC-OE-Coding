@@ -2557,7 +2557,7 @@ def page_visualizations():
     viz_data = st.session_state.viz_data
     coder = st.session_state.coder
 
-    # 7-tab layout with new visualizations (word cloud, sunburst, scatter)
+    # 7-tab layout with visualizations (word cloud, sunburst, network)
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "📊 Frequency",
         "🔥 Heatmap",
@@ -2565,7 +2565,7 @@ def page_visualizations():
         "💬 Quotes",
         "☁️ Word Cloud",
         "🌞 Sunburst",
-        "🔵 Scatter"
+        "🔗 Network"
     ])
 
     # =========================================================================
@@ -3045,66 +3045,57 @@ def page_visualizations():
             st.info("No code data available for sunburst chart.")
 
     # =========================================================================
-    # TAB 7: Scatter Plot (Frequency vs Confidence)
+    # TAB 7: Cluster Network Diagram
     # =========================================================================
     with tab7:
-        st.markdown("### Frequency vs Confidence")
+        st.markdown("### Cluster Network Diagram")
 
         with st.expander("ℹ️ What am I seeing?", expanded=False):
             st.markdown("""
-            **What this shows:** Scatter plot comparing code frequency (how often a code appears)
-            vs. average confidence (how certain the model is when assigning this code).
+            **What this shows:** Network diagram showing relationships between clusters/topics.
 
             **How to interpret:**
-            - **Top-right:** High frequency, high confidence = strong, reliable codes
-            - **Top-left:** Low frequency, high confidence = specialized but reliable codes
-            - **Bottom-right:** High frequency, low confidence = common but uncertain codes
-            - **Bottom-left:** Low frequency, low confidence = weak codes to review
+            - **Nodes:** Each node represents a cluster/topic. Larger nodes = more documents.
+            - **Edges:** Lines connect similar clusters. Thicker lines = higher similarity.
+            - **Layout:** Similar clusters are positioned closer together.
             """)
 
-        top_codes_df = viz_data['top_codes_df']
+        if METHOD_VISUALIZER_AVAILABLE:
+            try:
+                results_df = st.session_state.results_df
+                text_column = viz_data.get('text_column', 'response')
 
-        if not top_codes_df.empty:
-            fig = px.scatter(
-                top_codes_df,
-                x='Count',
-                y='Avg Confidence',
-                text='Label',
-                size='Count',
-                color='Avg Confidence',
-                color_continuous_scale='Viridis',
-                title='Code Frequency vs. Average Confidence',
-                labels={
-                    'Count': 'Frequency (Number of Responses)',
-                    'Avg Confidence': 'Average Confidence Score'
-                }
-            )
-            fig.update_traces(
-                textposition='top center',
-                marker=dict(sizemin=10, sizeref=2.*max(top_codes_df['Count'])/(40.**2)),
-                hovertemplate='<b>%{text}</b><br>Count: %{x}<br>Confidence: %{y:.2f}<extra></extra>'
-            )
-            fig.update_layout(
-                height=550,
-                xaxis=dict(title='Frequency (Count)'),
-                yaxis=dict(title='Average Confidence', range=[0, 1.05])
-            )
+                visualizer = MethodVisualizer(coder, results_df, text_column)
 
-            st.plotly_chart(fig, use_container_width=True, key="scatter_chart")
-
-            # Insights
-            st.markdown("#### Quick Insights")
-            if len(top_codes_df) >= 2:
-                highest_conf = top_codes_df.loc[top_codes_df['Avg Confidence'].idxmax()]
-                highest_freq = top_codes_df.loc[top_codes_df['Count'].idxmax()]
-
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.info(f"**Highest Confidence:** {highest_conf['Label']} ({highest_conf['Avg Confidence']:.2f})")
+                # Layout selection
+                col1, col2 = st.columns([3, 1])
                 with col2:
-                    st.info(f"**Most Frequent:** {highest_freq['Label']} ({highest_freq['Count']} responses)")
+                    network_layout = st.selectbox(
+                        "Layout Algorithm",
+                        options=['spring', 'circular', 'kamada_kawai'],
+                        format_func=lambda x: {
+                            'spring': 'Spring (Force-directed)',
+                            'circular': 'Circular',
+                            'kamada_kawai': 'Kamada-Kawai'
+                        }[x],
+                        key="network_layout_select"
+                    )
+
+                with st.spinner("Generating network diagram..."):
+                    network_fig = visualizer.create_cluster_network(layout=network_layout)
+
+                if network_fig is not None:
+                    st.plotly_chart(network_fig, use_container_width=True, key="network_chart")
+                    st.caption(
+                        "Node size represents document count. "
+                        "Edge thickness indicates inter-cluster similarity based on centroid cosine similarity."
+                    )
+                else:
+                    st.warning("Could not generate network diagram. Need at least 2 clusters.")
+            except Exception as e:
+                st.error(f"Error generating network diagram: {str(e)}")
         else:
-            st.info("No code data available for scatter plot.")
+            st.warning("Network diagram requires the method visualizations module.")
 
     # Next button
     render_next_button("💾 Export Results")
