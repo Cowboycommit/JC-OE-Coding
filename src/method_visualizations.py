@@ -417,6 +417,12 @@ VISUALIZATION_COMPATIBILITY = {
         'recommended': ['tfidf_kmeans', 'nmf', 'lda'],
         'description': 'Semantic word cloud with color-coded word meanings',
         'note': 'Colors represent semantic similarity - similar colors mean similar meanings.'
+    },
+    'cluster_network': {
+        'compatible': ['tfidf_kmeans', 'nmf', 'lda'],
+        'recommended': ['tfidf_kmeans', 'nmf', 'lda'],
+        'description': 'Network diagram showing cluster relationships',
+        'note': 'Nodes represent clusters, edges show inter-cluster similarity.'
     }
 }
 
@@ -657,6 +663,225 @@ class MethodVisualizer:
             yaxis_title=axis_labels[1],
             legend_title='Topic',
             hovermode='closest'
+        )
+
+        return fig
+
+    def create_cluster_network(
+        self,
+        similarity_threshold: float = 0.1,
+        layout: str = 'spring',
+        show_edge_labels: bool = False
+    ) -> Optional[Any]:
+        """
+        Create network diagram showing cluster/topic relationships.
+
+        Nodes represent clusters, sized by document count.
+        Edges represent inter-cluster similarity based on centroid cosine similarity.
+
+        Best for: All methods (KMeans, NMF, LDA)
+
+        Args:
+            similarity_threshold: Minimum similarity to show an edge (0.0-1.0)
+            layout: Graph layout algorithm ('spring', 'circular', 'kamada_kawai')
+            show_edge_labels: Whether to show similarity values on edges
+
+        Returns:
+            Plotly Figure or None if not available
+        """
+        if not PLOTLY_AVAILABLE:
+            logger.warning("Plotly not available for network diagram")
+            return None
+
+        # Get dense matrix
+        if hasattr(self.feature_matrix, 'toarray'):
+            dense_matrix = self.feature_matrix.toarray()
+        else:
+            dense_matrix = np.array(self.feature_matrix)
+
+        # Get unique clusters
+        unique_clusters = sorted(set(self.assignments))
+        n_clusters = len(unique_clusters)
+
+        if n_clusters < 2:
+            logger.warning("Need at least 2 clusters for network diagram")
+            return None
+
+        # Calculate cluster centroids
+        centroids = []
+        cluster_sizes = []
+        cluster_labels = []
+
+        for cluster_id in unique_clusters:
+            mask = self.assignments == cluster_id
+            cluster_docs = dense_matrix[mask]
+            centroid = cluster_docs.mean(axis=0)
+            centroids.append(centroid)
+            cluster_sizes.append(mask.sum())
+            cluster_labels.append(self._get_topic_label(cluster_id))
+
+        centroids = np.array(centroids)
+
+        # Calculate pairwise similarities using cosine similarity
+        # Cosine similarity = 1 - cosine distance
+        if SCIPY_AVAILABLE:
+            # Use scipy for efficient computation
+            distances = pdist(centroids, metric='cosine')
+            similarity_matrix = 1 - squareform(distances)
+        else:
+            # Manual computation
+            similarity_matrix = np.zeros((n_clusters, n_clusters))
+            for i in range(n_clusters):
+                for j in range(n_clusters):
+                    if i == j:
+                        similarity_matrix[i, j] = 1.0
+                    else:
+                        norm_i = np.linalg.norm(centroids[i])
+                        norm_j = np.linalg.norm(centroids[j])
+                        if norm_i > 0 and norm_j > 0:
+                            similarity_matrix[i, j] = np.dot(centroids[i], centroids[j]) / (norm_i * norm_j)
+
+        # Create edges based on similarity threshold
+        edges = []
+        edge_weights = []
+        for i in range(n_clusters):
+            for j in range(i + 1, n_clusters):
+                sim = similarity_matrix[i, j]
+                if sim >= similarity_threshold:
+                    edges.append((i, j))
+                    edge_weights.append(sim)
+
+        # Calculate node positions using simple layout algorithms
+        if layout == 'circular':
+            # Circular layout
+            angles = np.linspace(0, 2 * np.pi, n_clusters, endpoint=False)
+            node_x = np.cos(angles)
+            node_y = np.sin(angles)
+        elif layout == 'kamada_kawai' and SCIPY_AVAILABLE:
+            # Use spring layout with scipy optimization
+            # Start with circular, then apply force-directed adjustment
+            angles = np.linspace(0, 2 * np.pi, n_clusters, endpoint=False)
+            node_x = np.cos(angles).copy()
+            node_y = np.sin(angles).copy()
+            # Simple force-directed adjustment
+            for _ in range(50):
+                for i in range(n_clusters):
+                    fx, fy = 0, 0
+                    for j in range(n_clusters):
+                        if i != j:
+                            dx = node_x[i] - node_x[j]
+                            dy = node_y[i] - node_y[j]
+                            dist = max(np.sqrt(dx**2 + dy**2), 0.01)
+                            # Repulsion
+                            fx += dx / (dist ** 2) * 0.1
+                            fy += dy / (dist ** 2) * 0.1
+                            # Attraction for connected nodes
+                            if (i, j) in edges or (j, i) in edges:
+                                fx -= dx * similarity_matrix[i, j] * 0.05
+                                fy -= dy * similarity_matrix[i, j] * 0.05
+                    node_x[i] += fx * 0.1
+                    node_y[i] += fy * 0.1
+        else:  # spring layout (default)
+            # Force-directed spring layout
+            np.random.seed(42)
+            node_x = np.random.rand(n_clusters) * 2 - 1
+            node_y = np.random.rand(n_clusters) * 2 - 1
+
+            for _ in range(100):
+                for i in range(n_clusters):
+                    fx, fy = 0, 0
+                    for j in range(n_clusters):
+                        if i != j:
+                            dx = node_x[i] - node_x[j]
+                            dy = node_y[i] - node_y[j]
+                            dist = max(np.sqrt(dx**2 + dy**2), 0.01)
+                            # Repulsion (all nodes repel each other)
+                            repulsion = 0.5 / (dist ** 2)
+                            fx += dx / dist * repulsion
+                            fy += dy / dist * repulsion
+                            # Attraction (connected nodes attract)
+                            sim = similarity_matrix[i, j]
+                            if sim >= similarity_threshold:
+                                attraction = sim * dist * 0.5
+                                fx -= dx / dist * attraction
+                                fy -= dy / dist * attraction
+                    node_x[i] += fx * 0.05
+                    node_y[i] += fy * 0.05
+
+        # Create Plotly figure
+        fig = go.Figure()
+
+        # Use color palette
+        colors = px.colors.qualitative.Plotly
+        if n_clusters > len(colors):
+            colors = colors * (n_clusters // len(colors) + 1)
+
+        # Add edges
+        for idx, (i, j) in enumerate(edges):
+            weight = edge_weights[idx]
+            # Line width proportional to similarity
+            line_width = 1 + weight * 5
+
+            fig.add_trace(go.Scatter(
+                x=[node_x[i], node_x[j], None],
+                y=[node_y[i], node_y[j], None],
+                mode='lines',
+                line=dict(width=line_width, color='rgba(150, 150, 150, 0.6)'),
+                hoverinfo='text',
+                hovertext=f"Similarity: {weight:.2f}",
+                showlegend=False
+            ))
+
+            # Add edge label if requested
+            if show_edge_labels:
+                mid_x = (node_x[i] + node_x[j]) / 2
+                mid_y = (node_y[i] + node_y[j]) / 2
+                fig.add_annotation(
+                    x=mid_x, y=mid_y,
+                    text=f"{weight:.2f}",
+                    showarrow=False,
+                    font=dict(size=9, color='gray')
+                )
+
+        # Add nodes
+        # Scale node sizes based on document counts
+        max_size = max(cluster_sizes)
+        min_size = min(cluster_sizes)
+        size_range = max_size - min_size if max_size > min_size else 1
+        node_sizes = [20 + (s - min_size) / size_range * 40 for s in cluster_sizes]
+
+        for i, (x, y, label, size, count) in enumerate(zip(
+            node_x, node_y, cluster_labels, node_sizes, cluster_sizes
+        )):
+            fig.add_trace(go.Scatter(
+                x=[x],
+                y=[y],
+                mode='markers+text',
+                marker=dict(
+                    size=size,
+                    color=colors[i % len(colors)],
+                    line=dict(width=2, color='white')
+                ),
+                text=[label],
+                textposition='top center',
+                textfont=dict(size=10),
+                hovertemplate=(
+                    f"<b>{label}</b><br>"
+                    f"Documents: {count}<br>"
+                    f"<extra></extra>"
+                ),
+                name=label,
+                showlegend=True
+            ))
+
+        fig.update_layout(
+            title='Cluster Network Diagram',
+            showlegend=True,
+            legend_title='Clusters',
+            hovermode='closest',
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=''),
+            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=''),
+            plot_bgcolor='white'
         )
 
         return fig
