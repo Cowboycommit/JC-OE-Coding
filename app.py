@@ -2557,15 +2557,16 @@ def page_visualizations():
     viz_data = st.session_state.viz_data
     coder = st.session_state.coder
 
-    # 7-tab layout with new visualizations (word cloud, sunburst, scatter)
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    # 8-tab layout with new visualizations (word cloud, sunburst, scatter, network)
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
         "📊 Frequency",
         "🔥 Heatmap",
         "📉 Stats",
         "💬 Quotes",
         "☁️ Word Cloud",
         "🌞 Sunburst",
-        "🔵 Scatter"
+        "🔵 Scatter",
+        "🔗 Network"
     ])
 
     # =========================================================================
@@ -3100,6 +3101,59 @@ def page_visualizations():
                     st.info(f"**Most Frequent:** {highest_freq['Label']} ({highest_freq['Count']} responses)")
         else:
             st.info("No code data available for scatter plot.")
+
+    # =========================================================================
+    # TAB 8: Cluster Network Diagram
+    # =========================================================================
+    with tab8:
+        st.markdown("### Cluster Network Diagram")
+
+        with st.expander("ℹ️ What am I seeing?", expanded=False):
+            st.markdown("""
+            **What this shows:** Network diagram showing relationships between clusters/topics.
+
+            **How to interpret:**
+            - **Nodes:** Each node represents a cluster/topic. Larger nodes = more documents.
+            - **Edges:** Lines connect similar clusters. Thicker lines = higher similarity.
+            - **Layout:** Similar clusters are positioned closer together.
+            """)
+
+        if METHOD_VISUALIZER_AVAILABLE:
+            try:
+                results_df = st.session_state.results_df
+                text_column = viz_data.get('text_column', 'response')
+
+                visualizer = MethodVisualizer(coder, results_df, text_column)
+
+                # Layout selection
+                col1, col2 = st.columns([3, 1])
+                with col2:
+                    network_layout = st.selectbox(
+                        "Layout Algorithm",
+                        options=['spring', 'circular', 'kamada_kawai'],
+                        format_func=lambda x: {
+                            'spring': 'Spring (Force-directed)',
+                            'circular': 'Circular',
+                            'kamada_kawai': 'Kamada-Kawai'
+                        }[x],
+                        key="network_layout_select"
+                    )
+
+                with st.spinner("Generating network diagram..."):
+                    network_fig = visualizer.create_cluster_network(layout=network_layout)
+
+                if network_fig is not None:
+                    st.plotly_chart(network_fig, use_container_width=True, key="network_chart")
+                    st.caption(
+                        "Node size represents document count. "
+                        "Edge thickness indicates inter-cluster similarity based on centroid cosine similarity."
+                    )
+                else:
+                    st.warning("Could not generate network diagram. Need at least 2 clusters.")
+            except Exception as e:
+                st.error(f"Error generating network diagram: {str(e)}")
+        else:
+            st.warning("Network diagram requires the method visualizations module.")
 
     # Next button
     render_next_button("💾 Export Results")
