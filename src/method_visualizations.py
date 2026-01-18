@@ -303,23 +303,53 @@ class PILWordCloud:
 
         return self
 
-    def _generate_colors(self, n_colors: int) -> List[str]:
-        """Generate colors based on colormap."""
+    def _hex_to_rgb(self, hex_color: str) -> tuple:
+        """Convert hex color string to RGB tuple for PIL compatibility."""
+        hex_color = hex_color.lstrip('#')
+        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+    def _generate_colors(self, n_colors: int) -> List[tuple]:
+        """Generate colors based on colormap. Returns RGB tuples for PIL compatibility."""
         # Viridis-like color palette (for when matplotlib is not available)
-        viridis_colors = [
+        viridis_hex = [
             '#440154', '#481567', '#482677', '#453781', '#404788',
             '#39568c', '#33638d', '#2d708e', '#287d8e', '#238a8d',
             '#1f968b', '#20a387', '#29af7f', '#3cbb75', '#55c667',
             '#73d055', '#95d840', '#b8de29', '#dce319', '#fde725'
         ]
 
-        # Generate evenly spaced colors from the palette
+        # Generate evenly spaced colors from the palette as RGB tuples
         colors = []
         for i in range(n_colors):
-            idx = int(i * (len(viridis_colors) - 1) / max(n_colors - 1, 1))
-            colors.append(viridis_colors[idx])
+            idx = int(i * (len(viridis_hex) - 1) / max(n_colors - 1, 1))
+            colors.append(self._hex_to_rgb(viridis_hex[idx]))
 
         return colors
+
+    def _normalize_color(self, color) -> tuple:
+        """
+        Normalize color to RGB tuple for PIL compatibility.
+
+        Handles:
+        - Hex strings: '#440154'
+        - RGB strings: 'rgb(68,1,84)'
+        - Tuples: (68, 1, 84)
+        - Color names: 'white', 'black' (returned as-is for PIL)
+        """
+        if isinstance(color, tuple):
+            return color
+        if isinstance(color, str):
+            if color.startswith('#'):
+                return self._hex_to_rgb(color)
+            elif color.startswith('rgb('):
+                # Parse 'rgb(r,g,b)' format
+                rgb_str = color[4:-1]  # Remove 'rgb(' and ')'
+                r, g, b = map(int, rgb_str.split(','))
+                return (r, g, b)
+            else:
+                # Color name like 'white', 'black' - PIL can handle these
+                return color
+        return color
 
     def to_image(self) -> 'Image.Image':
         """
@@ -352,10 +382,11 @@ class PILWordCloud:
                     font_cache[size] = ImageFont.load_default()
             return font_cache[size]
 
-        # Draw each word
+        # Draw each word with normalized color
         for word, x, y, font_size, color in self._layout:
             font = get_font(font_size)
-            draw.text((x, y), word, font=font, fill=color)
+            normalized_color = self._normalize_color(color)
+            draw.text((x, y), word, font=font, fill=normalized_color)
 
         return img
 
@@ -1570,7 +1601,8 @@ class MethodVisualizer:
 
             def get_color(pos):
                 color = cmap(pos)
-                return f'rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})'
+                # Return RGB tuple for PIL compatibility
+                return (int(color[0]*255), int(color[1]*255), int(color[2]*255))
         else:
             # Use fallback palette without matplotlib
             palette_idx = cluster_id % len(fallback_palettes)
@@ -1584,7 +1616,8 @@ class MethodVisualizer:
                 r = int(c1[0] + frac * (c2[0] - c1[0]))
                 g = int(c1[1] + frac * (c2[1] - c1[1]))
                 b = int(c1[2] + frac * (c2[2] - c1[2]))
-                return f'rgb({r},{g},{b})'
+                # Return RGB tuple for PIL compatibility
+                return (r, g, b)
 
         if len(words) <= 1:
             # Only one word - use middle color
