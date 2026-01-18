@@ -1399,7 +1399,7 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True) -> pd.DataFra
 
         row = {
             'Code': code_id,
-            'Label': info['label'],
+            'Label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
             'Keywords': ', '.join(info['keywords'][:10]),
         }
 
@@ -1468,7 +1468,7 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 5) -> pd.DataFrame:
 
         code_data.append({
             'Code': code_id,
-            'Label': info['label'],
+            'Label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
             'Keywords': ', '.join(info['keywords'][:10]),
             'Sample Text': ' | '.join(sample_texts) if sample_texts else '(no examples available)',
             'Count': info['count'],
@@ -1768,7 +1768,7 @@ def export_results_package(coder, results_df: pd.DataFrame, format: str = 'excel
 
                 codebook_data.append({
                     'Code': code_id,
-                    'Label': info['label'],
+                    'Label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
                     'Keywords': ', '.join(info['keywords']),
                     'Count': info['count'],
                     'Avg Confidence': info['avg_confidence'],

@@ -634,7 +634,8 @@ class RigorDiagnostics:
         """Check for code labels that are too long."""
         long_labels = []
         for code_id, info in coder.codebook.items():
-            label = info['label']
+            # Check the display label (prefer LLM label if available)
+            label = info.get('llm_label', info['label'])
             if len(label.split()) > 5:
                 long_labels.append(f"{code_id}: {label}")
         return long_labels
