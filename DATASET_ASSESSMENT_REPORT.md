@@ -8,7 +8,9 @@
 
 ## Executive Summary
 
-This report assesses **13 datasets** available in the project to determine which best demonstrate the framework's capabilities. The analysis considers text quality, realism, theme clarity, and alignment with key project features.
+This report assesses **9 datasets** available in the project to determine which best demonstrate the framework's capabilities. The analysis considers text quality, realism, theme clarity, and alignment with key project features.
+
+> **Note:** 4 low-quality datasets were removed following this assessment (Remote Work Survey, Fashion Trends Survey, Cricket Lovers Survey, IMDB Movie Reviews).
 
 ### Top Recommendations
 
@@ -60,9 +62,6 @@ The framework provides **15 essential outputs** for qualitative analysis:
 | Healthcare_Patient_Feedback_300.csv | 34 KB | 300 | `department` | Wait times, staff, communication, cleanliness |
 | Market_Research_Survey_300.csv | 32 KB | 300 | `demographic_segment` | Quality, price, service, loyalty |
 | Psychology_Wellbeing_Study_300.csv | 39 KB | 300 | `age_group` | Burnout, balance, mental health, growth |
-| Remote Work Survey Data.csv | 12 KB | 200 | None | Flexibility, isolation, productivity |
-| Fashion Trends Survey Data.csv | 16 KB | 200 | `topic` | Sustainability, fast fashion, vintage |
-| Cricket Lovers Survey Data.csv | 16 KB | 200 | `topic` | Format debates, IPL, commercialization |
 
 ### Benchmark Datasets (Classification/Sentiment)
 
@@ -74,7 +73,6 @@ The framework provides **15 essential outputs** for qualitative analysis:
 | SemEval Twitter Sentiment.csv | 218 KB | 2,116 | `sentiment` | 3 sentiment classes |
 | SST-5 Sentiment Dataset.csv | 4.5 KB | 75 | `sentiment` | 5 sentiment levels |
 | SST-2 Sentiment Dataset.csv | 6.8 KB | 150 | `sentiment` | Binary (pos/neg) |
-| IMDB Movie Reviews.csv | 7.6 KB | 36 | `sentiment` | Binary (pos/neg) |
 
 ---
 
@@ -242,21 +240,6 @@ The framework provides **15 essential outputs** for qualitative analysis:
 #### 9. SST-2 Sentiment Dataset.csv
 **Rating: 3/5 Stars** - Binary sentiment, 150 samples
 
-#### 10. IMDB Movie Reviews.csv
-**Rating: 2.5/5 Stars** - Only 36 samples, too small for robust demo
-
-### Tier 4: Not Recommended for Primary Demo
-
-#### 11-13. Remote Work / Fashion / Cricket Survey Data
-**Rating: 2/5 Stars**
-
-| Issue | Impact |
-|-------|--------|
-| Pre-processed appearance | Text feels like summaries, not raw responses |
-| Lack of authenticity | No typos, no natural expression variation |
-| Too clean | Doesn't demonstrate preprocessing capabilities |
-| Themes too obvious | Doesn't showcase algorithm's discovery power |
-
 ---
 
 ## Feature-to-Dataset Mapping
@@ -270,7 +253,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 | **Co-occurrence Analysis** | Healthcare | Related issues co-occur (wait + communication) |
 | **Representative Quotes** | All Tier 1 datasets | Authentic, quotable responses |
 | **Text Preprocessing** | Healthcare, Market Research | Intentional errors test robustness |
-| **Long-form Text** | AG News, IMDB | Paragraph-level content |
+| **Long-form Text** | AG News | Paragraph-level content |
 | **Short-form Text** | Twitter Sentiment | Tweet-length responses |
 | **Sentiment Analysis** | SST-5 (5-class), SST-2 (binary), Twitter | Pre-labeled sentiment data |
 | **Algorithm Comparison** | Psychology (nuanced) | Tests separation of subtle themes |
@@ -360,7 +343,8 @@ Use the **three 300-row test datasets** in order:
 | Large-scale processing | AG News or SNIPS |
 | Sentiment analysis | SST-5 or SemEval Twitter |
 
-### Datasets to Avoid for Primary Demos
+### Datasets Removed (Low Quality)
+The following datasets were removed from the project after this assessment:
 - **Remote Work Survey Data** - Too pre-processed, lacks authenticity
 - **Fashion Trends Survey Data** - Same issue
 - **Cricket Lovers Survey Data** - Same issue
