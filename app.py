@@ -2501,6 +2501,7 @@ def page_results_overview():
     st.markdown("### ☁️ Word Cloud")
 
     # Ensure visualization data is pre-computed
+    wordcloud_generated = False
     if ensure_viz_data_ready():
         viz_data = st.session_state.viz_data
 
@@ -2545,12 +2546,58 @@ def page_results_overview():
                 plt.close(fig)  # Clean up to prevent memory leaks
 
                 st.caption("Word cloud generated from all response text - larger words appear more frequently")
+                wordcloud_generated = True
             elif wordcloud_text.strip():
                 st.warning("⚠️ Word cloud generation failed. PIL library may not be available.")
-        else:
-            st.info("📝 Word cloud not available. Please ensure the `wordcloud` or `PIL` package is installed.")
-    else:
-        st.info("📝 Visualization data not ready. Please re-run analysis.")
+
+    # Fallback: try to generate wordcloud directly from results_df if viz_data wasn't available
+    if not wordcloud_generated and (WORDCLOUD_AVAILABLE or (PIL_AVAILABLE and PILWordCloud is not None)):
+        try:
+            results_df = st.session_state.results_df
+            # Find text column
+            text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes', 'sentiment_label', 'sentiment_score', 'sentiment_positive', 'sentiment_negative', 'sentiment_neutral']][0]
+            all_text = ' '.join(results_df[text_col].dropna().astype(str).tolist())
+            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
+            cleaned_text = ' '.join(cleaned_text.split())
+
+            if cleaned_text.strip():
+                wordcloud = None
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=800,
+                        height=400,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=100,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(cleaned_text)
+                elif PILWordCloud is not None:
+                    wordcloud = PILWordCloud(
+                        width=800,
+                        height=400,
+                        background_color='white',
+                        max_words=100,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(cleaned_text)
+
+                if wordcloud is not None:
+                    fig, ax = plt.subplots(figsize=(12, 6))
+                    ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+                    ax.axis('off')
+                    plt.tight_layout()
+
+                    st.pyplot(fig, use_container_width=True)
+                    plt.close(fig)
+
+                    st.caption("Word cloud generated from all response text - larger words appear more frequently")
+                    wordcloud_generated = True
+        except Exception as e:
+            st.warning(f"⚠️ Word cloud generation failed: {str(e)}")
+
+    if not wordcloud_generated:
+        st.info("📝 Word cloud not available. Please ensure the `wordcloud` or `PIL` package is installed.")
 
     # Detailed codebook
     st.markdown("---")
