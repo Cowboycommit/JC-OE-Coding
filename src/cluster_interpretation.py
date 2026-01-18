@@ -1100,12 +1100,20 @@ class ClusterInterpreter:
             n_docs = len(doc_indices)
             n_pairs = n_docs * (n_docs - 1) // 2
 
-            # Sample pairs if too many
+            # Sample pairs if too many - use efficient direct sampling
+            # instead of generating all pairs first (which is O(n²) memory)
             if n_pairs > max_pairs:
-                # Random sampling of pairs
+                # Generate random pairs directly without creating full list
                 import random
-                all_pairs = [(i, j) for i in range(n_docs) for j in range(i + 1, n_docs)]
-                sampled_pairs = random.sample(all_pairs, max_pairs)
+                sampled_pairs = set()
+                while len(sampled_pairs) < max_pairs:
+                    i = random.randint(0, n_docs - 1)
+                    j = random.randint(0, n_docs - 1)
+                    if i != j:
+                        # Ensure consistent ordering (smaller index first)
+                        pair = (min(i, j), max(i, j))
+                        sampled_pairs.add(pair)
+                sampled_pairs = list(sampled_pairs)
             else:
                 sampled_pairs = [(i, j) for i in range(n_docs) for j in range(i + 1, n_docs)]
 
