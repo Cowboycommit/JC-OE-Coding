@@ -38,8 +38,8 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Stopwords to exclude from topic labels (common non-descriptive words)
-LABEL_STOPWORDS: Set[str] = {
+# Default stopwords to exclude from topic labels (common non-descriptive words)
+DEFAULT_LABEL_STOPWORDS: Set[str] = {
     'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
     'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
     'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used',
@@ -59,6 +59,65 @@ LABEL_STOPWORDS: Set[str] = {
     'really', 'actually', 'basically', 'simply', 'even', 'still', 'already',
     've', 'll', 're', 't', 's', 'd', 'm'  # Contractions
 }
+
+# For backward compatibility
+LABEL_STOPWORDS = DEFAULT_LABEL_STOPWORDS
+
+
+def detect_domain_stopwords(
+    texts: List[str],
+    min_doc_frequency: float = 0.7,
+    max_words: int = 20
+) -> Set[str]:
+    """
+    Detect domain-specific high-frequency words that should be treated as stopwords.
+
+    These are words that appear in a high percentage of documents and are likely
+    uninformative for distinguishing clusters in this specific domain.
+
+    Args:
+        texts: List of document texts
+        min_doc_frequency: Minimum document frequency (0-1) to consider a word as domain stopword
+        max_words: Maximum number of domain stopwords to detect
+
+    Returns:
+        Set of detected domain-specific stopwords
+    """
+    if not texts:
+        return set()
+
+    from collections import Counter
+
+    # Count document frequency for each word
+    word_doc_counts = Counter()
+    n_docs = len(texts)
+
+    for text in texts:
+        if not text or pd.isna(text):
+            continue
+        # Get unique words in this document
+        words = set(str(text).lower().split())
+        for word in words:
+            # Skip very short words and words that are already stopwords
+            if len(word) > 2 and word not in DEFAULT_LABEL_STOPWORDS:
+                word_doc_counts[word] += 1
+
+    # Find words that appear in too many documents
+    domain_stopwords = set()
+    for word, count in word_doc_counts.most_common():
+        doc_freq = count / n_docs
+        if doc_freq >= min_doc_frequency:
+            domain_stopwords.add(word)
+            if len(domain_stopwords) >= max_words:
+                break
+        else:
+            # Since most_common returns in descending order, we can stop early
+            break
+
+    if domain_stopwords:
+        logger.info(f"Detected {len(domain_stopwords)} domain-specific stopwords: {domain_stopwords}")
+
+    return domain_stopwords
 
 
 @dataclass
@@ -193,6 +252,9 @@ class ClusterInterpretationReport:
         warnings: Global warnings about interpretation
         llm_enhanced: Whether LLM enhancement was applied
         llm_backend: Backend used for LLM ('api', 'local', or None)
+        overall_coherence: Average coherence score across clusters (if computed)
+        tuning_recommendations: Automated recommendations for improving clusters
+        domain_stopwords_used: Set of domain-specific stopwords detected
     """
     summaries: Dict[Any, ClusterSummary]
     n_clusters: int
@@ -202,10 +264,13 @@ class ClusterInterpretationReport:
     warnings: List[str] = field(default_factory=list)
     llm_enhanced: bool = False
     llm_backend: Optional[str] = None
+    overall_coherence: Optional[float] = None
+    tuning_recommendations: List[str] = field(default_factory=list)
+    domain_stopwords_used: Set[str] = field(default_factory=set)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
-        return {
+        result = {
             'n_clusters': self.n_clusters,
             'n_documents': self.n_documents,
             'overall_interpretability': round(self.overall_interpretability, 3),
@@ -217,9 +282,25 @@ class ClusterInterpretationReport:
                 k: v.to_dict() for k, v in self.summaries.items()
             }
         }
+        if self.overall_coherence is not None:
+            result['overall_coherence'] = round(self.overall_coherence, 3)
+        if self.tuning_recommendations:
+            result['tuning_recommendations'] = self.tuning_recommendations
+        if self.domain_stopwords_used:
+            result['domain_stopwords_used'] = list(self.domain_stopwords_used)
+        return result
 
-    def get_display_report(self) -> str:
-        """Generate a human-readable report."""
+    def get_display_report(self, always_show_terms: bool = True) -> str:
+        """
+        Generate a human-readable report.
+
+        Args:
+            always_show_terms: If True, always display top terms alongside labels.
+                              This reduces over-reliance on short labels.
+
+        Returns:
+            Formatted report string
+        """
         lines = [
             "=" * 60,
             "CLUSTER INTERPRETATION REPORT",
@@ -231,17 +312,33 @@ class ClusterInterpretationReport:
             f"Overall Interpretability: {self.overall_interpretability:.1%}",
         ]
 
+        # Show coherence if available
+        if self.overall_coherence is not None:
+            lines.append(f"Overall Coherence: {self.overall_coherence:.2f}")
+
         # Show LLM enhancement status
         if self.llm_enhanced:
             lines.append(f"LLM Enhancement: Enabled ({self.llm_backend})")
         else:
             lines.append("LLM Enhancement: Disabled (using term-based labels)")
+
+        # Show domain stopwords if any
+        if self.domain_stopwords_used:
+            lines.append(f"Domain Stopwords Detected: {', '.join(sorted(self.domain_stopwords_used)[:5])}" +
+                        (f"... (+{len(self.domain_stopwords_used) - 5} more)" if len(self.domain_stopwords_used) > 5 else ""))
+
         lines.append("")
 
         if self.warnings:
             lines.append("WARNINGS:")
             for warning in self.warnings:
                 lines.append(f"  - {warning}")
+            lines.append("")
+
+        if self.tuning_recommendations:
+            lines.append("TUNING RECOMMENDATIONS:")
+            for rec in self.tuning_recommendations:
+                lines.append(f"  - {rec}")
             lines.append("")
 
         lines.append("-" * 60)
@@ -257,15 +354,20 @@ class ClusterInterpretationReport:
         )
 
         for summary in sorted_summaries:
-            lines.append(summary.get_display_string(include_terms=True, include_llm=self.llm_enhanced))
+            # Always show both label and top terms to reduce over-reliance on labels
+            lines.append(summary.get_display_string(
+                include_terms=always_show_terms,
+                include_llm=self.llm_enhanced
+            ))
             lines.append("")
 
         lines.append("=" * 60)
         lines.append("NOTE: Cluster IDs are internal identifiers, not semantic labels.")
+        lines.append("IMPORTANT: Always review top_terms alongside labels for full context.")
         if self.llm_enhanced:
             lines.append("Labels have been refined by LLM for improved readability.")
         else:
-            lines.append("Use the 'label' and 'top_terms' for interpretation.")
+            lines.append("Labels are generated from top weighted terms/phrases.")
         lines.append("=" * 60)
 
         return "\n".join(lines)
@@ -303,7 +405,11 @@ class ClusterInterpreter:
         n_label_terms: int = 3,
         n_representative_docs: int = 10,  # Increased from 5 to provide more context for LLM
         min_term_weight_threshold: float = 0.005,
-        low_interpretability_threshold: float = 0.3
+        low_interpretability_threshold: float = 0.3,
+        custom_stopwords: Optional[Set[str]] = None,
+        detect_domain_stopwords: bool = True,
+        prefer_ngram_phrases: bool = True,
+        min_coherence_threshold: float = 0.4
     ):
         """
         Initialize the cluster interpreter.
@@ -314,18 +420,42 @@ class ClusterInterpreter:
             n_representative_docs: Number of example documents to include (used by LLM for context)
             min_term_weight_threshold: Minimum weight for terms to be considered
             low_interpretability_threshold: Threshold below which to warn about interpretability
+            custom_stopwords: Optional set of additional stopwords to exclude from labels
+            detect_domain_stopwords: Whether to auto-detect domain-specific high-frequency stopwords
+            prefer_ngram_phrases: Whether to prefer n-gram phrases over single words in labels
+            min_coherence_threshold: Minimum coherence score below which to flag cluster issues
         """
         self.n_top_terms = n_top_terms
         self.n_label_terms = n_label_terms
         self.n_representative_docs = n_representative_docs
         self.min_term_weight_threshold = min_term_weight_threshold
         self.low_interpretability_threshold = low_interpretability_threshold
+        self.custom_stopwords = custom_stopwords or set()
+        self.detect_domain_stopwords_flag = detect_domain_stopwords
+        self.prefer_ngram_phrases = prefer_ngram_phrases
+        self.min_coherence_threshold = min_coherence_threshold
+        self._domain_stopwords: Set[str] = set()
+        self._texts_for_domain_detection: Optional[List[str]] = None
+
+    def _get_combined_stopwords(self) -> Set[str]:
+        """
+        Get the combined set of all stopwords (default + custom + domain-specific).
+
+        Returns:
+            Combined set of stopwords
+        """
+        combined = set(DEFAULT_LABEL_STOPWORDS)
+        combined.update(self.custom_stopwords)
+        combined.update(self._domain_stopwords)
+        return combined
 
     def _filter_stopwords_with_weights(
         self, terms: List[str], weights: List[float]
     ) -> Tuple[List[str], List[float]]:
         """
         Filter out stopwords from terms list, keeping weights in sync.
+
+        Uses combined stopwords: default + custom + domain-specific.
 
         Args:
             terms: List of terms to filter
@@ -334,10 +464,11 @@ class ClusterInterpreter:
         Returns:
             Tuple of (filtered_terms, filtered_weights) with stopwords removed
         """
+        combined_stopwords = self._get_combined_stopwords()
         filtered_terms = []
         filtered_weights = []
         for term, weight in zip(terms, weights):
-            if term.lower().strip() not in LABEL_STOPWORDS:
+            if term.lower().strip() not in combined_stopwords:
                 filtered_terms.append(term)
                 filtered_weights.append(weight)
         return filtered_terms, filtered_weights
@@ -405,6 +536,146 @@ class ClusterInterpreter:
         # Return terms that are not subsets
         return [term for i, (term, _) in enumerate(term_words) if i not in to_remove]
 
+    def _generate_phrase_based_label(
+        self,
+        filtered_terms: List[str],
+        filtered_weights: List[float],
+        n_label_terms: int
+    ) -> str:
+        """
+        Generate a label preferring n-gram phrases over single words.
+
+        This method prioritizes multi-word phrases (2-3 words) because they
+        are typically more semantically complete than single words.
+        For example, "customer service" is more informative than just "customer".
+
+        Strategy:
+        1. Score each term: phrase_weight = base_weight * (1 + 0.3 * (n_words - 1))
+           This gives a 30% bonus per additional word to prefer phrases
+        2. Select top phrases that don't overlap too much in words
+        3. Combine into a readable label
+
+        Args:
+            filtered_terms: List of terms (may include n-grams)
+            filtered_weights: Corresponding weights
+            n_label_terms: Target number of distinct concepts for label
+
+        Returns:
+            Generated label string
+        """
+        combined_stopwords = self._get_combined_stopwords()
+
+        if not filtered_terms:
+            return ""
+
+        # Score each term, boosting n-grams
+        scored_terms = []
+        for term, weight in zip(filtered_terms, filtered_weights):
+            # Clean the term
+            term_words = [w for w in term.split() if w.lower() not in combined_stopwords]
+            if not term_words:
+                continue
+
+            n_words = len(term_words)
+            # Boost multi-word phrases: 30% bonus per additional word
+            # This makes "customer service" (2 words) score 1.3x its base weight
+            # and "easy to use" (3 words) score 1.6x its base weight
+            phrase_boost = 1.0 + 0.3 * (n_words - 1)
+            adjusted_weight = weight * phrase_boost
+
+            scored_terms.append({
+                'term': term,
+                'words': term_words,
+                'n_words': n_words,
+                'base_weight': weight,
+                'adjusted_weight': adjusted_weight
+            })
+
+        # Sort by adjusted weight
+        scored_terms.sort(key=lambda x: x['adjusted_weight'], reverse=True)
+
+        # Select terms that don't overlap too much
+        selected_terms = []
+        used_words = set()
+        total_words = 0
+
+        for item in scored_terms:
+            term_words_lower = set(w.lower() for w in item['words'])
+
+            # Check overlap with already selected terms
+            overlap = len(term_words_lower & used_words)
+            overlap_ratio = overlap / len(term_words_lower) if term_words_lower else 1.0
+
+            # Accept if low overlap or if it's a longer phrase containing used words
+            # (e.g., accept "customer service" even if "customer" was used)
+            if overlap_ratio < 0.5 or (item['n_words'] > 1 and overlap < item['n_words']):
+                selected_terms.append(item)
+                used_words.update(term_words_lower)
+                total_words += item['n_words']
+
+                # Stop when we have enough concepts or words
+                if len(selected_terms) >= n_label_terms or total_words >= n_label_terms + 2:
+                    break
+
+        if not selected_terms:
+            # Fallback: just use top term
+            if scored_terms:
+                selected_terms = [scored_terms[0]]
+
+        # Build the label
+        label_parts = []
+        for item in selected_terms:
+            # Title case each word
+            formatted = " ".join(w.title() for w in item['words'])
+            label_parts.append(formatted)
+
+        return " ".join(label_parts)
+
+    def _generate_word_based_label(
+        self,
+        filtered_terms: List[str],
+        filtered_weights: List[float],
+        n_label_terms: int
+    ) -> str:
+        """
+        Generate a label using the legacy word-by-word approach.
+
+        This is the original approach: extract individual words from terms,
+        sort by weight, and select top N words.
+
+        Args:
+            filtered_terms: List of terms
+            filtered_weights: Corresponding weights
+            n_label_terms: Number of words to use in label
+
+        Returns:
+            Generated label string
+        """
+        combined_stopwords = self._get_combined_stopwords()
+
+        # Build label word-by-word with weight tracking for semantic coherence
+        seen_words = set()
+        word_weight_pairs = []
+        for term, term_weight in zip(filtered_terms, filtered_weights):
+            # Split term into individual words and filter
+            for word in term.split():
+                word_lower = word.lower().strip()
+                # Skip stopwords and already-seen words
+                if word_lower not in combined_stopwords and word_lower not in seen_words:
+                    seen_words.add(word_lower)
+                    word_weight_pairs.append((word, term_weight))
+
+        # Sort by weight (highest first) for semantic coherence
+        word_weight_pairs.sort(key=lambda x: x[1], reverse=True)
+
+        # Take top N words by weight
+        label_words = [w for w, _ in word_weight_pairs[:n_label_terms]]
+
+        if label_words:
+            return " ".join(word.title() for word in label_words)
+        else:
+            return ""
+
     def interpret_clusters(
         self,
         vectorizer,
@@ -439,12 +710,20 @@ class ClusterInterpreter:
             - For KMeans: uses cluster_centers_
             - For LDA/NMF: uses components_
             - Labels are generated from top terms, NOT from external data
+            - Supports phrase-based labels (prefer_ngram_phrases=True) for better semantic clarity
+            - Detects domain-specific stopwords if detect_domain_stopwords=True
         """
         # Validate inputs
         if len(texts) != len(cluster_assignments):
             raise ValueError(
                 f"Mismatch: {len(texts)} texts but {len(cluster_assignments)} assignments"
             )
+
+        # Detect domain-specific stopwords if enabled
+        if self.detect_domain_stopwords_flag and not self._domain_stopwords:
+            self._domain_stopwords = detect_domain_stopwords(texts)
+            if self._domain_stopwords:
+                logger.info(f"Using domain stopwords: {self._domain_stopwords}")
 
         # Get feature names
         try:
@@ -482,6 +761,7 @@ class ClusterInterpreter:
         summaries = {}
         global_warnings = []
         interpretability_scores = []
+        coherence_scores = []
 
         for cluster_idx in unique_clusters:
             # Get cluster center
@@ -505,28 +785,17 @@ class ClusterInterpreter:
                 filtered_terms, filtered_weights
             )
 
-            # Build label word-by-word with weight tracking for semantic coherence
-            # Collect unique words with their weights, then sort by weight (highest first)
-            seen_words = set()
-            word_weight_pairs = []
-            for term, term_weight in zip(filtered_terms, filtered_weights):
-                # Split term into individual words and filter
-                for word in term.split():
-                    word_lower = word.lower().strip()
-                    # Skip stopwords and already-seen words
-                    if word_lower not in LABEL_STOPWORDS and word_lower not in seen_words:
-                        seen_words.add(word_lower)
-                        word_weight_pairs.append((word, term_weight))
-
-            # Sort by weight (highest first) for semantic coherence
-            word_weight_pairs.sort(key=lambda x: x[1], reverse=True)
-
-            # Take top N words by weight
-            label_words = [w for w, _ in word_weight_pairs[:self.n_label_terms]]
-
-            if label_words:
-                label = " ".join(word.title() for word in label_words)
+            # Generate label using phrase-based or word-based approach
+            if self.prefer_ngram_phrases:
+                label = self._generate_phrase_based_label(
+                    filtered_terms, filtered_weights, self.n_label_terms
+                )
             else:
+                label = self._generate_word_based_label(
+                    filtered_terms, filtered_weights, self.n_label_terms
+                )
+
+            if not label:
                 label = f"Cluster {cluster_idx} (low confidence)"
 
             # Get document count and indices
@@ -545,6 +814,14 @@ class ClusterInterpreter:
                 confidence = min(1.0, weight_sum / 2.0)  # Normalize
             else:
                 confidence = 0.0
+
+            # Calculate coherence score for this cluster if we have feature matrix
+            cluster_coherence = None
+            if feature_matrix is not None and len(doc_indices) >= 2:
+                cluster_coherence = self._calculate_cluster_coherence(
+                    feature_matrix, doc_indices
+                )
+                coherence_scores.append(cluster_coherence)
 
             # Check for interpretation issues
             warnings = []
@@ -565,6 +842,11 @@ class ClusterInterpreter:
                 warnings.append("Very small cluster (<3 docs)")
                 confidence *= 0.95
 
+            # Add coherence-based warnings
+            if cluster_coherence is not None and cluster_coherence < self.min_coherence_threshold:
+                warnings.append(f"Low coherence ({cluster_coherence:.2f}) - cluster may be poorly defined")
+                confidence *= 0.85
+
             interpretability_scores.append(confidence)
 
             # Create cluster ID string
@@ -579,6 +861,7 @@ class ClusterInterpreter:
                 document_count=doc_count,
                 document_indices=doc_indices,
                 representative_docs=representative_docs,
+                coherence_score=cluster_coherence,
                 interpretation_confidence=confidence,
                 is_interpretable=is_interpretable,
                 warnings=warnings
@@ -588,6 +871,9 @@ class ClusterInterpreter:
 
         # Calculate overall interpretability
         overall_interpretability = np.mean(interpretability_scores) if interpretability_scores else 0.0
+
+        # Calculate overall coherence
+        overall_coherence = np.mean(coherence_scores) if coherence_scores else None
 
         # Add global warnings
         if overall_interpretability < self.low_interpretability_threshold:
@@ -600,6 +886,34 @@ class ClusterInterpreter:
         if empty_clusters > 0:
             global_warnings.append(f"{empty_clusters} empty cluster(s) detected")
 
+        # Add coherence-based recommendations
+        if overall_coherence is not None and overall_coherence < self.min_coherence_threshold:
+            global_warnings.append(
+                f"Low overall coherence ({overall_coherence:.2f}). "
+                "Recommended actions: reduce cluster count, adjust vectorizer parameters, "
+                "or review preprocessing. Clusters may have overlapping themes."
+            )
+
+        # Count low-coherence clusters for additional recommendations
+        low_coherence_count = sum(
+            1 for s in summaries.values()
+            if s.coherence_score is not None and s.coherence_score < self.min_coherence_threshold
+        )
+        if low_coherence_count > len(summaries) * 0.3:  # >30% of clusters have low coherence
+            global_warnings.append(
+                f"{low_coherence_count} clusters have low coherence. "
+                "Consider: (1) reducing n_clusters, (2) using different preprocessing, "
+                "(3) trying alternative clustering methods like LDA or NMF."
+            )
+
+        # Generate tuning recommendations based on analysis
+        tuning_recommendations = self._generate_tuning_recommendations(
+            summaries=summaries,
+            overall_interpretability=overall_interpretability,
+            overall_coherence=overall_coherence,
+            n_clusters=len(unique_clusters)
+        )
+
         # Create report
         report = ClusterInterpretationReport(
             summaries=summaries,
@@ -607,15 +921,94 @@ class ClusterInterpreter:
             n_documents=len(texts),
             overall_interpretability=overall_interpretability,
             method_used=method_name,
-            warnings=global_warnings
+            warnings=global_warnings,
+            overall_coherence=overall_coherence,
+            tuning_recommendations=tuning_recommendations,
+            domain_stopwords_used=self._domain_stopwords
         )
 
+        coherence_str = f", coherence={overall_coherence:.2f}" if overall_coherence else ""
         logger.info(
             f"Cluster interpretation complete: {len(summaries)} clusters, "
-            f"interpretability={overall_interpretability:.1%}"
+            f"interpretability={overall_interpretability:.1%}{coherence_str}"
         )
 
         return report
+
+    def _generate_tuning_recommendations(
+        self,
+        summaries: Dict[str, ClusterSummary],
+        overall_interpretability: float,
+        overall_coherence: Optional[float],
+        n_clusters: int
+    ) -> List[str]:
+        """
+        Generate automated tuning recommendations based on cluster analysis.
+
+        Args:
+            summaries: Dictionary of cluster summaries
+            overall_interpretability: Average interpretability score
+            overall_coherence: Average coherence score (or None)
+            n_clusters: Number of clusters
+
+        Returns:
+            List of actionable recommendations
+        """
+        recommendations = []
+
+        # Low interpretability recommendations
+        if overall_interpretability < self.low_interpretability_threshold:
+            recommendations.append(
+                "Low interpretability detected. Try: (a) increase n_top_terms, "
+                "(b) lower min_term_weight_threshold, (c) check text preprocessing"
+            )
+
+        # Low coherence recommendations
+        if overall_coherence is not None and overall_coherence < self.min_coherence_threshold:
+            if n_clusters > 5:
+                recommendations.append(
+                    f"Low coherence ({overall_coherence:.2f}). Consider reducing cluster count "
+                    f"from {n_clusters} to {max(3, n_clusters - 2)}"
+                )
+            else:
+                recommendations.append(
+                    f"Low coherence ({overall_coherence:.2f}). Try: (a) different preprocessing, "
+                    "(b) topic modeling (LDA/NMF) instead of KMeans"
+                )
+
+        # Check for empty or very small clusters
+        empty_count = sum(1 for s in summaries.values() if s.document_count == 0)
+        tiny_count = sum(1 for s in summaries.values() if 0 < s.document_count < 3)
+
+        if empty_count > 0:
+            recommendations.append(
+                f"{empty_count} empty cluster(s). Reduce n_clusters parameter"
+            )
+        if tiny_count > n_clusters * 0.3:  # >30% tiny clusters
+            recommendations.append(
+                f"{tiny_count} very small clusters (<3 docs). Consider merging or reducing n_clusters"
+            )
+
+        # Check for low confidence clusters
+        low_conf_count = sum(
+            1 for s in summaries.values()
+            if s.interpretation_confidence < self.low_interpretability_threshold
+        )
+        if low_conf_count > n_clusters * 0.3:
+            recommendations.append(
+                f"{low_conf_count} clusters have low confidence. Review vectorizer settings "
+                "or increase n_top_terms for better term extraction"
+            )
+
+        # Check for clusters with warnings
+        clusters_with_warnings = sum(1 for s in summaries.values() if s.warnings)
+        if clusters_with_warnings > n_clusters * 0.5:
+            recommendations.append(
+                f"{clusters_with_warnings}/{n_clusters} clusters have warnings. "
+                "Run with feature_matrix for coherence analysis"
+            )
+
+        return recommendations
 
     def _get_representative_docs(
         self,
@@ -671,6 +1064,65 @@ class ClusterInterpreter:
             representative_docs.append(doc)
 
         return representative_docs
+
+    def _calculate_cluster_coherence(
+        self,
+        feature_matrix,
+        doc_indices: List[int],
+        max_pairs: int = 100
+    ) -> float:
+        """
+        Calculate semantic coherence for a single cluster.
+
+        Coherence is measured as the average pairwise cosine similarity
+        between documents in the cluster. Higher coherence indicates
+        that documents in the cluster are more similar to each other.
+
+        Args:
+            feature_matrix: TF-IDF or other feature matrix
+            doc_indices: Indices of documents in this cluster
+            max_pairs: Maximum number of pairs to sample (for efficiency)
+
+        Returns:
+            Coherence score between 0 and 1 (higher is better)
+        """
+        if len(doc_indices) < 2:
+            return 1.0  # Single document clusters are perfectly coherent by definition
+
+        try:
+            from scipy.spatial.distance import cosine
+
+            # Get vectors for this cluster
+            vectors = feature_matrix[doc_indices]
+            if hasattr(vectors, 'toarray'):
+                vectors = vectors.toarray()
+
+            n_docs = len(doc_indices)
+            n_pairs = n_docs * (n_docs - 1) // 2
+
+            # Sample pairs if too many
+            if n_pairs > max_pairs:
+                # Random sampling of pairs
+                import random
+                all_pairs = [(i, j) for i in range(n_docs) for j in range(i + 1, n_docs)]
+                sampled_pairs = random.sample(all_pairs, max_pairs)
+            else:
+                sampled_pairs = [(i, j) for i in range(n_docs) for j in range(i + 1, n_docs)]
+
+            # Calculate pairwise similarities
+            similarities = []
+            for i, j in sampled_pairs:
+                sim = 1 - cosine(vectors[i], vectors[j])
+                if not np.isnan(sim):
+                    similarities.append(sim)
+
+            if similarities:
+                return float(np.mean(similarities))
+            return 0.0
+
+        except Exception as e:
+            logger.warning(f"Could not calculate cluster coherence: {e}")
+            return 0.0
 
     def apply_llm_enhancement(
         self,
