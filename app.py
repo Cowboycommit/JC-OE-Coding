@@ -2787,26 +2787,30 @@ def page_visualizations():
 
                 # Generate word cloud (lightweight - just rendering pre-cleaned text)
                 # Use wordcloud package if available, otherwise fall back to PIL
-                if WORDCLOUD_AVAILABLE:
-                    wordcloud = WordCloud(
-                        width=800,
-                        height=400,
-                        background_color='white',
-                        colormap='viridis',
-                        max_words=100,
-                        min_font_size=10,
-                        max_font_size=100
-                    ).generate(wordcloud_text)
-                elif PILWordCloud is not None:
-                    wordcloud = PILWordCloud(
-                        width=800,
-                        height=400,
-                        background_color='white',
-                        max_words=100,
-                        min_font_size=10,
-                        max_font_size=100
-                    ).generate(wordcloud_text)
-                else:
+                wordcloud = None
+                try:
+                    if WORDCLOUD_AVAILABLE:
+                        wordcloud = WordCloud(
+                            width=800,
+                            height=400,
+                            background_color='white',
+                            colormap='viridis',
+                            max_words=100,
+                            min_font_size=10,
+                            max_font_size=100
+                        ).generate(wordcloud_text)
+                    elif PILWordCloud is not None:
+                        wordcloud = PILWordCloud(
+                            width=800,
+                            height=400,
+                            background_color='white',
+                            max_words=100,
+                            min_font_size=10,
+                            max_font_size=100
+                        ).generate(wordcloud_text)
+                except ValueError as e:
+                    # WordCloud raises ValueError if text is empty or only stopwords
+                    st.info(f"📝 Not enough text content to generate word cloud. The text may contain only common words (stopwords) that are filtered out.")
                     wordcloud = None
 
                 if wordcloud is not None:
@@ -2821,7 +2825,8 @@ def page_visualizations():
                     plt.close(fig)  # Clean up to prevent memory leaks
 
                     st.caption("Word cloud generated from all response text")
-                else:
+                elif wordcloud_text.strip():
+                    # Text exists but wordcloud failed for other reason
                     st.warning("⚠️ Word cloud generation failed. PIL library may not be available.")
             elif PIL_AVAILABLE and PILWordCloud is not None:
                 # Fallback: generate word cloud even if viz_data didn't have it pre-computed

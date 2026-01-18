@@ -984,28 +984,32 @@ class MethodVisualizer:
         cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
         # Use wordcloud package if available, otherwise fall back to PIL
-        if WORDCLOUD_AVAILABLE:
-            wordcloud = WordCloud(
-                width=width,
-                height=height,
-                background_color='white',
-                colormap='viridis',
-                max_words=max_words,
-                min_font_size=10,
-                max_font_size=100
-            ).generate(cleaned_text)
-        elif PIL_AVAILABLE:
-            # Fall back to PIL-based word cloud
-            wordcloud = PILWordCloud(
-                width=width,
-                height=height,
-                background_color='white',
-                max_words=max_words,
-                min_font_size=10,
-                max_font_size=100
-            ).generate(cleaned_text)
-        else:
-            logger.warning("Neither wordcloud nor PIL available for word cloud generation")
+        try:
+            if WORDCLOUD_AVAILABLE:
+                wordcloud = WordCloud(
+                    width=width,
+                    height=height,
+                    background_color='white',
+                    colormap='viridis',
+                    max_words=max_words,
+                    min_font_size=10,
+                    max_font_size=100
+                ).generate(cleaned_text)
+            elif PIL_AVAILABLE:
+                # Fall back to PIL-based word cloud
+                wordcloud = PILWordCloud(
+                    width=width,
+                    height=height,
+                    background_color='white',
+                    max_words=max_words,
+                    min_font_size=10,
+                    max_font_size=100
+                ).generate(cleaned_text)
+            else:
+                logger.warning("Neither wordcloud nor PIL available for word cloud generation")
+                return None
+        except ValueError as e:
+            logger.warning(f"Word cloud generation failed for cluster {cluster_id}: {e}")
             return None
 
         # Use matplotlib if available, otherwise return PIL image directly
@@ -1222,28 +1226,32 @@ class MethodVisualizer:
             return word_colors.get(word.lower(), 'gray')
 
         # Generate word cloud using available method
-        if WORDCLOUD_AVAILABLE:
-            wordcloud = WordCloud(
-                width=width,
-                height=height,
-                background_color='white',
-                max_words=max_words,
-                min_font_size=10,
-                max_font_size=100,
-                color_func=color_func,
-                prefer_horizontal=0.7
-            ).generate_from_frequencies(top_words)
-        else:
-            # Use PILWordCloud fallback with color function
-            wordcloud = PILWordCloud(
-                width=width,
-                height=height,
-                background_color='white',
-                max_words=max_words,
-                min_font_size=10,
-                max_font_size=100,
-                color_func=color_func
-            ).generate_from_frequencies(top_words)
+        try:
+            if WORDCLOUD_AVAILABLE:
+                wordcloud = WordCloud(
+                    width=width,
+                    height=height,
+                    background_color='white',
+                    max_words=max_words,
+                    min_font_size=10,
+                    max_font_size=100,
+                    color_func=color_func,
+                    prefer_horizontal=0.7
+                ).generate_from_frequencies(top_words)
+            else:
+                # Use PILWordCloud fallback with color function
+                wordcloud = PILWordCloud(
+                    width=width,
+                    height=height,
+                    background_color='white',
+                    max_words=max_words,
+                    min_font_size=10,
+                    max_font_size=100,
+                    color_func=color_func
+                ).generate_from_frequencies(top_words)
+        except ValueError as e:
+            logger.warning(f"Semantic word cloud generation failed for cluster {cluster_id}: {e}")
+            return None
 
         # Use matplotlib if available, otherwise return PIL image directly
         if MATPLOTLIB_AVAILABLE:
