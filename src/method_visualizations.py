@@ -97,6 +97,279 @@ except ImportError:
 
 
 # =============================================================================
+# PIL-BASED WORD CLOUD GENERATOR (Fallback when wordcloud package unavailable)
+# =============================================================================
+
+class PILWordCloud:
+    """
+    Pure PIL-based word cloud generator.
+
+    Used as a fallback when the 'wordcloud' package is not installed.
+    Creates word clouds using PIL's ImageDraw for text rendering.
+    """
+
+    def __init__(
+        self,
+        width: int = 800,
+        height: int = 400,
+        background_color: str = 'white',
+        max_words: int = 100,
+        min_font_size: int = 10,
+        max_font_size: int = 100,
+        color_func: Optional[callable] = None,
+        colormap: Optional[str] = None
+    ):
+        """
+        Initialize PIL word cloud generator.
+
+        Args:
+            width: Image width in pixels
+            height: Image height in pixels
+            background_color: Background color (name or hex)
+            max_words: Maximum number of words to display
+            min_font_size: Minimum font size in points
+            max_font_size: Maximum font size in points
+            color_func: Optional function to determine word color
+            colormap: Colormap name for coloring words (viridis, etc.)
+        """
+        self.width = width
+        self.height = height
+        self.background_color = background_color
+        self.max_words = max_words
+        self.min_font_size = min_font_size
+        self.max_font_size = max_font_size
+        self.color_func = color_func
+        self.colormap = colormap or 'viridis'
+        self._layout = []  # Stores (word, x, y, font_size, color)
+
+    def generate(self, text: str) -> 'PILWordCloud':
+        """
+        Generate word cloud from text.
+
+        Args:
+            text: Input text to create word cloud from
+
+        Returns:
+            Self for chaining
+        """
+        from collections import Counter
+        import re
+
+        # Tokenize and count words
+        words = re.findall(r'\b[a-zA-Z]{3,}\b', text.lower())
+        word_freq = Counter(words)
+
+        # Remove common stopwords
+        stopwords = {
+            'the', 'and', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+            'should', 'may', 'might', 'must', 'can', 'but', 'for', 'with',
+            'from', 'into', 'its', 'this', 'that', 'these', 'those', 'what',
+            'which', 'who', 'whom', 'you', 'your', 'they', 'them', 'their',
+            'not', 'just', 'very', 'really', 'about', 'get', 'got', 'also',
+            'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
+            'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now',
+            'here', 'there', 'when', 'where', 'why', 'how'
+        }
+        word_freq = {w: f for w, f in word_freq.items() if w not in stopwords}
+
+        return self.generate_from_frequencies(word_freq)
+
+    def generate_from_frequencies(self, frequencies: Dict[str, int]) -> 'PILWordCloud':
+        """
+        Generate word cloud from word frequencies.
+
+        Args:
+            frequencies: Dictionary of word -> frequency
+
+        Returns:
+            Self for chaining
+        """
+        if not frequencies:
+            self._layout = []
+            return self
+
+        # Sort by frequency and limit words
+        sorted_words = sorted(frequencies.items(), key=lambda x: x[1], reverse=True)
+        sorted_words = sorted_words[:self.max_words]
+
+        if not sorted_words:
+            self._layout = []
+            return self
+
+        # Calculate font sizes proportional to frequency
+        max_freq = sorted_words[0][1]
+        min_freq = sorted_words[-1][1] if len(sorted_words) > 1 else max_freq
+        freq_range = max(max_freq - min_freq, 1)
+
+        # Generate colors
+        colors = self._generate_colors(len(sorted_words))
+
+        # Calculate layout
+        self._layout = []
+        occupied = []  # List of bounding boxes (x1, y1, x2, y2)
+
+        # Create a temporary image to measure text sizes
+        from PIL import ImageDraw, ImageFont
+        temp_img = Image.new('RGB', (self.width, self.height))
+        temp_draw = ImageDraw.Draw(temp_img)
+
+        # Try to load a font, fall back to default if not available
+        font_cache = {}
+
+        def get_font(size):
+            if size not in font_cache:
+                try:
+                    # Try common fonts
+                    for font_name in ['DejaVuSans.ttf', 'Arial.ttf', 'FreeSans.ttf', 'LiberationSans-Regular.ttf']:
+                        try:
+                            font_cache[size] = ImageFont.truetype(font_name, size)
+                            break
+                        except (OSError, IOError):
+                            continue
+                    else:
+                        # Fall back to default font
+                        font_cache[size] = ImageFont.load_default()
+                except Exception:
+                    font_cache[size] = ImageFont.load_default()
+            return font_cache[size]
+
+        # Place each word
+        import random
+        random.seed(42)  # Reproducible layout
+
+        for idx, (word, freq) in enumerate(sorted_words):
+            # Calculate font size
+            if freq_range > 0:
+                size_ratio = (freq - min_freq) / freq_range
+            else:
+                size_ratio = 1.0
+            font_size = int(self.min_font_size + size_ratio * (self.max_font_size - self.min_font_size))
+            font_size = max(self.min_font_size, min(self.max_font_size, font_size))
+
+            font = get_font(font_size)
+
+            # Get text bounding box
+            try:
+                bbox = temp_draw.textbbox((0, 0), word, font=font)
+                text_width = bbox[2] - bbox[0]
+                text_height = bbox[3] - bbox[1]
+            except AttributeError:
+                # Older PIL versions
+                text_width, text_height = temp_draw.textsize(word, font=font)
+
+            # Add some padding
+            text_width += 10
+            text_height += 5
+
+            # Get color for this word
+            if self.color_func:
+                color = self.color_func(word, font_size, None, None)
+            else:
+                color = colors[idx]
+
+            # Try to find a position that doesn't overlap
+            placed = False
+            max_attempts = 100
+
+            for attempt in range(max_attempts):
+                # Generate random position
+                x = random.randint(5, max(6, self.width - text_width - 5))
+                y = random.randint(5, max(6, self.height - text_height - 5))
+
+                # Check for overlaps
+                new_box = (x, y, x + text_width, y + text_height)
+                overlaps = False
+
+                for ox1, oy1, ox2, oy2 in occupied:
+                    if not (new_box[2] < ox1 or new_box[0] > ox2 or
+                            new_box[3] < oy1 or new_box[1] > oy2):
+                        overlaps = True
+                        break
+
+                if not overlaps:
+                    self._layout.append((word, x, y, font_size, color))
+                    occupied.append(new_box)
+                    placed = True
+                    break
+
+            # If we couldn't place it after max attempts, skip it
+            if not placed and len(occupied) < 10:
+                # Force place first few words
+                x = random.randint(5, max(6, self.width - text_width - 5))
+                y = random.randint(5, max(6, self.height - text_height - 5))
+                self._layout.append((word, x, y, font_size, color))
+                occupied.append((x, y, x + text_width, y + text_height))
+
+        return self
+
+    def _generate_colors(self, n_colors: int) -> List[str]:
+        """Generate colors based on colormap."""
+        # Viridis-like color palette (for when matplotlib is not available)
+        viridis_colors = [
+            '#440154', '#481567', '#482677', '#453781', '#404788',
+            '#39568c', '#33638d', '#2d708e', '#287d8e', '#238a8d',
+            '#1f968b', '#20a387', '#29af7f', '#3cbb75', '#55c667',
+            '#73d055', '#95d840', '#b8de29', '#dce319', '#fde725'
+        ]
+
+        # Generate evenly spaced colors from the palette
+        colors = []
+        for i in range(n_colors):
+            idx = int(i * (len(viridis_colors) - 1) / max(n_colors - 1, 1))
+            colors.append(viridis_colors[idx])
+
+        return colors
+
+    def to_image(self) -> 'Image.Image':
+        """
+        Render the word cloud to a PIL Image.
+
+        Returns:
+            PIL Image object
+        """
+        from PIL import ImageDraw, ImageFont
+
+        # Create image
+        img = Image.new('RGB', (self.width, self.height), self.background_color)
+        draw = ImageDraw.Draw(img)
+
+        # Font cache
+        font_cache = {}
+
+        def get_font(size):
+            if size not in font_cache:
+                try:
+                    for font_name in ['DejaVuSans.ttf', 'Arial.ttf', 'FreeSans.ttf', 'LiberationSans-Regular.ttf']:
+                        try:
+                            font_cache[size] = ImageFont.truetype(font_name, size)
+                            break
+                        except (OSError, IOError):
+                            continue
+                    else:
+                        font_cache[size] = ImageFont.load_default()
+                except Exception:
+                    font_cache[size] = ImageFont.load_default()
+            return font_cache[size]
+
+        # Draw each word
+        for word, x, y, font_size, color in self._layout:
+            font = get_font(font_size)
+            draw.text((x, y), word, font=font, fill=color)
+
+        return img
+
+    def to_array(self) -> np.ndarray:
+        """
+        Convert word cloud to numpy array.
+
+        Returns:
+            Numpy array of the image
+        """
+        return np.array(self.to_image())
+
+
+# =============================================================================
 # VISUALIZATION-METHOD COMPATIBILITY MATRIX
 # =============================================================================
 # Defines which visualizations are available/recommended for each method
@@ -686,9 +959,6 @@ class MethodVisualizer:
         Returns:
             Matplotlib Figure, PIL Image, or None if not available
         """
-        if not WORDCLOUD_AVAILABLE:
-            return None
-
         # Get documents in this cluster
         mask = self.assignments == cluster_id
         cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
@@ -702,16 +972,30 @@ class MethodVisualizer:
         import re
         cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
-        # Generate word cloud
-        wordcloud = WordCloud(
-            width=width,
-            height=height,
-            background_color='white',
-            colormap='viridis',
-            max_words=max_words,
-            min_font_size=10,
-            max_font_size=100
-        ).generate(cleaned_text)
+        # Use wordcloud package if available, otherwise fall back to PIL
+        if WORDCLOUD_AVAILABLE:
+            wordcloud = WordCloud(
+                width=width,
+                height=height,
+                background_color='white',
+                colormap='viridis',
+                max_words=max_words,
+                min_font_size=10,
+                max_font_size=100
+            ).generate(cleaned_text)
+        elif PIL_AVAILABLE:
+            # Fall back to PIL-based word cloud
+            wordcloud = PILWordCloud(
+                width=width,
+                height=height,
+                background_color='white',
+                max_words=max_words,
+                min_font_size=10,
+                max_font_size=100
+            ).generate(cleaned_text)
+        else:
+            logger.warning("Neither wordcloud nor PIL available for word cloud generation")
+            return None
 
         # Use matplotlib if available, otherwise return PIL image directly
         if MATPLOTLIB_AVAILABLE:
@@ -740,13 +1024,32 @@ class MethodVisualizer:
         Returns:
             Matplotlib Figure, PIL Image, or None if not available
         """
-        if not WORDCLOUD_AVAILABLE:
+        if not WORDCLOUD_AVAILABLE and not PIL_AVAILABLE:
+            logger.warning("Neither wordcloud nor PIL available for word cloud generation")
             return None
 
         n_clusters = len(set(self.assignments))
         rows = (n_clusters + cols - 1) // cols
 
         import re
+
+        def generate_wordcloud(cleaned_text, cell_width, cell_height):
+            """Helper to generate wordcloud using available method."""
+            if WORDCLOUD_AVAILABLE:
+                return WordCloud(
+                    width=cell_width,
+                    height=cell_height,
+                    background_color='white',
+                    colormap='viridis',
+                    max_words=max_words
+                ).generate(cleaned_text)
+            else:
+                return PILWordCloud(
+                    width=cell_width,
+                    height=cell_height,
+                    background_color='white',
+                    max_words=max_words
+                ).generate(cleaned_text)
 
         # Use matplotlib if available
         if MATPLOTLIB_AVAILABLE:
@@ -770,14 +1073,7 @@ class MethodVisualizer:
                 cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
                 try:
-                    wordcloud = WordCloud(
-                        width=400,
-                        height=200,
-                        background_color='white',
-                        colormap='viridis',
-                        max_words=max_words
-                    ).generate(cleaned_text)
-
+                    wordcloud = generate_wordcloud(cleaned_text, 400, 200)
                     # Use to_image() PIL method for numpy compatibility
                     ax.imshow(wordcloud.to_image(), interpolation='bilinear')
                 except ValueError:
@@ -811,13 +1107,7 @@ class MethodVisualizer:
                 cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
                 try:
-                    wordcloud = WordCloud(
-                        width=cell_width,
-                        height=cell_height,
-                        background_color='white',
-                        colormap='viridis',
-                        max_words=max_words
-                    ).generate(cleaned_text)
+                    wordcloud = generate_wordcloud(cleaned_text, cell_width, cell_height)
                     wordcloud_images.append(wordcloud.to_image())
                 except ValueError:
                     img = Image.new('RGB', (cell_width, cell_height), 'white')
@@ -859,7 +1149,8 @@ class MethodVisualizer:
         Returns:
             Matplotlib Figure, PIL Image, or None if not available
         """
-        if not WORDCLOUD_AVAILABLE:
+        if not WORDCLOUD_AVAILABLE and not PIL_AVAILABLE:
+            logger.warning("Neither wordcloud nor PIL available for word cloud generation")
             return None
 
         # Get documents in this cluster
@@ -915,17 +1206,29 @@ class MethodVisualizer:
         def color_func(word, font_size, position, orientation, random_state=None, **kwargs):
             return word_colors.get(word.lower(), 'gray')
 
-        # Generate word cloud
-        wordcloud = WordCloud(
-            width=width,
-            height=height,
-            background_color='white',
-            max_words=max_words,
-            min_font_size=10,
-            max_font_size=100,
-            color_func=color_func,
-            prefer_horizontal=0.7
-        ).generate_from_frequencies(top_words)
+        # Generate word cloud using available method
+        if WORDCLOUD_AVAILABLE:
+            wordcloud = WordCloud(
+                width=width,
+                height=height,
+                background_color='white',
+                max_words=max_words,
+                min_font_size=10,
+                max_font_size=100,
+                color_func=color_func,
+                prefer_horizontal=0.7
+            ).generate_from_frequencies(top_words)
+        else:
+            # Use PILWordCloud fallback with color function
+            wordcloud = PILWordCloud(
+                width=width,
+                height=height,
+                background_color='white',
+                max_words=max_words,
+                min_font_size=10,
+                max_font_size=100,
+                color_func=color_func
+            ).generate_from_frequencies(top_words)
 
         # Use matplotlib if available, otherwise return PIL image directly
         if MATPLOTLIB_AVAILABLE:
@@ -1164,7 +1467,8 @@ class MethodVisualizer:
         Returns:
             Matplotlib Figure, PIL Image, or None if not available
         """
-        if not WORDCLOUD_AVAILABLE:
+        if not WORDCLOUD_AVAILABLE and not PIL_AVAILABLE:
+            logger.warning("Neither wordcloud nor PIL available for word cloud generation")
             return None
 
         n_clusters = len(set(self.assignments))
@@ -1219,16 +1523,27 @@ class MethodVisualizer:
                 return color_func
 
             try:
-                wordcloud = WordCloud(
-                    width=cell_width,
-                    height=cell_height,
-                    background_color='white',
-                    max_words=max_words,
-                    min_font_size=8,
-                    max_font_size=80,
-                    color_func=make_color_func(word_colors),
-                    prefer_horizontal=0.7
-                ).generate_from_frequencies(top_words)
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=cell_width,
+                        height=cell_height,
+                        background_color='white',
+                        max_words=max_words,
+                        min_font_size=8,
+                        max_font_size=80,
+                        color_func=make_color_func(word_colors),
+                        prefer_horizontal=0.7
+                    ).generate_from_frequencies(top_words)
+                else:
+                    wordcloud = PILWordCloud(
+                        width=cell_width,
+                        height=cell_height,
+                        background_color='white',
+                        max_words=max_words,
+                        min_font_size=8,
+                        max_font_size=80,
+                        color_func=make_color_func(word_colors)
+                    ).generate_from_frequencies(top_words)
                 return wordcloud.to_image(), sum(mask)
             except ValueError:
                 return None, sum(mask)

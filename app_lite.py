@@ -74,6 +74,13 @@ try:
 except ImportError:
     WORDCLOUD_AVAILABLE = False
 
+# PIL for fallback wordcloud rendering
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+
 # -----------------------------------------------------------------------------
 # PATH SETUP
 # Ensure src/ is importable for pipeline modules
@@ -90,6 +97,7 @@ from src.rigor_diagnostics import RigorDiagnostics
 from src.method_visualizations import (
     MethodVisualizer,
     get_visualization_availability,
+    PILWordCloud,
 )
 from helpers.analysis import (
     validate_dataframe,
@@ -1374,7 +1382,7 @@ def main():
 
                 # === VISUALIZATION: Per-Cluster Word Clouds ===
                 st.markdown("**Per-Cluster/Topic Word Clouds**:")
-                if WORDCLOUD_AVAILABLE:
+                if WORDCLOUD_AVAILABLE or PIL_AVAILABLE:
                     try:
                         # Use semantic wordclouds with color-coded meanings
                         with st.spinner("Generating semantic word clouds..."):
@@ -1435,7 +1443,7 @@ def main():
                     except Exception as e:
                         st.warning(f"Could not generate word clouds: {str(e)}")
                 else:
-                    st.info("Word clouds require the `wordcloud` package. Install with: `pip install wordcloud`")
+                    st.info("Word clouds require the `wordcloud` or `PIL` package. Install with: `pip install wordcloud` or `pip install Pillow`")
 
                 # === Method Recommendations Summary ===
                 with st.expander("Visualization Recommendations for Your Method"):

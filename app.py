@@ -34,12 +34,20 @@ try:
 except ImportError:
     WORDCLOUD_AVAILABLE = False
 
-# Method visualizations (includes semantic wordclouds)
+# PIL for fallback wordcloud rendering
 try:
-    from src.method_visualizations import MethodVisualizer
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+
+# Method visualizations (includes semantic wordclouds and PILWordCloud fallback)
+try:
+    from src.method_visualizations import MethodVisualizer, PILWordCloud
     METHOD_VISUALIZER_AVAILABLE = True
 except ImportError:
     METHOD_VISUALIZER_AVAILABLE = False
+    PILWordCloud = None
 
 # Import helper modules
 from helpers.formatting import (
@@ -2693,29 +2701,73 @@ def page_visualizations():
                 wordcloud_text = viz_data['wordcloud_text']
 
                 # Generate word cloud (lightweight - just rendering pre-cleaned text)
-                wordcloud = WordCloud(
-                    width=800,
-                    height=400,
-                    background_color='white',
-                    colormap='viridis',
-                    max_words=100,
-                    min_font_size=10,
-                    max_font_size=100
-                ).generate(wordcloud_text)
+                # Use wordcloud package if available, otherwise fall back to PIL
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=800,
+                        height=400,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=100,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(wordcloud_text)
+                elif PILWordCloud is not None:
+                    wordcloud = PILWordCloud(
+                        width=800,
+                        height=400,
+                        background_color='white',
+                        max_words=100,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(wordcloud_text)
+                else:
+                    wordcloud = None
 
-                # Create matplotlib figure
-                fig, ax = plt.subplots(figsize=(12, 6))
-                # Use to_image() PIL method for numpy compatibility
-                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-                ax.axis('off')
-                plt.tight_layout()
+                if wordcloud is not None:
+                    # Create matplotlib figure
+                    fig, ax = plt.subplots(figsize=(12, 6))
+                    # Use to_image() PIL method for numpy compatibility
+                    ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+                    ax.axis('off')
+                    plt.tight_layout()
 
-                st.pyplot(fig, use_container_width=True)
-                plt.close(fig)  # Clean up to prevent memory leaks
+                    st.pyplot(fig, use_container_width=True)
+                    plt.close(fig)  # Clean up to prevent memory leaks
 
-                st.caption("Word cloud generated from all response text")
+                    st.caption("Word cloud generated from all response text")
+                else:
+                    st.warning("⚠️ Word cloud generation failed. PIL library may not be available.")
+            elif PIL_AVAILABLE and PILWordCloud is not None:
+                # Fallback: generate word cloud even if viz_data didn't have it pre-computed
+                try:
+                    results_df = st.session_state.results_df
+                    text_column = viz_data.get('text_column', 'response')
+                    all_text = ' '.join(results_df[text_column].dropna().astype(str).tolist())
+                    cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
+
+                    wordcloud = PILWordCloud(
+                        width=800,
+                        height=400,
+                        background_color='white',
+                        max_words=100,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(cleaned_text)
+
+                    fig, ax = plt.subplots(figsize=(12, 6))
+                    ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+                    ax.axis('off')
+                    plt.tight_layout()
+
+                    st.pyplot(fig, use_container_width=True)
+                    plt.close(fig)
+
+                    st.caption("Word cloud generated from all response text (using PIL fallback)")
+                except Exception as e:
+                    st.warning(f"⚠️ Word cloud generation failed: {str(e)}")
             else:
-                st.warning("⚠️ Word cloud not available. Please ensure the `wordcloud` package is installed.")
+                st.warning("⚠️ Word cloud not available. Please ensure the `wordcloud` or `PIL` package is installed.")
 
         # Sub-tab 2: Semantic Word Clouds by Topic
         with wc_tab2:
@@ -2735,7 +2787,7 @@ def page_visualizations():
                 would have similar color shades because they're semantically related.
                 """)
 
-            if METHOD_VISUALIZER_AVAILABLE and WORDCLOUD_AVAILABLE:
+            if METHOD_VISUALIZER_AVAILABLE and (WORDCLOUD_AVAILABLE or PIL_AVAILABLE):
                 try:
                     results_df = st.session_state.results_df
                     text_column = viz_data.get('text_column', 'response')
@@ -2798,7 +2850,7 @@ def page_visualizations():
             else:
                 st.warning(
                     "⚠️ Semantic word clouds require additional packages. "
-                    "Please ensure `wordcloud` and `gensim` are installed."
+                    "Please ensure `wordcloud` or `PIL` and `gensim` are installed."
                 )
 
         # Sub-tab 3: Simple Topic Word Clouds (fallback)
@@ -2813,7 +2865,7 @@ def page_visualizations():
                 Colors are random and do not indicate meaning.
                 """)
 
-            if METHOD_VISUALIZER_AVAILABLE and WORDCLOUD_AVAILABLE:
+            if METHOD_VISUALIZER_AVAILABLE and (WORDCLOUD_AVAILABLE or PIL_AVAILABLE):
                 try:
                     results_df = st.session_state.results_df
                     text_column = viz_data.get('text_column', 'response')
@@ -2832,7 +2884,7 @@ def page_visualizations():
                 except Exception as e:
                     st.error(f"Error generating wordclouds: {str(e)}")
             else:
-                st.warning("⚠️ Word clouds not available.")
+                st.warning("⚠️ Word clouds not available. Please ensure `wordcloud` or `PIL` is installed.")
 
     # =========================================================================
     # TAB 6: Sunburst Chart (hierarchical code structure)
