@@ -1,0 +1,301 @@
+id,response,participant_id,timestamp,age_group
+1,"I've been feeling soooo burnt out lately... work just never stops &amp; I can't find time for myself",P001,2025-03-15 09:23:41,26-35
+2,"My manager expects me to be available 24/7 and it's destroying my mental health. I don't know how much longer I can keep this up.",P002,2025-03-15 10:45:22,36-45
+3,"Finally set some boundaries at work!!! Told my boss I won't answer emails after 6pm and it feels AMAZING",P003,2025-03-15 11:12:08,26-35
+4,"The flexibility of working from home has been life-changing for me. I can actually pick up my kids from school now.",P004,2025-03-15 14:33:56,36-45
+5,"idk",P005,2025-03-15 15:02:19,18-25
+6,"Work-life balance? What's that??? I haven't had a real vacation in 3 years...",P006,2025-03-15 16:45:33,46-55
+7,"I'm definately struggling to seperate my work life from my personal life since everything happens in my living room now",P007,2025-03-16 08:17:42,26-35
+8,"Burnout is realllly affecting my relationships. I come home exhausted and have nothing left to give to my family.",P008,2025-03-16 09:28:15,36-45
+9,"Started taking my lunch breaks outside instead of at my desk &amp; it's made such a difference in how I feel",P009,2025-03-16 10:55:03,26-35
+10,"THE STRESS IS UNBEARABLE. I wake up at 3am thinking about work emails.",P010,2025-03-16 11:33:47,46-55
+11,"I've learned that saying no to extra projects isn't selfish, it's necessary for my wellbeing",P011,2025-03-16 13:22:18,36-45
+12,"My friends have been AMAZING support system, I definately couldn't have gotten through this without them",P012,2025-03-16 14:45:29,26-35
+13,"Loneliness has been hitting me hard lately   especially since I moved to a new city for work",P013,2025-03-16 15:18:42,18-25
+14,"I'm so grateful for my book club - it's the only social interaction I get some weeks &amp; it keeps me sane",P014,2025-03-16 16:02:55,56+
+15,"fine I guess",P015,2025-03-17 08:33:21,18-25
+16,"Community involvement has given me a sense of purpose. Volunteering at the food bank every Saturday makes me feel connected to something bigger.",P016,2025-03-17 09:47:38,56+
+17,"I wanna make more friends but it's sooo hard as an adult. Everyone already has their established friend groups.",P017,2025-03-17 10:22:14,26-35
+18,"My support network helped me through my divorce. Without them I would have been completely lost.",P018,2025-03-17 11:55:06,46-55
+19,"Ughhh social media makes me feel MORE lonely not less. Seeing everyone's perfect lives while I'm sitting alone...",P019,2025-03-17 13:08:33,18-25
+20,"I've been making an effort to call my parents more often.  It's strengthened our relationship so much.",P020,2025-03-17 14:29:47,26-35
+21,"Joined a hiking group last month and it's been wonderful!!! Finally found my people &quot;in the wild&quot; haha",P021,2025-03-17 15:44:22,36-45
+22,"The pandemic really showed me who my true friends are. Some friendships faded but the ones that remained are stronger than ever.",P022,2025-03-17 16:18:09,36-45
+23,"I occassionally feel like I don't belong anywhere. Like I'm always on the outside looking in.",P023,2025-03-18 08:05:41,18-25
+24,"Therapy has helped me learn to manage my anxiety, I'm finally starting to feel like myself again",P024,2025-03-18 09:33:28,26-35
+25,"Self-care isn't selfish!!! I had to learn this the hard way after years of putting everyone else first",P025,2025-03-18 10:47:15,46-55
+26,"Mindfulness meditation has been kinda transformative for me. I never thought I'd be someone who meditates but here I am.",P026,2025-03-18 11:22:39,36-45
+27,"I've been seeing a therapist for 6 months now &amp; I wish I had started sooner. The stigma kept me away for too long.",P027,2025-03-18 13:15:52,26-35
+28,"Ahhh the anxiety never really goes away does it? But I'm learning to live with it rather than fight against it.",P028,2025-03-18 14:38:06,36-45
+29,"nothing",P029,2025-03-18 15:02:44,18-25
+30,"I recieve so much comfort from my daily journaling practice. It helps me process my emotions before they overwhelm me.",P030,2025-03-18 16:29:18,46-55
+31,"FINALLY found a medication that works for my depression without terrible side effects. It took 3 years of trying different things.",P031,2025-03-19 08:44:33,26-35
+32,"Breathing exercises sound stupid but they actually help??? I was so skeptical at first",P032,2025-03-19 09:57:21,18-25
+33,"My coping mechanisms used to be unhealthy - drinking, avoiding problems. Now I have better tools thanks to therapy.",P033,2025-03-19 10:28:47,36-45
+34,"I'm gonna keep working on myself even when it's hard. Mental health is a journey not a destination.",P034,2025-03-19 11:45:09,26-35
+35,"The hardest part of managing anxiety is that nobody can see it. People think I'm fine because I look fine on the outside.",P035,2025-03-19 13:12:36,36-45
+36,"Self-care for me means setting boundaries   saying no to things that drain my energy   and prioritizing sleep",P036,2025-03-19 14:33:58,46-55
+37,"I feeeeling like I'm finally making progress with my mental health. It's been a long road but I can see the light.",P037,2025-03-19 15:47:22,26-35
+38,"Overall I'd say I'm pretty happy with my life right now. I have a stable job, good health, and people who love me.",P038,2025-03-19 16:18:44,46-55
+39,"I've found that gratitude journaling has completely shifted my perspective. Focusing on what I have rather than what I lack.",P039,2025-03-20 08:29:15,56+
+40,"Life satisfaction is sorta complicated for me. Some days I feel fulfilled, other days I wonder what's the point.",P040,2025-03-20 09:42:38,26-35
+41,"I LOVE MY LIFE!!! Took 40 years to get here but I finally feel at peace with who I am",P041,2025-03-20 10:55:21,46-55
+42,"Happiness comes and goes but contentment is what I'm really after. That deeper sense of being okay with things.",P042,2025-03-20 11:28:47,56+
+43,"Finding meaning in small moments has been important for me... a good cup of coffee, a sunset, a laugh with friends",P043,2025-03-20 13:15:33,36-45
+44,"I definately feel more fulfilled since I started prioritizing experiences over things. Less stuff, more memories.",P044,2025-03-20 14:38:59,26-35
+45,"meh",P045,2025-03-20 15:02:16,18-25
+46,"Gratitude practice has been helpful but sometimes it feels forced??? Like I'm trying to convince myself to be happy",P046,2025-03-20 16:29:42,26-35
+47,"I've learned that happiness isn't about having a perfect life. It's about appreciating the imperfect life you have.",P047,2025-03-21 08:44:18,46-55
+48,"My relationships bring me the most satisfaction. Career achievements feel empty without people to share them with.",P048,2025-03-21 09:57:35,36-45
+49,"I wanna feel more fulfilled but I don't know what's missing. I have everything I'm supposed to want but still feel empty.",P049,2025-03-21 10:28:51,26-35
+50,"THE LITTLE THINGS MATTER. A stranger's smile, a good book, sunshine on my face - that's where I find joy.",P050,2025-03-21 11:45:27,56+
+51,"Learning new skills at 55 has been incredibly rewarding!!! Just started playing guitar and I love it",P051,2025-03-21 13:12:43,56+
+52,"I'm constantly working on self-improvement &amp; sometimes I wonder if I'll ever feel like I'm &#39;enough&#39;",P052,2025-03-21 14:33:69,26-35
+53,"Personal growth is uncomfortable but necessary. Staying the same is more painful than changing.",P053,2025-03-21 15:47:22,36-45
+54,"I've set some ambitious goals for this year. Gonna run a marathon, learn Spanish, and read 50 books.",P054,2025-03-21 16:18:38,26-35
+55,"Challenges have made me who I am. Every difficult experience taught me something valuable about myself.",P055,2025-03-22 08:29:14,46-55
+56,"ughhh why is personal growth so hard??? Every time I think I've figured something out, something new comes up",P056,2025-03-22 09:42:31,18-25
+57,"I've been working on being less of a people pleaser. It's realllly challenging to put my own needs first.",P057,2025-03-22 10:55:47,36-45
+58,"Self-improvement books used to make me feel inadequate. Now I take what's useful and leave the rest.",P058,2025-03-22 11:28:55,46-55
+59,"I recieve criticism better now than I used to. Trying to see it as information rather than attack.",P059,2025-03-22 13:15:21,36-45
+60,"My goal is to become more patient. With myself, with others, with the process of life itself.",P060,2025-03-22 14:38:44,56+
+61,"I'm hopeful about the future even though there's so much uncertainty. I believe things will work out somehow.",P061,2025-03-22 15:47:18,26-35
+62,"Climate change scares me... I worry about what kind of world my kids will inherit",P062,2025-03-22 16:18:33,36-45
+63,"My optimism has been tested lately but I refuse to give up on believing that better days are ahead!!!",P063,2025-03-23 08:29:47,46-55
+64,"I'm kinda terrified of the future tbh. So much is changing so fast &amp; I don't know where I fit in.",P064,2025-03-23 09:42:15,18-25
+65,"Uncertainty used to paralyze me but now I try to embrace it. Not knowing can be exciting too.",P065,2025-03-23 10:55:28,36-45
+66,"I hope to retire comfortably but the economy makes me nervous. Will I have enough? Will social security still exist?",P066,2025-03-23 11:28:41,56+
+67,"THE FUTURE IS BRIGHT. I truly believe the next generation will fix what we've broken.",P067,2025-03-23 13:15:54,46-55
+68,"I'm scared of getting older... of being alone... of losing my independence",P068,2025-03-23 14:38:22,56+
+69,"whatever happens happens I guess",P069,2025-03-23 15:02:38,18-25
+70,"I've stopped trying to control the future. I make plans but hold them loosely. Life has other ideas sometimes.",P070,2025-03-23 16:29:51,46-55
+71,"My work has been consuming my entire life lately. I eat lunch at my desk   work late   and even dream about spreadsheets.",P071,2025-03-24 08:44:16,36-45
+72,"Finally took a mental health day and felt SO guilty about it. Why is rest so hard???",P072,2025-03-24 09:57:33,26-35
+73,"I've been feeeeling overwhelmed by everything. Work, family, responsibilities - it never ends.",P073,2025-03-24 10:28:49,36-45
+74,"Flexibility at work has allowed me to care for my aging parents. I'm grateful my company understands.",P074,2025-03-24 11:45:15,46-55
+75,"BURNOUT IS REAL. I ignored the signs for years and now I'm paying the price with my health.",P075,2025-03-24 13:12:28,46-55
+76,"I occassionally think about quitting everything and moving to a cabin in the woods. Just... disappearing.",P076,2025-03-24 14:33:44,36-45
+77,"Work used to define me but I'm learning that I'm more than my job title &amp; productivity",P077,2025-03-24 15:47:57,36-45
+78,"The boundary between work and home is nonexistent when your office is your kitchen table...",P078,2025-03-24 16:18:23,26-35
+79,"I've started leaving work at work. Literally. I don't bring my laptop home anymore and it's been liberating.",P079,2025-03-25 08:29:36,46-55
+80,"Stress management is something I'm actively working on. Yoga, meditation, therapy - throwing everything at it.",P080,2025-03-25 09:42:52,36-45
+81,"My social anxiety makes it realllly hard to make new connections. I want friends but the process is exhausting.",P081,2025-03-25 10:55:18,18-25
+82,"I found my community through online gaming. People dismiss it but these friendships are real &amp; meaningful.",P082,2025-03-25 11:28:34,18-25
+83,"Loneliness doesn't mean being alone... I can be surrounded by people and still feel completely isolated",P083,2025-03-25 13:15:47,36-45
+84,"I'm gonna try to be more vulnerable with my friends. Letting people in is scary but necessary.",P084,2025-03-25 14:38:13,26-35
+85,"My neighbors have become like family. We have dinner together every Sunday &amp; look out for each other.",P085,2025-03-25 15:47:26,56+
+86,"FRIENDSHIP IS SO IMPORTANT!!! I don't know why I spent so many years prioritizing work over people.",P086,2025-03-25 16:18:39,46-55
+87,"I kinda pushed everyone away during my depression. Now I'm trying to rebuild those bridges.",P087,2025-03-26 08:29:52,26-35
+88,"Support groups have been invaluable. Being with people who truly understand what you're going through... there's nothing like it.",P088,2025-03-26 09:42:18,36-45
+89,"I haven't made a new friend in years??? Is that normal or am I doing something wrong???",P089,2025-03-26 10:55:34,36-45
+90,"Community service connects me to my town in a meaningful way. I feel like I belong here now.",P090,2025-03-26 11:28:47,56+
+91,"Ahhh I love my therapist. She's helped me understand patterns I've been repeating my whole life.",P091,2025-03-26 13:15:23,26-35
+92,"Mindfulness seemed like woo-woo nonsense until I tried it. Now I practice every single day.",P092,2025-03-26 14:38:36,46-55
+93,"I definately need to work on my emotional regulation. I react instead of respond too often.",P093,2025-03-26 15:47:49,36-45
+94,"Self-care looks different for everyone. For me it's long baths, trashy reality TV, and saying no to plans I don't want.",P094,2025-03-26 16:18:55,26-35
+95,"Managing anxiety is a daily practice not a one-time fix. Some days are harder than others.",P095,2025-03-27 08:29:21,36-45
+96,"I've been journaling about my feelings &amp; it's helped me identify triggers I didn't even know I had",P096,2025-03-27 09:42:37,26-35
+97,"fine",P097,2025-03-27 10:55:03,18-25
+98,"THE MENTAL HEALTH STIGMA NEEDS TO END. I'm open about my struggles because someone else might need to hear it.",P098,2025-03-27 11:28:19,36-45
+99,"I wanna normalize therapy. It's not just for &quot;crazy people&quot; - everyone can benefit from talking to someone.",P099,2025-03-27 13:15:32,26-35
+100,"Coping with grief has been the hardest thing I've ever done. Therapy helped me process losing my mom.",P100,2025-03-27 14:38:45,46-55
+101,"I've been feeling soooo burnt out lately... work just never stops &amp; I can't find time for myself",P101,2025-03-27 15:47:58,26-35
+102,"Learning to sit with uncomfortable emotions rather than numbing them has been transformative for my mental health.",P102,2025-03-27 16:18:24,36-45
+103,"Happiness for me is simple things: morning coffee, my dog's excitement when I come home, a good night's sleep.",P103,2025-03-28 08:29:37,46-55
+104,"I've realllly struggled with feeling fulfilled. I achieved all my goals and still felt empty inside.",P104,2025-03-28 09:42:53,36-45
+105,"Meaning comes from contribution   from mattering to others   from being part of something larger than myself",P105,2025-03-28 10:55:19,56+
+106,"I started a gratitude jar. Every day I write something I'm thankful for. On bad days I read through them.",P106,2025-03-28 11:28:32,26-35
+107,"My life satisfaction increased dramatically when I stopped comparing myself to others on social media!!!",P107,2025-03-28 13:15:45,26-35
+108,"Contentment is underrated. We're always chasing happiness but maybe peace is the real goal.",P108,2025-03-28 14:38:58,56+
+109,"I occassionally feel guilty for being happy when there's so much suffering in the world. Is that weird?",P109,2025-03-28 15:47:21,26-35
+110,"THE PURSUIT OF HAPPINESS IS EXHAUSTING. I'm learning to just... be. Without always striving for more.",P110,2025-03-28 16:18:34,46-55
+111,"Fulfillment comes from alignment - when my actions match my values, I feel at peace.",P111,2025-03-29 08:29:47,36-45
+112,"I'm happier now at 60 than I was at 30. Age brings perspective &amp; I've stopped sweating the small stuff.",P112,2025-03-29 09:42:13,56+
+113,"I kinda resent the pressure to be happy all the time. Sometimes life is hard and that's okay.",P113,2025-03-29 10:55:26,26-35
+114,"My definition of success has changed. It used to be money and status. Now it's time and relationships.",P114,2025-03-29 11:28:39,46-55
+115,"I've been working on accepting compliments... I always deflect but I'm trying to just say thank you",P115,2025-03-29 13:15:52,26-35
+116,"Personal development podcasts have changed my life!!! I listen during my commute and learn so much.",P116,2025-03-29 14:38:15,26-35
+117,"Growth mindset is realllly hard to maintain when you keep failing at the same things over and over...",P117,2025-03-29 15:47:28,36-45
+118,"I set a goal to step outside my comfort zone once a week. Small challenges add up to big changes.",P118,2025-03-29 16:18:41,26-35
+119,"ughhh self-improvement culture is toxic sometimes. Can't I just be a person without optimizing everything???",P119,2025-03-30 08:29:54,18-25
+120,"I've been learning to embrace failure as feedback rather than evidence that I'm not good enough.",P120,2025-03-30 09:42:27,36-45
+121,"My biggest area of growth has been communication. I used to avoid conflict &amp; now I address issues directly.",P121,2025-03-30 10:55:33,36-45
+122,"I'm gonna focus on progress not perfection this year. Small steps forward are still steps forward.",P122,2025-03-30 11:28:46,26-35
+123,"Challenges build character but honestly??? Sometimes I wish life would just be easy for a while.",P123,2025-03-30 13:15:59,36-45
+124,"I recieve feedback better now that I've worked on my defensiveness. It's still hard but I'm improving.",P124,2025-03-30 14:38:22,36-45
+125,"LEARNING IS LIFELONG. At 70 I'm taking online courses and loving it!!!",P125,2025-03-30 15:47:35,56+
+126,"I've set boundaries with my family and it's been the hardest thing but also the most necessary for my growth.",P126,2025-03-30 16:18:48,46-55
+127,"The future excites me!!! So many possibilities, so much potential for positive change.",P127,2025-03-31 08:29:21,18-25
+128,"I worry about job security with AI taking over everything... will my skills even be relevant in 10 years?",P128,2025-03-31 09:42:34,36-45
+129,"Optimism is a choice I make every day. Not because things are perfect but because hope is better than despair.",P129,2025-03-31 10:55:47,46-55
+130,"I'm kinda scared about the political situation. It feels like things are getting worse not better...",P130,2025-03-31 11:28:13,26-35
+131,"Uncertainty is the only certainty &amp; I'm learning to be okay with not knowing what comes next",P131,2025-03-31 13:15:26,36-45
+132,"I hope my children have better opportunities than I did. That's what keeps me working so hard.",P132,2025-03-31 14:38:39,46-55
+133,"THE WORLD IS GETTING BETTER even though the news makes it seem otherwise. I have to believe that.",P133,2025-03-31 15:47:52,56+
+134,"I'm feeeeling anxious about retirement. Will I have enough? What will I do with all that time?",P134,2025-03-31 16:18:15,56+
+135,"dunno really",P135,2025-04-01 08:29:28,18-25
+136,"I try to focus on what I can control and let go of what I can't. It's the only way to stay sane.",P136,2025-04-01 09:42:41,46-55
+137,"My hopes for the future include traveling more, spending time with grandkids, and finally writing that novel.",P137,2025-04-01 10:55:54,56+
+138,"Fears about the future keep me up at night sometimes... health, finances, losing loved ones...",P138,2025-04-01 11:28:27,46-55
+139,"I've been realllly struggling with work lately. My boss is unreasonable &amp; expectations are impossible.",P139,2025-04-01 13:15:33,26-35
+140,"Remote work has been both a blessing and a curse. Flexibility yes, but also no escape from the job.",P140,2025-04-01 14:38:46,36-45
+141,"I definately need better boundaries. I say yes to everything and then resent everyone for it.",P141,2025-04-01 15:47:59,36-45
+142,"Burnout recovery is slow. I thought taking a week off would fix it but it's been months and I'm still exhausted.",P142,2025-04-01 16:18:22,36-45
+143,"My company introduced mental health days and it's made such a difference!!! Finally feel supported.",P143,2025-04-02 08:29:35,26-35
+144,"Stress has become my baseline... I don't even know what relaxed feels like anymore",P144,2025-04-02 09:42:48,36-45
+145,"I'm gonna ask for a raise. I've been putting it off for years but I deserve to be compensated fairly.",P145,2025-04-02 10:55:14,26-35
+146,"Work-life balance improved when I stopped checking email on weekends. Revolutionary concept apparently???",P146,2025-04-02 11:28:27,36-45
+147,"The hustle culture is killing us. Rest is not laziness. When did we forget that humans aren't machines?",P147,2025-04-02 13:15:33,26-35
+148,"I love my job but I love my life more. That's why I leave at 5pm sharp every single day.",P148,2025-04-02 14:38:46,46-55
+149,"ahhh I just need a vacation!!! Haven't had a proper break in so long",P149,2025-04-02 15:47:59,26-35
+150,"Flexibility matters more to me than salary at this point. Time is the most valuable resource.",P150,2025-04-02 16:18:22,46-55
+151,"Making friends as an adult is sooo much harder than anyone tells you. Where do people even meet???",P151,2025-04-03 08:29:35,26-35
+152,"I joined a running club and it's been amazing for both my physical and social health!!!",P152,2025-04-03 09:42:48,36-45
+153,"Loneliness is an epidemic and nobody talks about it... I feel so alone even in a crowded room",P153,2025-04-03 10:55:14,36-45
+154,"My community center offers free classes for seniors and it's helped me stay connected after retiring.",P154,2025-04-03 11:28:27,56+
+155,"I've been neglecting my friendships and I regret it. Too focused on career while relationships withered.",P155,2025-04-03 13:15:33,46-55
+156,"TRUE FRIENDS SHOW UP. Not just when it's convenient but when things are hard. I'm lucky to have a few.",P156,2025-04-03 14:38:46,46-55
+157,"I kinda isolate when I'm depressed which makes the depression worse. Vicious cycle.",P157,2025-04-03 15:47:59,26-35
+158,"Social media gives me anxiety but also FOMO if I'm not on it??? Can't win",P158,2025-04-03 16:18:22,18-25
+159,"I've been making an effort to deepen existing friendships rather than always trying to make new ones.",P159,2025-04-04 08:29:35,36-45
+160,"Support from my church community has been invaluable during my health struggles. They brought meals every day.",P160,2025-04-04 09:42:48,56+
+161,"I don't have many friends but the ones I have are solid. Quality over quantity.",P161,2025-04-04 10:55:14,36-45
+162,"Connection is a basic human need &amp; I think modern life makes it harder to fulfill that need",P162,2025-04-04 11:28:27,36-45
+163,"Therapy taught me that I'm not broken, just human. Everyone struggles. I'm not alone in this.",P163,2025-04-04 13:15:33,26-35
+164,"I've been practicing mindfulness for a year and my anxiety has decreased significantly!!! Highly recommend.",P164,2025-04-04 14:38:46,36-45
+165,"Self-care is not bubble baths and face masks for me. It's saying no, setting limits, protecting my energy.",P165,2025-04-04 15:47:59,46-55
+166,"I wanna be more consistent with my mental health routines but life gets in the way...",P166,2025-04-04 16:18:22,26-35
+167,"Coping with change has always been hard for me. I like stability and predictability.",P167,2025-04-05 08:29:35,36-45
+168,"I occassionally have panic attacks and they're terrifying. But I've learned techniques to manage them.",P168,2025-04-05 09:42:48,26-35
+169,"MENTAL HEALTH IS HEALTH. Period. End of discussion. We need to treat it that way.",P169,2025-04-05 10:55:14,36-45
+170,"I've been off medication for 2 years now and managing well with therapy and lifestyle changes.",P170,2025-04-05 11:28:27,36-45
+171,"ughhh why does getting help have to be so expensive??? Therapy should be accessible to everyone",P171,2025-04-05 13:15:33,18-25
+172,"My anxiety is always there in the background but I've learned to function with it rather than fight it.",P172,2025-04-05 14:38:46,36-45
+173,"I've been soooo stressed that my body is showing it. Headaches, tension, trouble sleeping...",P173,2025-04-05 15:47:59,36-45
+174,"Self-compassion is the skill I'm currently working on. I'm my own worst critic &amp; it's not helpful.",P174,2025-04-05 16:18:22,26-35
+175,"Happiness isn't a destination, it's a practice. Something you do every day, not something you achieve.",P175,2025-04-06 08:29:35,46-55
+176,"I've found meaning through mentoring younger colleagues. Helping others succeed is deeply fulfilling.",P176,2025-04-06 09:42:48,46-55
+177,"Life satisfaction comes and goes in waves. Right now I'm in a good wave &amp; trying to appreciate it.",P177,2025-04-06 10:55:14,36-45
+178,"I definately compare myself to others too much. It steals my joy and I know it but can't stop.",P178,2025-04-06 11:28:27,26-35
+179,"Gratitude has shifted my entire perspective!!! I focus on abundance not scarcity now.",P179,2025-04-06 13:15:33,36-45
+180,"I'm pretty satisfied with my life overall. Not perfect but pretty good. That's enough.",P180,2025-04-06 14:38:46,56+
+181,"Finding purpose after retirement has been challenging. Work gave me structure and identity.",P181,2025-04-06 15:47:59,56+
+182,"I've learned that you can be grateful AND still want more. They're not mutually exclusive.",P182,2025-04-06 16:18:22,36-45
+183,"My life has meaning because of my relationships. Everything else is just details.",P183,2025-04-07 08:29:35,46-55
+184,"I kinda resent positive thinking culture. Sometimes things are bad and pretending otherwise doesn't help.",P184,2025-04-07 09:42:48,26-35
+185,"THE SIMPLE LIFE IS UNDERRATED. Less stuff, less stress, more space for what matters.",P185,2025-04-07 10:55:14,46-55
+186,"I recieve so much joy from my garden. Watching things grow that I planted myself is magical.",P186,2025-04-07 11:28:27,56+
+187,"I'm working on being more patient with my personal growth. Change takes time and that's okay.",P187,2025-04-07 13:15:33,36-45
+188,"Goal setting used to stress me out. Now I set intentions instead - gentler, more flexible.",P188,2025-04-07 14:38:46,26-35
+189,"I've grown so much in the past year!!! Barely recognize who I was 12 months ago.",P189,2025-04-07 15:47:59,26-35
+190,"Self-improvement is great but self-acceptance is where it starts. You can't grow from a place of hatred.",P190,2025-04-07 16:18:22,36-45
+191,"I'm gonna learn a new language this year. Something I've always wanted to do but never made time for.",P191,2025-04-08 08:29:35,36-45
+192,"Challenges have shaped me into who I am. I wouldn't choose the hard times but I value what they taught me.",P192,2025-04-08 09:42:48,46-55
+193,"Personal growth isn't linear??? I take two steps forward and one step back constantly",P193,2025-04-08 10:55:14,26-35
+194,"I've been realllly working on my communication skills. Saying what I mean clearly and kindly.",P194,2025-04-08 11:28:27,36-45
+195,"Learning to fail gracefully has been a major area of growth. Failure isn't fatal, it's feedback.",P195,2025-04-08 13:15:33,26-35
+196,"ahhh personal development is exhausting sometimes. Can't I just exist without optimizing???",P196,2025-04-08 14:38:46,18-25
+197,"My goals this year: more sleep, less screen time, deeper relationships. Quality over quantity in everything.",P197,2025-04-08 15:47:59,36-45
+198,"I've stopped making New Year's resolutions. Now I pick one word to focus on all year. This year: presence.",P198,2025-04-08 16:18:22,46-55
+199,"The future feels uncertain but I'm trying to see that as exciting rather than scary.",P199,2025-04-09 08:29:35,26-35
+200,"I worry about my kids' futures. The job market, the environment, the cost of living... it's all so uncertain.",P200,2025-04-09 09:42:48,46-55
+201,"Optimism is a choice &amp; I choose it every day even when things are hard",P201,2025-04-09 10:55:14,46-55
+202,"I'm kinda terrified of AI and what it means for humanity. Are we creating our replacements???",P202,2025-04-09 11:28:27,26-35
+203,"Hope is the thing with feathers that perches in the soul... I try to remember that on dark days",P203,2025-04-09 13:15:33,56+
+204,"I've stopped watching the news because it was destroying my mental health. Ignorance is bliss sometimes.",P204,2025-04-09 14:38:46,36-45
+205,"THE FUTURE IS WHAT WE MAKE IT. We have agency. We have power. Let's use it wisely.",P205,2025-04-09 15:47:59,36-45
+206,"I plan for the future but try not to live there. The present moment is all we really have.",P206,2025-04-09 16:18:22,46-55
+207,"My fears about aging have lessened as I've gotten older. Each decade has brought unexpected gifts.",P207,2025-04-10 08:29:35,56+
+208,"I'm hopeful about medical advances. Maybe my grandkids will live in a world without cancer.",P208,2025-04-10 09:42:48,56+
+209,"Uncertainty used to paralyze me but now I see it as possibility. Anything could happen!!!",P209,2025-04-10 10:55:14,26-35
+210,"whatever",P210,2025-04-10 11:28:27,18-25
+211,"I've been struggling with boundaries at work again. Every time I set one, someone pushes past it.",P211,2025-04-10 13:15:33,36-45
+212,"Remote work has been a double-edged sword &amp; I miss the separation between work and home",P212,2025-04-10 14:38:46,36-45
+213,"Burnout symptoms are creeping back... headaches, insomnia, irritability. I know the signs now.",P213,2025-04-10 15:47:59,36-45
+214,"I occassionally take mental health days and lie about being sick. Why is that still necessary in 2025???",P214,2025-04-10 16:18:22,26-35
+215,"My boss finally gets it!!! After years of advocacy, we have flexible hours and it's amazing.",P215,2025-04-11 08:29:35,36-45
+216,"Stress is my constant companion. I've normalized it but I know that's not healthy.",P216,2025-04-11 09:42:48,46-55
+217,"I'm gonna prioritize rest this year. Not just sleep but actual restoration and recovery.",P217,2025-04-11 10:55:14,26-35
+218,"Work-life integration is what I aim for now. Not balance, but blending in a healthy way.",P218,2025-04-11 11:28:27,36-45
+219,"I definately need to learn to say no more often. My plate is overflowing constantly.",P219,2025-04-11 13:15:33,36-45
+220,"THE GRIND CULTURE IS TOXIC. I'm not lazy for wanting a life outside of work!!!",P220,2025-04-11 14:38:46,26-35
+221,"I've found that loneliness hits hardest on Sunday evenings... dreading the week ahead",P221,2025-04-11 15:47:59,36-45
+222,"Making time for friendships is hard when everyone is so busy. We schedule hangouts months in advance.",P222,2025-04-11 16:18:22,36-45
+223,"I moved across the country and had to rebuild my entire social network. It's been realllly challenging.",P223,2025-04-12 08:29:35,26-35
+224,"Community means everything to me. I'd rather be poor and connected than rich and alone.",P224,2025-04-12 09:42:48,46-55
+225,"I've been putting more effort into maintaining friendships. Texting first, making plans, showing up.",P225,2025-04-12 10:55:14,36-45
+226,"ughhh social battery is REAL. I love my friends but I also need alone time to recharge",P226,2025-04-12 11:28:27,26-35
+227,"My support system carried me through my darkest times. I owe them everything.",P227,2025-04-12 13:15:33,36-45
+228,"I wanna make more time for the people who matter. Life is short &amp; relationships are what count.",P228,2025-04-12 14:38:46,46-55
+229,"Virtual friendships are real friendships. I have deep connections with people I've never met in person.",P229,2025-04-12 15:47:59,18-25
+230,"I'm learning to be a better friend. Listening more, advice giving less. Being present without fixing.",P230,2025-04-12 16:18:22,36-45
+231,"My therapist helped me understand my attachment style &amp; it's changed how I approach all relationships",P231,2025-04-13 08:29:35,26-35
+232,"Mindfulness helps but it's not a cure-all. I still need medication and that's okay.",P232,2025-04-13 09:42:48,36-45
+233,"Self-care isn't selfish, it's survival. You can't pour from an empty cup.",P233,2025-04-13 10:55:14,36-45
+234,"I've been feeeeling more anxious than usual lately. Not sure what's triggering it.",P234,2025-04-13 11:28:27,26-35
+235,"Mental health coping strategies I use: journaling, walking, deep breathing, talking to friends!!!",P235,2025-04-13 13:15:33,36-45
+236,"I've tried sooo many things for my anxiety. What works changes over time.",P236,2025-04-13 14:38:46,26-35
+237,"Therapy is expensive but worth every penny. It's an investment in myself.",P237,2025-04-13 15:47:59,36-45
+238,"I'm learning to recognize the difference between productive worry and anxiety spiral. One is useful, one isn't.",P238,2025-04-13 16:18:22,36-45
+239,"NORMALIZE TALKING ABOUT MENTAL HEALTH. The more we share, the less alone we all feel.",P239,2025-04-14 08:29:35,26-35
+240,"I recieve so much benefit from my morning routine. It sets the tone for the whole day.",P240,2025-04-14 09:42:48,46-55
+241,"Happiness is overrated. I'm aiming for contentment and occasional joy. That feels more realistic.",P241,2025-04-14 10:55:14,46-55
+242,"I've found meaning in unexpected places... a conversation with a stranger, a sunset, a moment of stillness",P242,2025-04-14 11:28:27,56+
+243,"Life satisfaction for me comes from alignment. Living according to my values, not society's expectations.",P243,2025-04-14 13:15:33,36-45
+244,"I'm grateful for the ordinary things!!! Hot showers, clean water, a roof over my head.",P244,2025-04-14 14:38:46,36-45
+245,"Fulfillment isn't about achievement, it's about contribution. What am I giving, not what am I getting.",P245,2025-04-14 15:47:59,46-55
+246,"I've stopped chasing happiness and started creating conditions for it. Big difference.",P246,2025-04-14 16:18:22,36-45
+247,"My definition of a good life has simplified over time: health, love, purpose. That's it.",P247,2025-04-15 08:29:35,56+
+248,"I kinda think the pursuit of happiness is making us miserable. Ironic isn't it???",P248,2025-04-15 09:42:48,26-35
+249,"Gratitude practice felt fake at first but now it's genuinely shifted my perspective. I see good everywhere.",P249,2025-04-15 10:55:14,36-45
+250,"I'm satisfied with where I am while still working toward where I want to be. Both can be true.",P250,2025-04-15 11:28:27,36-45
+251,"Personal growth is a lifelong journey &amp; I'm committed to it even when it's uncomfortable",P251,2025-04-15 13:15:33,36-45
+252,"I've been learning to set better goals. SMART goals, not vague wishes.",P252,2025-04-15 14:38:46,26-35
+253,"Self-improvement has become my hobby??? Not sure if that's healthy or not",P253,2025-04-15 15:47:59,26-35
+254,"Challenges test us but they also reveal us. I've learned so much about myself through hard times.",P254,2025-04-15 16:18:22,46-55
+255,"I'm gonna stop waiting for the right time and just start. The right time is now!!!",P255,2025-04-16 08:29:35,26-35
+256,"ahhh growth is uncomfortable. Every level has a new devil as they say.",P256,2025-04-16 09:42:48,26-35
+257,"I occassionally feel stuck in my personal development. Like I keep working on the same issues forever.",P257,2025-04-16 10:55:14,36-45
+258,"Learning to be okay with not being okay has been major growth for me. Acceptance before change.",P258,2025-04-16 11:28:27,36-45
+259,"My goals this year are less about doing and more about being. Being present, being kind, being authentic.",P259,2025-04-16 13:15:33,46-55
+260,"I've realllly been working on vulnerability. Letting people see the real me, not the curated version.",P260,2025-04-16 14:38:46,26-35
+261,"The future is uncertain but I'm choosing to be hopeful anyway. What's the alternative???",P261,2025-04-16 15:47:59,36-45
+262,"I worry about climate change constantly. It's like a low-level anxiety that never goes away.",P262,2025-04-16 16:18:22,26-35
+263,"Optimism isn't naivety, it's strategy. Believing things can improve helps us work toward improvement.",P263,2025-04-17 08:29:35,46-55
+264,"I'm kinda scared about growing older. Losing independence, health issues, being a burden...",P264,2025-04-17 09:42:48,56+
+265,"Uncertainty is the price of possibility. I'm trying to see it that way.",P265,2025-04-17 10:55:14,36-45
+266,"I hope the next generation does better than us. They seem more aware, more caring, more connected.",P266,2025-04-17 11:28:27,56+
+267,"TOMORROW IS NOT PROMISED but that's not scary, it's motivation to live fully today.",P267,2025-04-17 13:15:33,46-55
+268,"I've stopped trying to predict the future. I just prepare as best I can &amp; trust the process.",P268,2025-04-17 14:38:46,46-55
+269,"My fears about the future often don't come true. I've wasted so much energy on what-ifs.",P269,2025-04-17 15:47:59,36-45
+270,"I'm hopeful!!! For myself, for the world, for what's possible. Hope is a discipline.",P270,2025-04-17 16:18:22,26-35
+271,"Burnout sneaks up on you... one day you're fine, the next you can't get out of bed",P271,2025-04-18 08:29:35,36-45
+272,"I've been soooo exhausted from work. Even weekends don't feel like enough recovery time.",P272,2025-04-18 09:42:48,26-35
+273,"Work flexibility has allowed me to pursue hobbies again!!! I forgot how much I love painting.",P273,2025-04-18 10:55:14,36-45
+274,"I definately struggle with imposter syndrome at work. Feel like I'm faking it constantly.",P274,2025-04-18 11:28:27,26-35
+275,"Boundaries at work are non-negotiable now. I learned the hard way what happens without them.",P275,2025-04-18 13:15:33,46-55
+276,"I recieve so many after-hours messages. Turning off notifications was the best decision I ever made.",P276,2025-04-18 14:38:46,36-45
+277,"THE 4-DAY WORK WEEK SHOULD BE STANDARD. We'd all be healthier and just as productive.",P277,2025-04-18 15:47:59,36-45
+278,"I kinda love my job now that I've set proper boundaries. Before I resented it.",P278,2025-04-18 16:18:22,36-45
+279,"Stress management is a skill I'm actively developing. Deep breathing, exercise, sleep, boundaries.",P279,2025-04-19 08:29:35,46-55
+280,"I'm gonna take a real vacation this year. No checking email, no laptop, complete disconnection.",P280,2025-04-19 09:42:48,26-35
+281,"My friends have been AMAZING support system, I definately couldn't have gotten through this without them",P281,2025-04-19 10:55:14,26-35
+282,"Loneliness during the pandemic showed me how much I need human connection. I took it for granted before.",P282,2025-04-19 11:28:27,36-45
+283,"I wanna host more gatherings. My home should be a place where friends feel welcome.",P283,2025-04-19 13:15:33,36-45
+284,"Community isn't given, it's built. I'm investing time and energy into building mine.",P284,2025-04-19 14:38:46,46-55
+285,"ughhh making plans is exhausting. Sometimes I just want people to show up without all the logistics.",P285,2025-04-19 15:47:59,26-35
+286,"I've found my tribe through shared interests. We bond over books, not just proximity.",P286,2025-04-19 16:18:22,36-45
+287,"Social support is protective for mental health &amp; I'm grateful for the people in my corner",P287,2025-04-20 08:29:35,36-45
+288,"I'm learning to ask for help. It doesn't make me weak, it makes me human.",P288,2025-04-20 09:42:48,36-45
+289,"Therapy is the best thing I've ever done for myself!!! Wish I started sooner.",P289,2025-04-20 10:55:14,26-35
+290,"Mindfulness isn't about clearing your mind, it's about noticing what's there. That was a revelation.",P290,2025-04-20 11:28:27,36-45
+291,"I've been feeeeling more balanced lately. The work I've put into my mental health is paying off.",P291,2025-04-20 13:15:33,36-45
+292,"Self-care looks like boring things for me: sleeping enough, eating well, moving my body.",P292,2025-04-20 14:38:46,46-55
+293,"Anxiety management is a daily practice. Some days are easier than others.",P293,2025-04-20 15:47:59,26-35
+294,"I occassionally still have bad mental health days but I have tools now. That makes all the difference.",P294,2025-04-20 16:18:22,36-45
+295,"THERAPY SHOULD BE FREE. Mental health care is health care. Period.",P295,2025-04-21 08:29:35,26-35
+296,"I've learned that healing isn't linear. I circle back to old wounds and that's okay.",P296,2025-04-21 09:42:48,36-45
+297,"Happiness for me is realllly about the small moments. Not grand achievements, just quiet contentment.",P297,2025-04-21 10:55:14,46-55
+298,"I'm satisfied with my life because I've stopped comparing it to others'. My path is my path.",P298,2025-04-21 11:28:27,36-45
+299,"Gratitude journaling changed my brain. I literally see the world differently now.",P299,2025-04-21 13:15:33,36-45
+300,"Life is short &amp; I'm gonna live it fully. No more waiting for someday. Today is the day!!!",P300,2025-04-21 14:38:46,26-35
