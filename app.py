@@ -2628,11 +2628,12 @@ def page_results_overview():
                 cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
                 words = cleaned_text.split()
 
-                # Minimal stopwords - only the most common
-                stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'was', 'are', 'were', 'be', 'have', 'has', 'had', 'it', 'its', 'this', 'that', 'i', 'you', 'we', 'they', 'my', 'your', 'not', 'so', 'as', 'if', 'do', 'can', 'will', 'just', 'been', 'from', 'all', 'more', 'would', 'there', 'their', 'what', 'which', 'who', 'when', 'how', 'than', 'into', 'our', 'also', 'other', 'very', 'about', 'out', 'up', 'no', 'he', 'she', 'him', 'her', 'me', 'them', 'us', 'am'}
+                # Very minimal stopwords - ONLY articles/prepositions/pronouns
+                # NO content words since data is likely lemmatized/preprocessed
+                stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'if', 'it', 'its', 'this', 'that', 'i', 'you', 'we', 'they', 'my', 'your', 'he', 'she', 'him', 'her', 'me', 'them', 'us', 'is', 'was', 'are', 'were', 'be', 'been', 'am', 'has', 'have', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'from', 'than', 'so', 'not', 'no', 'nan', 'none', 'also', 'very', 'just', 'only', 'even', 'still', 'already', 'yet'}
                 word_counts = {}
                 for word in words:
-                    if len(word) > 2 and word not in stopwords:
+                    if len(word) > 1 and word not in stopwords:  # Allow 2-char words
                         word_counts[word] = word_counts.get(word, 0) + 1
 
                 if word_counts:
