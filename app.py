@@ -149,7 +149,7 @@ def precompute_all_visualizations(coder, results_df):
     for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[1]['count'], reverse=True)[:15]:
         top_codes_data.append({
             'Code': code_id,
-            'Label': info['label'],
+            'Label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
             'Count': info['count'],
             'Avg Confidence': info['avg_confidence'],
             'Keywords': ', '.join(info['keywords'][:5])
@@ -173,7 +173,7 @@ def precompute_all_visualizations(coder, results_df):
                 cooccur[code_to_idx[code], code_to_idx[code]] += 1
 
     viz_data['cooccurrence_matrix'] = cooccur
-    viz_data['cooccurrence_labels'] = [coder.codebook[c]['label'] for c in codes]
+    viz_data['cooccurrence_labels'] = [coder.codebook[c].get('llm_label', coder.codebook[c]['label']) for c in codes]  # Prefer LLM labels
     viz_data['cooccurrence_codes'] = codes
 
     # 3. Co-occurrence pairs
@@ -219,7 +219,7 @@ def precompute_all_visualizations(coder, results_df):
 
     # Pre-format code options for dropdown (avoid computation on render)
     viz_data['code_options'] = {
-        c: f"{coder.codebook[c]['label']} ({coder.codebook[c]['count']} occurrences)"
+        c: f"{coder.codebook[c].get('llm_label', coder.codebook[c]['label'])} ({coder.codebook[c]['count']} occurrences)"  # Prefer LLM labels
         for c in codes_with_examples
     }
 
@@ -239,7 +239,7 @@ def precompute_all_visualizations(coder, results_df):
         if info['count'] > 0:  # Only include active codes
             sunburst_data.append({
                 'id': code_id,
-                'label': info['label'],
+                'label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
                 'parent': 'All Codes',
                 'value': info['count'],
                 'confidence': info['avg_confidence']
@@ -2501,10 +2501,20 @@ def page_results_overview():
 
     for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[1]['count'], reverse=True):
         if info['count'] > 0:  # Only show active codes
-            with st.expander(f"**{code_id}**: {info['label']} ({info['count']} responses)"):
+            # Use LLM-generated label if available
+            display_label = info.get('llm_label', info['label'])
+            with st.expander(f"**{code_id}**: {display_label} ({info['count']} responses)"):
                 col1, col2 = st.columns([2, 1])
 
                 with col1:
+                    # Show LLM description if available
+                    if info.get('llm_description'):
+                        st.markdown(f"**Description:** {info['llm_description']}")
+
+                    # Show alternative labels if available
+                    if info.get('alternative_labels'):
+                        st.markdown(f"**Alternative Labels:** {', '.join(info['alternative_labels'])}")
+
                     st.markdown(f"**Keywords:** {', '.join(info['keywords'][:10])}")
 
                     # Show examples (5 representative quotes or all if fewer)
@@ -2707,9 +2717,12 @@ def page_visualizations():
 
             if selected_code:
                 code_info = coder.codebook[selected_code]
+                display_label = code_info.get('llm_label', code_info['label'])  # Prefer LLM label
 
                 # Code summary
-                st.markdown(f"**{code_info['label']}**")
+                st.markdown(f"**{display_label}**")
+                if code_info.get('llm_description'):
+                    st.caption(code_info['llm_description'])
                 st.caption(f"Keywords: {', '.join(code_info['keywords'][:8])}")
                 st.caption(f"Count: {code_info['count']} | Avg Confidence: {code_info['avg_confidence']:.2f}")
 
@@ -2747,7 +2760,7 @@ def page_visualizations():
 
                 # Simple export button
                 if examples:
-                    export_text = f"Code: {code_info['label']}\n\n"
+                    export_text = f"Code: {display_label}\n\n"
                     for i, ex in enumerate(examples, 1):
                         export_text += f"Quote {i} (confidence: {ex['confidence']:.3f}):\n{ex['text']}\n\n"
 

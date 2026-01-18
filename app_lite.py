@@ -1078,8 +1078,8 @@ def main():
             if cooccurrence_df is not None and not cooccurrence_df.empty:
                 # Build matrix for heatmap using code labels instead of code IDs
                 codes = list(coder.codebook.keys())
-                # Create mapping from code ID to label
-                code_to_label = {code_id: info['label'] for code_id, info in coder.codebook.items()}
+                # Create mapping from code ID to label (prefer LLM labels)
+                code_to_label = {code_id: info.get('llm_label', info['label']) for code_id, info in coder.codebook.items()}
                 labels = [code_to_label[code] for code in codes]
 
                 # Use labels for both index and columns
@@ -1145,7 +1145,7 @@ def main():
                 try:
                     # Build network graph
                     G = nx.Graph()
-                    code_to_label = {code_id: info['label'] for code_id, info in coder.codebook.items()}
+                    code_to_label = {code_id: info.get('llm_label', info['label']) for code_id, info in coder.codebook.items()}  # Prefer LLM labels
 
                     # Add nodes with size based on count
                     for code_id, info in coder.codebook.items():
@@ -1484,7 +1484,7 @@ def main():
             if cooccurrence_df is not None and not cooccurrence_df.empty:
                 # Create a copy with labels instead of code IDs
                 display_df = cooccurrence_df.copy()
-                code_to_label = {code_id: info['label'] for code_id, info in coder.codebook.items()}
+                code_to_label = {code_id: info.get('llm_label', info['label']) for code_id, info in coder.codebook.items()}  # Prefer LLM labels
 
                 # Replace code IDs with labels
                 display_df['Code 1 Label'] = display_df['Code 1'].map(code_to_label)
