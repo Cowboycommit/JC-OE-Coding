@@ -1076,6 +1076,31 @@ def page_text_processor():
 
     st.markdown("---")
 
+    # ==========================================================================
+    # Quick Dataset Presets Section Header
+    # ==========================================================================
+    st.markdown("### Quick Dataset Presets")
+    st.markdown("""
+    Select a preset optimized for your data type. Each preset configures preprocessing
+    options and sets the appropriate response type for sentiment analysis. Use the tabs
+    below to customize your preprocessing workflow.
+    """)
+
+    # Verbose explanation of tab options
+    st.info("""
+    **🎯 Quick Presets** — One-click preprocessing configurations optimized for common data types
+    (general text, social media, product reviews, news articles). Best for getting started quickly.
+
+    **⚙️ Social Media Options** — Fine-grained control over social media-specific processing including
+    hashtag handling, slang expansion, emoji filtering, and mention removal. Requires Social Media preset.
+
+    **🔬 Advanced Processing** — Expert-level text processing with NLTK including custom stopword removal,
+    stemming/lemmatization options, POS tagging, and token limit controls for long documents.
+
+    **📊 Quality Report** — View and download a detailed report of preprocessing results including
+    statistics on filtered rows, token counts, and data quality metrics.
+    """)
+
     # Create tabs for different processing options
     tab1, tab2, tab3, tab4 = st.tabs([
         "🎯 Quick Presets",
@@ -1088,11 +1113,6 @@ def page_text_processor():
     # TAB 1: Quick Presets (DataCleaningPipeline)
     # ==========================================================================
     with tab1:
-        st.markdown("### Quick Dataset Presets")
-        st.markdown("""
-        Select a preset optimized for your data type. Each preset configures
-        preprocessing options and sets the appropriate response type for sentiment analysis.
-        """)
 
         # Preset options with data_type mapping for sentiment analysis
         preset_options = {
