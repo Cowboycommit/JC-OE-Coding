@@ -1090,9 +1090,10 @@ def page_text_processor():
         st.markdown("### Quick Dataset Presets")
         st.markdown("""
         Select a preset optimized for your data type. Each preset configures
-        all preprocessing options automatically.
+        preprocessing options and sets the appropriate response type for sentiment analysis.
         """)
 
+        # Preset options with data_type mapping for sentiment analysis
         preset_options = {
             "general": {
                 "name": "📋 General Text",
@@ -1100,7 +1101,9 @@ def page_text_processor():
                 "features": ["Contraction expansion", "Spam detection", "Min 3 tokens"],
                 "remove_stopwords": True,
                 "lemmatize": True,
-                "lowercase": True
+                "lowercase": True,
+                "data_type": "survey",
+                "sentiment_model": "VADER (rule-based)"
             },
             "social_media": {
                 "name": "🐦 Social Media (Twitter/X)",
@@ -1108,7 +1111,9 @@ def page_text_processor():
                 "features": ["Slang expansion", "URL/mention handling", "Hashtag processing", "Emoji tolerance", "Min 2 tokens"],
                 "remove_stopwords": True,
                 "lemmatize": True,
-                "lowercase": True
+                "lowercase": True,
+                "data_type": "twitter",
+                "sentiment_model": "Twitter-RoBERTa (transformer)"
             },
             "reviews": {
                 "name": "⭐ Product Reviews",
@@ -1116,7 +1121,9 @@ def page_text_processor():
                 "features": ["Elongation normalization", "Contraction expansion", "Spam detection", "Min 5 tokens"],
                 "remove_stopwords": True,
                 "lemmatize": True,
-                "lowercase": True
+                "lowercase": True,
+                "data_type": "longform",
+                "sentiment_model": "Review-BERT (transformer)"
             },
             "news": {
                 "name": "📰 News Articles",
@@ -1124,7 +1131,9 @@ def page_text_processor():
                 "features": ["Minimal normalization", "No spam detection", "Min 10 tokens", "Max 2000 tokens"],
                 "remove_stopwords": False,
                 "lemmatize": False,
-                "lowercase": True
+                "lowercase": True,
+                "data_type": "survey",
+                "sentiment_model": "VADER (rule-based)"
             }
         }
 
@@ -1136,16 +1145,18 @@ def page_text_processor():
             key="dataset_preset"
         )
 
-        # Show preset details
+        # Show preset details with sentiment model info
         preset = preset_options[selected_preset]
         st.markdown(f"""
         <div class="info-box" style="padding: 15px;">
         <strong>{preset['name']}</strong><br>
         <em>{preset['description']}</em><br><br>
-        <strong>Features:</strong>
+        <strong>Processing Features:</strong>
         <ul style="margin: 5px 0 0 15px;">
         {''.join([f"<li>{f}</li>" for f in preset['features']])}
         </ul>
+        <br>
+        <strong>Sentiment Model:</strong> {preset['sentiment_model']}
         </div>
         """, unsafe_allow_html=True)
 
@@ -1176,16 +1187,11 @@ def page_text_processor():
                     st.session_state.preprocessing_report = pipeline.get_quality_report()
                     st.session_state.preprocessing_summary = pipeline.get_summary()
 
-                    # Map preset to data_type for sentiment analysis
-                    preset_to_data_type = {
-                        'general': 'survey',
-                        'social_media': 'twitter',
-                        'reviews': 'longform',
-                        'news': 'survey'
-                    }
-                    st.session_state.data_type = preset_to_data_type.get(selected_preset, 'survey')
+                    # Set data_type from preset for sentiment analysis
+                    st.session_state.data_type = preset.get('data_type', 'survey')
 
                     st.success(f"✅ Preprocessing complete! Processed {len(processed_df):,} rows.")
+                    st.info(f"📊 Response type set to **{preset['name']}** - Sentiment model: {preset['sentiment_model']}")
 
                     # Show before/after comparison
                     st.markdown("#### Before/After Comparison")
@@ -1762,31 +1768,90 @@ def page_configuration():
             help="Minimum confidence score for code assignment (lower = more codes per response)"
         )
 
-        # Enable sentiment analysis checkbox
-        if SENTIMENT_ANALYSIS_AVAILABLE:
-            enable_sentiment = st.checkbox(
-                "Enable Sentiment Analysis",
-                value=st.session_state.get('data_type', 'survey') == 'twitter',
-                help="Run sentiment analysis to detect positive, neutral, or negative sentiment in each response"
-            )
-            st.session_state.enable_sentiment = enable_sentiment
-        else:
-            st.markdown("""
-            <div class="warning-box" style="padding: 10px; font-size: 0.9em;">
-            ⚠️ Sentiment analysis not available.<br>
-            <code>pip install transformers torch</code>
-            </div>
-            """, unsafe_allow_html=True)
-            st.session_state.enable_sentiment = False
-
         # Language is hardcoded to English (non-English text is filtered out)
         stop_words = 'english'
 
-    # Set default data_type if not already set (from Text Processor presets)
-    if 'data_type' not in st.session_state:
-        st.session_state.data_type = 'survey'
+    # ==========================================================================
+    # Data Type & Sentiment Analysis Configuration
+    # ==========================================================================
+    st.markdown("---")
+    st.markdown("### 📊 Response Type & Sentiment Analysis")
 
-    # Save configuration
+    # Data type selection with clear descriptions
+    data_type_options = {
+        'survey': {
+            'name': 'Survey Responses',
+            'description': 'Standard survey answers, feedback forms, open-ended questions',
+            'model': 'VADER (rule-based, fast)',
+            'icon': '📋'
+        },
+        'twitter': {
+            'name': 'Social Media (Twitter/X)',
+            'description': 'Tweets, social posts, short informal text with slang/emojis',
+            'model': 'Twitter-RoBERTa (transformer-based)',
+            'icon': '🐦'
+        },
+        'longform': {
+            'name': 'Long-form Reviews',
+            'description': 'Product reviews, detailed feedback, articles',
+            'model': 'Review-BERT (transformer-based)',
+            'icon': '⭐'
+        }
+    }
+
+    # Get current data_type from session state, defaulting to 'survey'
+    current_data_type = st.session_state.get('data_type', 'survey')
+    # Ensure it's a valid option
+    if current_data_type not in data_type_options:
+        current_data_type = 'survey'
+
+    # Response type radio button
+    selected_data_type = st.radio(
+        "Select your response type:",
+        options=list(data_type_options.keys()),
+        format_func=lambda x: f"{data_type_options[x]['icon']} {data_type_options[x]['name']}",
+        index=list(data_type_options.keys()).index(current_data_type),
+        horizontal=True,
+        key="config_data_type",
+        help="This affects sentiment analysis model selection and text processing behavior"
+    )
+
+    # Update session state immediately when selection changes
+    st.session_state.data_type = selected_data_type
+
+    # Show selected type details
+    selected_type_info = data_type_options[selected_data_type]
+    st.markdown(f"""
+    <div class="info-box" style="padding: 12px; margin: 10px 0;">
+    <strong>{selected_type_info['icon']} {selected_type_info['name']}</strong><br>
+    <em>{selected_type_info['description']}</em><br><br>
+    <strong>Sentiment Model:</strong> {selected_type_info['model']}
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Enable sentiment analysis checkbox
+    if SENTIMENT_ANALYSIS_AVAILABLE:
+        enable_sentiment = st.checkbox(
+            "Enable Sentiment Analysis",
+            value=st.session_state.get('enable_sentiment', False),
+            help="Run sentiment analysis to detect positive, neutral, or negative sentiment in each response",
+            key="config_enable_sentiment"
+        )
+        st.session_state.enable_sentiment = enable_sentiment
+
+        if enable_sentiment:
+            st.success(f"✅ Sentiment analysis will use **{selected_type_info['model']}** for {selected_type_info['name'].lower()}")
+    else:
+        st.markdown("""
+        <div class="warning-box" style="padding: 10px; font-size: 0.9em;">
+        ⚠️ Sentiment analysis not available.<br>
+        <code>pip install transformers torch</code>
+        </div>
+        """, unsafe_allow_html=True)
+        st.session_state.enable_sentiment = False
+        enable_sentiment = False
+
+    # Save configuration with the selected data_type
     st.session_state.config = {
         'text_column': selected_column,
         'n_codes': n_codes,
@@ -1794,15 +1859,15 @@ def page_configuration():
         'method': method,
         'min_confidence': min_confidence,
         'stop_words': stop_words,
-        'data_type': st.session_state.get('data_type', 'survey'),
-        'enable_sentiment': st.session_state.get('enable_sentiment', False)
+        'data_type': selected_data_type,
+        'enable_sentiment': enable_sentiment
     }
 
     # Show configuration summary
     st.markdown("---")
     st.markdown("### 📋 Configuration Summary")
 
-    config_col1, config_col2, config_col3 = st.columns(3)
+    config_col1, config_col2, config_col3, config_col4 = st.columns(4)
 
     with config_col1:
         st.metric("Responses", f"{len(df):,}")
@@ -1810,6 +1875,8 @@ def page_configuration():
         st.metric("Codes to Find", "Auto" if auto_optimal_codes else n_codes)
     with config_col3:
         st.metric("Algorithm", method.upper())
+    with config_col4:
+        st.metric("Response Type", selected_type_info['name'].split()[0])
 
     st.success("✅ Configuration saved! Go to 'Run Analysis' to start.")
 
@@ -1880,6 +1947,14 @@ def page_run_analysis():
     enable_sentiment = config.get('enable_sentiment', False)
     data_type = config.get('data_type', 'survey')
 
+    # Map data_type to user-friendly labels
+    data_type_display = {
+        'survey': 'Survey',
+        'twitter': 'Social Media',
+        'longform': 'Reviews'
+    }
+    data_type_label = data_type_display.get(data_type, data_type.title())
+
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         st.metric("Responses", f"{len(df):,}")
@@ -1890,15 +1965,15 @@ def page_run_analysis():
     with col4:
         st.metric("Method", config['method'].upper())
     with col5:
-        st.metric("Data Type", data_type.title())
+        st.metric("Response Type", data_type_label)
 
     if auto_optimal:
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
 
     if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
-        data_type_labels = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT'}
-        model_label = data_type_labels.get(data_type, 'Standard')
-        st.success(f"📊 **Sentiment Analysis Enabled** - Using {model_label} model for {data_type} data")
+        data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT'}
+        model_label = data_type_models.get(data_type, 'Standard')
+        st.success(f"📊 **Sentiment Analysis Enabled** - Using {model_label} model for {data_type_label} responses")
 
     st.markdown("---")
 
