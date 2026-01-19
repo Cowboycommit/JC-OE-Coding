@@ -47,6 +47,7 @@ try:
     METHOD_VISUALIZER_AVAILABLE = True
 except ImportError:
     METHOD_VISUALIZER_AVAILABLE = False
+    MethodVisualizer = None
     PILWordCloud = None
 
 # Import helper modules
@@ -3084,7 +3085,7 @@ def page_visualizations():
                 would have similar color shades because they're semantically related.
                 """)
 
-            if METHOD_VISUALIZER_AVAILABLE and (WORDCLOUD_AVAILABLE or PIL_AVAILABLE):
+            if WORDCLOUD_AVAILABLE or PIL_AVAILABLE:
                 try:
                     results_df = st.session_state.results_df
                     text_column = viz_data.get('text_column', 'response')
@@ -3162,7 +3163,7 @@ def page_visualizations():
                 Colors are random and do not indicate meaning.
                 """)
 
-            if METHOD_VISUALIZER_AVAILABLE and (WORDCLOUD_AVAILABLE or PIL_AVAILABLE):
+            if WORDCLOUD_AVAILABLE or PIL_AVAILABLE:
                 try:
                     results_df = st.session_state.results_df
                     text_column = viz_data.get('text_column', 'response')
