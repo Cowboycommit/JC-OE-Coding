@@ -4,10 +4,14 @@ Unit tests for Text Preprocessor module.
 
 import pytest
 import pandas as pd
+import tempfile
+from pathlib import Path
 from src.text_preprocessor import (
     TextPreprocessor,
     TextPreprocessingError,
     DataCleaningPipeline,
+    NEGATION_KEEP_WORDS,
+    DEFAULT_DOMAIN_STOPWORDS_PATH,
 )
 
 
@@ -127,6 +131,154 @@ class TestTextPreprocessor:
         report = preprocessor.get_quality_report()
         assert isinstance(report, str)
         assert len(report) > 0
+
+
+class TestNegationPreservation:
+    """Test cases for negation word preservation during stopword removal."""
+
+    @pytest.fixture
+    def preprocessor_preserve(self):
+        """Create preprocessor with negation preservation enabled (default)."""
+        return TextPreprocessor(preserve_negations=True)
+
+    @pytest.fixture
+    def preprocessor_no_preserve(self):
+        """Create preprocessor with negation preservation disabled."""
+        return TextPreprocessor(preserve_negations=False)
+
+    def test_negation_keep_words_constant(self):
+        """Test that NEGATION_KEEP_WORDS constant is properly defined."""
+        assert "not" in NEGATION_KEEP_WORDS
+        assert "no" in NEGATION_KEEP_WORDS
+        assert "never" in NEGATION_KEEP_WORDS
+        assert "none" in NEGATION_KEEP_WORDS
+        assert "nobody" in NEGATION_KEEP_WORDS
+        assert "nothing" in NEGATION_KEEP_WORDS
+        assert "neither" in NEGATION_KEEP_WORDS
+        assert "nowhere" in NEGATION_KEEP_WORDS
+        assert "cannot" in NEGATION_KEEP_WORDS
+        assert "can't" in NEGATION_KEEP_WORDS
+        assert "don't" in NEGATION_KEEP_WORDS
+        assert "doesn't" in NEGATION_KEEP_WORDS
+        assert "didn't" in NEGATION_KEEP_WORDS
+        assert "won't" in NEGATION_KEEP_WORDS
+        assert "wouldn't" in NEGATION_KEEP_WORDS
+        assert "shouldn't" in NEGATION_KEEP_WORDS
+        assert "couldn't" in NEGATION_KEEP_WORDS
+        assert "hasn't" in NEGATION_KEEP_WORDS
+        assert "haven't" in NEGATION_KEEP_WORDS
+        assert "hadn't" in NEGATION_KEEP_WORDS
+        assert "isn't" in NEGATION_KEEP_WORDS
+        assert "aren't" in NEGATION_KEEP_WORDS
+        assert "wasn't" in NEGATION_KEEP_WORDS
+        assert "weren't" in NEGATION_KEEP_WORDS
+
+    def test_preserve_not_in_sentence(self, preprocessor_preserve):
+        """Test that 'not' is preserved: 'I do not like this' should preserve 'not'."""
+        text = "I do not like this"
+        result = preprocessor_preserve.preprocess(text, remove_stopwords=True, lemmatize=False)
+        # Note: after preprocessing, text is lowercased and non-alpha chars removed
+        # 'not' should be preserved even though it's typically a stopword
+        if preprocessor_preserve.stop_words:
+            assert "not" in result.split(), f"Expected 'not' to be preserved, got: {result}"
+
+    def test_preserve_never_in_sentence(self, preprocessor_preserve):
+        """Test that 'never' is preserved: 'never again' should preserve 'never'."""
+        text = "never again"
+        result = preprocessor_preserve.preprocess(text, remove_stopwords=True, lemmatize=False)
+        if preprocessor_preserve.stop_words:
+            assert "never" in result.split(), f"Expected 'never' to be preserved, got: {result}"
+
+    def test_preserve_no_in_sentence(self, preprocessor_preserve):
+        """Test that 'no' is preserved in sentences."""
+        text = "There is no way this works"
+        result = preprocessor_preserve.preprocess(text, remove_stopwords=True, lemmatize=False, min_token_length=1)
+        if preprocessor_preserve.stop_words:
+            # 'no' might be filtered by min_token_length=2 default, so we use min_token_length=1
+            assert "no" in result.split(), f"Expected 'no' to be preserved, got: {result}"
+
+    def test_preserve_none_in_sentence(self, preprocessor_preserve):
+        """Test that 'none' is preserved in sentences."""
+        text = "none of these options work"
+        result = preprocessor_preserve.preprocess(text, remove_stopwords=True, lemmatize=False)
+        if preprocessor_preserve.stop_words:
+            assert "none" in result.split(), f"Expected 'none' to be preserved, got: {result}"
+
+    def test_old_behavior_when_disabled(self, preprocessor_no_preserve):
+        """Test that old behavior is maintained when preserve_negations=False."""
+        text = "I do not like this"
+        result = preprocessor_no_preserve.preprocess(text, remove_stopwords=True, lemmatize=False)
+        # With preserve_negations=False, 'not' should be removed as a stopword
+        if preprocessor_no_preserve.stop_words:
+            assert "not" not in result.split(), f"Expected 'not' to be removed, got: {result}"
+
+    def test_never_removed_when_disabled(self, preprocessor_no_preserve):
+        """Test that 'never' is removed when preserve_negations=False."""
+        text = "I will never forget this experience"
+        result = preprocessor_no_preserve.preprocess(text, remove_stopwords=True, lemmatize=False)
+        # 'never' is in NLTK stopwords, so it should be removed when not preserving
+        if preprocessor_no_preserve.stop_words and "never" in preprocessor_no_preserve.stop_words:
+            assert "never" not in result.split(), f"Expected 'never' to be removed, got: {result}"
+
+    def test_default_preserve_negations_is_true(self):
+        """Test that the default value for preserve_negations is True."""
+        preprocessor = TextPreprocessor()
+        assert preprocessor.preserve_negations is True
+
+    def test_multiple_negations_preserved(self, preprocessor_preserve):
+        """Test that multiple negation words are preserved in a sentence."""
+        text = "I do not and will never accept this"
+        result = preprocessor_preserve.preprocess(text, remove_stopwords=True, lemmatize=False)
+        if preprocessor_preserve.stop_words:
+            assert "not" in result.split(), f"Expected 'not' to be preserved, got: {result}"
+            assert "never" in result.split(), f"Expected 'never' to be preserved, got: {result}"
+
+    def test_sentiment_preservation_example(self, preprocessor_preserve):
+        """Test that negation words preserve sentiment context."""
+        # This is a practical example showing why negation preservation matters
+        positive_text = "I like this product"
+        negative_text = "I do not like this product"
+
+        positive_result = preprocessor_preserve.preprocess(positive_text, remove_stopwords=True, lemmatize=False)
+        negative_result = preprocessor_preserve.preprocess(negative_text, remove_stopwords=True, lemmatize=False)
+
+        if preprocessor_preserve.stop_words:
+            # The negative result should contain 'not' to preserve the sentiment
+            assert "not" in negative_result.split(), f"Expected 'not' in negative text, got: {negative_result}"
+            # The positive result should not contain 'not'
+            assert "not" not in positive_result.split(), f"Unexpected 'not' in positive text, got: {positive_result}"
+
+
+class TestDataCleaningPipelineNegation:
+    """Test cases for negation preservation in DataCleaningPipeline."""
+
+    def test_pipeline_default_preserve_negations(self):
+        """Test that pipeline has preserve_negations=True by default."""
+        pipeline = DataCleaningPipeline()
+        assert pipeline.preserve_negations is True
+        assert pipeline.preprocessor.preserve_negations is True
+
+    def test_pipeline_preserve_negations_false(self):
+        """Test that pipeline can disable negation preservation."""
+        pipeline = DataCleaningPipeline(preserve_negations=False)
+        assert pipeline.preserve_negations is False
+        assert pipeline.preprocessor.preserve_negations is False
+
+    def test_pipeline_preserves_negations_in_text(self):
+        """Test that pipeline preserves negation words in cleaned text."""
+        pipeline = DataCleaningPipeline(preserve_negations=True)
+        texts = ["I do not recommend this product"]
+        results = pipeline.clean_texts(texts)
+        if pipeline.preprocessor.stop_words:
+            assert "not" in results[0].split(), f"Expected 'not' to be preserved, got: {results[0]}"
+
+    def test_pipeline_removes_negations_when_disabled(self):
+        """Test that pipeline removes negations when disabled."""
+        pipeline = DataCleaningPipeline(preserve_negations=False)
+        texts = ["I do not recommend this product"]
+        results = pipeline.clean_texts(texts)
+        if pipeline.preprocessor.stop_words:
+            assert "not" not in results[0].split(), f"Expected 'not' to be removed, got: {results[0]}"
 
 
 class TestTextPreprocessorDomainSpecific:
@@ -386,3 +538,208 @@ class TestTextPreprocessorIntegration:
 
         metrics = preprocessor.get_quality_metrics()
         assert metrics.total_records == 3
+
+
+class TestDomainStopwords:
+    """Test cases for domain-specific stopwords functionality."""
+
+    @pytest.fixture
+    def preprocessor_with_domain(self):
+        """Create preprocessor with domain stopwords enabled (default)."""
+        return TextPreprocessor(use_domain_stopwords=True)
+
+    @pytest.fixture
+    def preprocessor_without_domain(self):
+        """Create preprocessor with domain stopwords disabled."""
+        return TextPreprocessor(use_domain_stopwords=False)
+
+    def test_default_domain_stopwords_path_exists(self):
+        """Test that the default domain stopwords file exists."""
+        assert DEFAULT_DOMAIN_STOPWORDS_PATH.exists(), \
+            f"Domain stopwords file not found at {DEFAULT_DOMAIN_STOPWORDS_PATH}"
+
+    def test_domain_stopwords_loaded(self, preprocessor_with_domain):
+        """Test that domain stopwords are loaded correctly."""
+        assert preprocessor_with_domain.use_domain_stopwords is True
+        assert len(preprocessor_with_domain.domain_stopwords) > 0
+        # Check some expected domain stopwords
+        assert "response" in preprocessor_with_domain.domain_stopwords
+        assert "survey" in preprocessor_with_domain.domain_stopwords
+        assert "feedback" in preprocessor_with_domain.domain_stopwords
+        assert "question" in preprocessor_with_domain.domain_stopwords
+
+    def test_domain_stopwords_merged(self, preprocessor_with_domain):
+        """Test that domain stopwords are merged with NLTK stopwords."""
+        # Domain stopwords should be in the combined stop_words set
+        assert "response" in preprocessor_with_domain.stop_words
+        assert "survey" in preprocessor_with_domain.stop_words
+        assert "feedback" in preprocessor_with_domain.stop_words
+        # NLTK stopwords should still be present
+        if preprocessor_with_domain.stop_words:
+            assert "the" in preprocessor_with_domain.stop_words
+            assert "is" in preprocessor_with_domain.stop_words
+
+    def test_domain_stopwords_not_loaded_when_disabled(self, preprocessor_without_domain):
+        """Test that domain stopwords are not loaded when disabled."""
+        assert preprocessor_without_domain.use_domain_stopwords is False
+        assert len(preprocessor_without_domain.domain_stopwords) == 0
+        # Domain words should NOT be in stop_words when disabled
+        assert "response" not in preprocessor_without_domain.stop_words
+        assert "survey" not in preprocessor_without_domain.stop_words
+        assert "feedback" not in preprocessor_without_domain.stop_words
+
+    def test_domain_stopwords_removed_from_text(self, preprocessor_with_domain):
+        """Test that domain stopwords are removed from text when enabled."""
+        text = "The survey response regarding feedback was positive"
+        result = preprocessor_with_domain.preprocess(text, remove_stopwords=True, lemmatize=False)
+        tokens = result.split()
+        # Domain stopwords should be removed
+        assert "survey" not in tokens, f"'survey' should be removed, got: {result}"
+        assert "response" not in tokens, f"'response' should be removed, got: {result}"
+        assert "regarding" not in tokens, f"'regarding' should be removed, got: {result}"
+        assert "feedback" not in tokens, f"'feedback' should be removed, got: {result}"
+        # Content words should remain
+        assert "positive" in tokens, f"'positive' should remain, got: {result}"
+
+    def test_domain_stopwords_kept_when_disabled(self, preprocessor_without_domain):
+        """Test that domain stopwords are NOT removed when disabled."""
+        text = "The survey response regarding feedback was positive"
+        result = preprocessor_without_domain.preprocess(text, remove_stopwords=True, lemmatize=False)
+        tokens = result.split()
+        # Domain stopwords should NOT be removed when use_domain_stopwords=False
+        assert "survey" in tokens, f"'survey' should remain when disabled, got: {result}"
+        assert "response" in tokens, f"'response' should remain when disabled, got: {result}"
+        assert "feedback" in tokens, f"'feedback' should remain when disabled, got: {result}"
+
+    def test_domain_stopwords_with_custom_path(self):
+        """Test loading domain stopwords from a custom path."""
+        # Create a temporary file with custom stopwords
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            f.write("customword\n")
+            f.write("anotherword\n")
+            temp_path = Path(f.name)
+
+        try:
+            preprocessor = TextPreprocessor(
+                use_domain_stopwords=True,
+                domain_stopwords_path=temp_path
+            )
+            assert "customword" in preprocessor.domain_stopwords
+            assert "anotherword" in preprocessor.domain_stopwords
+            assert "customword" in preprocessor.stop_words
+        finally:
+            temp_path.unlink()  # Clean up temp file
+
+    def test_domain_stopwords_missing_file_graceful(self):
+        """Test graceful handling when domain stopwords file doesn't exist."""
+        nonexistent_path = Path("/nonexistent/path/stopwords.txt")
+        # Should not raise an error, just log a warning and continue
+        preprocessor = TextPreprocessor(
+            use_domain_stopwords=True,
+            domain_stopwords_path=nonexistent_path
+        )
+        # Domain stopwords should be empty, but preprocessor should work
+        assert len(preprocessor.domain_stopwords) == 0
+        # NLTK stopwords should still be loaded
+        if preprocessor.stop_words:
+            assert "the" in preprocessor.stop_words
+
+    def test_load_domain_stopwords_static_method(self):
+        """Test the _load_domain_stopwords static method directly."""
+        stopwords = TextPreprocessor._load_domain_stopwords()
+        assert isinstance(stopwords, set)
+        assert len(stopwords) > 0
+        assert "response" in stopwords
+        assert "survey" in stopwords
+
+    def test_domain_stopwords_lowercase(self):
+        """Test that domain stopwords are loaded in lowercase."""
+        # Create a temp file with mixed case
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            f.write("MixedCase\n")
+            f.write("UPPERCASE\n")
+            f.write("lowercase\n")
+            temp_path = Path(f.name)
+
+        try:
+            stopwords = TextPreprocessor._load_domain_stopwords(temp_path)
+            assert "mixedcase" in stopwords
+            assert "uppercase" in stopwords
+            assert "lowercase" in stopwords
+            # Original case should not be in the set
+            assert "MixedCase" not in stopwords
+            assert "UPPERCASE" not in stopwords
+        finally:
+            temp_path.unlink()
+
+    def test_domain_stopwords_with_comments(self):
+        """Test that comments (lines starting with #) are ignored."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            f.write("# This is a comment\n")
+            f.write("validword\n")
+            f.write("# Another comment\n")
+            f.write("anothervalid\n")
+            temp_path = Path(f.name)
+
+        try:
+            stopwords = TextPreprocessor._load_domain_stopwords(temp_path)
+            assert "validword" in stopwords
+            assert "anothervalid" in stopwords
+            assert "# this is a comment" not in stopwords
+            assert "this" not in stopwords
+        finally:
+            temp_path.unlink()
+
+    def test_all_domain_stopwords_present(self, preprocessor_with_domain):
+        """Test that all expected domain stopwords are loaded."""
+        expected_stopwords = {
+            "response", "responses", "survey", "surveys",
+            "question", "questions", "answer", "answers",
+            "please", "thanks", "thank",
+            "participant", "participants", "respondent", "respondents",
+            "feedback", "comment", "comments",
+            "opinion", "opinions", "regarding", "concerning"
+        }
+        for word in expected_stopwords:
+            assert word in preprocessor_with_domain.domain_stopwords, \
+                f"Expected '{word}' in domain stopwords"
+
+
+class TestDataCleaningPipelineDomainStopwords:
+    """Test cases for domain stopwords in DataCleaningPipeline."""
+
+    def test_pipeline_default_domain_stopwords_enabled(self):
+        """Test that pipeline has use_domain_stopwords=True by default."""
+        pipeline = DataCleaningPipeline()
+        assert pipeline.use_domain_stopwords is True
+        assert pipeline.preprocessor.use_domain_stopwords is True
+        assert len(pipeline.preprocessor.domain_stopwords) > 0
+
+    def test_pipeline_domain_stopwords_disabled(self):
+        """Test that pipeline can disable domain stopwords."""
+        pipeline = DataCleaningPipeline(use_domain_stopwords=False)
+        assert pipeline.use_domain_stopwords is False
+        assert pipeline.preprocessor.use_domain_stopwords is False
+        assert len(pipeline.preprocessor.domain_stopwords) == 0
+
+    def test_pipeline_removes_domain_stopwords(self):
+        """Test that pipeline removes domain stopwords from cleaned text."""
+        pipeline = DataCleaningPipeline(use_domain_stopwords=True)
+        texts = ["The survey response about feedback was excellent"]
+        results = pipeline.clean_texts(texts)
+        tokens = results[0].split()
+        # Domain stopwords should be removed
+        assert "survey" not in tokens, f"Expected 'survey' to be removed, got: {results[0]}"
+        assert "response" not in tokens, f"Expected 'response' to be removed, got: {results[0]}"
+        assert "feedback" not in tokens, f"Expected 'feedback' to be removed, got: {results[0]}"
+
+    def test_pipeline_keeps_domain_stopwords_when_disabled(self):
+        """Test that pipeline keeps domain stopwords when disabled."""
+        pipeline = DataCleaningPipeline(use_domain_stopwords=False)
+        texts = ["The survey response about feedback was excellent"]
+        results = pipeline.clean_texts(texts)
+        tokens = results[0].split()
+        # Domain stopwords should NOT be removed
+        assert "survey" in tokens, f"Expected 'survey' to remain, got: {results[0]}"
+        assert "response" in tokens, f"Expected 'response' to remain, got: {results[0]}"
+        assert "feedback" in tokens, f"Expected 'feedback' to remain, got: {results[0]}"

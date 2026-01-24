@@ -16,6 +16,23 @@ os.environ['TF_USE_LEGACY_KERAS'] = '1'
 import pytest
 
 
+def pytest_addoption(parser):
+    """Add custom command-line options for pytest."""
+    parser.addoption(
+        "--generate-golden",
+        action="store_true",
+        default=False,
+        help="Generate golden outputs for preprocessing regression tests",
+    )
+
+
+def pytest_configure(config):
+    """Configure pytest with custom markers."""
+    config.addinivalue_line(
+        "markers", "generate_golden: mark test as golden output generator"
+    )
+
+
 @pytest.fixture(scope="session", autouse=True)
 def keras_compatibility_setup():
     """Ensure Keras compatibility environment variable is set for all tests."""

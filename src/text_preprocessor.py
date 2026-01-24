@@ -10,8 +10,10 @@ text preprocessing capabilities for the Open-Ended Coding Analysis framework.
 """
 
 import logging
+import os
 import re
-from typing import Dict, List, Optional, Union
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Union
 
 from .gold_standard_preprocessing import (
     GoldStandardTextProcessor,
@@ -21,6 +23,19 @@ from .gold_standard_preprocessing import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Negation words to preserve during stopword removal for sentiment/topic analysis
+# These words are important for understanding context and sentiment polarity
+NEGATION_KEEP_WORDS = {
+    "not", "no", "never", "none", "nobody", "nothing", "neither", "nowhere",
+    "cannot", "can't", "don't", "doesn't", "didn't", "won't", "wouldn't",
+    "shouldn't", "couldn't", "hasn't", "haven't", "hadn't", "isn't", "aren't",
+    "wasn't", "weren't"
+}
+
+# Default path for domain-specific stopwords file
+# This file contains survey-specific stopwords that should be removed from survey text
+DEFAULT_DOMAIN_STOPWORDS_PATH = Path(__file__).parent.parent / "data" / "stopwords_domain.txt"
 
 
 def _download_nltk_resources():
@@ -56,7 +71,7 @@ class TextPreprocessor:
 
     This class provides comprehensive text preprocessing for NLP tasks including:
     - Gold standard normalization (Unicode, HTML, contractions, etc.)
-    - Stopword removal
+    - Stopword removal (including domain-specific stopwords for survey data)
     - Lemmatization
     - Domain-specific cleaning
     - Long document handling
@@ -69,6 +84,44 @@ class TextPreprocessor:
         >>> print(clean_text)
         'love product amazing'
     """
+
+    @staticmethod
+    def _load_domain_stopwords(
+        file_path: Optional[Path] = None
+    ) -> Set[str]:
+        """
+        Load domain-specific stopwords from a file.
+
+        Args:
+            file_path: Path to the domain stopwords file. If None, uses the default
+                path (data/stopwords_domain.txt relative to the project root).
+
+        Returns:
+            Set of domain stopwords (lowercase). Returns empty set if file not found.
+        """
+        if file_path is None:
+            file_path = DEFAULT_DOMAIN_STOPWORDS_PATH
+
+        stopwords = set()
+        try:
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        word = line.strip().lower()
+                        if word and not word.startswith('#'):  # Skip empty lines and comments
+                            stopwords.add(word)
+                logger.debug(f"Loaded {len(stopwords)} domain stopwords from {file_path}")
+            else:
+                logger.warning(
+                    f"Domain stopwords file not found at {file_path}. "
+                    "Continuing without domain stopwords."
+                )
+        except Exception as e:
+            logger.warning(
+                f"Error loading domain stopwords from {file_path}: {e}. "
+                "Continuing without domain stopwords."
+            )
+        return stopwords
 
     def __init__(
         self,
@@ -90,6 +143,9 @@ class TextPreprocessor:
         max_char_repeat: int = 2,
         url_token: str = "<URL>",
         user_token: str = "<USER>",
+        preserve_negations: bool = True,
+        use_domain_stopwords: bool = True,
+        domain_stopwords_path: Optional[Path] = None,
     ):
         """
         Initialize preprocessor with gold standard preprocessing support.
@@ -113,8 +169,17 @@ class TextPreprocessor:
             max_char_repeat: Maximum character repetitions
             url_token: Token to replace URLs
             user_token: Token to replace mentions
+            preserve_negations: Preserve negation words (not, never, etc.) during
+                stopword removal for better sentiment/topic analysis (default: True)
+            use_domain_stopwords: Enable domain-specific stopwords for survey data
+                (default: True). When enabled, loads additional stopwords from the
+                domain stopwords file (e.g., 'response', 'survey', 'feedback').
+            domain_stopwords_path: Custom path to domain stopwords file. If None,
+                uses the default path (data/stopwords_domain.txt).
         """
         self.use_gold_standard = use_gold_standard
+        self.preserve_negations = preserve_negations
+        self.use_domain_stopwords = use_domain_stopwords
 
         self.gold_standard_config = {
             "normalize_unicode": normalize_unicode,
@@ -168,6 +233,17 @@ class TextPreprocessor:
             logger.warning(f"Could not load NLTK resources: {e}")
             self.stop_words = set()
             self.lemmatizer = None
+
+        # Load and merge domain stopwords if enabled
+        self.domain_stopwords: Set[str] = set()
+        if use_domain_stopwords:
+            self.domain_stopwords = self._load_domain_stopwords(domain_stopwords_path)
+            if self.domain_stopwords:
+                self.stop_words = self.stop_words.union(self.domain_stopwords)
+                logger.debug(
+                    f"Merged {len(self.domain_stopwords)} domain stopwords. "
+                    f"Total stopwords: {len(self.stop_words)}"
+                )
 
     def get_quality_metrics(self) -> Optional[DataQualityMetrics]:
         """Get quality metrics from the gold standard processor."""
@@ -425,7 +501,11 @@ class TextPreprocessor:
 
             # Remove stopwords
             if remove_stopwords and self.stop_words:
-                tokens = [t for t in tokens if t not in self.stop_words]
+                if self.preserve_negations:
+                    # Keep negation words even if they appear in stopwords
+                    tokens = [t for t in tokens if t not in self.stop_words or t in NEGATION_KEEP_WORDS]
+                else:
+                    tokens = [t for t in tokens if t not in self.stop_words]
 
             # Lemmatize
             if lemmatize and self.lemmatizer:
@@ -529,6 +609,8 @@ class DataCleaningPipeline:
         remove_stopwords: bool = True,
         lemmatize: bool = True,
         lowercase: bool = True,
+        preserve_negations: bool = True,
+        use_domain_stopwords: bool = True,
     ):
         """
         Initialize the data cleaning pipeline.
@@ -538,14 +620,23 @@ class DataCleaningPipeline:
             remove_stopwords: Remove stopwords during preprocessing
             lemmatize: Apply lemmatization
             lowercase: Convert to lowercase
+            preserve_negations: Preserve negation words during stopword removal
+                for better sentiment/topic analysis (default: True)
+            use_domain_stopwords: Enable domain-specific stopwords for survey data
+                (default: True). Removes common survey terms like 'response',
+                'survey', 'feedback', etc.
         """
         self.dataset_type = dataset_type
         self.remove_stopwords = remove_stopwords
         self.lemmatize = lemmatize
         self.lowercase = lowercase
+        self.preserve_negations = preserve_negations
+        self.use_domain_stopwords = use_domain_stopwords
 
         # Configure preprocessor based on dataset type
         config = self._get_config_for_dataset(dataset_type)
+        config["preserve_negations"] = preserve_negations
+        config["use_domain_stopwords"] = use_domain_stopwords
         self.preprocessor = TextPreprocessor(**config)
 
         self._summary = {}
