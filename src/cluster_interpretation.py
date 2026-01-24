@@ -30,13 +30,28 @@ Usage:
 
 import logging
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple, Set
+from pathlib import Path
+from typing import List, Dict, Any, Optional, Tuple, Set, Union
 from collections import Counter
 
 import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# Import stopwords discovery utilities (with graceful fallback)
+try:
+    from .stopwords_discovery import (
+        load_stopwords_from_file,
+        load_keep_list,
+        get_layered_stopwords,
+        find_domain_stopword_candidates,
+        StopwordDiscoveryReport,
+    )
+    STOPWORDS_DISCOVERY_AVAILABLE = True
+except ImportError:
+    STOPWORDS_DISCOVERY_AVAILABLE = False
+    logger.debug("Stopwords discovery module not available")
 
 # Default stopwords to exclude from topic labels (common non-descriptive words)
 DEFAULT_LABEL_STOPWORDS: Set[str] = {
@@ -409,7 +424,10 @@ class ClusterInterpreter:
         custom_stopwords: Optional[Set[str]] = None,
         detect_domain_stopwords: bool = True,
         prefer_ngram_phrases: bool = True,
-        min_coherence_threshold: float = 0.4
+        min_coherence_threshold: float = 0.4,
+        use_file_based_stopwords: bool = True,
+        domain_stopwords_path: Optional[Union[str, Path]] = None,
+        keep_list_path: Optional[Union[str, Path]] = None
     ):
         """
         Initialize the cluster interpreter.
@@ -424,6 +442,12 @@ class ClusterInterpreter:
             detect_domain_stopwords: Whether to auto-detect domain-specific high-frequency stopwords
             prefer_ngram_phrases: Whether to prefer n-gram phrases over single words in labels
             min_coherence_threshold: Minimum coherence score below which to flag cluster issues
+            use_file_based_stopwords: Whether to load domain stopwords from file
+                                      (data/stopwords_domain.txt). Default True.
+            domain_stopwords_path: Custom path to domain stopwords file.
+                                   If None, uses data/stopwords_domain.txt
+            keep_list_path: Custom path to keep-list file (semantic overrides).
+                           If None, uses data/stopwords_keep.txt
         """
         self.n_top_terms = n_top_terms
         self.n_label_terms = n_label_terms
@@ -434,19 +458,83 @@ class ClusterInterpreter:
         self.detect_domain_stopwords_flag = detect_domain_stopwords
         self.prefer_ngram_phrases = prefer_ngram_phrases
         self.min_coherence_threshold = min_coherence_threshold
+        self.use_file_based_stopwords = use_file_based_stopwords
+        self.domain_stopwords_path = domain_stopwords_path
+        self.keep_list_path = keep_list_path
         self._domain_stopwords: Set[str] = set()
+        self._file_based_stopwords: Set[str] = set()
+        self._keep_list: Set[str] = set()
         self._texts_for_domain_detection: Optional[List[str]] = None
+        self._stopwords_loaded: bool = False
+
+    def _load_file_based_stopwords(self) -> None:
+        """
+        Load stopwords from files if enabled and not already loaded.
+
+        This implements the layered governance model:
+        1. Default label stopwords (always included)
+        2. File-based domain stopwords (data/stopwords_domain.txt)
+        3. Custom stopwords (passed to constructor)
+        4. Dynamically detected domain stopwords
+        5. Minus keep-list words (data/stopwords_keep.txt)
+        """
+        if self._stopwords_loaded:
+            return
+
+        if self.use_file_based_stopwords and STOPWORDS_DISCOVERY_AVAILABLE:
+            try:
+                # Load domain stopwords from file
+                self._file_based_stopwords = load_stopwords_from_file(
+                    self.domain_stopwords_path
+                )
+                if self._file_based_stopwords:
+                    logger.info(
+                        f"Loaded {len(self._file_based_stopwords)} domain stopwords from file"
+                    )
+
+                # Load keep-list
+                self._keep_list = load_keep_list(self.keep_list_path)
+                if self._keep_list:
+                    logger.info(
+                        f"Loaded {len(self._keep_list)} keep-list words from file"
+                    )
+            except Exception as e:
+                logger.warning(f"Error loading file-based stopwords: {e}")
+
+        self._stopwords_loaded = True
 
     def _get_combined_stopwords(self) -> Set[str]:
         """
-        Get the combined set of all stopwords (default + custom + domain-specific).
+        Get the combined set of all stopwords using the layered governance model.
+
+        Layers (in order of application):
+        1. Default label stopwords (common non-descriptive words)
+        2. File-based domain stopwords (data/stopwords_domain.txt)
+        3. Custom stopwords (passed to constructor)
+        4. Dynamically detected domain stopwords (runtime detection)
+        5. Minus keep-list words (data/stopwords_keep.txt - semantic overrides)
 
         Returns:
-            Combined set of stopwords
+            Combined set of stopwords with keep-list exclusions applied
         """
+        # Ensure file-based stopwords are loaded
+        self._load_file_based_stopwords()
+
+        # Layer 1: Default label stopwords
         combined = set(DEFAULT_LABEL_STOPWORDS)
+
+        # Layer 2: File-based domain stopwords
+        combined.update(self._file_based_stopwords)
+
+        # Layer 3: Custom stopwords
         combined.update(self.custom_stopwords)
+
+        # Layer 4: Dynamically detected domain stopwords
         combined.update(self._domain_stopwords)
+
+        # Layer 5: Remove keep-list words (semantic overrides)
+        combined -= self._keep_list
+
         return combined
 
     def _filter_stopwords_with_weights(
@@ -1232,6 +1320,95 @@ class ClusterInterpreter:
         df = pd.DataFrame(rows)
         df = df.sort_values('Documents', ascending=False)
         return df
+
+    def discover_domain_stopwords(
+        self,
+        texts: List[str],
+        min_doc_frequency: float = 0.7,
+        cluster_assignments: Optional[List[int]] = None
+    ) -> Optional['StopwordDiscoveryReport']:
+        """
+        Discover domain stopword candidates from the corpus.
+
+        This method analyzes the corpus to identify words that appear frequently
+        across documents and may be candidates for domain-specific stopwords.
+
+        The workflow for using this method:
+        1. Run this method to get a discovery report
+        2. Review the candidates in the report
+        3. Add appropriate words to data/stopwords_domain.txt
+        4. Add words to keep (semantic meaning) to data/stopwords_keep.txt
+        5. Re-run your analysis pipeline
+
+        Args:
+            texts: List of document texts to analyze
+            min_doc_frequency: Minimum document frequency (0-1) threshold.
+                              Default 0.7 means words in 70%+ of documents.
+            cluster_assignments: Optional cluster assignments for cluster-aware
+                               discovery (identifies words across all clusters)
+
+        Returns:
+            StopwordDiscoveryReport with candidates and recommendations,
+            or None if stopwords_discovery module is not available
+
+        Example:
+            >>> interpreter = ClusterInterpreter()
+            >>> report = interpreter.discover_domain_stopwords(texts)
+            >>> print(report.to_markdown())
+            >>> # Review candidates, then add to data/stopwords_domain.txt
+        """
+        if not STOPWORDS_DISCOVERY_AVAILABLE:
+            logger.warning(
+                "Stopwords discovery module not available. "
+                "Cannot run domain stopword discovery."
+            )
+            return None
+
+        if cluster_assignments is not None:
+            # Use cluster-aware discovery
+            from .stopwords_discovery import discover_from_clusters
+            report = discover_from_clusters(
+                texts=texts,
+                cluster_assignments=cluster_assignments,
+                min_doc_frequency=min_doc_frequency
+            )
+        else:
+            # Use basic discovery
+            report = find_domain_stopword_candidates(
+                texts=texts,
+                min_doc_frequency=min_doc_frequency,
+                compute_tfidf_variance=True
+            )
+
+        logger.info(
+            f"Domain stopword discovery complete: {len(report.candidates)} candidates found"
+        )
+        return report
+
+    def get_stopwords_summary(self) -> Dict[str, Any]:
+        """
+        Get a summary of all stopwords being used.
+
+        Returns:
+            Dictionary with stopword counts by source and sample words
+        """
+        # Ensure stopwords are loaded
+        self._load_file_based_stopwords()
+
+        summary = {
+            'default_label_stopwords': len(DEFAULT_LABEL_STOPWORDS),
+            'file_based_domain_stopwords': len(self._file_based_stopwords),
+            'custom_stopwords': len(self.custom_stopwords),
+            'dynamic_domain_stopwords': len(self._domain_stopwords),
+            'keep_list_words': len(self._keep_list),
+            'total_combined': len(self._get_combined_stopwords()),
+            'samples': {
+                'file_based': list(self._file_based_stopwords)[:10],
+                'dynamic': list(self._domain_stopwords)[:10],
+                'keep_list': list(self._keep_list)[:10],
+            }
+        }
+        return summary
 
 
 class ClusterCodebook:
