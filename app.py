@@ -1186,6 +1186,18 @@ def page_text_processor():
         # Option to drop filtered rows
         preset_drop_filtered = st.checkbox("Drop filtered rows", value=False, key="preset_drop")
 
+        # Enhanced preprocessing options
+        with st.expander("🔧 Enhanced Preprocessing Options", expanded=False):
+            col1, col2 = st.columns(2)
+            with col1:
+                preset_preserve_negations = st.checkbox("Preserve negation words", value=True,
+                    help="Keep 'not', 'no', 'never' etc. for better sentiment/topic analysis",
+                    key="preset_preserve_negations")
+            with col2:
+                preset_domain_stopwords = st.checkbox("Use domain stopwords", value=True,
+                    help="Remove survey-specific words like 'response', 'survey', 'participant'",
+                    key="preset_domain_stopwords")
+
         if st.button("🚀 Apply Preset", use_container_width=True, key="apply_preset_btn"):
             with st.spinner(f"Applying {preset['name']} preprocessing..."):
                 try:
@@ -1194,7 +1206,9 @@ def page_text_processor():
                         dataset_type=selected_preset,
                         remove_stopwords=preset['remove_stopwords'],
                         lemmatize=preset['lemmatize'],
-                        lowercase=preset['lowercase']
+                        lowercase=preset['lowercase'],
+                        preserve_negations=preset_preserve_negations,
+                        use_domain_stopwords=preset_domain_stopwords
                     )
 
                     # Process the data
@@ -1415,6 +1429,20 @@ def page_text_processor():
             adv_min_token_len = st.number_input("Min token length", min_value=1, max_value=10, value=2,
                 help="Minimum character length for tokens", key="adv_min_token_len")
 
+        # Enhanced preprocessing options
+        st.markdown("#### Enhanced Preprocessing")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            adv_preserve_negations = st.checkbox("Preserve negation words", value=True,
+                help="Keep words like 'not', 'no', 'never' that are critical for sentiment and topic coherence",
+                key="adv_preserve_negations")
+
+        with col2:
+            adv_domain_stopwords = st.checkbox("Use domain stopwords", value=True,
+                help="Remove survey-specific words like 'response', 'survey', 'participant' that add noise",
+                key="adv_domain_stopwords")
+
         # Token count filtering
         st.markdown("#### Token Count Filtering")
         col1, col2 = st.columns(2)
@@ -1474,14 +1502,16 @@ def page_text_processor():
         if st.button("🚀 Apply Advanced Processing", use_container_width=True, key="apply_adv_btn"):
             with st.spinner("Applying advanced preprocessing..."):
                 try:
-                    # Create TextPreprocessor with token limits
+                    # Create TextPreprocessor with token limits and enhanced options
                     preprocessor = TextPreprocessor(
                         use_gold_standard=True,
                         expand_slang=False,
                         detect_spam=True,
                         detect_duplicates=True,
                         min_tokens=adv_min_tokens,
-                        max_tokens=adv_max_tokens
+                        max_tokens=adv_max_tokens,
+                        preserve_negations=adv_preserve_negations,
+                        use_domain_stopwords=adv_domain_stopwords
                     )
 
                     # Parse preserve terms

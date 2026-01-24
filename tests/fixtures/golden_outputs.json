@@ -1,0 +1,411 @@
+{
+  "description": "Golden outputs for preprocessing regression testing",
+  "version": "1.0.0",
+  "generated_at": "2026-01-24T10:07:24.025450",
+  "preprocessor_config": {
+    "legacy_mode": {
+      "use_gold_standard": true,
+      "remove_stopwords": true,
+      "lemmatize": true,
+      "lowercase": true,
+      "min_token_length": 2
+    },
+    "enhanced_mode": {
+      "use_gold_standard": true,
+      "remove_stopwords": false,
+      "lemmatize": false,
+      "lowercase": true,
+      "min_token_length": 2
+    }
+  },
+  "outputs": {
+    "legacy_mode": {
+      "simple_01": {
+        "input": "This is a simple test sentence.",
+        "output": "simple test sentence",
+        "description": "Basic simple sentence",
+        "category": "simple"
+      },
+      "simple_02": {
+        "input": "The quick brown fox jumps over the lazy dog.",
+        "output": "quick brown fox jump lazy dog",
+        "description": "Pangram sentence",
+        "category": "simple"
+      },
+      "simple_03": {
+        "input": "I really enjoyed the product and would recommend it to others.",
+        "output": "really enjoyed product would recommend others",
+        "description": "Simple review-like sentence",
+        "category": "simple"
+      },
+      "contraction_01": {
+        "input": "I don't think this can't work.",
+        "output": "not think not work",
+        "description": "Multiple contractions with negation",
+        "category": "contractions"
+      },
+      "contraction_02": {
+        "input": "I'll be there when you're ready and we've finished.",
+        "output": "ready finished",
+        "description": "Future tense contractions",
+        "category": "contractions"
+      },
+      "contraction_03": {
+        "input": "She's going to the store because she'd like some groceries.",
+        "output": "going store would like grocery",
+        "description": "Mixed contractions",
+        "category": "contractions"
+      },
+      "contraction_04": {
+        "input": "They've been working hard and they're almost done.",
+        "output": "working hard almost done",
+        "description": "Present perfect and present continuous contractions",
+        "category": "contractions"
+      },
+      "negation_01": {
+        "input": "I do not like this and never will.",
+        "output": "not like never",
+        "description": "Explicit negations",
+        "category": "negations"
+      },
+      "negation_02": {
+        "input": "There is no way this could not have been prevented.",
+        "output": "way could not prevented",
+        "description": "Double negation",
+        "category": "negations"
+      },
+      "negation_03": {
+        "input": "Nobody ever said it was impossible to achieve success.",
+        "output": "nobody ever said impossible achieve success",
+        "description": "Negation with pronouns",
+        "category": "negations"
+      },
+      "url_email_01": {
+        "input": "Check out our website at https://example.com for more information.",
+        "output": "check website url information",
+        "description": "HTTPS URL",
+        "category": "urls_emails"
+      },
+      "url_email_02": {
+        "input": "Contact us at support@company.com or visit www.company.org today.",
+        "output": "contact supporturl visit url today",
+        "description": "Email and www URL",
+        "category": "urls_emails"
+      },
+      "url_email_03": {
+        "input": "The documentation is at http://docs.example.io/api/v2/endpoints and http://github.com/repo for code.",
+        "output": "documentation url url code",
+        "description": "Multiple URLs",
+        "category": "urls_emails"
+      },
+      "numbers_01": {
+        "input": "The survey received 1,234 responses with a 95% completion rate.",
+        "output": "received completion rate",
+        "description": "Numbers with punctuation",
+        "category": "numbers"
+      },
+      "numbers_02": {
+        "input": "We analyzed 50 participants aged 18-65 over 3 months.",
+        "output": "analyzed aged month",
+        "description": "Various number formats",
+        "category": "numbers"
+      },
+      "numbers_03": {
+        "input": "The cost was $19.99 plus 8.5% tax for a total of $21.69.",
+        "output": "cost plus tax total",
+        "description": "Currency and percentages",
+        "category": "numbers"
+      },
+      "domain_01": {
+        "input": "The survey response rate exceeded our participant expectations.",
+        "output": "rate exceeded expectation",
+        "description": "Survey-related domain terms",
+        "category": "domain_specific"
+      },
+      "domain_02": {
+        "input": "Participants indicated their satisfaction level on a scale of 1 to 10.",
+        "output": "indicated satisfaction level scale",
+        "description": "Research methodology terms",
+        "category": "domain_specific"
+      },
+      "domain_03": {
+        "input": "The qualitative analysis of open-ended responses revealed key themes.",
+        "output": "qualitative analysis openended revealed key theme",
+        "description": "Analysis terminology",
+        "category": "domain_specific"
+      },
+      "mixed_case_01": {
+        "input": "THIS IS ALL UPPERCASE TEXT FOR TESTING.",
+        "output": "uppercase text testing",
+        "description": "All uppercase",
+        "category": "mixed_case"
+      },
+      "mixed_case_02": {
+        "input": "ThIs Is MiXeD cAsE tExT fOr TeStInG.",
+        "output": "mixed case text testing",
+        "description": "Alternating case",
+        "category": "mixed_case"
+      },
+      "mixed_case_03": {
+        "input": "iPhone users LOVE the new MacBook Pro features.",
+        "output": "iphone user love new macbook pro feature",
+        "description": "Brand names with emphasis",
+        "category": "mixed_case"
+      },
+      "special_char_01": {
+        "input": "I loooove this!!! It's soooo good!!!",
+        "output": "loove soo good",
+        "description": "Elongated words and repeated punctuation",
+        "category": "special_characters"
+      },
+      "special_char_02": {
+        "input": "Testing &amp; HTML entities &lt;div&gt; and &quot;quotes&quot;",
+        "output": "testing html entity div quote",
+        "description": "HTML entities",
+        "category": "special_characters"
+      },
+      "special_char_03": {
+        "input": "The product costs $100 (50% off!) & includes free shipping.",
+        "output": "product cost includes free shipping",
+        "description": "Special characters and symbols",
+        "category": "special_characters"
+      },
+      "special_char_04": {
+        "input": "What?!?! That's amazing... I can't believe it!!!",
+        "output": "amazing not believe",
+        "description": "Mixed punctuation and emphasis",
+        "category": "special_characters"
+      },
+      "empty_whitespace_01": {
+        "input": "",
+        "output": "",
+        "description": "Empty string",
+        "category": "empty_whitespace"
+      },
+      "empty_whitespace_02": {
+        "input": "   ",
+        "output": "",
+        "description": "Whitespace only",
+        "category": "empty_whitespace"
+      },
+      "empty_whitespace_03": {
+        "input": "  Some text with   extra   spaces  ",
+        "output": "text extra space",
+        "description": "Extra whitespace",
+        "category": "empty_whitespace"
+      },
+      "long_text_01": {
+        "input": "This is a longer piece of text that is designed to test how the preprocessing pipeline handles documents with more content. The text contains multiple sentences and covers various topics including technology, science, and everyday life. We want to ensure that the preprocessing maintains semantic meaning while properly normalizing the text. Additionally, this text includes some common patterns like contractions such as don't, can't, and won't, as well as some numbers like 42 and percentages like 85%. The goal is to verify that longer documents are processed consistently and that no information is lost during the normalization process.",
+        "output": "longer piece text designed test preprocessing pipeline handle document content text contains multiple sentence cover various topic including technology science everyday life want ensure preprocessing maintains semantic meaning properly normalizing text additionally text includes common pattern like contraction not not not well number like percentage like goal verify longer document processed consistently information lost normalization process",
+        "description": "Long paragraph with mixed content",
+        "category": "long_text"
+      },
+      "social_media_01": {
+        "input": "Just saw @username post about #machinelearning - check it out! https://twitter.com/status/123",
+        "output": "saw user post machinelearning check url",
+        "description": "Social media text with mentions and hashtags",
+        "category": "social_media"
+      },
+      "social_media_02": {
+        "input": "lol this is so funny tbh! Can't believe it worked rofl",
+        "output": "lol funny tbh not believe worked rofl",
+        "description": "Informal social media text with slang",
+        "category": "social_media"
+      }
+    },
+    "enhanced_mode": {
+      "simple_01": {
+        "input": "This is a simple test sentence.",
+        "output": "this simple test sentence",
+        "description": "Basic simple sentence",
+        "category": "simple"
+      },
+      "simple_02": {
+        "input": "The quick brown fox jumps over the lazy dog.",
+        "output": "the quick brown fox jumps over the lazy dog",
+        "description": "Pangram sentence",
+        "category": "simple"
+      },
+      "simple_03": {
+        "input": "I really enjoyed the product and would recommend it to others.",
+        "output": "really enjoyed the product and would recommend others",
+        "description": "Simple review-like sentence",
+        "category": "simple"
+      },
+      "contraction_01": {
+        "input": "I don't think this can't work.",
+        "output": "not think this can not work",
+        "description": "Multiple contractions with negation",
+        "category": "contractions"
+      },
+      "contraction_02": {
+        "input": "I'll be there when you're ready and we've finished.",
+        "output": "will there when you are ready and have finished",
+        "description": "Future tense contractions",
+        "category": "contractions"
+      },
+      "contraction_03": {
+        "input": "She's going to the store because she'd like some groceries.",
+        "output": "she going the store because she would like some groceries",
+        "description": "Mixed contractions",
+        "category": "contractions"
+      },
+      "contraction_04": {
+        "input": "They've been working hard and they're almost done.",
+        "output": "they have been working hard and they are almost done",
+        "description": "Present perfect and present continuous contractions",
+        "category": "contractions"
+      },
+      "negation_01": {
+        "input": "I do not like this and never will.",
+        "output": "not like this and never will",
+        "description": "Explicit negations",
+        "category": "negations"
+      },
+      "negation_02": {
+        "input": "There is no way this could not have been prevented.",
+        "output": "there way this could not have been prevented",
+        "description": "Double negation",
+        "category": "negations"
+      },
+      "negation_03": {
+        "input": "Nobody ever said it was impossible to achieve success.",
+        "output": "nobody ever said was impossible achieve success",
+        "description": "Negation with pronouns",
+        "category": "negations"
+      },
+      "url_email_01": {
+        "input": "Check out our website at https://example.com for more information.",
+        "output": "check out our website url for more information",
+        "description": "HTTPS URL",
+        "category": "urls_emails"
+      },
+      "url_email_02": {
+        "input": "Contact us at support@company.com or visit www.company.org today.",
+        "output": "contact supporturl visit url today",
+        "description": "Email and www URL",
+        "category": "urls_emails"
+      },
+      "url_email_03": {
+        "input": "The documentation is at http://docs.example.io/api/v2/endpoints and http://github.com/repo for code.",
+        "output": "the documentation url and url for code",
+        "description": "Multiple URLs",
+        "category": "urls_emails"
+      },
+      "numbers_01": {
+        "input": "The survey received 1,234 responses with a 95% completion rate.",
+        "output": "the survey received responses with completion rate",
+        "description": "Numbers with punctuation",
+        "category": "numbers"
+      },
+      "numbers_02": {
+        "input": "We analyzed 50 participants aged 18-65 over 3 months.",
+        "output": "analyzed participants aged over months",
+        "description": "Various number formats",
+        "category": "numbers"
+      },
+      "numbers_03": {
+        "input": "The cost was $19.99 plus 8.5% tax for a total of $21.69.",
+        "output": "the cost was plus tax for total",
+        "description": "Currency and percentages",
+        "category": "numbers"
+      },
+      "domain_01": {
+        "input": "The survey response rate exceeded our participant expectations.",
+        "output": "the survey response rate exceeded our participant expectations",
+        "description": "Survey-related domain terms",
+        "category": "domain_specific"
+      },
+      "domain_02": {
+        "input": "Participants indicated their satisfaction level on a scale of 1 to 10.",
+        "output": "participants indicated their satisfaction level scale",
+        "description": "Research methodology terms",
+        "category": "domain_specific"
+      },
+      "domain_03": {
+        "input": "The qualitative analysis of open-ended responses revealed key themes.",
+        "output": "the qualitative analysis openended responses revealed key themes",
+        "description": "Analysis terminology",
+        "category": "domain_specific"
+      },
+      "mixed_case_01": {
+        "input": "THIS IS ALL UPPERCASE TEXT FOR TESTING.",
+        "output": "this all uppercase text for testing",
+        "description": "All uppercase",
+        "category": "mixed_case"
+      },
+      "mixed_case_02": {
+        "input": "ThIs Is MiXeD cAsE tExT fOr TeStInG.",
+        "output": "this mixed case text for testing",
+        "description": "Alternating case",
+        "category": "mixed_case"
+      },
+      "mixed_case_03": {
+        "input": "iPhone users LOVE the new MacBook Pro features.",
+        "output": "iphone users love the new macbook pro features",
+        "description": "Brand names with emphasis",
+        "category": "mixed_case"
+      },
+      "special_char_01": {
+        "input": "I loooove this!!! It's soooo good!!!",
+        "output": "loove this soo good",
+        "description": "Elongated words and repeated punctuation",
+        "category": "special_characters"
+      },
+      "special_char_02": {
+        "input": "Testing &amp; HTML entities &lt;div&gt; and &quot;quotes&quot;",
+        "output": "testing html entities div and quotes",
+        "description": "HTML entities",
+        "category": "special_characters"
+      },
+      "special_char_03": {
+        "input": "The product costs $100 (50% off!) & includes free shipping.",
+        "output": "the product costs off includes free shipping",
+        "description": "Special characters and symbols",
+        "category": "special_characters"
+      },
+      "special_char_04": {
+        "input": "What?!?! That's amazing... I can't believe it!!!",
+        "output": "what that amazing can not believe",
+        "description": "Mixed punctuation and emphasis",
+        "category": "special_characters"
+      },
+      "empty_whitespace_01": {
+        "input": "",
+        "output": "",
+        "description": "Empty string",
+        "category": "empty_whitespace"
+      },
+      "empty_whitespace_02": {
+        "input": "   ",
+        "output": "",
+        "description": "Whitespace only",
+        "category": "empty_whitespace"
+      },
+      "empty_whitespace_03": {
+        "input": "  Some text with   extra   spaces  ",
+        "output": "some text with extra spaces",
+        "description": "Extra whitespace",
+        "category": "empty_whitespace"
+      },
+      "long_text_01": {
+        "input": "This is a longer piece of text that is designed to test how the preprocessing pipeline handles documents with more content. The text contains multiple sentences and covers various topics including technology, science, and everyday life. We want to ensure that the preprocessing maintains semantic meaning while properly normalizing the text. Additionally, this text includes some common patterns like contractions such as don't, can't, and won't, as well as some numbers like 42 and percentages like 85%. The goal is to verify that longer documents are processed consistently and that no information is lost during the normalization process.",
+        "output": "this longer piece text that designed test how the preprocessing pipeline handles documents with more content the text contains multiple sentences and covers various topics including technology science and everyday life want ensure that the preprocessing maintains semantic meaning while properly normalizing the text additionally this text includes some common patterns like contractions such not can not and will not well some numbers like and percentages like the goal verify that longer documents are processed consistently and that information lost during the normalization process",
+        "description": "Long paragraph with mixed content",
+        "category": "long_text"
+      },
+      "social_media_01": {
+        "input": "Just saw @username post about #machinelearning - check it out! https://twitter.com/status/123",
+        "output": "just saw user post about machinelearning check out url",
+        "description": "Social media text with mentions and hashtags",
+        "category": "social_media"
+      },
+      "social_media_02": {
+        "input": "lol this is so funny tbh! Can't believe it worked rofl",
+        "output": "lol this funny tbh can not believe worked rofl",
+        "description": "Informal social media text with slang",
+        "category": "social_media"
+      }
+    }
+  }
+}
