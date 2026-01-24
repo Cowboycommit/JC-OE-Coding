@@ -24,20 +24,38 @@ Interactive web interface for ML-based coding - no coding required!
 - **Robust Error Handling**: Comprehensive logging and error management
 - **Code Quality**: Automated testing and linting via Makefile
 
-### ML-Based Approach (NEW!)
-- 🤖 **Automatic Theme Discovery**: Uses TF-IDF, LDA, NMF, and K-Means clustering
+### ML-Based Approach
+- 🤖 **Automatic Theme Discovery**: Uses TF-IDF, LDA, LSTM, BERT, and SVM clustering
 - 📊 **15 Essential Outputs**: Complete analysis package for researchers
 - 🎯 **Confidence Scoring**: Probabilistic code assignments with quality metrics
 - 📈 **Advanced Analytics**: Co-occurrence analysis, network diagrams, segmentation
-- 💾 **Multiple Export Formats**: CSV, Excel, JSON with comprehensive results
+- 💾 **Multiple Export Formats**: CSV, Excel, Markdown with comprehensive results
 - 📝 **Executive Summaries**: Auto-generated stakeholder reports
 - ✅ **Quality Assurance**: Built-in validation and error detection
+- 🏷️ **LLM-Enhanced Labels**: AI-refined code labels and descriptions
 
-### Streamlit Web UI (NEW!)
-- 🌐 **No Coding Required**: User-friendly web interface
-- 📤 **Drag & Drop Upload**: Upload CSV/Excel files easily
-- ⚙️ **Interactive Configuration**: Visual parameter adjustment
-- 📊 **Real-time Visualizations**: Interactive charts and graphs
+### Text Preprocessing
+- 🔧 **Quick Presets**: One-click configurations for different data types (General, Social Media, Reviews, News)
+- 🛡️ **Negation Preservation**: Keeps "not", "never" for accurate sentiment/topic analysis
+- 📋 **Domain Stopwords**: Removes survey-specific noise words ("response", "survey", "participant")
+- 🐦 **Social Media Handling**: URL, @mention, #hashtag standardization, slang expansion
+- 📊 **Quality Reports**: Detailed statistics on filtered records and preprocessing effects
+
+### Sentiment Analysis
+- 📊 **Data-Type Specific Models**: Optimal model selection based on your data
+  - Survey/General: VADER (rule-based, fast)
+  - Twitter/Social Media: Twitter-RoBERTa (transformer-based)
+  - Long-form Reviews: Review-BERT (transformer-based)
+- 😊 **Sentiment Classification**: Positive, Neutral, Negative with confidence scores
+- 📈 **Integrated Results**: Sentiment appears alongside topic codes in results
+
+### Streamlit Web UI
+- 🌐 **No Coding Required**: User-friendly web interface for non-programmers
+- 📤 **Drag & Drop Upload**: Upload CSV/Excel files or use sample datasets
+- 🔧 **Text Processor**: Comprehensive preprocessing with data-type presets
+- ⚙️ **Interactive Configuration**: Visual parameter adjustment with algorithm guidance
+- 📊 **Sentiment Analysis**: Optional integrated sentiment detection
+- 📈 **Rich Visualizations**: Word clouds, network diagrams, sunburst charts
 - 💾 **One-Click Export**: Download complete results packages
 - 📱 **Responsive Design**: Works on desktop and mobile
 - 🎨 **Professional Styling**: Publication-ready visualizations
@@ -121,28 +139,32 @@ jupyter notebook open_ended_coding_analysis.ipynb
 
 ```
 .
-├── app.py                           # Streamlit web UI (NEW!)
+├── app.py                           # Main Streamlit web UI (user-facing)
+├── app_lite.py                      # Engineering/Lite UI (pipeline documentation)
 ├── open_ended_coding_analysis.ipynb  # Traditional keyword-based coding
-├── ml_open_coding_analysis.ipynb     # ML-based automatic coding (NEW!)
-├── helpers/                         # Helper modules for Streamlit (NEW!)
+├── ml_open_coding_analysis.ipynb     # ML-based automatic coding
+├── helpers/                         # Helper modules for Streamlit
 │   ├── __init__.py
 │   ├── formatting.py               # Formatting utilities
-│   └── analysis.py                 # Analysis helper functions
+│   └── analysis.py                 # Analysis orchestration
 ├── src/
 │   ├── __init__.py
-│   ├── data_loader.py              # Data loading utilities
+│   ├── data_loader.py              # Data loading (CSV, Excel, JSON)
+│   ├── text_preprocessor.py        # Enhanced text preprocessing (NLTK)
+│   ├── gold_standard_preprocessing.py  # Industry-standard text normalization
+│   ├── sentiment_analysis.py       # Data-type-specific sentiment models
+│   ├── embeddings.py               # TF-IDF, BERT, LSTM, Word2Vec
+│   ├── cluster_interpretation.py   # Code labeling with LLM enhancement
+│   ├── method_visualizations.py    # Word clouds, network diagrams
+│   ├── rigor_diagnostics.py        # Validity assessment
 │   ├── code_frame.py               # Code frame management
 │   ├── theme_analyzer.py           # Theme identification
 │   └── category_manager.py         # Categorization system
 ├── data/
-│   ├── sample_responses.csv        # Sample data
-│   └── README.md                   # Data documentation
-├── output/                         # Analysis results
-├── tests/                          # Unit tests
-│   ├── test_data_loader.py
-│   ├── test_code_frame.py
-│   ├── test_theme_analyzer.py
-│   └── test_category_manager.py
+│   ├── *.csv                       # Sample datasets (9 datasets)
+│   └── stopwords_domain.txt        # Domain-specific stopwords
+├── documentation/                  # 7-document comprehensive suite
+├── tests/                          # Unit and integration tests (21 files)
 ├── requirements.txt                # Production dependencies
 ├── requirements-dev.txt            # Development dependencies
 ├── Makefile                        # Build and test automation
@@ -283,15 +305,16 @@ The `app.py` provides an intuitive web interface for ML-based coding - **perfect
    - Explore interactive visualizations
    - Download complete results package
 
-### 📱 Interface Sections
+### 📱 Interface Sections (8 Pages)
 
-- **📤 Data Upload**: Load and preview your data
-- **⚙️ Configuration**: Set up analysis parameters
-- **🚀 Run Analysis**: Execute ML coding with progress tracking
-- **📊 Results Overview**: View metrics, insights, and codebook
-- **📈 Visualizations**: Interactive charts and graphs
-- **💾 Export Results**: Download complete packages
-- **ℹ️ About**: Documentation and help
+1. **📤 Data Upload**: Load sample datasets or upload CSV/Excel files
+2. **🔧 Text Processor**: Preprocess text with data-type presets (General, Social Media, Reviews, News)
+3. **⚙️ Configuration**: Select ML algorithm, code count, and enable sentiment analysis
+4. **🚀 Run Analysis**: Execute ML coding with real-time progress tracking
+5. **📊 Results Overview**: View metrics, codebook, word cloud, and sentiment results
+6. **📈 Visualizations**: Charts, heatmaps, word clouds, sunburst, network diagrams
+7. **💾 Export Results**: Download Excel package, CSV, or Markdown summary
+8. **ℹ️ About**: Complete feature documentation and getting started guide
 
 ## ML-Based Open Coding (NEW!)
 
@@ -347,11 +370,15 @@ exporter.export_all()
 exporter.export_excel('results.xlsx')
 ```
 
-### Supported Algorithms
+### Supported ML Algorithms
 
-- **TF-IDF + K-Means** (default): Fast, interpretable clustering
-- **Latent Dirichlet Allocation (LDA)**: Probabilistic topic modeling
-- **Non-negative Matrix Factorization (NMF)**: Parts-based decomposition
+| Algorithm | Description | Best For |
+|-----------|-------------|----------|
+| **TF-IDF + K-Means** | Fast bag-of-words clustering | General use, quick exploration |
+| **LDA** | Probabilistic topic modeling | Overlapping themes, academic research |
+| **LSTM + K-Means** | Sequential pattern recognition | Order-dependent text, narratives |
+| **BERT + K-Means** | Semantic embedding clustering | Nuanced meaning, synonyms |
+| **SVM Spectral** | Kernel-based clustering | Complex, non-linear boundaries |
 
 ### Output Formats
 
@@ -586,20 +613,39 @@ Built with:
 ### Completed Features
 
 - [x] Machine learning-assisted coding (ML-based notebook)
-- [x] Advanced NLP integration (topic modeling with LDA, NMF, K-Means)
-- [x] Comprehensive export formats (CSV, Excel, JSON)
+- [x] Advanced NLP integration (topic modeling with LDA, LSTM, BERT, SVM)
+- [x] Comprehensive export formats (CSV, Excel, Markdown)
 - [x] Executive summaries and stakeholder reports
+- [x] Web-based dashboard (Streamlit UI)
+- [x] Sentiment analysis integration (VADER, Twitter-RoBERTa, Review-BERT)
+- [x] Text preprocessing with data-type presets
+- [x] LLM-enhanced code labels and descriptions
+- [x] Semantic word clouds with meaning-based coloring
 
 ### Planned Features
 
 - [ ] Real-time collaborative coding
-- [ ] Web-based dashboard
-- [ ] API for programmatic access
+- [ ] REST API for programmatic access
 - [ ] Support for qualitative data software export formats (NVivo, Atlas.ti)
-- [ ] Sentiment analysis integration
-- [ ] Multi-language support
+- [ ] Multi-language support (currently English only)
 
 ## Version History
+
+### v1.3.0 (2026) - Enhanced Preprocessing & Sentiment
+- **Text Processor**: Comprehensive preprocessing with data-type presets
+  - Quick Presets: General, Social Media, Reviews, News
+  - Negation preservation for accurate sentiment/topic analysis
+  - Domain-specific stopwords for noise reduction
+  - Gold Standard processing (Unicode, HTML, contractions, slang)
+- **Sentiment Analysis**: Integrated with data-type-specific models
+  - Survey: VADER (rule-based)
+  - Twitter: Twitter-RoBERTa (transformer)
+  - Reviews: Review-BERT (transformer)
+- **Enhanced ML Algorithms**: Added LSTM, BERT, and SVM clustering
+- **LLM-Enhanced Labels**: AI-refined code labels and descriptions
+- **Semantic Word Clouds**: Color-coded by word meaning similarity
+- **Network Diagrams**: Cluster relationship visualization
+- **Engineering View** (app_lite.py): Pipeline documentation UI
 
 ### v1.2.0 (2024) - Streamlit Web UI
 - Added Streamlit web application for no-code analysis
@@ -615,7 +661,7 @@ Built with:
 ### v1.1.0 (2024) - ML-Based Open Coding
 - Added ML-based automatic coding notebook
 - Implemented 15 essential outputs for comprehensive analysis
-- Added support for TF-IDF, LDA, NMF, and K-Means algorithms
+- Added support for TF-IDF, LDA, and K-Means algorithms
 - Automatic theme discovery and code generation
 - Confidence scoring and quality metrics
 - Co-occurrence analysis and network visualizations
