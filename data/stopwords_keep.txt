@@ -1,0 +1,84 @@
+# Semantic Override Keep-List
+# ===========================
+#
+# This file contains words that should NEVER be removed as stopwords,
+# even if they appear frequently or match stopword patterns.
+#
+# These are typically words that carry important semantic meaning
+# for sentiment analysis, negation, or domain-specific concepts.
+#
+# USAGE:
+# - Add one word per line, lowercase
+# - Lines starting with # are comments (ignored)
+# - Empty lines are ignored
+# - Words in this list override both general and domain stopwords
+#
+# COMMON SEMANTIC OVERRIDES:
+#
+# Negation words (critical for sentiment analysis):
+not
+no
+never
+none
+neither
+nobody
+nothing
+nowhere
+cannot
+cant
+wont
+dont
+doesnt
+didnt
+hasnt
+havent
+hadnt
+isnt
+arent
+wasnt
+werent
+shouldnt
+wouldnt
+couldnt
+mustnt
+
+# Intensifiers and qualifiers:
+very
+really
+extremely
+highly
+completely
+totally
+absolutely
+always
+sometimes
+often
+rarely
+seldom
+
+# Sentiment-bearing words that might appear frequently:
+good
+bad
+great
+terrible
+excellent
+poor
+best
+worst
+love
+hate
+like
+dislike
+
+# Comparison words:
+better
+worse
+more
+less
+most
+least
+
+# =========================
+# ADD YOUR DOMAIN-SPECIFIC KEEP WORDS BELOW THIS LINE
+# =========================
+
