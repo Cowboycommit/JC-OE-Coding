@@ -14,13 +14,27 @@ DESIGN PHILOSOPHY:
     - Clarity and correctness over polish
 
 PIPELINE STAGES:
-    1. Dataset Ingestion
-    2. Data Validation & Typing
-    3. Method Eligibility Checks
-    4. Model Execution
-    5. Diagnostics & Assumptions
-    6. Visualization Generation
-    7. Export & Reporting
+    1. Dataset Ingestion - Load CSV/Excel/JSON data
+    2. Data Validation & Text Preprocessing - Validate structure, apply text cleaning
+       (includes negation preservation, domain stopwords, quality filtering)
+    3. Method Eligibility Checks - Verify ML method compatibility with data
+    4. Model Execution - Run clustering/topic modeling (TF-IDF, LDA, LSTM, BERT, SVM)
+    5. Diagnostics & Assumptions - Assess validity, generate QA report
+    6. Visualization Generation - Charts, word clouds, network diagrams
+    7. Export & Reporting - Excel package, methods documentation, executive summary
+
+SUPPORTED ML METHODS:
+    - tfidf_kmeans: TF-IDF + K-Means (fast, bag-of-words)
+    - lda: Latent Dirichlet Allocation (topic modeling)
+    - lstm_kmeans: LSTM + K-Means (sequential patterns)
+    - bert_kmeans: BERT + K-Means (semantic understanding)
+    - svm: SVM Spectral Clustering (kernel-based)
+
+KEY FEATURES:
+    - LLM-enhanced code labels and descriptions
+    - Optional sentiment analysis (Twitter-RoBERTa, VADER, Review-BERT)
+    - Semantic word clouds with meaning-based coloring
+    - Auto-selection of optimal code count via silhouette analysis
 
 AUTHOR: Engineering Team
 """
@@ -172,16 +186,24 @@ PIPELINE_STAGES = [
     },
     {
         "number": 2,
-        "name": "Data Validation & Typing",
-        "purpose": "Validate data structure and preprocess text responses",
-        "inputs": ["Raw DataFrame", "Text column name", "Preprocessing options"],
-        "module": "helpers.analysis",
-        "function": "validate_dataframe(), preprocess_responses()",
-        "outputs": ["Validated DataFrame", "Preprocessed responses"],
+        "name": "Data Validation & Text Preprocessing",
+        "purpose": "Validate structure and apply text preprocessing with quality filtering",
+        "inputs": [
+            "Raw DataFrame",
+            "Text column name",
+            "Preprocessing options (preset type, negation preservation, domain stopwords)",
+        ],
+        "module": "helpers.analysis, src.text_preprocessor, src.gold_standard_preprocessing",
+        "function": "validate_dataframe(), preprocess_responses(), DataCleaningPipeline.clean_dataframe()",
+        "outputs": [
+            "Validated DataFrame with preprocessed text column",
+            "Quality metrics (valid ratio, token counts, filter reasons)",
+        ],
         "mistakes": [
             "Skipping validation before analysis",
-            "Not removing null/empty responses",
-            "Not documenting preprocessing decisions",
+            "Not preserving negation words for sentiment analysis",
+            "Using generic stopwords instead of domain-specific ones",
+            "Not documenting preprocessing decisions for reproducibility",
         ],
     },
     {
@@ -229,21 +251,27 @@ PIPELINE_STAGES = [
     {
         "number": 6,
         "name": "Visualization Generation",
-        "purpose": "Create visual representations of analysis results",
-        "inputs": ["MLOpenCoder", "Results DataFrame", "Metrics"],
+        "purpose": "Create visual representations of analysis and sentiment results",
+        "inputs": ["MLOpenCoder", "Results DataFrame", "Metrics", "Sentiment results (optional)"],
         "module": "helpers.analysis (data prep), src.method_visualizations, UI (rendering only)",
         "function": "get_top_codes(), get_cooccurrence_pairs(), MethodVisualizer.create_*()",
         "outputs": [
-            "Frequency tables", "Co-occurrence data", "Chart data",
-            "Cluster scatter (PCA/t-SNE)", "Silhouette plot (KMeans)",
-            "Topic-term heatmap", "Topic distribution (LDA)",
-            "Per-cluster wordclouds", "pyLDAvis (LDA)"
+            "Code frequency bar charts",
+            "Co-occurrence heatmaps and network diagrams",
+            "Sunburst hierarchical charts",
+            "Overall and per-topic word clouds (with semantic coloring)",
+            "Cluster scatter plots (PCA/t-SNE)",
+            "Silhouette analysis plots (K-Means methods)",
+            "Topic-term heatmaps",
+            "Topic distribution charts (LDA)",
+            "Sentiment distribution pie charts (if enabled)",
+            "Confidence score histograms",
         ],
         "mistakes": [
-            "Computing chart data in Streamlit callbacks",
-            "Not caching visualization data",
-            "Putting Plotly/chart logic in analysis modules",
-            "Showing incompatible visualizations for methods",
+            "Computing chart data in Streamlit callbacks (use precompute_all_visualizations)",
+            "Not caching visualization data in session state",
+            "Putting Plotly/chart logic in analysis modules instead of UI",
+            "Showing incompatible visualizations for methods (e.g., pyLDAvis for K-Means)",
         ],
     },
     {
@@ -419,16 +447,17 @@ def main():
 
     **Full Analysis Lifecycle**:
 
-    1. **Dataset Ingestion** - Load data from file into memory
-    2. **Data Validation & Typing** - Validate structure, preprocess text
-    3. **Method Eligibility Checks** - Verify ML method compatibility
-    4. **Model Execution** - Run clustering/topic modeling
-    5. **Diagnostics & Assumptions** - Assess validity, detect bias
-    6. **Visualization Generation** - Prepare chart data
-    7. **Export & Reporting** - Package results for consumption
+    1. **Dataset Ingestion** - Load data from CSV/Excel/JSON files
+    2. **Data Validation & Text Preprocessing** - Validate structure, apply text cleaning
+       (negation preservation, domain stopwords, quality filtering)
+    3. **Method Eligibility Checks** - Verify ML method compatibility with data characteristics
+    4. **Model Execution** - Run clustering/topic modeling (TF-IDF, LDA, LSTM, BERT, SVM)
+    5. **Diagnostics & Assumptions** - Assess validity, generate QA report, detect bias
+    6. **Visualization Generation** - Charts, word clouds, network diagrams, sentiment plots
+    7. **Export & Reporting** - Excel package, methods documentation, executive summary
 
     Each stage must complete before the next can begin. This prevents
-    mixing UI logic with analytics logic.
+    mixing UI logic with analytics logic and ensures reproducibility.
     """)
 
     st.markdown("---")

@@ -11,15 +11,30 @@ Get up and running with the framework in three simple steps:
 pip install -r requirements.txt
 ```
 
-### Run the Streamlit Application
+### Run the Streamlit Application (Recommended)
 ```bash
 streamlit run app.py
+```
+
+### Run the Engineering/Lite View
+```bash
+streamlit run app_lite.py
 ```
 
 ### Run the Jupyter Notebook
 ```bash
 jupyter notebook ml_open_coding_analysis.ipynb
 ```
+
+---
+
+## Key Features
+
+- **5 ML Algorithms**: TF-IDF+K-Means, LDA, LSTM, BERT, SVM
+- **Text Preprocessing**: Data-type presets, negation preservation, domain stopwords
+- **Sentiment Analysis**: VADER (survey), Twitter-RoBERTa (social), Review-BERT (reviews)
+- **LLM-Enhanced Labels**: AI-refined code labels and descriptions
+- **15 Essential Outputs**: Complete analysis package for researchers
 
 ---
 
@@ -103,8 +118,8 @@ Provides complete documentation standards and handover procedures for deploying 
 
 Use this guide to quickly find the documentation you need:
 
-| Question | Document |
-|----------|----------|
+| Question | Document/Location |
+|----------|-------------------|
 | What tools should I use? | 01 - Open Source Tools Review |
 | How do I measure success? | 02 - Benchmark Standards |
 | What data format do I need? | 03 - Input Data Specification |
@@ -112,9 +127,10 @@ Use this guide to quickly find the documentation you need:
 | How should results be displayed? | 05 - Reporting & Visualization Standards |
 | How do I test the system? | 06 - Validation & Demonstration |
 | How do I deploy this? | 07 - Documentation & Handover |
-| What are the quality standards? | 02 - Benchmark Standards |
-| How do I validate outputs? | 06 - Validation & Demonstration |
-| What's the integration procedure? | 07 - Documentation & Handover |
+| **How do I preprocess text?** | **app.py → Text Processor page** |
+| **Which sentiment model to use?** | **app.py → Configuration page** |
+| **What ML algorithm is best?** | **app.py → About page (algorithm table)** |
+| **How does the pipeline work?** | **app_lite.py (Engineering View)** |
 
 ---
 
@@ -123,9 +139,13 @@ Use this guide to quickly find the documentation you need:
 The Open-Ended Coding Analysis Framework is a comprehensive machine learning pipeline designed to analyze, process, and visualize open-ended coding data. The framework consists of:
 
 - **Data Pipeline**: Ingestion, validation, and formatting of input data
-- **ML Analysis Engine**: Core processing and analysis components
-- **Quality Assurance**: Validation and verification systems
-- **Visualization Layer**: Streamlit-based interactive dashboard
+- **Text Preprocessing**: Data-type presets, negation preservation, domain stopwords
+- **ML Analysis Engine**: 5 algorithms (TF-IDF, LDA, LSTM, BERT, SVM)
+- **Sentiment Analysis**: Data-type-specific models (VADER, Twitter-RoBERTa, Review-BERT)
+- **LLM Enhancement**: AI-refined code labels and descriptions
+- **Quality Assurance**: Validation, rigor diagnostics, and QA reports
+- **Visualization Layer**: Word clouds, network diagrams, sunburst charts
+- **Streamlit UIs**: Main app (user-facing) and Engineering View (pipeline documentation)
 - **Notebook Interface**: Jupyter notebook for exploration and analysis
 
 Each component is documented in detail across the documentation suite to ensure successful implementation and deployment.
@@ -144,8 +164,9 @@ Each component is documented in detail across the documentation suite to ensure 
 
 ## Version Information
 
-- **Documentation Suite Version**: 1.0
-- **Last Updated**: 2025-12-26
+- **Documentation Suite Version**: 1.1
+- **Framework Version**: 1.3.0
+- **Last Updated**: 2026-01-24
 - **Framework Status**: Production Ready
 - **Maintenance**: Active
 

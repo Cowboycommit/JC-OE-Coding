@@ -1049,8 +1049,15 @@ def page_text_processor():
 
     st.markdown("""
     <div class="info-box">
-    <strong>Text Preprocessing</strong> cleans and normalizes your text data before analysis.
-    This can improve the quality of topic modeling and sentiment analysis results.
+    <strong>Text Preprocessing</strong> cleans and normalizes your text data before analysis.<br><br>
+    <strong>When to use:</strong> Preprocessing is <em>optional but recommended</em> for:
+    <ul style="margin: 5px 0 0 15px;">
+    <li><strong>Social media data</strong> — handles slang, hashtags, emojis, URLs</li>
+    <li><strong>Noisy survey data</strong> — removes spam, very short responses, duplicates</li>
+    <li><strong>Sentiment analysis</strong> — preserves negation words for accuracy</li>
+    <li><strong>Topic modeling</strong> — removes domain-specific noise words</li>
+    </ul><br>
+    <strong>Skip if:</strong> Your data is already clean and well-formatted.
     </div>
     """, unsafe_allow_html=True)
 
@@ -1090,17 +1097,29 @@ def page_text_processor():
 
     # Verbose explanation of tab options
     st.info("""
-    **🎯 Quick Presets** — One-click preprocessing configurations optimized for common data types
-    (general text, social media, product reviews, news articles). Best for getting started quickly.
+    **🎯 Quick Presets** — One-click preprocessing for your data type. Each preset:
+    - Configures optimal text normalization settings
+    - Sets the appropriate sentiment analysis model
+    - Includes negation preservation and domain stopword options
+    - Best choice for most users - start here!
 
-    **⚙️ Social Media Options** — Fine-grained control over social media-specific processing including
-    hashtag handling, slang expansion, emoji filtering, and mention removal. Requires Social Media preset.
+    **⚙️ Social Media Options** — Fine-grained control for Twitter/X data (requires Social Media preset):
+    - URL, @mention, and #hashtag handling
+    - Slang expansion (lol → laughing out loud)
+    - Emoji ratio filtering
+    - Elongation normalization (soooo → so)
 
-    **🔬 Advanced Processing** — Expert-level text processing with NLTK including custom stopword removal,
-    stemming/lemmatization options, POS tagging, and token limit controls for long documents.
+    **🔬 Advanced Processing** — Expert NLTK-based processing for special requirements:
+    - Custom stopword removal with negation preservation
+    - Lemmatization (running → run) vs stemming options
+    - Domain-specific term preservation (medical, legal, technical)
+    - Token limits for long documents (truncate or chunk)
 
-    **📊 Quality Report** — View and download a detailed report of preprocessing results including
-    statistics on filtered rows, token counts, and data quality metrics.
+    **📊 Quality Report** — After preprocessing, view detailed statistics:
+    - Records filtered and why (too short, spam, duplicates)
+    - Token count distributions
+    - Before/after text comparisons
+    - Downloadable quality report
     """)
 
     # Create tabs for different processing options
@@ -3451,57 +3470,101 @@ def page_about():
 
     This tool provides **automatic qualitative data analysis** using machine learning algorithms.
 
-    ### 🎯 Features
+    ### 🎯 Core Features
 
-    - **Automatic Theme Discovery**: Let ML algorithms find themes in your data
-    - **Multiple Algorithms**: Choose from TF-IDF+K-Means, LDA, or NMF
+    - **Automatic Theme Discovery**: ML algorithms discover themes and patterns in your data
+    - **Multiple ML Algorithms**: TF-IDF+K-Means, LDA, LSTM, BERT, and SVM-based clustering
     - **Confidence Scoring**: Every code assignment includes a confidence score
+    - **LLM-Enhanced Labels**: Auto-generated code labels refined by language models
     - **15 Essential Outputs**: Complete analysis package for researchers
-    - **Interactive Visualizations**: Explore your data with interactive charts
-    - **Multiple Export Formats**: Download results in CSV, Excel, or JSON
+    - **Interactive Visualizations**: Explore data with charts, word clouds, and network diagrams
+    - **Multiple Export Formats**: Download results in CSV, Excel, or Markdown
 
-    ### 🤖 Supported Algorithms
+    ### 🔧 Text Processor
 
-    #### TF-IDF + K-Means (Recommended)
-    - Fast and interpretable clustering
-    - Good for well-separated themes
-    - Best for exploratory analysis
+    The **Text Processor** provides comprehensive preprocessing before analysis:
 
-    #### Latent Dirichlet Allocation (LDA)
-    - Probabilistic topic modeling
-    - Handles overlapping themes well
-    - Good for document collections
+    - **Quick Presets**: One-click configurations for different data types:
+      - General Text (surveys, feedback)
+      - Social Media (Twitter/X with slang, emojis, hashtags)
+      - Product Reviews (elongated expressions, informal language)
+      - News Articles (formal, minimal preprocessing)
 
-    #### Non-negative Matrix Factorization (NMF)
-    - Parts-based decomposition
-    - Produces sparse, interpretable results
-    - Good for distinct themes
+    - **Enhanced Preprocessing Options**:
+      - **Negation Preservation**: Keeps words like "not", "never" for accurate sentiment/topic analysis
+      - **Domain Stopwords**: Removes survey-specific noise words like "response", "survey", "participant"
+
+    - **Gold Standard Processing**: Fine-grained control including:
+      - Unicode normalization, HTML entity decoding
+      - URL/mention/hashtag standardization
+      - Contraction and slang expansion
+      - Elongation normalization ("loooove" → "love")
+      - Spam and duplicate detection
+
+    - **Advanced NLTK Processing**: Stemming, lemmatization, custom stopwords, domain-specific cleaning
+
+    ### 📊 Sentiment Analysis
+
+    Integrated sentiment analysis with data-type-specific models:
+
+    - **Survey Responses**: VADER (rule-based, fast)
+    - **Social Media (Twitter/X)**: Twitter-RoBERTa (transformer-based, handles slang/emojis)
+    - **Long-form Reviews**: Review-BERT (transformer-based, nuanced sentiment)
+
+    Results include positive/neutral/negative classification with confidence scores.
+
+    ### 🤖 Supported ML Algorithms
+
+    | Algorithm | Description | Best For |
+    |-----------|-------------|----------|
+    | **TF-IDF + K-Means** | Fast bag-of-words clustering | General use, quick exploration |
+    | **LDA** | Probabilistic topic modeling | Overlapping themes, academic research |
+    | **LSTM + K-Means** | Sequential pattern recognition | Order-dependent text, narratives |
+    | **BERT + K-Means** | Semantic embedding clustering | Nuanced meaning, synonyms |
+    | **SVM Spectral** | Kernel-based clustering | Complex, non-linear boundaries |
+
+    ### 📈 Visualizations
+
+    - **Code Frequency Charts**: Bar charts showing theme prevalence
+    - **Co-occurrence Heatmaps**: Which codes appear together
+    - **Word Clouds**: Overall and per-topic semantic word clouds
+    - **Sunburst Charts**: Hierarchical code distribution
+    - **Network Diagrams**: Cluster relationships and similarity
+    - **Confidence Distributions**: Quality assessment histograms
 
     ### 📊 15 Essential Outputs
 
     1. Code Assignments with confidence scores
-    2. Auto-generated Codebook
+    2. Auto-generated Codebook with LLM-enhanced labels
     3. Code Frequency Tables
-    4. Quality Metrics
+    4. Quality Metrics (silhouette score, coverage)
     5. Binary Matrix for statistical analysis
-    6. Representative Quotes
+    6. Representative Quotes per code
     7. Co-Occurrence Analysis
     8. Descriptive Statistics
     9. Segmentation Analysis
-    10. QA Report
+    10. QA Report with validity assessment
     11. Interactive Visualizations
-    12. Multiple Export Formats
-    13. Method Documentation
+    12. Multiple Export Formats (Excel, CSV, Markdown)
+    13. Method Documentation (reproducibility)
     14. Uncoded Response Detection
     15. Executive Summary
 
     ### 🚀 Getting Started
 
-    1. **Upload Data**: CSV or Excel file with text responses
-    2. **Configure**: Choose algorithm and parameters
-    3. **Run Analysis**: Let ML discover themes
-    4. **Explore Results**: View codes, insights, and visualizations
-    5. **Export**: Download complete results package
+    1. **Upload Data**: Load CSV/Excel or select a sample dataset
+    2. **Preprocess (Optional)**: Use Text Processor for data cleaning
+    3. **Configure**: Choose algorithm, code count, and enable sentiment analysis
+    4. **Run Analysis**: ML discovers themes with progress tracking
+    5. **Explore Results**: View codes, insights, sentiment, and visualizations
+    6. **Export**: Download complete results package
+
+    ### 📋 Data Requirements
+
+    - **Format**: CSV or Excel (.xlsx, .xls)
+    - **Required**: At least one text column with responses
+    - **Recommended**: 20+ responses for reliable analysis
+    - **Language**: English (non-English text is filtered)
     """)
 
 
