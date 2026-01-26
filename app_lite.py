@@ -127,6 +127,14 @@ from helpers.analysis import (
     generate_executive_summary,
     find_optimal_codes,
 )
+from helpers.ui_utils import (
+    get_code_label,
+    get_code_labels_mapping,
+    render_stage_metadata,
+    get_stage_status as shared_get_stage_status,
+    render_status_badge as shared_render_status_badge,
+    reset_downstream_state,
+)
 
 # -----------------------------------------------------------------------------
 # CONSTANTS
@@ -362,24 +370,12 @@ def init_session_state():
 # -----------------------------------------------------------------------------
 def get_stage_status(stage_num: int) -> str:
     """Return status indicator for a pipeline stage."""
-    if st.session_state.get(f"stage_{stage_num}_complete", False):
-        return "COMPLETE"
-    # Check if prior stages are complete
-    for i in range(1, stage_num):
-        if not st.session_state.get(f"stage_{i}_complete", False):
-            return "BLOCKED"
-    return "READY"
+    return shared_get_stage_status(stage_num)
 
 
 def render_status_badge(status: str) -> str:
     """Return a text badge for status."""
-    badges = {
-        "COMPLETE": "[COMPLETE]",
-        "READY": "[READY]",
-        "BLOCKED": "[BLOCKED]",
-        "RUNNING": "[RUNNING...]",
-    }
-    return badges.get(status, "[UNKNOWN]")
+    return shared_render_status_badge(status)
 
 
 def reset_downstream_stages(from_stage: int):
@@ -389,23 +385,7 @@ def reset_downstream_stages(from_stage: int):
     WHY: When upstream data changes, downstream results are invalid.
     This enforces pipeline integrity.
     """
-    for i in range(from_stage + 1, 8):
-        st.session_state[f"stage_{i}_complete"] = False
-
-    # Clear downstream artifacts based on stage
-    if from_stage < 4:
-        st.session_state["coder"] = None
-        st.session_state["results_df"] = None
-        st.session_state["metrics"] = None
-    if from_stage < 5:
-        st.session_state["qa_report"] = None
-    if from_stage < 6:
-        st.session_state["top_codes_df"] = None
-        st.session_state["cooccurrence_df"] = None
-    if from_stage < 7:
-        st.session_state["excel_bytes"] = None
-        st.session_state["methods_doc"] = None
-        st.session_state["executive_summary"] = None
+    reset_downstream_state(from_stage, max_stages=7)
 
 
 # -----------------------------------------------------------------------------
@@ -475,23 +455,7 @@ def main():
         f"Stage {stage_1['number']}: {stage_1['name']} {render_status_badge(get_stage_status(1))}",
         expanded=not st.session_state["stage_1_complete"],
     ):
-        st.markdown(f"**Purpose**: {stage_1['purpose']}")
-        st.markdown(f"**Responsible Module**: `{stage_1['module']}`")
-        st.markdown(f"**Functions**: `{stage_1['function']}`")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Required Inputs**:")
-            for inp in stage_1["inputs"]:
-                st.markdown(f"- {inp}")
-        with col2:
-            st.markdown("**Outputs/Artifacts**:")
-            for out in stage_1["outputs"]:
-                st.markdown(f"- {out}")
-
-        st.markdown("**Common Engineering Mistakes**:")
-        for mistake in stage_1["mistakes"]:
-            st.markdown(f"- {mistake}")
+        render_stage_metadata(stage_1)
 
         st.markdown("---")
 
@@ -569,23 +533,7 @@ def main():
         f"Stage {stage_2['number']}: {stage_2['name']} {render_status_badge(get_stage_status(2))}",
         expanded=st.session_state["stage_1_complete"] and not st.session_state["stage_2_complete"],
     ):
-        st.markdown(f"**Purpose**: {stage_2['purpose']}")
-        st.markdown(f"**Responsible Module**: `{stage_2['module']}`")
-        st.markdown(f"**Functions**: `{stage_2['function']}`")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Required Inputs**:")
-            for inp in stage_2["inputs"]:
-                st.markdown(f"- {inp}")
-        with col2:
-            st.markdown("**Outputs/Artifacts**:")
-            for out in stage_2["outputs"]:
-                st.markdown(f"- {out}")
-
-        st.markdown("**Common Engineering Mistakes**:")
-        for mistake in stage_2["mistakes"]:
-            st.markdown(f"- {mistake}")
+        render_stage_metadata(stage_2)
 
         st.markdown("---")
 
@@ -679,23 +627,7 @@ def main():
         f"Stage {stage_3['number']}: {stage_3['name']} {render_status_badge(get_stage_status(3))}",
         expanded=st.session_state["stage_2_complete"] and not st.session_state["stage_3_complete"],
     ):
-        st.markdown(f"**Purpose**: {stage_3['purpose']}")
-        st.markdown(f"**Responsible Module**: `{stage_3['module']}`")
-        st.markdown(f"**Functions**: `{stage_3['function']}`")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Required Inputs**:")
-            for inp in stage_3["inputs"]:
-                st.markdown(f"- {inp}")
-        with col2:
-            st.markdown("**Outputs/Artifacts**:")
-            for out in stage_3["outputs"]:
-                st.markdown(f"- {out}")
-
-        st.markdown("**Common Engineering Mistakes**:")
-        for mistake in stage_3["mistakes"]:
-            st.markdown(f"- {mistake}")
+        render_stage_metadata(stage_3)
 
         st.markdown("---")
 
@@ -866,23 +798,7 @@ def main():
         f"Stage {stage_4['number']}: {stage_4['name']} {render_status_badge(get_stage_status(4))}",
         expanded=st.session_state["stage_3_complete"] and not st.session_state["stage_4_complete"],
     ):
-        st.markdown(f"**Purpose**: {stage_4['purpose']}")
-        st.markdown(f"**Responsible Module**: `{stage_4['module']}`")
-        st.markdown(f"**Functions**: `{stage_4['function']}`")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Required Inputs**:")
-            for inp in stage_4["inputs"]:
-                st.markdown(f"- {inp}")
-        with col2:
-            st.markdown("**Outputs/Artifacts**:")
-            for out in stage_4["outputs"]:
-                st.markdown(f"- {out}")
-
-        st.markdown("**Common Engineering Mistakes**:")
-        for mistake in stage_4["mistakes"]:
-            st.markdown(f"- {mistake}")
+        render_stage_metadata(stage_4)
 
         st.markdown("---")
 
@@ -960,7 +876,7 @@ def main():
 
                 codebook_data.append({
                     "Code": code_id,
-                    "Label": info.get('llm_label', info['label']),  # Use LLM label if available
+                    "Label": get_code_label(info),  # Use LLM label if available
                     "Alternative Labels": ", ".join(info.get('alternative_labels', [])[:3]),
                     "Keywords": ", ".join(info['keywords'][:5]),
                     "Sample Text": sample_text_display,
@@ -978,23 +894,7 @@ def main():
         f"Stage {stage_5['number']}: {stage_5['name']} {render_status_badge(get_stage_status(5))}",
         expanded=st.session_state["stage_4_complete"] and not st.session_state["stage_5_complete"],
     ):
-        st.markdown(f"**Purpose**: {stage_5['purpose']}")
-        st.markdown(f"**Responsible Module**: `{stage_5['module']}`")
-        st.markdown(f"**Functions**: `{stage_5['function']}`")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Required Inputs**:")
-            for inp in stage_5["inputs"]:
-                st.markdown(f"- {inp}")
-        with col2:
-            st.markdown("**Outputs/Artifacts**:")
-            for out in stage_5["outputs"]:
-                st.markdown(f"- {out}")
-
-        st.markdown("**Common Engineering Mistakes**:")
-        for mistake in stage_5["mistakes"]:
-            st.markdown(f"- {mistake}")
+        render_stage_metadata(stage_5)
 
         st.markdown("---")
 
@@ -1036,23 +936,7 @@ def main():
         f"Stage {stage_6['number']}: {stage_6['name']} {render_status_badge(get_stage_status(6))}",
         expanded=st.session_state["stage_5_complete"] and not st.session_state["stage_6_complete"],
     ):
-        st.markdown(f"**Purpose**: {stage_6['purpose']}")
-        st.markdown(f"**Responsible Module**: `{stage_6['module']}`")
-        st.markdown(f"**Functions**: `{stage_6['function']}`")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Required Inputs**:")
-            for inp in stage_6["inputs"]:
-                st.markdown(f"- {inp}")
-        with col2:
-            st.markdown("**Outputs/Artifacts**:")
-            for out in stage_6["outputs"]:
-                st.markdown(f"- {out}")
-
-        st.markdown("**Common Engineering Mistakes**:")
-        for mistake in stage_6["mistakes"]:
-            st.markdown(f"- {mistake}")
+        render_stage_metadata(stage_6)
 
         st.markdown("---")
 
@@ -1108,7 +992,7 @@ def main():
                 # Build matrix for heatmap using code labels instead of code IDs
                 codes = list(coder.codebook.keys())
                 # Create mapping from code ID to label (prefer LLM labels)
-                code_to_label = {code_id: info.get('llm_label', info['label']) for code_id, info in coder.codebook.items()}
+                code_to_label = get_code_labels_mapping(coder.codebook)
                 labels = [code_to_label[code] for code in codes]
 
                 # Use labels for both index and columns
@@ -1174,7 +1058,7 @@ def main():
                 try:
                     # Build network graph
                     G = nx.Graph()
-                    code_to_label = {code_id: info.get('llm_label', info['label']) for code_id, info in coder.codebook.items()}  # Prefer LLM labels
+                    code_to_label = get_code_labels_mapping(coder.codebook)  # Prefer LLM labels
 
                     # Add nodes with size based on count
                     for code_id, info in coder.codebook.items():
@@ -1536,7 +1420,7 @@ def main():
             if cooccurrence_df is not None and not cooccurrence_df.empty:
                 # Create a copy with labels instead of code IDs
                 display_df = cooccurrence_df.copy()
-                code_to_label = {code_id: info.get('llm_label', info['label']) for code_id, info in coder.codebook.items()}  # Prefer LLM labels
+                code_to_label = get_code_labels_mapping(coder.codebook)  # Prefer LLM labels
 
                 # Replace code IDs with labels
                 display_df['Code 1 Label'] = display_df['Code 1'].map(code_to_label)
@@ -1558,23 +1442,7 @@ def main():
         f"Stage {stage_7['number']}: {stage_7['name']} {render_status_badge(get_stage_status(7))}",
         expanded=st.session_state["stage_6_complete"] and not st.session_state["stage_7_complete"],
     ):
-        st.markdown(f"**Purpose**: {stage_7['purpose']}")
-        st.markdown(f"**Responsible Module**: `{stage_7['module']}`")
-        st.markdown(f"**Functions**: `{stage_7['function']}`")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Required Inputs**:")
-            for inp in stage_7["inputs"]:
-                st.markdown(f"- {inp}")
-        with col2:
-            st.markdown("**Outputs/Artifacts**:")
-            for out in stage_7["outputs"]:
-                st.markdown(f"- {out}")
-
-        st.markdown("**Common Engineering Mistakes**:")
-        for mistake in stage_7["mistakes"]:
-            st.markdown(f"- {mistake}")
+        render_stage_metadata(stage_7)
 
         st.markdown("---")
 

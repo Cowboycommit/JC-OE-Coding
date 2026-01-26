@@ -146,7 +146,8 @@ jupyter notebook open_ended_coding_analysis.ipynb
 ├── helpers/                         # Helper modules for Streamlit
 │   ├── __init__.py
 │   ├── formatting.py               # Formatting utilities
-│   └── analysis.py                 # Analysis orchestration
+│   ├── analysis.py                 # Analysis orchestration
+│   └── ui_utils.py                 # Shared UI components and utilities (NEW)
 ├── src/
 │   ├── __init__.py
 │   ├── data_loader.py              # Data loading (CSV, Excel, JSON)
@@ -630,6 +631,16 @@ Built with:
 - [ ] Multi-language support (currently English only)
 
 ## Version History
+
+### v1.3.1 (2026) - Codebase Refactoring
+- **Shared UI Utilities**: Created `helpers/ui_utils.py` with common patterns
+  - Centralized code label extraction logic
+  - Standardized progress mapping and stage tracking
+  - Reusable error recovery UI components
+  - Shared stage metadata rendering
+  - Session state management utilities
+- **Reduced Redundancy**: Eliminated duplicate code across app.py and app_lite.py
+- **Consistency**: All interfaces now use the same shared analysis functions
 
 ### v1.3.0 (2026) - Enhanced Preprocessing & Sentiment
 - **Text Processor**: Comprehensive preprocessing with data-type presets

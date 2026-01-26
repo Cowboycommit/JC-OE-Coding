@@ -1107,7 +1107,7 @@ def test_custom_algorithm():
 
 #### Adding a New Visualization
 
-**Step 1**: Create function in `helpers/visualization.py` (or new file):
+**Step 1**: Create function in `helpers/ui_utils.py` (or new file):
 
 ```python
 def plot_custom_visualization(results, **kwargs):
