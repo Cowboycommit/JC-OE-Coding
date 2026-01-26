@@ -2340,12 +2340,27 @@ def page_results_overview():
     # Stat chips - compact metric display
     st.markdown("### 📈 Key Metrics")
 
+    # Check if sentiment analysis was enabled for Key Metrics display
+    sentiment_enabled_metrics = metrics.get('sentiment_enabled', False)
+    sentiment_dist_metrics = metrics.get('sentiment_distribution', {})
+
+    # Build sentiment chips if sentiment analysis was run
+    sentiment_chips = ""
+    if sentiment_enabled_metrics and sentiment_dist_metrics:
+        pos_count = sentiment_dist_metrics.get('positive', 0)
+        neu_count = sentiment_dist_metrics.get('neutral', 0)
+        neg_count = sentiment_dist_metrics.get('negative', 0)
+        sentiment_chips = f"""
+        <span class="stat-chip" style="background: #d4edda; color: #155724;">😊 Positive: {pos_count}</span>
+        <span class="stat-chip" style="background: #e2e3e5; color: #383d41;">😐 Neutral: {neu_count}</span>
+        <span class="stat-chip" style="background: #f8d7da; color: #721c24;">😞 Negative: {neg_count}</span>
+        """
+
     stat_chips_html = f"""
     <div style="margin: 10px 0 20px 0;">
         <span class="stat-chip">📊 {metrics.get('total_responses', 0):,} Responses</span>
         <span class="stat-chip">🏷️ {metrics.get('n_codes', 0)} Codes</span>
-        <span class="stat-chip">📈 {metrics.get('avg_codes_per_response', 0):.2f} Avg/Response</span>
-        <span class="stat-chip">✅ {metrics.get('coverage_pct', 0):.1f}% Coverage</span>
+        {sentiment_chips}
     </div>
     """
     st.markdown(stat_chips_html, unsafe_allow_html=True)
