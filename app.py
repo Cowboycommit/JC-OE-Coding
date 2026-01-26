@@ -373,6 +373,18 @@ st.markdown("""
         transform: translateY(-1px);
         transition: all 0.2s ease;
     }
+    .stat-chip.sentiment-positive {
+        background: #d4edda;
+        color: #155724;
+    }
+    .stat-chip.sentiment-neutral {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    .stat-chip.sentiment-negative {
+        background: #f8d7da;
+        color: #721c24;
+    }
     /* Stepper navigation styles */
     .stepper-container {
         padding: 10px 0;
@@ -2444,9 +2456,9 @@ def page_results_overview():
             neu_pct = (neu_count / total_sentiment * 100)
             neg_pct = (neg_count / total_sentiment * 100)
             sentiment_chips = f"""
-            <span class="stat-chip" style="background: #d4edda; color: #155724;">😊 Positive: {pos_pct:.1f}%</span>
-            <span class="stat-chip" style="background: #e2e3e5; color: #383d41;">😐 Neutral: {neu_pct:.1f}%</span>
-            <span class="stat-chip" style="background: #f8d7da; color: #721c24;">😞 Negative: {neg_pct:.1f}%</span>
+            <span class="stat-chip sentiment-positive">😊 Positive: {pos_pct:.1f}%</span>
+            <span class="stat-chip sentiment-neutral">😐 Neutral: {neu_pct:.1f}%</span>
+            <span class="stat-chip sentiment-negative">😞 Negative: {neg_pct:.1f}%</span>
             """
 
     stat_chips_html = f"""
@@ -2454,7 +2466,6 @@ def page_results_overview():
         <span class="stat-chip">📊 {actual_response_count:,} Responses</span>
         <span class="stat-chip">🏷️ {metrics.get('n_codes', 0)} Codes</span>
         <span class="stat-chip">📈 {metrics.get('avg_codes_per_response', 0):.2f} Avg/Response</span>
-        <span class="stat-chip">✅ {metrics.get('coverage_pct', 0):.1f}% Coverage</span>
         {sentiment_chips}
     </div>
     """
