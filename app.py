@@ -1780,7 +1780,92 @@ def page_configuration():
 
     st.markdown("---")
 
-    # ML Configuration
+    # ==========================================================================
+    # Data Type & Sentiment Analysis Configuration (FIRST)
+    # ==========================================================================
+    st.markdown("### 📊 Response Type & Sentiment Analysis")
+
+    # Data type selection with clear descriptions (matches Text Processor presets)
+    data_type_options = {
+        'survey': {
+            'name': 'Survey Responses',
+            'description': 'Survey feedback, open-ended questions, form responses',
+            'model': 'VADER (rule-based, fast)',
+            'model_key': 'vader',
+            'icon': '📋'
+        },
+        'twitter': {
+            'name': 'Social Media (Twitter/X)',
+            'description': 'Tweets, social posts, short informal text with slang/emojis',
+            'model': 'Twitter-RoBERTa (transformer-based)',
+            'model_key': 'twitter_roberta',
+            'icon': '🐦'
+        },
+        'longform': {
+            'name': 'Long-form Reviews',
+            'description': 'Customer reviews, detailed feedback, elongated expressions',
+            'model': 'Review-BERT (transformer-based)',
+            'model_key': 'review_bert',
+            'icon': '⭐'
+        },
+        'news': {
+            'name': 'News Articles',
+            'description': 'Formal, well-written articles and news content',
+            'model': 'Review-BERT (transformer-based)',
+            'model_key': 'review_bert',
+            'icon': '📰'
+        }
+    }
+
+    # Get current data_type from session state, defaulting to 'survey'
+    current_data_type = st.session_state.get('data_type', 'survey')
+    # Ensure it's a valid option
+    if current_data_type not in data_type_options:
+        current_data_type = 'survey'
+
+    # Response type radio button
+    selected_data_type = st.radio(
+        "Select your response type:",
+        options=list(data_type_options.keys()),
+        format_func=lambda x: f"{data_type_options[x]['icon']} {data_type_options[x]['name']}",
+        index=list(data_type_options.keys()).index(current_data_type),
+        horizontal=True,
+        key="config_data_type",
+        help="This affects sentiment analysis model selection and text processing behavior"
+    )
+
+    # Update session state immediately when selection changes
+    st.session_state.data_type = selected_data_type
+
+    # Show selected type details
+    selected_type_info = data_type_options[selected_data_type]
+    st.markdown(f"""
+    <div class="info-box" style="padding: 12px; margin: 10px 0;">
+    <strong>{selected_type_info['icon']} {selected_type_info['name']}</strong><br>
+    <em>{selected_type_info['description']}</em><br><br>
+    <strong>Recommended Sentiment Model:</strong> {selected_type_info['model']}
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Sentiment analysis is standard - always enabled when available
+    if SENTIMENT_ANALYSIS_AVAILABLE:
+        enable_sentiment = True
+        st.session_state.enable_sentiment = True
+        st.success(f"✅ Sentiment analysis will use **{selected_type_info['model']}** for {selected_type_info['name'].lower()}")
+    else:
+        st.markdown("""
+        <div class="warning-box" style="padding: 10px; font-size: 0.9em;">
+        ⚠️ Sentiment analysis not available.<br>
+        <code>pip install transformers torch</code>
+        </div>
+        """, unsafe_allow_html=True)
+        st.session_state.enable_sentiment = False
+        enable_sentiment = False
+
+    # ==========================================================================
+    # ML Algorithm Settings (SECOND)
+    # ==========================================================================
+    st.markdown("---")
     st.markdown("### 🤖 ML Algorithm Settings")
 
     # Show text column badge
@@ -1874,7 +1959,7 @@ def page_configuration():
                 'watch_out': "Watch out for memory usage with large datasets"
             }
         }
-        
+
         algo = algorithm_info[method]
         st.markdown(f"""
         <div class="info-box" style="padding: 10px;">
@@ -1899,85 +1984,75 @@ def page_configuration():
         stop_words = 'english'
 
     # ==========================================================================
-    # Data Type & Sentiment Analysis Configuration
+    # Advanced: Sentiment Model Override
     # ==========================================================================
-    st.markdown("---")
-    st.markdown("### 📊 Response Type & Sentiment Model")
-
-    # Data type selection with clear descriptions (matches Text Processor presets)
-    data_type_options = {
-        'survey': {
-            'name': 'Survey Responses',
-            'description': 'Survey feedback, open-ended questions, form responses',
-            'model': 'VADER (rule-based, fast)',
-            'icon': '📋'
-        },
-        'twitter': {
-            'name': 'Social Media (Twitter/X)',
-            'description': 'Tweets, social posts, short informal text with slang/emojis',
-            'model': 'Twitter-RoBERTa (transformer-based)',
-            'icon': '🐦'
-        },
-        'longform': {
-            'name': 'Long-form Reviews',
-            'description': 'Customer reviews, detailed feedback, elongated expressions',
-            'model': 'Review-BERT (transformer-based)',
-            'icon': '⭐'
-        },
-        'news': {
-            'name': 'News Articles',
-            'description': 'Formal, well-written articles and news content',
-            'model': 'Review-BERT (transformer-based)',
-            'icon': '📰'
-        }
-    }
-
-    # Get current data_type from session state, defaulting to 'survey'
-    current_data_type = st.session_state.get('data_type', 'survey')
-    # Ensure it's a valid option
-    if current_data_type not in data_type_options:
-        current_data_type = 'survey'
-
-    # Response type radio button
-    selected_data_type = st.radio(
-        "Select your response type:",
-        options=list(data_type_options.keys()),
-        format_func=lambda x: f"{data_type_options[x]['icon']} {data_type_options[x]['name']}",
-        index=list(data_type_options.keys()).index(current_data_type),
-        horizontal=True,
-        key="config_data_type",
-        help="This affects sentiment analysis model selection and text processing behavior"
-    )
-
-    # Update session state immediately when selection changes
-    st.session_state.data_type = selected_data_type
-
-    # Show selected type details
-    selected_type_info = data_type_options[selected_data_type]
-    st.markdown(f"""
-    <div class="info-box" style="padding: 12px; margin: 10px 0;">
-    <strong>{selected_type_info['icon']} {selected_type_info['name']}</strong><br>
-    <em>{selected_type_info['description']}</em><br><br>
-    <strong>Sentiment Model:</strong> {selected_type_info['model']}
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Sentiment analysis is standard - always enabled when available
-    if SENTIMENT_ANALYSIS_AVAILABLE:
-        enable_sentiment = True
-        st.session_state.enable_sentiment = True
-        st.success(f"✅ Sentiment analysis will use **{selected_type_info['model']}** for {selected_type_info['name'].lower()}")
-    else:
+    with st.expander("🔧 Advanced: Sentiment Model Override", expanded=False):
         st.markdown("""
-        <div class="warning-box" style="padding: 10px; font-size: 0.9em;">
-        ⚠️ Sentiment analysis not available.<br>
-        <code>pip install transformers torch</code>
+        <div class="info-box" style="padding: 10px; margin-bottom: 15px;">
+        <strong>Override the default sentiment model</strong><br>
+        <em>By default, the sentiment model is automatically selected based on your response type above.
+        Use this option if you want to experiment with a different model.</em>
         </div>
         """, unsafe_allow_html=True)
-        st.session_state.enable_sentiment = False
-        enable_sentiment = False
 
-    # Save configuration with the selected data_type
+        # Sentiment model options
+        sentiment_model_options = {
+            'auto': {
+                'name': f"Use recommended model ({selected_type_info['model']})",
+                'description': 'Automatically use the model recommended for your response type',
+                'data_type_override': None
+            },
+            'vader': {
+                'name': 'VADER (rule-based, fast)',
+                'description': 'Lexicon-based sentiment analysis. Best for general text, surveys, and quick analysis.',
+                'data_type_override': 'survey'
+            },
+            'twitter_roberta': {
+                'name': 'Twitter-RoBERTa (transformer-based)',
+                'description': 'Fine-tuned on 124M tweets. Best for social media, informal text, emojis, and slang.',
+                'data_type_override': 'twitter'
+            },
+            'review_bert': {
+                'name': 'Review-BERT (transformer-based)',
+                'description': 'BERT fine-tuned on product reviews. Best for detailed feedback and formal content.',
+                'data_type_override': 'longform'
+            }
+        }
+
+        # Get current override setting
+        current_sentiment_override = st.session_state.get('sentiment_model_override', 'auto')
+        if current_sentiment_override not in sentiment_model_options:
+            current_sentiment_override = 'auto'
+
+        sentiment_model_override = st.radio(
+            "Sentiment Model:",
+            options=list(sentiment_model_options.keys()),
+            format_func=lambda x: sentiment_model_options[x]['name'],
+            index=list(sentiment_model_options.keys()).index(current_sentiment_override),
+            key="config_sentiment_model_override",
+            help="Choose which sentiment model to use for analysis"
+        )
+
+        # Store the override in session state
+        st.session_state.sentiment_model_override = sentiment_model_override
+
+        # Show description for selected model
+        selected_model_info = sentiment_model_options[sentiment_model_override]
+        if sentiment_model_override != 'auto':
+            st.markdown(f"""
+            <div class="warning-box" style="padding: 10px; margin-top: 10px;">
+            ⚠️ <strong>Override active:</strong> Using {selected_model_info['name']} instead of the recommended model.<br>
+            <em>{selected_model_info['description']}</em>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # Determine the effective data type for sentiment analysis
+    if sentiment_model_override != 'auto' and SENTIMENT_ANALYSIS_AVAILABLE:
+        effective_sentiment_data_type = sentiment_model_options[sentiment_model_override]['data_type_override']
+    else:
+        effective_sentiment_data_type = selected_data_type
+
+    # Save configuration with the selected data_type and sentiment override
     st.session_state.config = {
         'text_column': selected_column,
         'n_codes': n_codes,
@@ -1986,7 +2061,9 @@ def page_configuration():
         'min_confidence': min_confidence,
         'stop_words': stop_words,
         'data_type': selected_data_type,
-        'enable_sentiment': enable_sentiment
+        'enable_sentiment': enable_sentiment,
+        'sentiment_model_override': sentiment_model_override,
+        'effective_sentiment_data_type': effective_sentiment_data_type
     }
 
     # Show configuration summary
@@ -2077,6 +2154,9 @@ def page_run_analysis():
     # Check if sentiment analysis is enabled
     enable_sentiment = config.get('enable_sentiment', False)
     data_type = config.get('data_type', 'survey')
+    # Get effective sentiment data type (may be overridden by user)
+    effective_sentiment_data_type = config.get('effective_sentiment_data_type', data_type)
+    sentiment_model_override = config.get('sentiment_model_override', 'auto')
 
     # Map data_type to user-friendly labels
     data_type_display = {
@@ -2110,8 +2190,11 @@ def page_run_analysis():
 
     if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
         data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT', 'news': 'Review-BERT'}
-        model_label = data_type_models.get(data_type, 'Standard')
-        st.info(f"📊 **Sentiment Analysis** - Using {model_label} model for {data_type_label} responses")
+        model_label = data_type_models.get(effective_sentiment_data_type, 'Standard')
+        if sentiment_model_override != 'auto':
+            st.info(f"📊 **Sentiment Analysis** - Using {model_label} model (override active)")
+        else:
+            st.info(f"📊 **Sentiment Analysis** - Using {model_label} model for {data_type_label} responses")
 
     st.markdown("---")
 
@@ -2201,10 +2284,12 @@ def page_run_analysis():
             if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
                 try:
                     update_progress(0.92, "Running sentiment analysis...", len(stages) - 1)
-                    status_text.text(f"🔄 Loading {data_type} sentiment model...")
+                    model_type_display = effective_sentiment_data_type if sentiment_model_override == 'auto' else sentiment_model_override
+                    status_text.text(f"🔄 Loading {model_type_display} sentiment model...")
 
                     # Get the appropriate analyzer for the data type (cached to avoid reload)
-                    analyzer = get_cached_sentiment_analyzer(data_type)
+                    # Uses effective_sentiment_data_type which respects user override
+                    analyzer = get_cached_sentiment_analyzer(effective_sentiment_data_type)
 
                     # Run sentiment analysis
                     texts = df[config['text_column']].tolist()
