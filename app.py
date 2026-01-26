@@ -2449,10 +2449,11 @@ def page_results_overview():
         display_cols = [text_col, 'assigned_codes']
 
         # Check if sentiment data is available
-        has_sentiment = 'sentiment_label' in assignments_df.columns
+        has_sentiment = 'sentiment_label' in assignments_df.columns and 'sentiment_score' in assignments_df.columns
 
         if has_sentiment:
             display_cols.append('sentiment_label')
+            display_cols.append('sentiment_score')
 
         # Select sample
         sample_size = min(20, len(assignments_df))
@@ -2473,12 +2474,16 @@ def page_results_overview():
         display_df = display_df.rename(columns={text_col: 'Response'})
 
         if has_sentiment:
-            display_df = display_df.rename(columns={'sentiment_label': 'Sentiment'})
+            display_df = display_df.rename(columns={'sentiment_label': 'Sentiment', 'sentiment_score': 'Score'})
             # Capitalize sentiment values
             display_df['Sentiment'] = display_df['Sentiment'].apply(
                 lambda x: x.capitalize() if isinstance(x, str) else 'N/A'
             )
-            final_cols = ['Response', 'Label', 'Sentiment', 'Prevalence']
+            # Format sentiment score
+            display_df['Score'] = display_df['Score'].apply(
+                lambda x: f"{x:.3f}" if isinstance(x, (int, float)) else 'N/A'
+            )
+            final_cols = ['Response', 'Label', 'Sentiment', 'Score', 'Prevalence']
         else:
             final_cols = ['Response', 'Label', 'Prevalence']
 
