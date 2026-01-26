@@ -1570,12 +1570,21 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True, sort_by: str 
             # Get at least 3 representative quotes from original text
             examples = info.get('examples', [])
             sample_texts = []
-            for ex in examples[:3]:
+            seen_texts = set()
+            for ex in examples:
                 text = ex.get('text', '')
+                # Skip empty or duplicate texts
+                text_lower = text.lower().strip()
+                if not text_lower or text_lower in seen_texts:
+                    continue
+                seen_texts.add(text_lower)
                 # Truncate long texts for display but keep original wording
                 if len(text) > 100:
                     text = text[:100] + '...'
                 sample_texts.append(f'"{text}"')
+                # Stop after 3 unique samples
+                if len(sample_texts) >= 3:
+                    break
             # Pad with empty quotes if fewer than 3 samples
             while len(sample_texts) < 3:
                 sample_texts.append('""')
@@ -1628,12 +1637,22 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 5, sort_by: str = 'code'
         # Use all available examples up to n_quotes (ensures at least 3 or all if fewer)
         examples = info.get('examples', [])
         sample_texts = []
-        for example in examples[:max(n_quotes, 3)]:
+        seen_texts = set()
+        target_count = max(n_quotes, 3)
+        for example in examples:
             text = example.get('text', '')
+            # Skip empty or duplicate texts
+            text_lower = text.lower().strip()
+            if not text_lower or text_lower in seen_texts:
+                continue
+            seen_texts.add(text_lower)
             # Truncate long quotes
             if len(text) > 100:
                 text = text[:100] + '...'
             sample_texts.append(f'"{text}"')
+            # Stop after reaching target unique samples
+            if len(sample_texts) >= target_count:
+                break
         # Pad with empty quotes if fewer than 3 samples
         while len(sample_texts) < 3:
             sample_texts.append('""')
