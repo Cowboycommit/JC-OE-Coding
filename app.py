@@ -2151,8 +2151,8 @@ def page_run_analysis():
 
     auto_optimal = config.get('auto_optimal_codes', False)
 
-    # Check if sentiment analysis is enabled
-    enable_sentiment = config.get('enable_sentiment', False)
+    # Sentiment analysis is mandatory when available - model is determined by response type
+    enable_sentiment = SENTIMENT_ANALYSIS_AVAILABLE
     data_type = config.get('data_type', 'survey')
     # Get effective sentiment data type (may be overridden by user)
     effective_sentiment_data_type = config.get('effective_sentiment_data_type', data_type)
@@ -2188,7 +2188,7 @@ def page_run_analysis():
     if auto_optimal:
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
 
-    if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+    if enable_sentiment:
         data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT', 'news': 'Review-BERT'}
         model_label = data_type_models.get(effective_sentiment_data_type, 'Standard')
         if sentiment_model_override != 'auto':
@@ -2208,7 +2208,7 @@ def page_run_analysis():
             "Code Labeling",
             "Generating Insights"
         ]
-        if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+        if enable_sentiment:
             stages.append("Sentiment Analysis")
 
         # Progress tracking UI elements
@@ -2279,9 +2279,9 @@ def page_run_analysis():
                 metrics['auto_optimal'] = True
                 metrics['optimal_analysis'] = optimal_results
 
-            # Run sentiment analysis if enabled
+            # Run sentiment analysis (mandatory when available)
             sentiment_results = None
-            if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+            if enable_sentiment:
                 try:
                     update_progress(0.92, "Running sentiment analysis...", len(stages) - 1)
                     model_type_display = effective_sentiment_data_type if sentiment_model_override == 'auto' else sentiment_model_override
@@ -2291,8 +2291,8 @@ def page_run_analysis():
                     # Uses effective_sentiment_data_type which respects user override
                     analyzer = get_cached_sentiment_analyzer(effective_sentiment_data_type)
 
-                    # Run sentiment analysis
-                    texts = df[config['text_column']].tolist()
+                    # Run sentiment analysis on preprocessed results_df (not original df)
+                    texts = results_df[config['text_column']].tolist()
                     sentiment_results = analyzer.analyze(texts)
 
                     # Add sentiment columns to results_df
@@ -2425,13 +2425,16 @@ def page_results_overview():
     # Stat chips - compact metric display
     st.markdown("### 📈 Key Metrics")
 
+    # Use len(results_df) to show actual preprocessed response count
+    actual_response_count = len(results_df)
+
     # Check if sentiment analysis was enabled for Key Metrics display
-    sentiment_enabled_metrics = metrics.get('sentiment_enabled', False)
+    sentiment_enabled = metrics.get('sentiment_enabled', False)
     sentiment_dist_metrics = metrics.get('sentiment_distribution', {})
 
     # Build sentiment chips if sentiment analysis was run
     sentiment_chips = ""
-    if sentiment_enabled_metrics and sentiment_dist_metrics:
+    if sentiment_enabled and sentiment_dist_metrics:
         pos_count = sentiment_dist_metrics.get('positive', 0)
         neu_count = sentiment_dist_metrics.get('neutral', 0)
         neg_count = sentiment_dist_metrics.get('negative', 0)
@@ -2448,34 +2451,20 @@ def page_results_overview():
 
     stat_chips_html = f"""
     <div style="margin: 10px 0 20px 0;">
-        <span class="stat-chip">📊 {metrics.get('total_responses', 0):,} Responses</span>
+        <span class="stat-chip">📊 {actual_response_count:,} Responses</span>
         <span class="stat-chip">🏷️ {metrics.get('n_codes', 0)} Codes</span>
+        <span class="stat-chip">📈 {metrics.get('avg_codes_per_response', 0):.2f} Avg/Response</span>
+        <span class="stat-chip">✅ {metrics.get('coverage_pct', 0):.1f}% Coverage</span>
         {sentiment_chips}
     </div>
     """
     st.markdown(stat_chips_html, unsafe_allow_html=True)
 
-    # Download All button
-    col1, col2, col3 = st.columns([1, 1, 2])
-    with col1:
-        try:
-            excel_data = export_results_package(coder, results_df, format='excel')
-            st.download_button(
-                label="📥 Download All",
-                data=excel_data,
-                file_name=f"analysis_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
-        except Exception as e:
-            st.error(f"Export error: {str(e)}")
-
     # Extracted Codes with Sentiment Distribution
     st.markdown("---")
     st.markdown("### 📊 Extracted Codes")
 
-    # Check if sentiment analysis was enabled
-    sentiment_enabled = metrics.get('sentiment_enabled', False)
+    # Check if sentiment columns exist in results (sentiment_enabled already defined above)
     has_sentiment = 'sentiment_label' in results_df.columns and 'sentiment_score' in results_df.columns
 
     # Show overall sentiment summary if available
