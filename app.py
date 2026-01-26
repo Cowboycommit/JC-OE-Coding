@@ -2074,8 +2074,8 @@ def page_run_analysis():
 
     auto_optimal = config.get('auto_optimal_codes', False)
 
-    # Check if sentiment analysis is enabled
-    enable_sentiment = config.get('enable_sentiment', False)
+    # Sentiment analysis is mandatory when available - model is determined by response type
+    enable_sentiment = SENTIMENT_ANALYSIS_AVAILABLE
     data_type = config.get('data_type', 'survey')
 
     # Map data_type to user-friendly labels
@@ -2108,10 +2108,10 @@ def page_run_analysis():
     if auto_optimal:
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
 
-    if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+    if enable_sentiment:
         data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT', 'news': 'Review-BERT'}
         model_label = data_type_models.get(data_type, 'Standard')
-        st.info(f"📊 **Sentiment Analysis** - Using {model_label} model for {data_type_label} responses")
+        st.success(f"📊 **Sentiment Analysis** - Using {model_label} model for {data_type_label} responses")
 
     st.markdown("---")
 
@@ -2125,7 +2125,7 @@ def page_run_analysis():
             "Code Labeling",
             "Generating Insights"
         ]
-        if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+        if enable_sentiment:
             stages.append("Sentiment Analysis")
 
         # Progress tracking UI elements
@@ -2196,9 +2196,9 @@ def page_run_analysis():
                 metrics['auto_optimal'] = True
                 metrics['optimal_analysis'] = optimal_results
 
-            # Run sentiment analysis if enabled
+            # Run sentiment analysis (mandatory when available)
             sentiment_results = None
-            if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
+            if enable_sentiment:
                 try:
                     update_progress(0.92, "Running sentiment analysis...", len(stages) - 1)
                     status_text.text(f"🔄 Loading {data_type} sentiment model...")
@@ -2206,8 +2206,8 @@ def page_run_analysis():
                     # Get the appropriate analyzer for the data type (cached to avoid reload)
                     analyzer = get_cached_sentiment_analyzer(data_type)
 
-                    # Run sentiment analysis
-                    texts = df[config['text_column']].tolist()
+                    # Run sentiment analysis on preprocessed results_df (not original df)
+                    texts = results_df[config['text_column']].tolist()
                     sentiment_results = analyzer.analyze(texts)
 
                     # Add sentiment columns to results_df
