@@ -1376,14 +1376,15 @@ def get_analysis_summary(coder, results_df: pd.DataFrame) -> str:
     return summary
 
 
-def get_top_codes(coder, n: int = 10, include_quotes: bool = True) -> pd.DataFrame:
+def get_top_codes(coder, n: int = 10, include_quotes: bool = True, sort_by: str = 'count') -> pd.DataFrame:
     """
-    Get top N codes by frequency with labels, keywords, and representative quotes.
+    Get codes with labels, keywords, and representative quotes.
 
     Args:
         coder: Fitted MLOpenCoder instance
-        n: Number of codes to return
+        n: Number of codes to return (use None or -1 for all codes)
         include_quotes: Include representative quotes (default True)
+        sort_by: Sort order - 'count' for frequency descending, 'code' for code ID ascending
 
     Returns:
         DataFrame with: Code, Label, Keywords, Sample Text, Count, % of Total, Confidence
@@ -1425,7 +1426,18 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True) -> pd.DataFra
         code_data.append(row)
 
     df = pd.DataFrame(code_data)
-    df = df.sort_values('Count', ascending=False).head(n)
+
+    # Apply sorting
+    if sort_by == 'code':
+        # Sort by code ID (e.g., CODE_01, CODE_02, ...) ascending
+        df = df.sort_values('Code', ascending=True)
+    else:
+        # Default: sort by count descending
+        df = df.sort_values('Count', ascending=False)
+
+    # Apply limit if specified
+    if n is not None and n > 0:
+        df = df.head(n)
 
     return df
 
