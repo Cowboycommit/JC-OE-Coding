@@ -2515,108 +2515,13 @@ def page_results_overview():
                 mime="text/csv"
             )
 
-    # Word Cloud Visualization (directly after results table, before codebook)
+    # Word Frequency Chart (directly after results table, before codebook)
     st.markdown("---")
-    st.markdown("### ☁️ Word Cloud")
+    st.markdown("### 📊 Word Frequency")
 
-    # Ensure visualization data is pre-computed
-    wordcloud_generated = False
-    if ensure_viz_data_ready():
-        viz_data = st.session_state.viz_data
-
-        if viz_data.get('wordcloud_available', False):
-            wordcloud_text = viz_data['wordcloud_text']
-
-            # Generate word cloud
-            wordcloud = None
-            try:
-                if WORDCLOUD_AVAILABLE:
-                    wordcloud = WordCloud(
-                        width=800,
-                        height=400,
-                        background_color='white',
-                        colormap='viridis',
-                        max_words=100,
-                        min_font_size=10,
-                        max_font_size=100
-                    ).generate(wordcloud_text)
-                elif PILWordCloud is not None:
-                    wordcloud = PILWordCloud(
-                        width=800,
-                        height=400,
-                        background_color='white',
-                        max_words=100,
-                        min_font_size=10,
-                        max_font_size=100
-                    ).generate(wordcloud_text)
-            except ValueError:
-                # WordCloud raises ValueError if text is empty or only stopwords
-                st.info("📝 Not enough text content to generate word cloud. The text may contain only common words (stopwords) that are filtered out.")
-                wordcloud = None
-
-            if wordcloud is not None:
-                # Create matplotlib figure
-                fig, ax = plt.subplots(figsize=(12, 6))
-                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-                ax.axis('off')
-                plt.tight_layout()
-
-                st.pyplot(fig, use_container_width=True)
-                plt.close(fig)  # Clean up to prevent memory leaks
-
-                st.caption("Word cloud generated from all response text - larger words appear more frequently")
-                wordcloud_generated = True
-            elif wordcloud_text.strip():
-                st.warning("⚠️ Word cloud generation failed. PIL library may not be available.")
-
-    # Fallback: try to generate wordcloud directly from results_df if viz_data wasn't available
-    if not wordcloud_generated and (WORDCLOUD_AVAILABLE or (PIL_AVAILABLE and PILWordCloud is not None)):
-        try:
-            results_df = st.session_state.results_df
-            # Find text column
-            text_col = [col for col in results_df.columns if col not in ['assigned_codes', 'confidence_scores', 'num_codes', 'themes', 'sentiment_label', 'sentiment_score', 'sentiment_positive', 'sentiment_negative', 'sentiment_neutral']][0]
-            all_text = ' '.join(results_df[text_col].dropna().astype(str).tolist())
-            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
-            cleaned_text = ' '.join(cleaned_text.split())
-
-            if cleaned_text.strip():
-                wordcloud = None
-                if WORDCLOUD_AVAILABLE:
-                    wordcloud = WordCloud(
-                        width=800,
-                        height=400,
-                        background_color='white',
-                        colormap='viridis',
-                        max_words=100,
-                        min_font_size=10,
-                        max_font_size=100
-                    ).generate(cleaned_text)
-                elif PILWordCloud is not None:
-                    wordcloud = PILWordCloud(
-                        width=800,
-                        height=400,
-                        background_color='white',
-                        max_words=100,
-                        min_font_size=10,
-                        max_font_size=100
-                    ).generate(cleaned_text)
-
-                if wordcloud is not None:
-                    fig, ax = plt.subplots(figsize=(12, 6))
-                    ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-                    ax.axis('off')
-                    plt.tight_layout()
-
-                    st.pyplot(fig, use_container_width=True)
-                    plt.close(fig)
-
-                    st.caption("Word cloud generated from all response text - larger words appear more frequently")
-                    wordcloud_generated = True
-        except Exception as e:
-            st.warning(f"⚠️ Word cloud generation failed: {str(e)}")
-
-    # Final fallback: pure matplotlib word frequency chart (no wordcloud/PIL needed)
-    if not wordcloud_generated and 'results_df' in st.session_state:
+    # Generate word frequency chart from results
+    freq_chart_generated = False
+    if 'results_df' in st.session_state:
         try:
             results_df = st.session_state.results_df
 
@@ -2675,18 +2580,15 @@ def page_results_overview():
                     st.pyplot(fig, use_container_width=True)
                     plt.close(fig)
 
-                    st.caption("Word frequency chart - showing the most common words in response text")
-                    wordcloud_generated = True
+                    st.caption("Frequency chart showing the most common words in response text")
+                    freq_chart_generated = True
                 else:
                     st.info(f"📝 No words found after filtering. Text column: '{text_col}', Total words before filter: {len(words)}")
         except Exception as e:
             st.error(f"⚠️ Word frequency visualization failed: {type(e).__name__}: {str(e)}")
 
-    if not wordcloud_generated:
-        if 'results_df' not in st.session_state:
-            st.info("📝 Word visualization not available. Please run an analysis first.")
-        else:
-            st.info("📝 Word visualization could not be generated. Check error messages above.")
+    if not freq_chart_generated:
+        st.info("📝 Word frequency chart not available. Please run an analysis first.")
 
     # Detailed codebook
     st.markdown("---")
