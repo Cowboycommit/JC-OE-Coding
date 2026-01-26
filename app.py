@@ -1212,9 +1212,6 @@ def page_text_processor():
         </div>
         """, unsafe_allow_html=True)
 
-        # Option to drop filtered rows
-        preset_drop_filtered = st.checkbox("Drop filtered rows", value=False, key="preset_drop")
-
         # Enhanced preprocessing options
         with st.expander("🔧 Enhanced Preprocessing Options", expanded=False):
             col1, col2 = st.columns(2)
@@ -1240,12 +1237,12 @@ def page_text_processor():
                         use_domain_stopwords=preset_domain_stopwords
                     )
 
-                    # Process the data
+                    # Process the data (keep all rows by default)
                     processed_df = pipeline.clean_dataframe(
                         df,
                         text_column=selected_column,
                         output_column=f"{selected_column}_processed",
-                        drop_filtered=preset_drop_filtered
+                        drop_filtered=False
                     )
 
                     # Store results
@@ -1272,6 +1269,20 @@ def page_text_processor():
                         col1.metric("Valid Records", f"{summary.get('valid_records', 0):,}")
                         col2.metric("Avg Token Count", f"{summary.get('avg_token_count', 0):.1f}")
                         col3.metric("Valid Ratio", f"{summary.get('valid_ratio', 0):.1%}")
+
+                        # Dynamic option to drop filtered rows if any were detected
+                        filtered_count = summary.get('filtered_records', 0)
+                        if filtered_count > 0:
+                            st.session_state.has_filtered_rows = True
+                            st.session_state.filtered_count = filtered_count
+                            st.warning(f"⚠️ {filtered_count:,} rows have empty processed text (filtered during preprocessing).")
+                            if st.button("🗑️ Drop filtered rows", key="dynamic_drop_filtered"):
+                                output_col = f"{selected_column}_processed"
+                                clean_df = processed_df.dropna(subset=[output_col])
+                                clean_df = clean_df[clean_df[output_col].str.strip() != '']
+                                st.session_state.uploaded_df = clean_df
+                                st.success(f"✅ Dropped {filtered_count:,} filtered rows. {len(clean_df):,} rows remaining.")
+                                st.rerun()
 
                 except Exception as e:
                     st.error(f"❌ Preprocessing failed: {str(e)}")
@@ -1429,6 +1440,17 @@ def page_text_processor():
                         comparison_df = processed_df[[selected_column, f"{selected_column}_processed"]].dropna().head(5)
                         comparison_df.columns = ["Original", "Processed"]
                         st.dataframe(comparison_df, use_container_width=True)
+
+                        # Dynamic option to drop filtered rows if any were detected
+                        if metrics.filtered_records > 0:
+                            st.warning(f"⚠️ {metrics.filtered_records:,} rows have empty processed text (filtered during preprocessing).")
+                            if st.button("🗑️ Drop filtered rows", key="gs_dynamic_drop_filtered"):
+                                output_col = f"{selected_column}_processed"
+                                clean_df = processed_df.dropna(subset=[output_col])
+                                clean_df = clean_df[clean_df[output_col].str.strip() != '']
+                                st.session_state.uploaded_df = clean_df
+                                st.success(f"✅ Dropped {metrics.filtered_records:,} filtered rows. {len(clean_df):,} rows remaining.")
+                                st.rerun()
 
                     except Exception as e:
                         st.error(f"❌ Preprocessing failed: {str(e)}")
@@ -1613,6 +1635,17 @@ def page_text_processor():
                     comparison_df = processed_df[[selected_column, f"{selected_column}_processed"]].dropna().head(5)
                     comparison_df.columns = ["Original", "Processed"]
                     st.dataframe(comparison_df, use_container_width=True)
+
+                    # Dynamic option to drop filtered rows if any were detected
+                    if metrics and metrics.filtered_records > 0:
+                        st.warning(f"⚠️ {metrics.filtered_records:,} rows have empty processed text (filtered during preprocessing).")
+                        if st.button("🗑️ Drop filtered rows", key="adv_dynamic_drop_filtered"):
+                            output_col = f"{selected_column}_processed"
+                            clean_df = processed_df.dropna(subset=[output_col])
+                            clean_df = clean_df[clean_df[output_col].str.strip() != '']
+                            st.session_state.uploaded_df = clean_df
+                            st.success(f"✅ Dropped {metrics.filtered_records:,} filtered rows. {len(clean_df):,} rows remaining.")
+                            st.rerun()
 
                 except Exception as e:
                     st.error(f"❌ Preprocessing failed: {str(e)}")
