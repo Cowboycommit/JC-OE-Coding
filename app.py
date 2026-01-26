@@ -2340,37 +2340,38 @@ def page_results_overview():
     # Stat chips - compact metric display
     st.markdown("### 📈 Key Metrics")
 
+    # Use len(results_df) to show actual preprocessed response count
+    actual_response_count = len(results_df)
+
+    # Build sentiment metric if sentiment analysis was enabled
+    sentiment_enabled = metrics.get('sentiment_enabled', False)
+    sentiment_chip = ""
+    if sentiment_enabled:
+        sentiment_dist = metrics.get('sentiment_distribution', {})
+        if sentiment_dist:
+            total = sum(sentiment_dist.values())
+            if total > 0:
+                pos_pct = sentiment_dist.get('positive', 0) / total * 100
+                neu_pct = sentiment_dist.get('neutral', 0) / total * 100
+                neg_pct = sentiment_dist.get('negative', 0) / total * 100
+                sentiment_chip = f'<span class="stat-chip">😊 {pos_pct:.0f}% 😐 {neu_pct:.0f}% 😞 {neg_pct:.0f}% Sentiment</span>'
+
     stat_chips_html = f"""
     <div style="margin: 10px 0 20px 0;">
-        <span class="stat-chip">📊 {metrics.get('total_responses', 0):,} Responses</span>
+        <span class="stat-chip">📊 {actual_response_count:,} Responses</span>
         <span class="stat-chip">🏷️ {metrics.get('n_codes', 0)} Codes</span>
         <span class="stat-chip">📈 {metrics.get('avg_codes_per_response', 0):.2f} Avg/Response</span>
         <span class="stat-chip">✅ {metrics.get('coverage_pct', 0):.1f}% Coverage</span>
+        {sentiment_chip}
     </div>
     """
     st.markdown(stat_chips_html, unsafe_allow_html=True)
-
-    # Download All button
-    col1, col2, col3 = st.columns([1, 1, 2])
-    with col1:
-        try:
-            excel_data = export_results_package(coder, results_df, format='excel')
-            st.download_button(
-                label="📥 Download All",
-                data=excel_data,
-                file_name=f"analysis_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
-        except Exception as e:
-            st.error(f"Export error: {str(e)}")
 
     # Extracted Codes with Sentiment Distribution
     st.markdown("---")
     st.markdown("### 📊 Extracted Codes")
 
-    # Check if sentiment analysis was enabled
-    sentiment_enabled = metrics.get('sentiment_enabled', False)
+    # Check if sentiment columns exist in results (sentiment_enabled already defined above)
     has_sentiment = 'sentiment_label' in results_df.columns and 'sentiment_score' in results_df.columns
 
     # Show overall sentiment summary if available
