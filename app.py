@@ -3060,37 +3060,16 @@ def page_visualizations():
 
                 st.markdown("---")
 
-                # Get examples sorted by confidence
+                # Get examples sorted by confidence, show top 10
                 examples = sorted(code_info['examples'], key=lambda x: x['confidence'], reverse=True)
+                display_examples = examples[:10]
 
-                # Simple pagination instead of complex filters
-                total_quotes = len(examples)
-                quotes_per_page = 5
-
-                if total_quotes > quotes_per_page:
-                    page = st.number_input(
-                        f"Page (1-{(total_quotes + quotes_per_page - 1) // quotes_per_page})",
-                        min_value=1,
-                        max_value=(total_quotes + quotes_per_page - 1) // quotes_per_page,
-                        value=1,
-                        key="quote_page"
-                    )
-                    start_idx = (page - 1) * quotes_per_page
-                    end_idx = min(start_idx + quotes_per_page, total_quotes)
-                    display_examples = examples[start_idx:end_idx]
-                    st.caption(f"Showing quotes {start_idx + 1}-{end_idx} of {total_quotes}")
-                else:
-                    display_examples = examples
-                    st.caption(f"Showing all {total_quotes} quotes")
-
-                # Display quotes in a table
+                # Display quotes in a simple two-column table
                 quotes_data = []
                 for ex in display_examples:
-                    conf_color = "🟢" if ex['confidence'] >= 0.7 else "🟡" if ex['confidence'] >= 0.4 else "🔴"
                     quotes_data.append({
-                        "Status": conf_color,
-                        "Quote": ex['text'],
-                        "Confidence": f"{ex['confidence']:.2f}"
+                        "Code": display_label,
+                        "Quote": ex['text']
                     })
 
                 quotes_df = pd.DataFrame(quotes_data)
@@ -3099,9 +3078,8 @@ def page_visualizations():
                     use_container_width=True,
                     hide_index=True,
                     column_config={
-                        "Status": st.column_config.TextColumn("", width="small"),
-                        "Quote": st.column_config.TextColumn("Quote", width="large"),
-                        "Confidence": st.column_config.TextColumn("Confidence", width="small")
+                        "Code": st.column_config.TextColumn("Code", width="small"),
+                        "Quote": st.column_config.TextColumn("Quote", width="large")
                     }
                 )
 
