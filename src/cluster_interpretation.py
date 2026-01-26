@@ -39,6 +39,14 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+# Import sentiment analysis (with graceful fallback)
+try:
+    from .sentiment_analysis import SurveySentimentAnalyzer, SentimentResult
+    SENTIMENT_ANALYSIS_AVAILABLE = True
+except ImportError:
+    SENTIMENT_ANALYSIS_AVAILABLE = False
+    logger.debug("Sentiment analysis module not available for cluster sentiment distribution")
+
 # Import stopwords discovery utilities (with graceful fallback)
 try:
     from .stopwords_discovery import (
@@ -188,6 +196,12 @@ class ClusterSummary:
     llm_reasoning: Optional[str] = None
     llm_source: Optional[str] = None
 
+    # Sentiment distribution fields (for detecting mixed-sentiment clusters)
+    sentiment_distribution: Optional[Dict[str, float]] = None  # {'positive': 0.4, 'negative': 0.3, 'neutral': 0.3}
+    dominant_sentiment: Optional[str] = None  # 'positive', 'negative', 'neutral', or 'mixed'
+    sentiment_coherence: Optional[float] = None  # 0-1 score, low = mixed sentiment
+    has_mixed_sentiment: bool = False  # True if cluster contains conflicting sentiments
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         result = {
@@ -210,6 +224,14 @@ class ClusterSummary:
             result['llm_description'] = self.llm_description
             result['llm_reasoning'] = self.llm_reasoning
             result['llm_source'] = self.llm_source
+        # Include sentiment distribution fields if available
+        if self.sentiment_distribution is not None:
+            result['sentiment_distribution'] = {
+                k: round(v, 3) for k, v in self.sentiment_distribution.items()
+            }
+            result['dominant_sentiment'] = self.dominant_sentiment
+            result['sentiment_coherence'] = round(self.sentiment_coherence, 3) if self.sentiment_coherence else None
+            result['has_mixed_sentiment'] = self.has_mixed_sentiment
         return result
 
     @property
@@ -239,6 +261,13 @@ class ClusterSummary:
         if include_llm and self.llm_alternative_labels:
             alts_str = ", ".join(self.llm_alternative_labels[:3])
             parts.append(f"  Alternatives: {alts_str}")
+
+        # Show sentiment distribution if available
+        if self.sentiment_distribution is not None:
+            sent_parts = [f"{k}: {v:.0%}" for k, v in self.sentiment_distribution.items()]
+            parts.append(f"  Sentiment: {', '.join(sent_parts)}")
+            if self.has_mixed_sentiment:
+                parts.append(f"  ⚠ MIXED SENTIMENT: This cluster contains both positive and negative views")
 
         if self.warnings:
             parts.append(f"  Warnings: {'; '.join(self.warnings)}")
@@ -303,6 +332,13 @@ class ClusterInterpretationReport:
             result['tuning_recommendations'] = self.tuning_recommendations
         if self.domain_stopwords_used:
             result['domain_stopwords_used'] = list(self.domain_stopwords_used)
+        # Add sentiment analysis summary
+        mixed_sentiment_clusters = [
+            k for k, v in self.summaries.items() if v.has_mixed_sentiment
+        ]
+        if mixed_sentiment_clusters:
+            result['mixed_sentiment_clusters'] = mixed_sentiment_clusters
+            result['mixed_sentiment_count'] = len(mixed_sentiment_clusters)
         return result
 
     def get_display_report(self, always_show_terms: bool = True) -> str:
@@ -935,6 +971,20 @@ class ClusterInterpreter:
                 warnings.append(f"Low coherence ({cluster_coherence:.2f}) - cluster may be poorly defined")
                 confidence *= 0.85
 
+            # Analyze sentiment distribution within the cluster
+            sentiment_result = self._analyze_cluster_sentiment(texts, doc_indices)
+
+            # Add warning for mixed-sentiment clusters
+            if sentiment_result['is_mixed']:
+                pos_pct = sentiment_result['distribution']['positive']
+                neg_pct = sentiment_result['distribution']['negative']
+                warnings.append(
+                    f"Mixed sentiment ({pos_pct:.0%} positive, {neg_pct:.0%} negative) - "
+                    "cluster contains conflicting views on same topic. "
+                    "Consider reviewing representative quotes for label accuracy."
+                )
+                confidence *= 0.90  # Slight penalty for mixed sentiment
+
             interpretability_scores.append(confidence)
 
             # Create cluster ID string
@@ -952,7 +1002,11 @@ class ClusterInterpreter:
                 coherence_score=cluster_coherence,
                 interpretation_confidence=confidence,
                 is_interpretable=is_interpretable,
-                warnings=warnings
+                warnings=warnings,
+                sentiment_distribution=sentiment_result['distribution'],
+                dominant_sentiment=sentiment_result['dominant'],
+                sentiment_coherence=sentiment_result['coherence'],
+                has_mixed_sentiment=sentiment_result['is_mixed']
             )
 
             summaries[cluster_id_str] = summary
@@ -992,6 +1046,20 @@ class ClusterInterpreter:
                 f"{low_coherence_count} clusters have low coherence. "
                 "Consider: (1) reducing n_clusters, (2) using different preprocessing, "
                 "(3) trying alternative clustering methods like LDA or NMF."
+            )
+
+        # Count mixed-sentiment clusters and add warning
+        mixed_sentiment_clusters = [
+            s.cluster_id for s in summaries.values() if s.has_mixed_sentiment
+        ]
+        if mixed_sentiment_clusters:
+            cluster_list = ", ".join(mixed_sentiment_clusters[:5])
+            if len(mixed_sentiment_clusters) > 5:
+                cluster_list += f" and {len(mixed_sentiment_clusters) - 5} more"
+            global_warnings.append(
+                f"{len(mixed_sentiment_clusters)} cluster(s) have mixed sentiment "
+                f"(both positive and negative views): {cluster_list}. "
+                "These clusters group by topic, not sentiment. Review labels for accuracy."
             )
 
         # Generate tuning recommendations based on analysis
@@ -1094,6 +1162,17 @@ class ClusterInterpreter:
             recommendations.append(
                 f"{clusters_with_warnings}/{n_clusters} clusters have warnings. "
                 "Run with feature_matrix for coherence analysis"
+            )
+
+        # Check for mixed-sentiment clusters
+        mixed_sentiment_count = sum(1 for s in summaries.values() if s.has_mixed_sentiment)
+        if mixed_sentiment_count > 0:
+            recommendations.append(
+                f"{mixed_sentiment_count} cluster(s) have mixed sentiment (both positive and negative). "
+                "This is expected behavior - clustering groups by topic, not sentiment. "
+                "Options: (a) manually review and rename labels, "
+                "(b) increase n_clusters to separate positive/negative views, "
+                "(c) run sentiment-aware post-processing to split mixed clusters"
             )
 
         return recommendations
@@ -1219,6 +1298,114 @@ class ClusterInterpreter:
         except Exception as e:
             logger.warning(f"Could not calculate cluster coherence: {e}")
             return 0.0
+
+    def _analyze_cluster_sentiment(
+        self,
+        texts: List[str],
+        doc_indices: List[int],
+        mixed_threshold: float = 0.25
+    ) -> Dict[str, Any]:
+        """
+        Analyze sentiment distribution within a cluster.
+
+        This helps detect clusters where the topic-based label may be misleading
+        because the cluster contains both positive and negative sentiments about
+        the same topic (e.g., "Declining Product Quality" containing both
+        praise and criticism about quality).
+
+        Args:
+            texts: All original text documents
+            doc_indices: Indices of documents in this cluster
+            mixed_threshold: Minimum proportion to consider sentiment "present"
+                            (default 0.25 = 25%). If both positive and negative
+                            exceed this, cluster is flagged as mixed.
+
+        Returns:
+            Dictionary with:
+                - distribution: {'positive': float, 'negative': float, 'neutral': float}
+                - dominant: 'positive', 'negative', 'neutral', or 'mixed'
+                - coherence: 0-1 score (higher = more uniform sentiment)
+                - is_mixed: True if cluster has conflicting sentiments
+        """
+        if not SENTIMENT_ANALYSIS_AVAILABLE:
+            logger.debug("Sentiment analysis not available for cluster sentiment distribution")
+            return {
+                'distribution': None,
+                'dominant': None,
+                'coherence': None,
+                'is_mixed': False
+            }
+
+        if not doc_indices or len(doc_indices) < 2:
+            return {
+                'distribution': None,
+                'dominant': None,
+                'coherence': None,
+                'is_mixed': False
+            }
+
+        try:
+            # Get texts for this cluster
+            cluster_texts = [texts[i] for i in doc_indices]
+
+            # Use VADER for fast sentiment analysis (no GPU required)
+            analyzer = SurveySentimentAnalyzer(method='vader')
+            results = analyzer.analyze(cluster_texts)
+
+            # Count sentiments
+            sentiment_counts = {'positive': 0, 'negative': 0, 'neutral': 0}
+            for result in results:
+                sentiment_counts[result.label] += 1
+
+            # Calculate distribution
+            total = len(results)
+            distribution = {
+                k: v / total for k, v in sentiment_counts.items()
+            }
+
+            # Determine dominant sentiment
+            pos_pct = distribution['positive']
+            neg_pct = distribution['negative']
+            neu_pct = distribution['neutral']
+
+            # Check for mixed sentiment (both positive and negative above threshold)
+            is_mixed = pos_pct >= mixed_threshold and neg_pct >= mixed_threshold
+
+            if is_mixed:
+                dominant = 'mixed'
+            else:
+                # Find the dominant sentiment
+                max_sentiment = max(distribution, key=distribution.get)
+                dominant = max_sentiment
+
+            # Calculate sentiment coherence (how uniform is the sentiment?)
+            # Uses entropy-based measure: coherence = 1 - normalized_entropy
+            # Perfect uniformity (all same sentiment) = 1.0
+            # Perfect chaos (33% each) = 0.0
+            proportions = np.array([pos_pct, neg_pct, neu_pct])
+            proportions = proportions[proportions > 0]  # Remove zeros for log
+            if len(proportions) > 1:
+                entropy = -np.sum(proportions * np.log2(proportions))
+                max_entropy = np.log2(3)  # Maximum entropy for 3 categories
+                coherence = 1.0 - (entropy / max_entropy)
+            else:
+                coherence = 1.0  # Only one sentiment present = perfect coherence
+
+            return {
+                'distribution': distribution,
+                'dominant': dominant,
+                'coherence': float(coherence),
+                'is_mixed': is_mixed
+            }
+
+        except Exception as e:
+            logger.warning(f"Could not analyze cluster sentiment: {e}")
+            return {
+                'distribution': None,
+                'dominant': None,
+                'coherence': None,
+                'is_mixed': False
+            }
 
     def apply_llm_enhancement(
         self,
