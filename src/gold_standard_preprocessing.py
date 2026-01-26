@@ -846,6 +846,9 @@ def normalize_for_nlp(
             'that', 'which', 'who', 'whom', 'this', 'these', 'those',
             'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her',
             'us', 'them', 'my', 'your', 'his', 'its', 'our', 'their',
+            # HTML entity artifacts
+            'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash',
+            'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade',
         }
         tokens = result.split()
         result = ' '.join(t for t in tokens if t.lower() not in stopwords)

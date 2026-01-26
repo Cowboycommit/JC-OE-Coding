@@ -896,7 +896,10 @@ def run_ml_analysis(
                 'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
                 'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
                 'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
-                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which'
+                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which',
+                # HTML entity artifacts
+                'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash',
+                'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'
             }
 
             # For embedding-based representations (BERT, LSTM, etc.), create TF-IDF for term extraction

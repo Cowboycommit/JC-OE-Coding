@@ -169,7 +169,10 @@ class PILWordCloud:
             'not', 'just', 'very', 'really', 'about', 'get', 'got', 'also',
             'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
             'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now',
-            'here', 'there', 'when', 'where', 'why', 'how'
+            'here', 'there', 'when', 'where', 'why', 'how',
+            # HTML entity artifacts
+            'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash',
+            'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'
         }
         word_freq = {w: f for w, f in word_freq.items() if w not in stopwords}
 
@@ -1791,7 +1794,10 @@ class MethodVisualizer:
                 'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
                 'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
                 'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
-                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
+                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am',
+                # HTML entity artifacts
+                'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash',
+                'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'
             }
             word_freq = {w: f for w, f in word_freq.items()
                          if w not in stopwords and len(w) > 2}
@@ -2126,7 +2132,10 @@ class MethodVisualizer:
                     'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
                     'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
                     'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
-                    'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
+                    'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am',
+                    # HTML entity artifacts
+                    'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash',
+                    'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'
                 }
                 word_freq = {w: f for w, f in word_freq.items()
                              if w not in stopwords and len(w) > 2}
