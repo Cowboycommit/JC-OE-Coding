@@ -1442,7 +1442,7 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True, sort_by: str 
     return df
 
 
-def get_code_summary_with_quotes(coder, n_quotes: int = 5) -> pd.DataFrame:
+def get_code_summary_with_quotes(coder, n_quotes: int = 5, sort_by: str = 'code') -> pd.DataFrame:
     """
     Get comprehensive code summary with representative quotes.
 
@@ -1451,6 +1451,7 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 5) -> pd.DataFrame:
     Args:
         coder: Fitted MLOpenCoder instance
         n_quotes: Number of representative quotes per code (default 5, or all if fewer)
+        sort_by: Sort order - 'count' for frequency descending, 'code' for code ID ascending
 
     Returns:
         DataFrame with code summaries including representative quotes
@@ -1489,7 +1490,14 @@ def get_code_summary_with_quotes(coder, n_quotes: int = 5) -> pd.DataFrame:
         })
 
     df = pd.DataFrame(code_data)
-    df = df.sort_values('Count', ascending=False)
+
+    # Apply sorting
+    if sort_by == 'code':
+        # Sort by code ID (e.g., CODE_01, CODE_02, ...) ascending
+        df = df.sort_values('Code', ascending=True)
+    else:
+        # Sort by count descending
+        df = df.sort_values('Count', ascending=False)
 
     return df
 

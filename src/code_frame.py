@@ -173,7 +173,7 @@ class CodeFrame:
                     "Keywords": len(code_info["keywords"]),
                 }
             )
-        return pd.DataFrame(summary_data).sort_values("Count", ascending=False)
+        return pd.DataFrame(summary_data).sort_values("Code ID", ascending=True)
 
     def reset_counts(self):
         """Reset all code counts to zero."""

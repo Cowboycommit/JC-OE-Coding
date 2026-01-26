@@ -2743,7 +2743,7 @@ def page_results_overview():
     st.markdown("---")
     st.markdown("### 📖 Complete Codebook")
 
-    for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[1]['count'], reverse=True):
+    for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[0]):  # Sort by code ID (CODE_01, CODE_02, etc.)
         if info['count'] > 0:  # Only show active codes
             # Use LLM-generated label if available
             display_label = info.get('llm_label', info['label'])
