@@ -1109,7 +1109,7 @@ with pd.ExcelWriter('export.xlsx', engine='openpyxl') as writer:
     "metadata": {
         "project_name": "Customer Feedback Analysis",
         "export_date": "2025-12-25T10:30:00Z",
-        "framework_version": "1.0.0",
+        "framework_version": "1.3.1",
         "total_responses": 500,
         "total_codes": 12,
         "average_confidence": 0.85
@@ -1167,7 +1167,7 @@ export_data = {
     "metadata": {
         "project_name": project_name,
         "export_date": datetime.utcnow().isoformat() + 'Z',
-        "framework_version": "1.0.0",
+        "framework_version": "1.3.1",
         "total_responses": len(results_df),
         "total_codes": results_df['code'].nunique(),
         "average_confidence": float(results_df['confidence'].mean())
@@ -1324,7 +1324,7 @@ def create_export_package(project_name, results_df, charts):
     readme_content = f"""# {project_name} - Analysis Export
 
 **Export Date:** {timestamp}
-**Framework Version:** 1.0.0
+**Framework Version:** 1.3.1
 
 ## Contents
 

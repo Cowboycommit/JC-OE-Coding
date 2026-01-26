@@ -591,7 +591,7 @@ If you use this framework in your research, please cite:
 @software{open_ended_coding,
   title = {Open-Ended Coding Analysis Framework},
   author = {Your Name},
-  year = {2024},
+  year = {2026},
   url = {https://github.com/Cowboycommit/JC-OE-Coding}
 }
 ```
