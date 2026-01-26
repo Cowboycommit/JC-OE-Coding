@@ -2154,7 +2154,7 @@ def generate_executive_summary(
         summary.append(
             f"**{row['Label']}** ({row['Code']}): "
             f"{row['Count']:,} responses ({pct:.1f}%) | "
-            f"Confidence: {row['Avg Confidence']:.2f}"
+            f"Confidence: {row['Confidence']}"
         )
         summary.append(f"  - Keywords: {row['Keywords']}")
         summary.append("")
