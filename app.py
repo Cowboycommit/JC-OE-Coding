@@ -2467,36 +2467,6 @@ def page_results_overview():
     # Check if sentiment columns exist in results (sentiment_enabled already defined above)
     has_sentiment = 'sentiment_label' in results_df.columns and 'sentiment_score' in results_df.columns
 
-    # Show overall sentiment summary if available
-    if has_sentiment and sentiment_enabled:
-        sentiment_dist = metrics.get('sentiment_distribution', {})
-        if sentiment_dist:
-            total = sum(sentiment_dist.values())
-            pos_count = sentiment_dist.get('positive', 0)
-            neu_count = sentiment_dist.get('neutral', 0)
-            neg_count = sentiment_dist.get('negative', 0)
-
-            pos_pct = (pos_count / total * 100) if total > 0 else 0
-            neu_pct = (neu_count / total * 100) if total > 0 else 0
-            neg_pct = (neg_count / total * 100) if total > 0 else 0
-
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; padding: 15px; margin-bottom: 20px;">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Overall Sentiment Distribution</div>
-                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                    <span style="background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
-                        😊 Positive: {pos_count} ({pos_pct:.1f}%)
-                    </span>
-                    <span style="background: #e2e3e5; color: #383d41; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
-                        😐 Neutral: {neu_count} ({neu_pct:.1f}%)
-                    </span>
-                    <span style="background: #f8d7da; color: #721c24; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
-                        😞 Negative: {neg_count} ({neg_pct:.1f}%)
-                    </span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
     # Get all codes ordered by code ID (CODE_01, CODE_02, etc.)
     all_codes_df = get_top_codes(coder, n=None, sort_by='code')
 
