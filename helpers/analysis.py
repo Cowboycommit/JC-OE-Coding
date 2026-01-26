@@ -227,7 +227,18 @@ def find_optimal_codes(
     if df is None or len(df) == 0:
         raise ValueError("DataFrame is empty. Cannot perform code optimization.")
 
-    responses = df[text_column].tolist()
+    # Filter out null/empty entries before processing
+    valid_mask = df[text_column].notna() & (df[text_column].astype(str).str.strip() != '')
+    df_valid = df[valid_mask]
+
+    if len(df_valid) == 0:
+        raise ValueError("No valid text entries found after filtering null/empty values.")
+
+    filtered_count = len(df) - len(df_valid)
+    if filtered_count > 0:
+        logger.info(f"Filtered out {filtered_count} null/empty entries for code optimization")
+
+    responses = df_valid[text_column].tolist()
 
     # Preprocess text with multilingual support
     def preprocess_text(text):
@@ -1312,7 +1323,22 @@ def run_ml_analysis(
     if progress_callback:
         progress_callback(0.3, "Preprocessing text...")
 
-    responses = df[text_column].tolist()
+    # Filter out null/empty entries before processing
+    # This ensures only valid text entries are analyzed
+    original_count = len(df)
+    valid_mask = df[text_column].notna() & (df[text_column].astype(str).str.strip() != '')
+    df_valid = df[valid_mask].copy()
+    filtered_count = original_count - len(df_valid)
+
+    if filtered_count > 0:
+        logger.info(f"Filtered out {filtered_count} null/empty entries from {original_count} rows")
+
+    # Update labels for evaluation to match filtered data
+    if labels_for_evaluation is not None:
+        labels_for_evaluation = [l for l, m in zip(labels_for_evaluation, valid_mask) if m]
+        coder.labels_for_evaluation = labels_for_evaluation
+
+    responses = df_valid[text_column].tolist()
 
     if progress_callback:
         progress_callback(0.5, "Training ML model...")
@@ -1322,8 +1348,8 @@ def run_ml_analysis(
     if progress_callback:
         progress_callback(0.8, "Generating results...")
 
-    # Create results
-    results_df = df.copy()
+    # Create results from filtered dataframe (only valid entries)
+    results_df = df_valid.copy()
     results_df['assigned_codes'] = coder.code_assignments
     results_df['confidence_scores'] = coder.confidence_scores
     results_df['num_codes'] = results_df['assigned_codes'].apply(len)
@@ -1331,7 +1357,9 @@ def run_ml_analysis(
     # Calculate metrics
     metrics = coder.get_quality_metrics()
     metrics['execution_time'] = time.time() - start_time
-    metrics['total_responses'] = len(df)
+    metrics['total_responses'] = len(df_valid)
+    metrics['original_count'] = original_count
+    metrics['filtered_count'] = filtered_count
     metrics['method'] = method
     metrics['n_codes'] = n_codes
     metrics['representation'] = representation
