@@ -2753,37 +2753,89 @@ def page_results_overview():
                                 if summary.has_mixed_sentiment:
                                     st.warning("⚠️ Mixed sentiment: contains both positive and negative views on this topic")
 
-                # Add label editing section
+                # Add label confirmation section
                 st.markdown("---")
-                st.markdown("**✏️ Edit Label:**")
+                st.markdown("**✅ Confirm Label:**")
 
-                # Show if this label was user-renamed
+                # Show if this label was user-confirmed
                 if info.get('user_renamed'):
                     st.caption(f"📝 Custom label (original: {info.get('original_label', 'N/A')})")
 
-                # Text input for new label with unique key
-                new_label = st.text_input(
-                    "New label",
-                    value=display_label,
-                    key=f"label_input_{code_id}",
+                # Build label options
+                label_options = []
+                option_labels = {}
+
+                # Option 1: Use extracted code (current/original label)
+                extracted_label = info.get('original_label') or info.get('label', display_label)
+                label_options.append("extracted")
+                option_labels["extracted"] = f"Use extracted code: **{extracted_label}**"
+
+                # Option 2-4: Alternative labels (if available)
+                alt_labels = info.get('alternative_labels', [])
+                for i, alt_label in enumerate(alt_labels[:3]):  # Max 3 alternatives
+                    key = f"alt_{i}"
+                    label_options.append(key)
+                    option_labels[key] = f"Alternative {i+1}: **{alt_label}**"
+
+                # Option 5: Custom entry
+                label_options.append("custom")
+                option_labels["custom"] = "Enter custom label"
+
+                # Determine current selection based on saved state
+                current_selection = st.session_state.get(f"label_selection_{code_id}", "extracted")
+                if current_selection not in label_options:
+                    current_selection = "extracted"
+
+                # Radio button for label selection
+                selected_option = st.radio(
+                    "Choose label",
+                    options=label_options,
+                    format_func=lambda x: option_labels[x],
+                    key=f"label_radio_{code_id}",
+                    index=label_options.index(current_selection),
                     label_visibility="collapsed"
                 )
 
-                col_save, col_reset = st.columns(2)
-                with col_save:
-                    if st.button("💾 Save", key=f"save_{code_id}", use_container_width=True):
-                        if new_label and new_label != display_label:
+                # Custom label text input (shown only when "custom" is selected)
+                custom_label_value = ""
+                if selected_option == "custom":
+                    custom_label_value = st.text_input(
+                        "Enter your custom label",
+                        value=display_label,
+                        key=f"custom_label_input_{code_id}",
+                        placeholder="Type your custom label here..."
+                    )
+
+                # Determine the final label based on selection
+                final_label = None
+                if selected_option == "extracted":
+                    final_label = extracted_label
+                elif selected_option.startswith("alt_"):
+                    alt_index = int(selected_option.split("_")[1])
+                    if alt_index < len(alt_labels):
+                        final_label = alt_labels[alt_index]
+                elif selected_option == "custom":
+                    final_label = custom_label_value
+
+                col_confirm, col_reset = st.columns(2)
+                with col_confirm:
+                    # Only show confirm button if the label would change
+                    button_disabled = not final_label or final_label == display_label
+                    if st.button("✅ Confirm", key=f"confirm_{code_id}", use_container_width=True, disabled=button_disabled):
+                        if final_label and final_label != display_label:
                             if hasattr(coder, 'rename_code_label'):
-                                success = coder.rename_code_label(code_id, new_label)
+                                success = coder.rename_code_label(code_id, final_label)
                                 if success:
-                                    st.success(f"✓ Label updated!")
+                                    st.session_state[f"label_selection_{code_id}"] = selected_option
+                                    st.success(f"✓ Label confirmed: {final_label}")
                                     st.rerun()
                                 else:
                                     st.error("Failed to update label")
                             else:
                                 # Fallback for older coder versions
-                                coder.codebook[code_id]['label'] = new_label
-                                st.success(f"✓ Label updated!")
+                                coder.codebook[code_id]['label'] = final_label
+                                st.session_state[f"label_selection_{code_id}"] = selected_option
+                                st.success(f"✓ Label confirmed: {final_label}")
                                 st.rerun()
 
                 with col_reset:
@@ -2791,6 +2843,9 @@ def page_results_overview():
                         if st.button("↩️ Reset", key=f"reset_{code_id}", use_container_width=True):
                             if hasattr(coder, 'reset_code_label'):
                                 coder.reset_code_label(code_id)
+                                # Clear the selection state
+                                if f"label_selection_{code_id}" in st.session_state:
+                                    del st.session_state[f"label_selection_{code_id}"]
                                 st.success("✓ Label reset to original")
                                 st.rerun()
     # Next button - always show on this page if analysis is complete
