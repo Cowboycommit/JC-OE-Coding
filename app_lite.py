@@ -936,11 +936,11 @@ def main():
             with col4:
                 st.metric("Time", f"{metrics.get('execution_time', 0):.1f}s")
 
-            # Codebook preview
+            # Codebook preview - sorted by code ID (CODE_01, CODE_02, etc.)
             st.markdown("**Discovered Codebook**:")
             codebook_data = []
             total_responses = metrics.get('total_responses', len(coder.code_assignments) if coder.code_assignments else 1)
-            for code_id, info in coder.codebook.items():
+            for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[0]):
                 # Extract at least 3 sample texts from examples (original, not preprocessed)
                 examples = info.get('examples', [])
                 sample_texts = []

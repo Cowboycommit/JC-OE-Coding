@@ -2401,14 +2401,14 @@ def page_results_overview():
         tab1, tab2 = st.tabs(["Extracted Codes", "Label and Sentiment Assignments"])
 
     with tab1:
-        # Top codes
-        top_codes_df = get_top_codes(coder, n=10)
+        # All codes ordered by code ID (CODE_01, CODE_02, etc.)
+        all_codes_df = get_top_codes(coder, n=None, sort_by='code')
 
-        # Display as styled table
+        # Display as styled table with all codes
         st.dataframe(
-            style_frequency_table(top_codes_df),
+            style_frequency_table(all_codes_df),
             use_container_width=True,
-            height=400
+            height=500
         )
 
     with tab2:
@@ -2743,7 +2743,7 @@ def page_results_overview():
     st.markdown("---")
     st.markdown("### 📖 Complete Codebook")
 
-    for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[1]['count'], reverse=True):
+    for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[0]):  # Sort by code ID (CODE_01, CODE_02, etc.)
         if info['count'] > 0:  # Only show active codes
             # Use LLM-generated label if available
             display_label = info.get('llm_label', info['label'])
