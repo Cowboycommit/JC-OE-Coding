@@ -2753,6 +2753,29 @@ def page_results_overview():
     st.markdown("---")
     st.markdown("### 📖 Complete Codebook")
 
+    # Show warning if any codes have mixed sentiment
+    if hasattr(coder, 'cluster_interpretation') and coder.cluster_interpretation is not None:
+        mixed_clusters = [
+            s.cluster_id.replace('CLUSTER_', 'CODE_')
+            for s in coder.cluster_interpretation.summaries.values()
+            if s.has_mixed_sentiment
+        ]
+        if mixed_clusters:
+            with st.expander(f"⚠️ {len(mixed_clusters)} code(s) have mixed sentiment", expanded=False):
+                st.markdown("""
+                **What this means:** These codes contain both positive and negative views about the same topic.
+                This happens because clustering groups responses by *topic similarity*, not by sentiment.
+
+                **Example:** A code labeled "Product Quality" might contain both "quality is excellent!"
+                and "quality has declined" because both discuss *quality*.
+
+                **What to do:**
+                - Review the representative quotes to ensure the label accurately represents the mix
+                - Consider renaming ambiguous labels (e.g., "Product Quality" instead of "Declining Quality")
+                - Increase the number of clusters to potentially separate positive/negative views
+                """)
+                st.markdown(f"**Affected codes:** {', '.join(mixed_clusters)}")
+
     for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[0]):  # Sort by code ID (CODE_01, CODE_02, etc.)
         if info['count'] > 0:  # Only show active codes
             # Use LLM-generated label if available
@@ -2781,6 +2804,21 @@ def page_results_overview():
                 with col2:
                     st.metric("Count", f"{info['count']:,}")
                     st.metric("Avg Confidence", f"{info['avg_confidence']:.2f}")
+
+                    # Show sentiment distribution from cluster interpretation if available
+                    if hasattr(coder, 'cluster_interpretation') and coder.cluster_interpretation is not None:
+                        # Map CODE_XX to CLUSTER_XX
+                        cluster_id = code_id.replace('CODE_', 'CLUSTER_')
+                        if cluster_id in coder.cluster_interpretation.summaries:
+                            summary = coder.cluster_interpretation.summaries[cluster_id]
+                            if summary.sentiment_distribution is not None:
+                                st.markdown("**Sentiment Mix:**")
+                                pos_pct = summary.sentiment_distribution.get('positive', 0)
+                                neg_pct = summary.sentiment_distribution.get('negative', 0)
+                                neu_pct = summary.sentiment_distribution.get('neutral', 0)
+                                st.caption(f"👍 {pos_pct:.0%} · 👎 {neg_pct:.0%} · 😐 {neu_pct:.0%}")
+                                if summary.has_mixed_sentiment:
+                                    st.warning("⚠️ Mixed sentiment: contains both positive and negative views on this topic")
 
     # Next button - always show on this page if analysis is complete
     render_next_button("📈 Visualizations")
@@ -3419,6 +3457,21 @@ def page_export_results():
             while len(quotes) < 5:
                 quotes.append('')
 
+            # Get sentiment distribution if available
+            sentiment_positive = ''
+            sentiment_negative = ''
+            sentiment_neutral = ''
+            has_mixed_sentiment = ''
+            if hasattr(coder, 'cluster_interpretation') and coder.cluster_interpretation is not None:
+                cluster_id = code_id.replace('CODE_', 'CLUSTER_')
+                if cluster_id in coder.cluster_interpretation.summaries:
+                    summary = coder.cluster_interpretation.summaries[cluster_id]
+                    if summary.sentiment_distribution is not None:
+                        sentiment_positive = f"{summary.sentiment_distribution.get('positive', 0):.1%}"
+                        sentiment_negative = f"{summary.sentiment_distribution.get('negative', 0):.1%}"
+                        sentiment_neutral = f"{summary.sentiment_distribution.get('neutral', 0):.1%}"
+                        has_mixed_sentiment = 'Yes' if summary.has_mixed_sentiment else 'No'
+
             row = {
                 'Code': code_id,
                 'Label': info.get('llm_label', info['label']),  # Use LLM label if available
@@ -3428,6 +3481,10 @@ def page_export_results():
                 'Keywords': ', '.join(info['keywords']),
                 'Count': info['count'],
                 'Avg Confidence': info['avg_confidence'],
+                'Sentiment Positive': sentiment_positive,
+                'Sentiment Negative': sentiment_negative,
+                'Sentiment Neutral': sentiment_neutral,
+                'Mixed Sentiment': has_mixed_sentiment,
                 'Quote 1': quotes[0],
                 'Quote 2': quotes[1],
                 'Quote 3': quotes[2],
