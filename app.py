@@ -1972,10 +1972,15 @@ def page_configuration():
     st.markdown("---")
     st.markdown("### 📋 Configuration Summary")
 
+    # Calculate valid response count (non-null, non-empty entries in selected column)
+    valid_responses = df[selected_column].dropna()
+    valid_responses = valid_responses[valid_responses.astype(str).str.strip() != '']
+    valid_count = len(valid_responses)
+
     config_col1, config_col2, config_col3, config_col4 = st.columns(4)
 
     with config_col1:
-        st.metric("Responses", f"{len(df):,}")
+        st.metric("Responses", f"{valid_count:,}")
     with config_col2:
         st.metric("Codes to Find", "Auto" if auto_optimal_codes else n_codes)
     with config_col3:
@@ -2061,9 +2066,15 @@ def page_run_analysis():
     }
     data_type_label = data_type_display.get(data_type, data_type.title())
 
+    # Calculate valid response count (non-null, non-empty entries in text column)
+    text_column = config['text_column']
+    valid_responses = df[text_column].dropna()
+    valid_responses = valid_responses[valid_responses.astype(str).str.strip() != '']
+    valid_count = len(valid_responses)
+
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.metric("Responses", f"{len(df):,}")
+        st.metric("Responses", f"{valid_count:,}")
     with col2:
         st.metric("Text Column", config['text_column'])
     with col3:
