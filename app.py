@@ -1137,10 +1137,10 @@ def page_text_processor():
 
         # Preset options with data_type mapping for sentiment analysis
         preset_options = {
-            "general": {
-                "name": "📋 General Text",
-                "description": "Standard preprocessing for most text data",
-                "features": ["Contraction expansion", "Spam detection", "Min 3 tokens"],
+            "survey": {
+                "name": "📋 Survey Responses",
+                "description": "Optimized for survey feedback, open-ended questions, and form responses",
+                "features": ["Contraction expansion", "Spam detection", "Domain stopwords", "Min 3 tokens"],
                 "remove_stopwords": True,
                 "lemmatize": True,
                 "lowercase": True,
@@ -1158,7 +1158,7 @@ def page_text_processor():
                 "sentiment_model": "Twitter-RoBERTa (transformer)"
             },
             "reviews": {
-                "name": "⭐ Product Reviews",
+                "name": "⭐ Long-form Reviews",
                 "description": "For customer reviews with elongated expressions",
                 "features": ["Elongation normalization", "Contraction expansion", "Spam detection", "Min 5 tokens"],
                 "remove_stopwords": True,
@@ -1174,8 +1174,8 @@ def page_text_processor():
                 "remove_stopwords": False,
                 "lemmatize": False,
                 "lowercase": True,
-                "data_type": "survey",
-                "sentiment_model": "VADER (rule-based)"
+                "data_type": "news",
+                "sentiment_model": "Review-BERT (transformer)"
             }
         }
 
@@ -1271,7 +1271,7 @@ def page_text_processor():
     # ==========================================================================
     with tab2:
         # Check if social media preset is selected
-        current_preset = st.session_state.get('dataset_preset', 'general')
+        current_preset = st.session_state.get('dataset_preset', 'survey')
 
         if current_preset != 'social_media':
             st.markdown("### Gold Standard Text Processor")
@@ -1861,11 +1861,11 @@ def page_configuration():
     st.markdown("---")
     st.markdown("### 📊 Response Type & Sentiment Analysis")
 
-    # Data type selection with clear descriptions
+    # Data type selection with clear descriptions (matches Text Processor presets)
     data_type_options = {
         'survey': {
             'name': 'Survey Responses',
-            'description': 'Standard survey answers, feedback forms, open-ended questions',
+            'description': 'Survey feedback, open-ended questions, form responses',
             'model': 'VADER (rule-based, fast)',
             'icon': '📋'
         },
@@ -1877,9 +1877,15 @@ def page_configuration():
         },
         'longform': {
             'name': 'Long-form Reviews',
-            'description': 'Product reviews, detailed feedback, articles',
+            'description': 'Customer reviews, detailed feedback, elongated expressions',
             'model': 'Review-BERT (transformer-based)',
             'icon': '⭐'
+        },
+        'news': {
+            'name': 'News Articles',
+            'description': 'Formal, well-written articles and news content',
+            'model': 'Review-BERT (transformer-based)',
+            'icon': '📰'
         }
     }
 
@@ -2040,7 +2046,8 @@ def page_run_analysis():
     data_type_display = {
         'survey': 'Survey',
         'twitter': 'Social Media',
-        'longform': 'Reviews'
+        'longform': 'Reviews',
+        'news': 'News'
     }
     data_type_label = data_type_display.get(data_type, data_type.title())
 
@@ -3485,9 +3492,9 @@ def page_about():
     The **Text Processor** provides comprehensive preprocessing before analysis:
 
     - **Quick Presets**: One-click configurations for different data types:
-      - General Text (surveys, feedback)
+      - Survey Responses (feedback, open-ended questions, forms)
       - Social Media (Twitter/X with slang, emojis, hashtags)
-      - Product Reviews (elongated expressions, informal language)
+      - Long-form Reviews (elongated expressions, informal language)
       - News Articles (formal, minimal preprocessing)
 
     - **Enhanced Preprocessing Options**:

@@ -748,12 +748,12 @@ def get_sentiment_analyzer(
         return TwitterSentimentAnalyzer(**kwargs)
     elif data_type in ['survey', 'response', 'general']:
         return SurveySentimentAnalyzer(**kwargs)
-    elif data_type in ['longform', 'review', 'product']:
+    elif data_type in ['longform', 'review', 'product', 'news', 'article']:
         return LongFormSentimentAnalyzer(**kwargs)
     else:
         raise ValueError(
             f"Unknown data type: {data_type}. "
-            f"Choose from: 'twitter', 'survey', 'longform'"
+            f"Choose from: 'twitter', 'survey', 'longform', 'news'"
         )
 
 
@@ -826,5 +826,17 @@ DATA_TYPE_INFO = {
             'Trained on product reviews'
         ],
         'best_for': 'Product reviews, detailed feedback, articles'
+    },
+    'news': {
+        'name': 'News Articles',
+        'description': 'Formal, well-written news articles and content',
+        'model': 'nlptown/bert-base-multilingual-uncased-sentiment',
+        'features': [
+            'Handles long paragraphs',
+            'Multilingual support',
+            'Minimal preprocessing needed',
+            'Works well with formal text'
+        ],
+        'best_for': 'News articles, formal content, well-written text'
     }
 }

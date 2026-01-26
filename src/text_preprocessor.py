@@ -605,7 +605,7 @@ class DataCleaningPipeline:
 
     def __init__(
         self,
-        dataset_type: str = "general",
+        dataset_type: str = "survey",
         remove_stopwords: bool = True,
         lemmatize: bool = True,
         lowercase: bool = True,
@@ -616,7 +616,7 @@ class DataCleaningPipeline:
         Initialize the data cleaning pipeline.
 
         Args:
-            dataset_type: 'general', 'social_media', 'reviews', or 'news'
+            dataset_type: 'survey', 'social_media', 'reviews', or 'news'
             remove_stopwords: Remove stopwords during preprocessing
             lemmatize: Apply lemmatization
             lowercase: Convert to lowercase
@@ -643,13 +643,16 @@ class DataCleaningPipeline:
 
     def _get_config_for_dataset(self, dataset_type: str) -> dict:
         """Get preprocessor configuration for dataset type."""
+        # Base configuration for survey/general text
+        survey_config = {
+            "use_gold_standard": True,
+            "expand_slang": False,
+            "detect_spam": True,
+            "min_tokens": 3,
+        }
         configs = {
-            "general": {
-                "use_gold_standard": True,
-                "expand_slang": False,
-                "detect_spam": True,
-                "min_tokens": 3,
-            },
+            "survey": survey_config,
+            "general": survey_config,  # Alias for backward compatibility
             "social_media": {
                 "use_gold_standard": True,
                 "expand_slang": True,
@@ -676,7 +679,7 @@ class DataCleaningPipeline:
                 "max_tokens": 2000,
             },
         }
-        return configs.get(dataset_type, configs["general"])
+        return configs.get(dataset_type, configs["survey"])
 
     def clean_dataframe(
         self,
