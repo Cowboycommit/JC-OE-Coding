@@ -1120,6 +1120,114 @@ def run_ml_analysis(
                 return None
             return self.evaluation_metrics.get_summary()
 
+        def rename_code_label(self, code_id: str, new_label: str) -> bool:
+            """
+            Rename a code's label to a custom user-provided label.
+
+            This allows users to override auto-generated labels with more
+            meaningful names that better represent the cluster content.
+
+            Args:
+                code_id: The code ID (e.g., 'CODE_01')
+                new_label: The new label to assign
+
+            Returns:
+                True if successful, False if code_id not found.
+
+            Example:
+                >>> coder.rename_code_label('CODE_10', 'Product Quality Feedback')
+            """
+            if code_id not in self.codebook:
+                logger.warning(f"Code '{code_id}' not found in codebook")
+                return False
+
+            # Store original label for reference
+            if 'original_label' not in self.codebook[code_id]:
+                self.codebook[code_id]['original_label'] = self.codebook[code_id]['label']
+
+            # Update the label
+            self.codebook[code_id]['label'] = new_label
+            self.codebook[code_id]['user_renamed'] = True
+
+            # Also update cluster_interpretation if available
+            if self.cluster_interpretation is not None:
+                cluster_id = code_id.replace('CODE_', 'CLUSTER_')
+                if cluster_id in self.cluster_interpretation.summaries:
+                    summary = self.cluster_interpretation.summaries[cluster_id]
+                    if summary.llm_label is None:
+                        # Store original in llm fields for reference
+                        summary.llm_label = new_label
+                        summary.llm_source = 'user_renamed'
+                    else:
+                        # User is overriding LLM label
+                        summary.llm_label = new_label
+                        summary.llm_source = 'user_renamed'
+
+            logger.info(f"Renamed {code_id} to '{new_label}'")
+            return True
+
+        def get_code_labels(self) -> Dict[str, Dict[str, str]]:
+            """
+            Get all code labels with their sources.
+
+            Returns:
+                Dictionary mapping code_id to label info:
+                {
+                    'CODE_01': {
+                        'current_label': 'User Label',
+                        'original_label': 'Auto Generated Label',
+                        'llm_label': 'LLM Enhanced Label',
+                        'source': 'user_renamed' | 'llm' | 'auto'
+                    },
+                    ...
+                }
+            """
+            labels = {}
+            for code_id, info in self.codebook.items():
+                label_info = {
+                    'current_label': info.get('llm_label', info['label']),
+                    'original_label': info.get('original_label', info['label']),
+                    'llm_label': info.get('llm_label'),
+                    'source': 'user_renamed' if info.get('user_renamed') else (
+                        'llm' if info.get('llm_label') else 'auto'
+                    )
+                }
+                labels[code_id] = label_info
+            return labels
+
+        def reset_code_label(self, code_id: str) -> bool:
+            """
+            Reset a code's label back to the original auto-generated label.
+
+            Args:
+                code_id: The code ID (e.g., 'CODE_01')
+
+            Returns:
+                True if successful, False if code_id not found.
+            """
+            if code_id not in self.codebook:
+                logger.warning(f"Code '{code_id}' not found in codebook")
+                return False
+
+            # Reset to original label
+            if 'original_label' in self.codebook[code_id]:
+                self.codebook[code_id]['label'] = self.codebook[code_id]['original_label']
+
+            # Clear user-renamed flags
+            self.codebook[code_id].pop('user_renamed', None)
+            self.codebook[code_id].pop('llm_label', None)
+
+            # Also update cluster_interpretation if available
+            if self.cluster_interpretation is not None:
+                cluster_id = code_id.replace('CODE_', 'CLUSTER_')
+                if cluster_id in self.cluster_interpretation.summaries:
+                    summary = self.cluster_interpretation.summaries[cluster_id]
+                    summary.llm_label = None
+                    summary.llm_source = None
+
+            logger.info(f"Reset {code_id} label to original")
+            return True
+
     # Run analysis with progress updates
     start_time = time.time()
 

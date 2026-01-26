@@ -2810,6 +2810,47 @@ def page_results_overview():
                                 if summary.has_mixed_sentiment:
                                     st.warning("⚠️ Mixed sentiment: contains both positive and negative views on this topic")
 
+                # Add label editing section
+                st.markdown("---")
+                st.markdown("**✏️ Edit Label:**")
+
+                # Show if this label was user-renamed
+                if info.get('user_renamed'):
+                    st.caption(f"📝 Custom label (original: {info.get('original_label', 'N/A')})")
+
+                # Text input for new label with unique key
+                new_label = st.text_input(
+                    "New label",
+                    value=display_label,
+                    key=f"label_input_{code_id}",
+                    label_visibility="collapsed"
+                )
+
+                col_save, col_reset = st.columns(2)
+                with col_save:
+                    if st.button("💾 Save", key=f"save_{code_id}", use_container_width=True):
+                        if new_label and new_label != display_label:
+                            if hasattr(coder, 'rename_code_label'):
+                                success = coder.rename_code_label(code_id, new_label)
+                                if success:
+                                    st.success(f"✓ Label updated!")
+                                    st.rerun()
+                                else:
+                                    st.error("Failed to update label")
+                            else:
+                                # Fallback for older coder versions
+                                coder.codebook[code_id]['label'] = new_label
+                                st.success(f"✓ Label updated!")
+                                st.rerun()
+
+                with col_reset:
+                    if info.get('user_renamed') or info.get('original_label'):
+                        if st.button("↩️ Reset", key=f"reset_{code_id}", use_container_width=True):
+                            if hasattr(coder, 'reset_code_label'):
+                                coder.reset_code_label(code_id)
+                                st.success("✓ Label reset to original")
+                                st.rerun()
+
     # Next button - always show on this page if analysis is complete
     render_next_button("📈 Visualizations")
 
