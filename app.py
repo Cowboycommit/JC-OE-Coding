@@ -2113,7 +2113,10 @@ def page_run_analysis():
                     )
                     n_codes = optimal_n
 
-                    st.success(f"✨ Optimal number of codes determined: **{optimal_n}** (silhouette score: {optimal_results['best_silhouette_score']:.4f})")
+                    # Show which representation was used for optimization
+                    rep_used = optimal_results.get('representation_used', 'tfidf')
+                    rep_display = rep_used.upper() if rep_used in ('bert', 'lstm') else 'TF-IDF'
+                    st.success(f"✨ Optimal number of codes determined: **{optimal_n}** (silhouette score: {optimal_results['best_silhouette_score']:.4f}, using {rep_display} features)")
                 except ValueError as ve:
                     progress_bar.empty()
                     status_text.empty()
