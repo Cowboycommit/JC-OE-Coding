@@ -1902,7 +1902,7 @@ def page_configuration():
     # Data Type & Sentiment Analysis Configuration
     # ==========================================================================
     st.markdown("---")
-    st.markdown("### 📊 Response Type & Sentiment Analysis")
+    st.markdown("### 📊 Response Type & Sentiment Model")
 
     # Data type selection with clear descriptions (matches Text Processor presets)
     data_type_options = {
@@ -1962,23 +1962,11 @@ def page_configuration():
     </div>
     """, unsafe_allow_html=True)
 
-    # Enable sentiment analysis checkbox
-    # Use a single session state key to avoid conflicts between widget key and manual state
+    # Sentiment analysis is standard - always enabled when available
     if SENTIMENT_ANALYSIS_AVAILABLE:
-        # Initialize if not set
-        if 'enable_sentiment' not in st.session_state:
-            st.session_state.enable_sentiment = False
-
-        enable_sentiment = st.checkbox(
-            "Enable Sentiment Analysis",
-            value=st.session_state.enable_sentiment,
-            help="Run sentiment analysis to detect positive, neutral, or negative sentiment in each response"
-        )
-        # Update session state when checkbox changes
-        st.session_state.enable_sentiment = enable_sentiment
-
-        if enable_sentiment:
-            st.success(f"✅ Sentiment analysis will use **{selected_type_info['model']}** for {selected_type_info['name'].lower()}")
+        enable_sentiment = True
+        st.session_state.enable_sentiment = True
+        st.success(f"✅ Sentiment analysis will use **{selected_type_info['model']}** for {selected_type_info['name'].lower()}")
     else:
         st.markdown("""
         <div class="warning-box" style="padding: 10px; font-size: 0.9em;">
@@ -2121,9 +2109,9 @@ def page_run_analysis():
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
 
     if enable_sentiment and SENTIMENT_ANALYSIS_AVAILABLE:
-        data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT'}
+        data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT', 'news': 'Review-BERT'}
         model_label = data_type_models.get(data_type, 'Standard')
-        st.success(f"📊 **Sentiment Analysis Enabled** - Using {model_label} model for {data_type_label} responses")
+        st.info(f"📊 **Sentiment Analysis** - Using {model_label} model for {data_type_label} responses")
 
     st.markdown("---")
 
@@ -2377,143 +2365,94 @@ def page_results_overview():
         except Exception as e:
             st.error(f"Export error: {str(e)}")
 
-    # Tabs for Extracted Codes, Assignments, and Sentiment (if enabled)
+    # Extracted Codes with Sentiment Distribution
     st.markdown("---")
+    st.markdown("### 📊 Extracted Codes")
 
     # Check if sentiment analysis was enabled
     sentiment_enabled = metrics.get('sentiment_enabled', False)
+    has_sentiment = 'sentiment_label' in results_df.columns and 'sentiment_score' in results_df.columns
 
-    if sentiment_enabled:
-        tab1, tab2 = st.tabs(["Extracted Codes", "📊 Labels & Sentiment"])
-    else:
-        tab1, tab2 = st.tabs(["Extracted Codes", "🏷️ Label Assignments"])
+    # Show overall sentiment summary if available
+    if has_sentiment and sentiment_enabled:
+        sentiment_dist = metrics.get('sentiment_distribution', {})
+        if sentiment_dist:
+            total = sum(sentiment_dist.values())
+            pos_count = sentiment_dist.get('positive', 0)
+            neu_count = sentiment_dist.get('neutral', 0)
+            neg_count = sentiment_dist.get('negative', 0)
 
-    with tab1:
-        # All codes ordered by code ID (CODE_01, CODE_02, etc.)
-        all_codes_df = get_top_codes(coder, n=None, sort_by='code')
+            pos_pct = (pos_count / total * 100) if total > 0 else 0
+            neu_pct = (neu_count / total * 100) if total > 0 else 0
+            neg_pct = (neg_count / total * 100) if total > 0 else 0
 
-        # Display as styled table with all codes
-        st.dataframe(
-            style_frequency_table(all_codes_df),
-            use_container_width=True,
-            height=500
-        )
-
-    with tab2:
-        # Combined Labels & Sentiment view
-        assignments_df = results_df.copy()
-        total_responses = len(assignments_df)
-        text_col = st.session_state.config['text_column']
-        sentiment_filter = 'All'  # Default value
-
-        # Check if sentiment data is available
-        has_sentiment = 'sentiment_label' in assignments_df.columns and 'sentiment_score' in assignments_df.columns
-
-        # Show sentiment summary at top (only if sentiment enabled)
-        if has_sentiment and sentiment_enabled:
-            sentiment_dist = metrics.get('sentiment_distribution', {})
-            if sentiment_dist:
-                total = sum(sentiment_dist.values())
-                pos_count = sentiment_dist.get('positive', 0)
-                neu_count = sentiment_dist.get('neutral', 0)
-                neg_count = sentiment_dist.get('negative', 0)
-
-                pos_pct = (pos_count / total * 100) if total > 0 else 0
-                neu_pct = (neu_count / total * 100) if total > 0 else 0
-                neg_pct = (neg_count / total * 100) if total > 0 else 0
-
-                st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; padding: 15px; margin-bottom: 20px;">
-                    <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Sentiment Overview</div>
-                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                        <span style="background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
-                            😊 Positive: {pos_count} ({pos_pct:.1f}%)
-                        </span>
-                        <span style="background: #e2e3e5; color: #383d41; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
-                            😐 Neutral: {neu_count} ({neu_pct:.1f}%)
-                        </span>
-                        <span style="background: #f8d7da; color: #721c24; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
-                            😞 Negative: {neg_count} ({neg_pct:.1f}%)
-                        </span>
-                    </div>
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                <div style="font-weight: 600; margin-bottom: 10px; color: #495057;">Overall Sentiment Distribution</div>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <span style="background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
+                        😊 Positive: {pos_count} ({pos_pct:.1f}%)
+                    </span>
+                    <span style="background: #e2e3e5; color: #383d41; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
+                        😐 Neutral: {neu_count} ({neu_pct:.1f}%)
+                    </span>
+                    <span style="background: #f8d7da; color: #721c24; padding: 8px 16px; border-radius: 20px; font-weight: 500;">
+                        😞 Negative: {neg_count} ({neg_pct:.1f}%)
+                    </span>
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
 
-            # Sentiment filter
-            sentiment_filter = st.selectbox(
-                "Filter by sentiment:",
-                options=['All', 'Positive', 'Neutral', 'Negative'],
-                index=0,
-                key="combined_sentiment_filter"
-            )
+    # Get all codes ordered by code ID (CODE_01, CODE_02, etc.)
+    all_codes_df = get_top_codes(coder, n=None, sort_by='code')
 
-            # Apply filter
-            if sentiment_filter != 'All':
-                assignments_df = assignments_df[assignments_df['sentiment_label'] == sentiment_filter.lower()]
-
-        # Calculate prevalence for each code
-        code_counts = {}
-        for codes in results_df['assigned_codes']:  # Use full results for prevalence calc
-            if codes:
+    # Add sentiment distribution per code if sentiment analysis was run
+    if has_sentiment and sentiment_enabled:
+        # Calculate sentiment distribution for each code
+        code_sentiment = {}
+        for idx, row in results_df.iterrows():
+            codes = row.get('assigned_codes', [])
+            sentiment = row.get('sentiment_label', None)
+            if codes and sentiment:
                 for code in codes:
-                    code_counts[code] = code_counts.get(code, 0) + 1
+                    if code not in code_sentiment:
+                        code_sentiment[code] = {'positive': 0, 'neutral': 0, 'negative': 0, 'total': 0}
+                    code_sentiment[code][sentiment] = code_sentiment[code].get(sentiment, 0) + 1
+                    code_sentiment[code]['total'] += 1
 
-        # Increase sample size for better overview
-        sample_size = min(30, len(assignments_df))
-        display_cols = [text_col, 'assigned_codes']
-        if has_sentiment:
-            display_cols.extend(['sentiment_label', 'sentiment_score'])
-
-        sample_df = assignments_df[display_cols].head(sample_size).copy()
-
-        # Build display dataframe
-        display_df = sample_df.copy()
-
-        # Format labels
-        display_df['Label'] = display_df['assigned_codes'].apply(
-            lambda codes: ', '.join([coder.codebook[code]['label'] for code in codes if code in coder.codebook]) if codes else 'None'
-        )
-
-        # Add prevalence
-        def get_prevalence(codes):
-            if not codes or len(codes) == 0:
+        # Add sentiment columns to codes dataframe
+        def get_sentiment_dist(code_id):
+            if code_id not in code_sentiment:
                 return "—"
-            first_code = codes[0]
-            count = code_counts.get(first_code, 0)
-            prevalence = (count / total_responses) * 100 if total_responses > 0 else 0
-            return f"{prevalence:.1f}%"
+            dist = code_sentiment[code_id]
+            total = dist['total']
+            if total == 0:
+                return "—"
+            pos_pct = (dist['positive'] / total * 100)
+            neu_pct = (dist['neutral'] / total * 100)
+            neg_pct = (dist['negative'] / total * 100)
+            return f"😊 {pos_pct:.0f}% | 😐 {neu_pct:.0f}% | 😞 {neg_pct:.0f}%"
 
-        display_df['Prevalence'] = sample_df['assigned_codes'].apply(get_prevalence)
-        display_df = display_df.rename(columns={text_col: 'Response'})
+        def get_dominant_sentiment(code_id):
+            if code_id not in code_sentiment:
+                return "—"
+            dist = code_sentiment[code_id]
+            total = dist['total']
+            if total == 0:
+                return "—"
+            max_sentiment = max(['positive', 'neutral', 'negative'], key=lambda s: dist.get(s, 0))
+            emoji_map = {'positive': '😊', 'neutral': '😐', 'negative': '😞'}
+            return f"{emoji_map[max_sentiment]} {max_sentiment.capitalize()}"
 
-        if has_sentiment:
-            # Format sentiment with emoji for easy reading
-            def format_sentiment(label):
-                if not isinstance(label, str):
-                    return '—'
-                emoji_map = {'positive': '😊', 'neutral': '😐', 'negative': '😞'}
-                return f"{emoji_map.get(label, '')} {label.capitalize()}"
+        all_codes_df['Sentiment Distribution'] = all_codes_df['Code'].apply(get_sentiment_dist)
+        all_codes_df['Dominant Sentiment'] = all_codes_df['Code'].apply(get_dominant_sentiment)
 
-            display_df['Sentiment'] = display_df['sentiment_label'].apply(format_sentiment)
-            display_df['Confidence'] = display_df['sentiment_score'].apply(
-                lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else '—'
-            )
-            final_cols = ['Response', 'Label', 'Sentiment', 'Confidence', 'Prevalence']
-        else:
-            final_cols = ['Response', 'Label', 'Prevalence']
-
-        display_df = display_df[final_cols]
-
-        # Show count info
-        if has_sentiment and sentiment_enabled and sentiment_filter != 'All':
-            st.caption(f"Showing {len(display_df)} of {len(assignments_df)} {sentiment_filter.lower()} responses")
-        else:
-            st.caption(f"Showing {len(display_df)} of {total_responses} responses")
-
-        if len(display_df) > 0:
-            st.dataframe(display_df, use_container_width=True, height=450)
-        else:
-            st.info("No responses match the selected filter")
+    # Display as styled table with all codes
+    st.dataframe(
+        style_frequency_table(all_codes_df),
+        use_container_width=True,
+        height=500
+    )
 
     # Word Frequency Chart (directly after results table, before codebook)
     st.markdown("---")
