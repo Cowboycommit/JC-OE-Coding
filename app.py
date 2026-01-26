@@ -2350,11 +2350,16 @@ def page_results_overview():
         pos_count = sentiment_dist_metrics.get('positive', 0)
         neu_count = sentiment_dist_metrics.get('neutral', 0)
         neg_count = sentiment_dist_metrics.get('negative', 0)
-        sentiment_chips = f"""
-        <span class="stat-chip" style="background: #d4edda; color: #155724;">😊 Positive: {pos_count}</span>
-        <span class="stat-chip" style="background: #e2e3e5; color: #383d41;">😐 Neutral: {neu_count}</span>
-        <span class="stat-chip" style="background: #f8d7da; color: #721c24;">😞 Negative: {neg_count}</span>
-        """
+        total_sentiment = pos_count + neu_count + neg_count
+        if total_sentiment > 0:
+            pos_pct = (pos_count / total_sentiment * 100)
+            neu_pct = (neu_count / total_sentiment * 100)
+            neg_pct = (neg_count / total_sentiment * 100)
+            sentiment_chips = f"""
+            <span class="stat-chip" style="background: #d4edda; color: #155724;">😊 Positive: {pos_pct:.1f}%</span>
+            <span class="stat-chip" style="background: #e2e3e5; color: #383d41;">😐 Neutral: {neu_pct:.1f}%</span>
+            <span class="stat-chip" style="background: #f8d7da; color: #721c24;">😞 Negative: {neg_pct:.1f}%</span>
+            """
 
     stat_chips_html = f"""
     <div style="margin: 10px 0 20px 0;">
