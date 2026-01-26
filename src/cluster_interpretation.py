@@ -80,7 +80,10 @@ DEFAULT_LABEL_STOPWORDS: Set[str] = {
     'theirs', 'themselves', 'am', 'about', 'against', 'over', 'out', 'up',
     'down', 'off', 'on', 'over', 'under', 'again', 'get', 'got', 'getting',
     'really', 'actually', 'basically', 'simply', 'even', 'still', 'already',
-    've', 'll', 're', 't', 's', 'd', 'm'  # Contractions
+    've', 'll', 're', 't', 's', 'd', 'm',  # Contractions
+    # HTML entity artifacts
+    'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash',
+    'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'
 }
 
 # For backward compatibility

@@ -2710,7 +2710,7 @@ def page_results_overview():
 
                 # Very minimal stopwords - ONLY articles/prepositions/pronouns
                 # NO content words since data is likely lemmatized/preprocessed
-                stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'if', 'it', 'its', 'this', 'that', 'i', 'you', 'we', 'they', 'my', 'your', 'he', 'she', 'him', 'her', 'me', 'them', 'us', 'is', 'was', 'are', 'were', 'be', 'been', 'am', 'has', 'have', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'from', 'than', 'so', 'not', 'no', 'nan', 'none', 'also', 'very', 'just', 'only', 'even', 'still', 'already', 'yet'}
+                stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'if', 'it', 'its', 'this', 'that', 'i', 'you', 'we', 'they', 'my', 'your', 'he', 'she', 'him', 'her', 'me', 'them', 'us', 'is', 'was', 'are', 'were', 'be', 'been', 'am', 'has', 'have', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'from', 'than', 'so', 'not', 'no', 'nan', 'none', 'also', 'very', 'just', 'only', 'even', 'still', 'already', 'yet', 'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash', 'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'}
                 word_counts = {}
                 for word in words:
                     if len(word) > 1 and word not in stopwords:  # Allow 2-char words
@@ -3137,83 +3137,72 @@ def page_visualizations():
 
             with st.expander("ℹ️ What am I seeing?", expanded=False):
                 st.markdown("""
-                **What this shows:** Visual representation of the most frequent words across ALL responses.
+                **What this shows:** Visual representation of the most frequent words and phrases across ALL responses.
 
-                **How to interpret:** Larger words = more frequent. Colors are for visual distinction only.
+                **How to interpret:** Larger words = more frequent/important. Colors are for visual distinction only.
+                This word cloud uses meaningful terms extracted from topic analysis, including phrases.
                 """)
 
-            if viz_data.get('wordcloud_available', False):
-                wordcloud_text = viz_data['wordcloud_text']
-
-                # Generate word cloud (lightweight - just rendering pre-cleaned text)
-                # Use wordcloud package if available, otherwise fall back to PIL
-                wordcloud = None
-                try:
-                    if WORDCLOUD_AVAILABLE:
-                        wordcloud = WordCloud(
-                            width=800,
-                            height=400,
-                            background_color='white',
-                            colormap='viridis',
-                            max_words=100,
-                            min_font_size=10,
-                            max_font_size=100
-                        ).generate(wordcloud_text)
-                    elif PILWordCloud is not None:
-                        wordcloud = PILWordCloud(
-                            width=800,
-                            height=400,
-                            background_color='white',
-                            max_words=100,
-                            min_font_size=10,
-                            max_font_size=100
-                        ).generate(wordcloud_text)
-                except ValueError as e:
-                    # WordCloud raises ValueError if text is empty or only stopwords
-                    st.info(f"📝 Not enough text content to generate word cloud. The text may contain only common words (stopwords) that are filtered out.")
-                    wordcloud = None
-
-                if wordcloud is not None:
-                    # Create matplotlib figure
-                    fig, ax = plt.subplots(figsize=(12, 6))
-                    # Use to_image() PIL method for numpy compatibility
-                    ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-                    ax.axis('off')
-                    plt.tight_layout()
-
-                    st.pyplot(fig, use_container_width=True)
-                    plt.close(fig)  # Clean up to prevent memory leaks
-
-                    st.caption("Word cloud generated from all response text")
-                elif wordcloud_text.strip():
-                    # Text exists but wordcloud failed for other reason
-                    st.warning("⚠️ Word cloud generation failed. PIL library may not be available.")
-            elif PIL_AVAILABLE and PILWordCloud is not None:
-                # Fallback: generate word cloud even if viz_data didn't have it pre-computed
+            if WORDCLOUD_AVAILABLE or PIL_AVAILABLE:
                 try:
                     results_df = st.session_state.results_df
                     text_column = viz_data.get('text_column', 'response')
-                    all_text = ' '.join(results_df[text_column].dropna().astype(str).tolist())
-                    cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
 
-                    wordcloud = PILWordCloud(
-                        width=800,
-                        height=400,
-                        background_color='white',
+                    # Use MethodVisualizer to generate overall word cloud with pre-computed terms
+                    visualizer = MethodVisualizer(coder, results_df, text_column)
+                    overall_fig = visualizer.create_overall_wordcloud(
                         max_words=100,
-                        min_font_size=10,
-                        max_font_size=100
-                    ).generate(cleaned_text)
+                        width=800,
+                        height=400
+                    )
 
-                    fig, ax = plt.subplots(figsize=(12, 6))
-                    ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-                    ax.axis('off')
-                    plt.tight_layout()
+                    if overall_fig is not None:
+                        st.pyplot(overall_fig, use_container_width=True)
+                        plt.close(overall_fig)
+                        st.caption("Word cloud generated from topic analysis (includes meaningful phrases)")
+                    else:
+                        # Fallback to basic text-based word cloud with better filtering
+                        st.info("📝 Generating word cloud from raw text (topic terms not available)...")
+                        all_text = ' '.join(results_df[text_column].dropna().astype(str).tolist())
+                        cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
+                        # Filter out single/double letter words
+                        words = cleaned_text.split()
+                        filtered_words = [w for w in words if len(w) >= 3]
+                        cleaned_text = ' '.join(filtered_words)
 
-                    st.pyplot(fig, use_container_width=True)
-                    plt.close(fig)
+                        if cleaned_text.strip():
+                            try:
+                                if WORDCLOUD_AVAILABLE:
+                                    wordcloud = WordCloud(
+                                        width=800,
+                                        height=400,
+                                        background_color='white',
+                                        colormap='viridis',
+                                        max_words=100,
+                                        min_font_size=10,
+                                        max_font_size=100
+                                    ).generate(cleaned_text)
+                                else:
+                                    wordcloud = PILWordCloud(
+                                        width=800,
+                                        height=400,
+                                        background_color='white',
+                                        max_words=100,
+                                        min_font_size=10,
+                                        max_font_size=100
+                                    ).generate(cleaned_text)
 
-                    st.caption("Word cloud generated from all response text (using PIL fallback)")
+                                fig, ax = plt.subplots(figsize=(12, 6))
+                                ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+                                ax.axis('off')
+                                plt.tight_layout()
+                                st.pyplot(fig, use_container_width=True)
+                                plt.close(fig)
+                                st.caption("Word cloud generated from response text (fallback)")
+                            except ValueError:
+                                st.info("📝 Not enough meaningful text content to generate word cloud.")
+                        else:
+                            st.info("📝 No text content available for word cloud.")
                 except Exception as e:
                     st.warning(f"⚠️ Word cloud generation failed: {str(e)}")
             else:

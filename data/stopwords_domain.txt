@@ -71,3 +71,22 @@ opinion
 opinions
 regarding
 concerning
+
+# HTML entity artifacts (appear when HTML is improperly decoded)
+amp
+nbsp
+quot
+lt
+gt
+apos
+ndash
+mdash
+rsquo
+lsquo
+rdquo
+ldquo
+hellip
+bull
+copy
+reg
+trade
