@@ -567,6 +567,74 @@ class MethodVisualizer:
                 return label
         return f"Topic {cluster_idx + 1}"
 
+    def _get_cluster_term_frequencies(self, cluster_idx: int) -> Optional[Dict[str, float]]:
+        """
+        Get pre-computed term frequencies for a cluster from interpretation data.
+
+        This uses the top_terms and term_weights from ClusterInterpretation,
+        which are properly filtered and weighted using TF-IDF. This approach:
+        - Guarantees non-empty results if the cluster has terms
+        - Supports n-grams (phrases like "customer service")
+        - Uses proper TF-IDF weights instead of raw frequency
+        - Avoids stopword filtering issues
+
+        Args:
+            cluster_idx: Zero-based cluster/topic index
+
+        Returns:
+            Dictionary of term -> weight, or None if not available
+        """
+        # Try cluster_interpretation first (ClusterInterpretationReport)
+        if hasattr(self.coder, 'cluster_interpretation') and self.coder.cluster_interpretation is not None:
+            report = self.coder.cluster_interpretation
+            # ClusterInterpretationReport uses string keys like "CLUSTER_01"
+            cluster_id = f"CLUSTER_{cluster_idx + 1:02d}"
+            if cluster_id in report.summaries:
+                summary = report.summaries[cluster_id]
+                if summary.top_terms and summary.term_weights:
+                    # Create frequency dict from terms and weights
+                    # Normalize weights to ensure good visual scaling
+                    max_weight = max(summary.term_weights) if summary.term_weights else 1.0
+                    freq_dict = {}
+                    for term, weight in zip(summary.top_terms, summary.term_weights):
+                        # Scale weights to 1-100 range for better wordcloud sizing
+                        normalized = (weight / max_weight) * 100 if max_weight > 0 else 50
+                        freq_dict[term] = max(normalized, 1)  # Ensure minimum weight
+                    if freq_dict:
+                        logger.debug(f"Using cluster interpretation terms for cluster {cluster_idx}: {len(freq_dict)} terms")
+                        return freq_dict
+            # Try numeric key if string key not found
+            if cluster_idx in report.summaries:
+                summary = report.summaries[cluster_idx]
+                if summary.top_terms and summary.term_weights:
+                    max_weight = max(summary.term_weights) if summary.term_weights else 1.0
+                    freq_dict = {}
+                    for term, weight in zip(summary.top_terms, summary.term_weights):
+                        normalized = (weight / max_weight) * 100 if max_weight > 0 else 50
+                        freq_dict[term] = max(normalized, 1)
+                    if freq_dict:
+                        logger.debug(f"Using cluster interpretation terms (numeric key) for cluster {cluster_idx}: {len(freq_dict)} terms")
+                        return freq_dict
+
+        # Fallback: Try codebook keywords
+        code_id = f"CODE_{cluster_idx + 1:02d}"
+        if self.codebook and code_id in self.codebook:
+            keywords = self.codebook[code_id].get('keywords', [])
+            if keywords:
+                # Assign decreasing weights to keywords by position
+                freq_dict = {}
+                n_keywords = len(keywords)
+                for i, keyword in enumerate(keywords):
+                    # Higher weight for earlier keywords (more important)
+                    weight = 100 - (i * (80 / max(n_keywords - 1, 1)))
+                    freq_dict[keyword] = max(weight, 10)
+                if freq_dict:
+                    logger.debug(f"Using codebook keywords for cluster {cluster_idx}: {len(freq_dict)} terms")
+                    return freq_dict
+
+        logger.debug(f"No pre-computed terms available for cluster {cluster_idx}")
+        return None
+
     def create_cluster_scatter(
         self,
         reduction_method: str = 'pca',
@@ -1217,6 +1285,10 @@ class MethodVisualizer:
         """
         Create word cloud for a specific cluster/topic.
 
+        Uses pre-computed topic terms from cluster interpretation when available,
+        which guarantees non-empty wordclouds and proper n-gram phrase support.
+        Falls back to raw text extraction if interpretation data is not available.
+
         Args:
             cluster_id: Cluster/topic index (0-based)
             max_words: Maximum words in cloud
@@ -1226,46 +1298,79 @@ class MethodVisualizer:
         Returns:
             Matplotlib Figure, PIL Image, or None if not available
         """
-        # Get documents in this cluster
-        mask = self.assignments == cluster_id
-        cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
-
-        if not cluster_texts:
-            logger.warning(f"No documents in cluster {cluster_id}")
-            return None
-
-        # Combine and clean text
-        combined_text = ' '.join(str(t) for t in cluster_texts)
         import re
-        cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+        wordcloud = None
 
-        # Use wordcloud package if available, otherwise fall back to PIL
-        try:
-            if WORDCLOUD_AVAILABLE:
-                wordcloud = WordCloud(
-                    width=width,
-                    height=height,
-                    background_color='white',
-                    colormap='viridis',
-                    max_words=max_words,
-                    min_font_size=10,
-                    max_font_size=100
-                ).generate(cleaned_text)
-            elif PIL_AVAILABLE:
-                # Fall back to PIL-based word cloud
-                wordcloud = PILWordCloud(
-                    width=width,
-                    height=height,
-                    background_color='white',
-                    max_words=max_words,
-                    min_font_size=10,
-                    max_font_size=100
-                ).generate(cleaned_text)
-            else:
-                logger.warning("Neither wordcloud nor PIL available for word cloud generation")
+        # PRIORITY 1: Try pre-computed term frequencies from cluster interpretation
+        # This is the most reliable approach - guarantees non-empty results
+        term_freqs = self._get_cluster_term_frequencies(cluster_id)
+        if term_freqs:
+            try:
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate_from_frequencies(term_freqs)
+                    logger.info(f"Generated wordcloud from term frequencies for cluster {cluster_id}")
+                elif PIL_AVAILABLE:
+                    wordcloud = PILWordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate_from_frequencies(term_freqs)
+                    logger.info(f"Generated PIL wordcloud from term frequencies for cluster {cluster_id}")
+            except Exception as e:
+                logger.warning(f"Term-based wordcloud failed for cluster {cluster_id}: {e}")
+                wordcloud = None
+
+        # PRIORITY 2: Fall back to raw text extraction
+        if wordcloud is None:
+            mask = self.assignments == cluster_id
+            cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+
+            if not cluster_texts:
+                logger.warning(f"No documents in cluster {cluster_id}")
                 return None
-        except ValueError as e:
-            logger.warning(f"Word cloud generation failed for cluster {cluster_id}: {e}")
+
+            combined_text = ' '.join(str(t) for t in cluster_texts)
+            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+
+            try:
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(cleaned_text)
+                elif PIL_AVAILABLE:
+                    wordcloud = PILWordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(cleaned_text)
+                else:
+                    logger.warning("Neither wordcloud nor PIL available for word cloud generation")
+                    return None
+            except ValueError as e:
+                logger.warning(f"Text-based word cloud generation failed for cluster {cluster_id}: {e}")
+                return None
+
+        if wordcloud is None:
             return None
 
         # Use matplotlib if available, otherwise return PIL image directly
@@ -1288,6 +1393,10 @@ class MethodVisualizer:
         """
         Create grid of word clouds for all clusters.
 
+        Uses pre-computed topic terms from cluster interpretation when available,
+        which guarantees non-empty wordclouds and proper n-gram phrase support.
+        Falls back to raw text extraction if interpretation data is not available.
+
         Args:
             max_words: Maximum words per cloud
             cols: Number of columns in grid
@@ -1304,8 +1413,8 @@ class MethodVisualizer:
 
         import re
 
-        def generate_wordcloud(cleaned_text, cell_width, cell_height):
-            """Helper to generate wordcloud using available method."""
+        def generate_wordcloud_from_text(cleaned_text, cell_width, cell_height):
+            """Helper to generate wordcloud from text using available method."""
             if WORDCLOUD_AVAILABLE:
                 return WordCloud(
                     width=cell_width,
@@ -1322,6 +1431,51 @@ class MethodVisualizer:
                     max_words=max_words
                 ).generate(cleaned_text)
 
+        def generate_wordcloud_from_freqs(term_freqs, cell_width, cell_height):
+            """Helper to generate wordcloud from term frequencies."""
+            if WORDCLOUD_AVAILABLE:
+                return WordCloud(
+                    width=cell_width,
+                    height=cell_height,
+                    background_color='white',
+                    colormap='viridis',
+                    max_words=max_words
+                ).generate_from_frequencies(term_freqs)
+            else:
+                return PILWordCloud(
+                    width=cell_width,
+                    height=cell_height,
+                    background_color='white',
+                    max_words=max_words
+                ).generate_from_frequencies(term_freqs)
+
+        def get_wordcloud_for_cluster(cluster_id, cell_width, cell_height):
+            """Generate wordcloud for a cluster, trying term frequencies first."""
+            # PRIORITY 1: Try pre-computed term frequencies
+            term_freqs = self._get_cluster_term_frequencies(cluster_id)
+            if term_freqs:
+                try:
+                    wordcloud = generate_wordcloud_from_freqs(term_freqs, cell_width, cell_height)
+                    logger.debug(f"Generated grid wordcloud from term frequencies for cluster {cluster_id}")
+                    return wordcloud
+                except Exception as e:
+                    logger.debug(f"Term-based wordcloud failed for cluster {cluster_id}: {e}")
+
+            # PRIORITY 2: Fall back to raw text
+            mask = self.assignments == cluster_id
+            cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+
+            if not cluster_texts:
+                return None
+
+            combined_text = ' '.join(str(t) for t in cluster_texts)
+            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+
+            try:
+                return generate_wordcloud_from_text(cleaned_text, cell_width, cell_height)
+            except ValueError:
+                return None
+
         # Use matplotlib if available
         if MATPLOTLIB_AVAILABLE:
             fig, axes = plt.subplots(rows, cols, figsize=(cols * 5, rows * 3))
@@ -1333,29 +1487,20 @@ class MethodVisualizer:
 
             for cluster_id in range(n_clusters):
                 ax = axes[cluster_id]
-
-                # Get documents in this cluster
                 mask = self.assignments == cluster_id
-                cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+                doc_count = sum(mask)
 
-                if not cluster_texts:
-                    ax.text(0.5, 0.5, 'No documents', ha='center', va='center')
-                    ax.axis('off')
-                    continue
+                wordcloud = get_wordcloud_for_cluster(cluster_id, 400, 200)
 
-                # Generate word cloud
-                combined_text = ' '.join(str(t) for t in cluster_texts)
-                cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
-
-                try:
-                    wordcloud = generate_wordcloud(cleaned_text, 400, 200)
+                if wordcloud is None:
+                    ax.text(0.5, 0.5, 'No data available', ha='center', va='center',
+                            fontsize=10, color='gray')
+                else:
                     # Use to_image() PIL method for numpy compatibility
                     ax.imshow(wordcloud.to_image(), interpolation='bilinear')
-                except ValueError:
-                    ax.text(0.5, 0.5, 'Insufficient text', ha='center', va='center')
 
                 ax.axis('off')
-                ax.set_title(f'{self._get_topic_label(cluster_id)} ({sum(mask)} docs)')
+                ax.set_title(f'{self._get_topic_label(cluster_id)} ({doc_count} docs)')
 
             # Hide unused axes
             for idx in range(n_clusters, len(axes)):
@@ -1365,28 +1510,22 @@ class MethodVisualizer:
             return fig
         else:
             # PIL fallback: create a combined image grid
+            from PIL import ImageDraw
             wordcloud_images = []
             cell_width, cell_height = 400, 200
 
             for cluster_id in range(n_clusters):
-                mask = self.assignments == cluster_id
-                cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+                wordcloud = get_wordcloud_for_cluster(cluster_id, cell_width, cell_height)
 
-                if not cluster_texts:
-                    # Create blank image for empty clusters
+                if wordcloud is None:
+                    # Create image with "No data" message for empty clusters
                     img = Image.new('RGB', (cell_width, cell_height), 'white')
+                    draw = ImageDraw.Draw(img)
+                    draw.text((cell_width//2 - 40, cell_height//2 - 5),
+                              'No data available', fill='gray')
                     wordcloud_images.append(img)
-                    continue
-
-                combined_text = ' '.join(str(t) for t in cluster_texts)
-                cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
-
-                try:
-                    wordcloud = generate_wordcloud(cleaned_text, cell_width, cell_height)
+                else:
                     wordcloud_images.append(wordcloud.to_image())
-                except ValueError:
-                    img = Image.new('RGB', (cell_width, cell_height), 'white')
-                    wordcloud_images.append(img)
 
             # Combine images into a grid
             grid_width = cols * cell_width
@@ -1414,6 +1553,9 @@ class MethodVisualizer:
         Words are sized by frequency and colored by semantic similarity.
         Similar colors indicate similar word meanings (based on word embeddings).
 
+        Uses pre-computed topic terms from cluster interpretation when available,
+        which guarantees non-empty wordclouds and proper n-gram phrase support.
+
         Args:
             cluster_id: Cluster/topic index (0-based)
             max_words: Maximum words in cloud
@@ -1428,46 +1570,57 @@ class MethodVisualizer:
             logger.warning("Neither wordcloud nor PIL available for word cloud generation")
             return None
 
-        # Get documents in this cluster
+        import re
+
+        # Get documents in this cluster for semantic coloring
         mask = self.assignments == cluster_id
         cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
 
-        if not cluster_texts:
-            logger.warning(f"No documents in cluster {cluster_id}")
-            return None
+        # PRIORITY 1: Try pre-computed term frequencies from cluster interpretation
+        top_words = None
+        term_freqs = self._get_cluster_term_frequencies(cluster_id)
+        if term_freqs:
+            # Use pre-computed terms directly
+            top_words = dict(sorted(term_freqs.items(), key=lambda x: x[1], reverse=True)[:max_words])
+            logger.info(f"Using pre-computed terms for semantic wordcloud cluster {cluster_id}: {len(top_words)} terms")
 
-        # Combine and clean text
-        combined_text = ' '.join(str(t) for t in cluster_texts)
-        import re
-        cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+        # PRIORITY 2: Fall back to raw text extraction
+        if not top_words:
+            if not cluster_texts:
+                logger.warning(f"No documents in cluster {cluster_id}")
+                return None
 
-        # Get word frequencies
-        words = cleaned_text.split()
-        word_freq = Counter(words)
+            # Combine and clean text
+            combined_text = ' '.join(str(t) for t in cluster_texts)
+            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
-        # Remove common stopwords
-        stopwords = {
-            'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
-            'should', 'may', 'might', 'must', 'can', 'and', 'but', 'or', 'for',
-            'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
-            'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
-            'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
-            've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
-            'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
-            'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
-            'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
-            'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
-        }
-        word_freq = {w: f for w, f in word_freq.items()
-                     if w not in stopwords and len(w) > 2}
+            # Get word frequencies
+            words = cleaned_text.split()
+            word_freq = Counter(words)
 
-        if not word_freq:
-            logger.warning(f"No valid words in cluster {cluster_id} after filtering")
-            return None
+            # Remove common stopwords
+            stopwords = {
+                'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+                'should', 'may', 'might', 'must', 'can', 'and', 'but', 'or', 'for',
+                'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
+                'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
+                'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
+                've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
+                'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
+                'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
+                'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
+                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
+            }
+            word_freq = {w: f for w, f in word_freq.items()
+                         if w not in stopwords and len(w) > 2}
 
-        # Get top words by frequency
-        top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
+            if not word_freq:
+                logger.warning(f"No valid words in cluster {cluster_id} after filtering")
+                return None
+
+            # Get top words by frequency
+            top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
 
         # Compute semantic colors (uses matplotlib.colors internally, falls back gracefully)
         word_colors = self._compute_semantic_colors(
@@ -1760,37 +1913,47 @@ class MethodVisualizer:
         # Helper to generate wordcloud for a cluster
         def generate_cluster_wordcloud(cluster_id, cell_width=500, cell_height=300):
             mask = self.assignments == cluster_id
+            doc_count = sum(mask)
             cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
 
-            if not cluster_texts:
-                return None, 0
+            # PRIORITY 1: Try pre-computed term frequencies from cluster interpretation
+            top_words = None
+            term_freqs = self._get_cluster_term_frequencies(cluster_id)
+            if term_freqs:
+                top_words = dict(sorted(term_freqs.items(), key=lambda x: x[1], reverse=True)[:max_words])
+                logger.debug(f"Using pre-computed terms for semantic grid cluster {cluster_id}: {len(top_words)} terms")
 
-            combined_text = ' '.join(str(t) for t in cluster_texts)
-            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+            # PRIORITY 2: Fall back to raw text extraction
+            if not top_words:
+                if not cluster_texts:
+                    return None, 0
 
-            words = cleaned_text.split()
-            word_freq = Counter(words)
+                combined_text = ' '.join(str(t) for t in cluster_texts)
+                cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
 
-            stopwords = {
-                'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-                'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
-                'should', 'may', 'might', 'must', 'can', 'and', 'but', 'or', 'for',
-                'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
-                'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
-                'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
-                've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
-                'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
-                'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
-                'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
-                'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
-            }
-            word_freq = {w: f for w, f in word_freq.items()
-                         if w not in stopwords and len(w) > 2}
+                words = cleaned_text.split()
+                word_freq = Counter(words)
 
-            if not word_freq:
-                return None, sum(mask)
+                stopwords = {
+                    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                    'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+                    'should', 'may', 'might', 'must', 'can', 'and', 'but', 'or', 'for',
+                    'of', 'in', 'to', 'on', 'at', 'by', 'with', 'from', 'as', 'into',
+                    'it', 'its', 'this', 'that', 'these', 'those', 'what', 'which',
+                    'i', 'me', 'my', 'we', 'our', 'you', 'your', 'they', 'them', 'their',
+                    've', 'll', 're', 't', 's', 'd', 'm', 'not', 'just', 'very', 'really',
+                    'about', 'get', 'got', 'so', 'too', 'also', 'been', 'being', 'if',
+                    'no', 'more', 'most', 'other', 'some', 'such', 'any', 'each', 'few',
+                    'all', 'both', 'only', 'own', 'same', 'than', 'then', 'now', 'here',
+                    'there', 'when', 'where', 'why', 'how', 'who', 'whom', 'which', 'am'
+                }
+                word_freq = {w: f for w, f in word_freq.items()
+                             if w not in stopwords and len(w) > 2}
 
-            top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
+                if not word_freq:
+                    return None, doc_count
+
+                top_words = dict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_words])
 
             word_colors = self._compute_semantic_colors(
                 list(top_words.keys()),
@@ -1825,9 +1988,9 @@ class MethodVisualizer:
                         max_font_size=80,
                         color_func=make_color_func(word_colors)
                     ).generate_from_frequencies(top_words)
-                return wordcloud.to_image(), sum(mask)
+                return wordcloud.to_image(), doc_count
             except ValueError:
-                return None, sum(mask)
+                return None, doc_count
 
         if MATPLOTLIB_AVAILABLE:
             # Larger figure for semantic wordclouds
