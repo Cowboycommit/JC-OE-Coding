@@ -2590,6 +2590,98 @@ def page_results_overview():
     if not freq_chart_generated:
         st.info("📝 Word frequency chart not available. Please run an analysis first.")
 
+    # Phrase Frequency Chart
+    st.markdown("---")
+    st.markdown("### 📝 Phrase Frequency")
+
+    # Generate phrase frequency chart from results
+    phrase_chart_generated = False
+    if 'results_df' in st.session_state:
+        try:
+            results_df = st.session_state.results_df
+
+            # Find text column - try multiple approaches
+            exclude_cols = {'assigned_codes', 'confidence_scores', 'num_codes', 'themes',
+                           'sentiment_label', 'sentiment_score', 'sentiment_positive',
+                           'sentiment_negative', 'sentiment_neutral', 'index'}
+            text_candidates = [col for col in results_df.columns if col.lower() not in exclude_cols]
+
+            # Prefer columns with common text column names
+            text_col = None
+            for preferred in ['response', 'text', 'content', 'answer', 'comment', 'feedback', 'message']:
+                for col in text_candidates:
+                    if preferred in col.lower():
+                        text_col = col
+                        break
+                if text_col:
+                    break
+
+            # Fall back to first non-excluded column
+            if not text_col and text_candidates:
+                text_col = text_candidates[0]
+
+            if text_col is None:
+                st.warning(f"⚠️ Could not find text column. Available columns: {list(results_df.columns)}")
+            else:
+                all_text = ' '.join(results_df[text_col].dropna().astype(str).tolist())
+                cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
+                words = cleaned_text.split()
+
+                # Stopwords for filtering phrases
+                stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'if', 'it', 'its', 'this', 'that', 'i', 'you', 'we', 'they', 'my', 'your', 'he', 'she', 'him', 'her', 'me', 'them', 'us', 'is', 'was', 'are', 'were', 'be', 'been', 'am', 'has', 'have', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'from', 'than', 'so', 'not', 'no', 'nan', 'none', 'also', 'very', 'just', 'only', 'even', 'still', 'already', 'yet', 'amp', 'nbsp', 'quot', 'lt', 'gt', 'apos', 'ndash', 'mdash', 'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'}
+
+                # Generate bigrams and trigrams (2-word and 3-word phrases)
+                phrase_counts = {}
+
+                # Bigrams (2-word phrases)
+                for i in range(len(words) - 1):
+                    w1, w2 = words[i], words[i + 1]
+                    # Only include if both words are meaningful (not stopwords, length > 2)
+                    if len(w1) > 2 and len(w2) > 2 and w1 not in stopwords and w2 not in stopwords:
+                        phrase = f"{w1} {w2}"
+                        phrase_counts[phrase] = phrase_counts.get(phrase, 0) + 1
+
+                # Trigrams (3-word phrases)
+                for i in range(len(words) - 2):
+                    w1, w2, w3 = words[i], words[i + 1], words[i + 2]
+                    # Include if at least first and last words are meaningful
+                    if len(w1) > 2 and len(w3) > 2 and w1 not in stopwords and w3 not in stopwords:
+                        phrase = f"{w1} {w2} {w3}"
+                        phrase_counts[phrase] = phrase_counts.get(phrase, 0) + 1
+
+                # Filter to phrases that appear at least twice
+                phrase_counts = {k: v for k, v in phrase_counts.items() if v >= 2}
+
+                if phrase_counts:
+                    # Get top 20 phrases
+                    top_phrases = sorted(phrase_counts.items(), key=lambda x: x[1], reverse=True)[:20]
+                    phrases_list = [p[0] for p in top_phrases]
+                    counts_list = [p[1] for p in top_phrases]
+
+                    # Create horizontal bar chart
+                    fig, ax = plt.subplots(figsize=(10, 8))
+                    colors = plt.cm.plasma(np.linspace(0.2, 0.8, len(phrases_list)))
+                    ax.barh(range(len(phrases_list)), counts_list, color=colors)
+                    ax.set_yticks(range(len(phrases_list)))
+                    ax.set_yticklabels(phrases_list)
+                    ax.invert_yaxis()  # Largest at top
+                    ax.set_xlabel('Frequency')
+                    ax.set_title('Top 20 Most Frequent Phrases')
+                    plt.tight_layout()
+
+                    st.pyplot(fig, use_container_width=True)
+                    plt.close(fig)
+
+                    st.caption("Frequency chart showing the most common 2-word and 3-word phrases in response text")
+                    phrase_chart_generated = True
+                else:
+                    st.info("📝 No recurring phrases found. Phrases must appear at least twice to be shown.")
+        except Exception as e:
+            st.error(f"⚠️ Phrase frequency visualization failed: {type(e).__name__}: {str(e)}")
+
+    if not phrase_chart_generated:
+        st.info("📝 Phrase frequency chart not available. Please run an analysis first.")
+
     # Detailed codebook
     st.markdown("---")
     st.markdown("### 📖 Complete Codebook")
