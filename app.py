@@ -2684,7 +2684,23 @@ def page_results_overview():
 
     # Detailed codebook
     st.markdown("---")
-    st.markdown("### 📖 Complete Codebook")
+    st.markdown("### ✅ Confirm Code Label Selection")
+    st.markdown("""
+    This section allows you to review and finalize the labels for each discovered code in your codebook.
+    For each code, you'll see:
+
+    - **Current Label**: The AI-generated label that best describes the theme of responses in this code
+    - **Description**: A detailed explanation of what this code represents
+    - **Alternative Labels**: Other suggested labels that may also fit this code's theme
+    - **Keywords**: The most frequent terms appearing in responses assigned to this code
+    - **Example Responses**: Representative quotes showing what respondents actually said
+    - **Metrics**: The count of responses and average confidence score for this code
+    - **Sentiment Mix**: The distribution of positive, negative, and neutral sentiment within this code
+
+    **To confirm or change a label:** Expand each code below, review the examples and description,
+    then either keep the current label or select an alternative from the dropdown. Your selections
+    will be reflected in the final exported codebook and coded data.
+    """)
 
     # Show warning if any codes have mixed sentiment
     if hasattr(coder, 'cluster_interpretation') and coder.cluster_interpretation is not None:
