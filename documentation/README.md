@@ -164,9 +164,9 @@ Each component is documented in detail across the documentation suite to ensure 
 
 ## Version Information
 
-- **Documentation Suite Version**: 1.1
-- **Framework Version**: 1.3.0
-- **Last Updated**: 2026-01-24
+- **Documentation Suite Version**: 1.2
+- **Framework Version**: 1.3.1
+- **Last Updated**: 2026-01-26
 - **Framework Status**: Production Ready
 - **Maintenance**: Active
 
