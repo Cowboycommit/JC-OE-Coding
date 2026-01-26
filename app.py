@@ -3083,12 +3083,27 @@ def page_visualizations():
                     display_examples = examples
                     st.caption(f"Showing all {total_quotes} quotes")
 
-                # Display quotes (simple layout)
-                for i, ex in enumerate(display_examples, 1):
+                # Display quotes in a table
+                quotes_data = []
+                for ex in display_examples:
                     conf_color = "🟢" if ex['confidence'] >= 0.7 else "🟡" if ex['confidence'] >= 0.4 else "🔴"
-                    st.markdown(f"**{conf_color} Quote** (confidence: {ex['confidence']:.2f})")
-                    st.markdown(f"> {ex['text']}")
-                    st.markdown("---")
+                    quotes_data.append({
+                        "Status": conf_color,
+                        "Quote": ex['text'],
+                        "Confidence": f"{ex['confidence']:.2f}"
+                    })
+
+                quotes_df = pd.DataFrame(quotes_data)
+                st.dataframe(
+                    quotes_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "Status": st.column_config.TextColumn("", width="small"),
+                        "Quote": st.column_config.TextColumn("Quote", width="large"),
+                        "Confidence": st.column_config.TextColumn("Confidence", width="small")
+                    }
+                )
 
                 # Simple export button
                 if examples:
