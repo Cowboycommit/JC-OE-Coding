@@ -187,19 +187,29 @@ def find_optimal_codes(
     max_codes: int = 15,
     method: str = 'tfidf_kmeans',
     stop_words: str = 'english',
-    progress_callback=None
+    progress_callback=None,
+    embedding_kwargs: Optional[Dict[str, Any]] = None
 ) -> Tuple[int, Dict[str, Any]]:
     """
     Find the optimal number of codes using silhouette analysis.
+
+    Uses the same feature representation as the actual analysis to ensure
+    the optimal number of codes is valid for the chosen method.
 
     Args:
         df: DataFrame with responses
         text_column: Name of the text column
         min_codes: Minimum number of codes to test
         max_codes: Maximum number of codes to test
-        method: ML method to use for testing
-        stop_words: Stop words language
+        method: ML method to use for testing:
+            - 'tfidf_kmeans': Uses TF-IDF features
+            - 'bert_kmeans': Uses BERT embeddings
+            - 'lstm_kmeans': Uses LSTM embeddings
+            - 'lda': Uses CountVectorizer
+            - 'svm': Uses TF-IDF with spectral clustering
+        stop_words: Stop words language (for TF-IDF/LDA methods)
         progress_callback: Optional callback for progress updates
+        embedding_kwargs: Additional kwargs for embedding methods (e.g., model_name for BERT)
 
     Returns:
         Tuple of (optimal_n_codes, analysis_results)
@@ -233,34 +243,69 @@ def find_optimal_codes(
 
     processed = [preprocess_text(r) for r in responses]
 
-    # Create feature matrix based on method
-    if method == 'lda':
-        vectorizer = CountVectorizer(
-            max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
-        )
-    else:
-        vectorizer = TfidfVectorizer(
-            max_features=1000, stop_words=stop_words, min_df=2,
-            max_df=0.8, ngram_range=(1, 2)
-        )
+    # Determine representation based on method (matching run_ml_analysis behavior)
+    # This ensures silhouette optimization uses the same feature space as actual analysis
+    use_embeddings = False
+    embedding_type = None
 
-    try:
-        feature_matrix = vectorizer.fit_transform(processed)
-    except ValueError as e:
-        if "empty vocabulary" in str(e).lower():
-            raise ValueError(
-                "Empty vocabulary error: No valid terms found after text preprocessing. "
-                "This can happen when:\n"
-                "  1. The dataset is too small or contains only short responses\n"
-                "  2. All words are filtered by stop words (try a different language)\n"
-                "  3. The min_df/max_df thresholds are too restrictive\n"
-                "  4. Responses contain mostly non-text content (numbers, symbols)\n\n"
-                "Suggestions:\n"
-                "  - Provide more diverse text responses\n"
-                "  - Try a different stop words language setting\n"
-                "  - Check that your data contains meaningful text content"
-            ) from e
-        raise
+    if method == 'bert_kmeans':
+        use_embeddings = True
+        embedding_type = 'bert'
+        logger.info("Using BERT embeddings for silhouette optimization (matching bert_kmeans method)")
+    elif method == 'lstm_kmeans':
+        use_embeddings = True
+        embedding_type = 'lstm'
+        logger.info("Using LSTM embeddings for silhouette optimization (matching lstm_kmeans method)")
+
+    # Create feature matrix based on method
+    if use_embeddings:
+        # Use the same embeddings as the actual analysis
+        try:
+            from src.embeddings import get_embedder
+
+            if progress_callback:
+                progress_callback(0.05, f"Loading {embedding_type.upper()} model for optimization...")
+
+            embedder = get_embedder(embedding_type, **(embedding_kwargs or {}))
+            feature_matrix = embedder.fit_transform(processed)
+
+            logger.info(f"Created {embedding_type} embeddings for optimization: shape={feature_matrix.shape}")
+        except ImportError as e:
+            logger.warning(f"Could not load embeddings module: {e}. Falling back to TF-IDF.")
+            use_embeddings = False
+        except Exception as e:
+            logger.warning(f"Error creating {embedding_type} embeddings: {e}. Falling back to TF-IDF.")
+            use_embeddings = False
+
+    if not use_embeddings:
+        # Use TF-IDF or CountVectorizer for other methods
+        if method == 'lda':
+            vectorizer = CountVectorizer(
+                max_features=1000, stop_words=stop_words, min_df=2, max_df=0.8
+            )
+        else:
+            vectorizer = TfidfVectorizer(
+                max_features=1000, stop_words=stop_words, min_df=2,
+                max_df=0.8, ngram_range=(1, 2)
+            )
+
+        try:
+            feature_matrix = vectorizer.fit_transform(processed)
+        except ValueError as e:
+            if "empty vocabulary" in str(e).lower():
+                raise ValueError(
+                    "Empty vocabulary error: No valid terms found after text preprocessing. "
+                    "This can happen when:\n"
+                    "  1. The dataset is too small or contains only short responses\n"
+                    "  2. All words are filtered by stop words (try a different language)\n"
+                    "  3. The min_df/max_df thresholds are too restrictive\n"
+                    "  4. Responses contain mostly non-text content (numbers, symbols)\n\n"
+                    "Suggestions:\n"
+                    "  - Provide more diverse text responses\n"
+                    "  - Try a different stop words language setting\n"
+                    "  - Check that your data contains meaningful text content"
+                ) from e
+            raise
 
     # Calculate the maximum valid number of codes based on data constraints
     max_valid = min(len(df), feature_matrix.shape[1], max_codes)
@@ -321,7 +366,11 @@ def find_optimal_codes(
             # Calculate silhouette score (only if we have more than 1 unique label)
             if len(set(labels)) > 1:
                 sil_score = silhouette_score(feature_matrix, labels)
-                cal_score = calinski_harabasz_score(feature_matrix.toarray(), labels)
+                # calinski_harabasz_score requires dense array
+                if hasattr(feature_matrix, 'toarray'):
+                    cal_score = calinski_harabasz_score(feature_matrix.toarray(), labels)
+                else:
+                    cal_score = calinski_harabasz_score(feature_matrix, labels)
 
                 results['silhouette_scores'][n] = sil_score
                 results['calinski_scores'][n] = cal_score
@@ -351,8 +400,10 @@ def find_optimal_codes(
 
     results['optimal_n_codes'] = optimal_n
     results['best_silhouette_score'] = best_score
+    results['representation_used'] = embedding_type if use_embeddings else 'tfidf'
+    results['feature_dimensions'] = feature_matrix.shape[1]
 
-    logger.info(f"Optimal number of codes: {optimal_n} (silhouette score: {best_score:.4f})")
+    logger.info(f"Optimal number of codes: {optimal_n} (silhouette score: {best_score:.4f}, representation: {results['representation_used']})")
 
     return optimal_n, results
 
