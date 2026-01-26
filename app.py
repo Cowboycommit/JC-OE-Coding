@@ -2466,7 +2466,6 @@ def page_results_overview():
         <span class="stat-chip">📊 {actual_response_count:,} Responses</span>
         <span class="stat-chip">🏷️ {metrics.get('n_codes', 0)} Codes</span>
         <span class="stat-chip">📈 {metrics.get('avg_codes_per_response', 0):.2f} Avg/Response</span>
-        <span class="stat-chip">✅ {metrics.get('coverage_pct', 0):.1f}% Coverage</span>
         {sentiment_chips}
     </div>
     """
