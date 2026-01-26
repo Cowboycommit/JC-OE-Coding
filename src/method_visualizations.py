@@ -635,6 +635,172 @@ class MethodVisualizer:
         logger.debug(f"No pre-computed terms available for cluster {cluster_idx}")
         return None
 
+    def _get_all_term_frequencies(self, max_terms: int = 100) -> Optional[Dict[str, float]]:
+        """
+        Aggregate term frequencies across ALL clusters for an overall word cloud.
+
+        Combines terms from all cluster interpretations, weighting by cluster size.
+        This ensures the overall word cloud shows meaningful phrases and avoids
+        single letters and stopwords.
+
+        Args:
+            max_terms: Maximum number of terms to return
+
+        Returns:
+            Dictionary of term -> weight, or None if not available
+        """
+        all_terms: Dict[str, float] = {}
+        n_clusters = len(set(self.assignments))
+
+        # Calculate cluster sizes for weighting
+        cluster_sizes = {}
+        for cluster_idx in range(n_clusters):
+            mask = self.assignments == cluster_idx
+            cluster_sizes[cluster_idx] = mask.sum()
+        total_docs = sum(cluster_sizes.values())
+
+        # Aggregate terms from all clusters
+        terms_found = False
+        for cluster_idx in range(n_clusters):
+            cluster_terms = self._get_cluster_term_frequencies(cluster_idx)
+            if cluster_terms:
+                terms_found = True
+                # Weight by cluster size (larger clusters contribute more)
+                cluster_weight = cluster_sizes[cluster_idx] / max(total_docs, 1)
+                for term, weight in cluster_terms.items():
+                    # Filter out single letters and short fragments
+                    if len(term) <= 2:
+                        continue
+                    # Aggregate weights (terms appearing in multiple clusters get boosted)
+                    if term in all_terms:
+                        all_terms[term] += weight * cluster_weight
+                    else:
+                        all_terms[term] = weight * cluster_weight
+
+        if not terms_found or not all_terms:
+            logger.debug("No pre-computed terms available for overall word cloud")
+            return None
+
+        # Normalize and select top terms
+        if all_terms:
+            max_weight = max(all_terms.values())
+            normalized = {term: (w / max_weight) * 100 for term, w in all_terms.items()}
+            # Sort by weight and take top N
+            sorted_terms = sorted(normalized.items(), key=lambda x: x[1], reverse=True)
+            result = dict(sorted_terms[:max_terms])
+            logger.debug(f"Aggregated {len(result)} terms for overall word cloud")
+            return result
+
+        return None
+
+    def create_overall_wordcloud(
+        self,
+        max_words: int = 100,
+        width: int = 800,
+        height: int = 400
+    ) -> Optional[Any]:
+        """
+        Create an overall word cloud aggregating terms from all clusters.
+
+        Uses pre-computed TF-IDF weighted terms from cluster interpretations
+        to ensure meaningful phrases and avoid single letters/stopwords.
+
+        Args:
+            max_words: Maximum words in cloud
+            width: Image width
+            height: Image height
+
+        Returns:
+            Matplotlib Figure, PIL Image, or None if not available
+        """
+        import re
+        wordcloud = None
+
+        # PRIORITY 1: Try aggregated pre-computed term frequencies
+        term_freqs = self._get_all_term_frequencies(max_words)
+        if term_freqs:
+            try:
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate_from_frequencies(term_freqs)
+                    logger.info(f"Generated overall wordcloud from {len(term_freqs)} aggregated terms")
+                elif PIL_AVAILABLE:
+                    wordcloud = PILWordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate_from_frequencies(term_freqs)
+                    logger.info(f"Generated overall PIL wordcloud from {len(term_freqs)} aggregated terms")
+            except Exception as e:
+                logger.warning(f"Aggregated term-based overall wordcloud failed: {e}")
+                wordcloud = None
+
+        # PRIORITY 2: Fall back to cleaned raw text with better filtering
+        if wordcloud is None:
+            all_texts = self.results_df[self.text_column].tolist()
+            combined_text = ' '.join(str(t) for t in all_texts if t)
+            # Clean text - remove non-alphabetic, lowercase
+            cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+            # Additional filtering: remove single/double letter words
+            words = cleaned_text.split()
+            filtered_words = [w for w in words if len(w) >= 3]
+            cleaned_text = ' '.join(filtered_words)
+
+            if not cleaned_text.strip():
+                logger.warning("No text content for overall word cloud")
+                return None
+
+            try:
+                if WORDCLOUD_AVAILABLE:
+                    wordcloud = WordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        colormap='viridis',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(cleaned_text)
+                elif PIL_AVAILABLE:
+                    wordcloud = PILWordCloud(
+                        width=width,
+                        height=height,
+                        background_color='white',
+                        max_words=max_words,
+                        min_font_size=10,
+                        max_font_size=100
+                    ).generate(cleaned_text)
+                else:
+                    logger.warning("Neither wordcloud nor PIL available")
+                    return None
+            except ValueError as e:
+                logger.warning(f"Text-based overall word cloud failed: {e}")
+                return None
+
+        if wordcloud is None:
+            return None
+
+        # Use matplotlib if available
+        if MATPLOTLIB_AVAILABLE:
+            fig, ax = plt.subplots(figsize=(width/100, height/100))
+            ax.imshow(wordcloud.to_image(), interpolation='bilinear')
+            ax.axis('off')
+            ax.set_title('Overall Word Cloud')
+            plt.tight_layout()
+            return fig
+        else:
+            return wordcloud.to_image()
+
     def create_cluster_scatter(
         self,
         reduction_method: str = 'pca',
@@ -1342,6 +1508,14 @@ class MethodVisualizer:
 
             combined_text = ' '.join(str(t) for t in cluster_texts)
             cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+            # Filter out single/double letter words that come from contractions
+            words = cleaned_text.split()
+            filtered_words = [w for w in words if len(w) >= 3]
+            cleaned_text = ' '.join(filtered_words)
+
+            if not cleaned_text.strip():
+                logger.warning(f"No meaningful text after filtering for cluster {cluster_id}")
+                return None
 
             try:
                 if WORDCLOUD_AVAILABLE:
@@ -1470,6 +1644,13 @@ class MethodVisualizer:
 
             combined_text = ' '.join(str(t) for t in cluster_texts)
             cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
+            # Filter out single/double letter words that come from contractions
+            words = cleaned_text.split()
+            filtered_words = [w for w in words if len(w) >= 3]
+            cleaned_text = ' '.join(filtered_words)
+
+            if not cleaned_text.strip():
+                return None
 
             try:
                 return generate_wordcloud_from_text(cleaned_text, cell_width, cell_height)
