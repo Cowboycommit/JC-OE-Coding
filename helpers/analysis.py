@@ -1577,7 +1577,7 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True, sort_by: str 
         sort_by: Sort order - 'count' for frequency descending, 'code' for code ID ascending
 
     Returns:
-        DataFrame with: Code, Label, Keywords, Sample Text, Count, % of Total, Confidence
+        DataFrame with: Code, Label, Alternative Labels, Keywords, Sample Text, Count, % of Total, Confidence
     """
     code_data = []
 
@@ -1591,6 +1591,7 @@ def get_top_codes(coder, n: int = 10, include_quotes: bool = True, sort_by: str 
         row = {
             'Code': code_id,
             'Label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
+            'Alternative Labels': ', '.join(info.get('alternative_labels', [])[:3]),
             'Keywords': ', '.join(info['keywords'][:10]),
         }
 
