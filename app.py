@@ -74,6 +74,16 @@ from helpers.analysis import (
     get_cooccurrence_pairs,
     export_results_package
 )
+from helpers.ui_utils import (
+    get_code_label,
+    get_code_labels_mapping,
+    map_progress_to_stage,
+    create_adjusted_progress_callback,
+    render_retry_buttons,
+    format_sentiment_distribution,
+    render_sentiment_metrics,
+    render_chart_explanation,
+)
 from itertools import combinations
 
 # Import sentiment analysis module
@@ -150,7 +160,7 @@ def precompute_all_visualizations(coder, results_df):
     for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[1]['count'], reverse=True)[:15]:
         top_codes_data.append({
             'Code': code_id,
-            'Label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
+            'Label': get_code_label(info),
             'Count': info['count'],
             'Avg Confidence': info['avg_confidence'],
             'Keywords': ', '.join(info['keywords'][:5])
@@ -174,7 +184,7 @@ def precompute_all_visualizations(coder, results_df):
                 cooccur[code_to_idx[code], code_to_idx[code]] += 1
 
     viz_data['cooccurrence_matrix'] = cooccur
-    viz_data['cooccurrence_labels'] = [coder.codebook[c].get('llm_label', coder.codebook[c]['label']) for c in codes]  # Prefer LLM labels
+    viz_data['cooccurrence_labels'] = [get_code_label(coder.codebook[c]) for c in codes]
     viz_data['cooccurrence_codes'] = codes
 
     # 3. Co-occurrence pairs
@@ -220,7 +230,7 @@ def precompute_all_visualizations(coder, results_df):
 
     # Pre-format code options for dropdown (avoid computation on render)
     viz_data['code_options'] = {
-        c: f"{coder.codebook[c].get('llm_label', coder.codebook[c]['label'])} ({coder.codebook[c]['count']} occurrences)"  # Prefer LLM labels
+        c: f"{get_code_label(coder.codebook[c])} ({coder.codebook[c]['count']} occurrences)"
         for c in codes_with_examples
     }
 
@@ -241,7 +251,7 @@ def precompute_all_visualizations(coder, results_df):
         if info['count'] > 0:  # Only include active codes
             sunburst_data.append({
                 'id': code_id,
-                'label': info.get('llm_label', info['label']),  # Prefer LLM-generated label
+                'label': get_code_label(info),
                 'parent': 'All Codes',
                 'value': info['count'],
                 'confidence': info['avg_confidence']
@@ -2133,31 +2143,11 @@ def page_run_analysis():
 
                 # Adjust progress for main analysis
                 def adjusted_progress(p, m):
-                    # Map progress 0-1 to stages 0-4 and progress 0.4-1.0
-                    if p < 0.3:
-                        stage = 0
-                    elif p < 0.5:
-                        stage = 1
-                    elif p < 0.8:
-                        stage = 2
-                    elif p < 0.95:
-                        stage = 3
-                    else:
-                        stage = 4
+                    stage = map_progress_to_stage(p)
                     update_progress(0.4 + p * 0.6, m, stage)
             else:
-                # Map progress 0-1 to stages 0-4
                 def adjusted_progress(p, m):
-                    if p < 0.3:
-                        stage = 0
-                    elif p < 0.5:
-                        stage = 1
-                    elif p < 0.8:
-                        stage = 2
-                    elif p < 0.95:
-                        stage = 3
-                    else:
-                        stage = 4
+                    stage = map_progress_to_stage(p)
                     update_progress(p, m, stage)
 
             coder, results_df, metrics = run_ml_analysis(
@@ -2283,35 +2273,7 @@ def page_run_analysis():
                 st.info("💡 **Suggestions:**\n- Ensure your dataset has enough responses\n- Check that responses aren't too short or too similar\n- Try reducing the number of codes requested\n- Review your preprocessing settings")
 
                 # Add retry buttons
-                st.markdown("#### 🔄 Quick Fixes")
-                col1, col2, col3 = st.columns(3)
-
-                with col1:
-                    if st.button("Try with fewer codes", use_container_width=True):
-                        if not auto_optimal and config['n_codes'] > 2:
-                            st.session_state.config['n_codes'] = max(2, config['n_codes'] - 2)
-                            st.success(f"✅ Reduced codes to {st.session_state.config['n_codes']}. Click 'Start Analysis' again.")
-                            st.rerun()
-                        else:
-                            st.warning("Cannot reduce codes further or auto-optimization is enabled.")
-
-                with col2:
-                    if st.button("Try with lower confidence", use_container_width=True):
-                        if config['min_confidence'] > 0.1:
-                            st.session_state.config['min_confidence'] = max(0.1, config['min_confidence'] - 0.1)
-                            st.success(f"✅ Reduced confidence to {st.session_state.config['min_confidence']:.2f}. Click 'Start Analysis' again.")
-                            st.rerun()
-                        else:
-                            st.warning("Confidence already at minimum (0.1).")
-
-                with col3:
-                    if st.button("Reset and try again", use_container_width=True):
-                        st.session_state.analysis_complete = False
-                        st.session_state.pop('coder', None)
-                        st.session_state.pop('results_df', None)
-                        st.session_state.pop('metrics', None)
-                        st.success("✅ Analysis state reset. Click 'Start Analysis' again.")
-                        st.rerun()
+                render_retry_buttons(config, auto_optimal)
             else:
                 # For optimal codes finding error, clear UI elements
                 stage_checklist.empty()
@@ -2324,35 +2286,7 @@ def page_run_analysis():
             st.exception(e)
 
             # Add retry buttons for general errors too
-            st.markdown("#### 🔄 Quick Fixes")
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                if st.button("Try with fewer codes", key="error_fewer_codes", use_container_width=True):
-                    if not auto_optimal and config['n_codes'] > 2:
-                        st.session_state.config['n_codes'] = max(2, config['n_codes'] - 2)
-                        st.success(f"✅ Reduced codes to {st.session_state.config['n_codes']}. Click 'Start Analysis' again.")
-                        st.rerun()
-                    else:
-                        st.warning("Cannot reduce codes further or auto-optimization is enabled.")
-
-            with col2:
-                if st.button("Try with lower confidence", key="error_lower_conf", use_container_width=True):
-                    if config['min_confidence'] > 0.1:
-                        st.session_state.config['min_confidence'] = max(0.1, config['min_confidence'] - 0.1)
-                        st.success(f"✅ Reduced confidence to {st.session_state.config['min_confidence']:.2f}. Click 'Start Analysis' again.")
-                        st.rerun()
-                    else:
-                        st.warning("Confidence already at minimum (0.1).")
-
-            with col3:
-                if st.button("Reset and try again", key="error_reset", use_container_width=True):
-                    st.session_state.analysis_complete = False
-                    st.session_state.pop('coder', None)
-                    st.session_state.pop('results_df', None)
-                    st.session_state.pop('metrics', None)
-                    st.success("✅ Analysis state reset. Click 'Start Analysis' again.")
-                    st.rerun()
+            render_retry_buttons(config, auto_optimal, key_prefix="error")
 
     # Next button - show when analysis is complete
     if st.session_state.analysis_complete:
@@ -2784,7 +2718,7 @@ def page_results_overview():
     for code_id, info in sorted(coder.codebook.items(), key=lambda x: x[0]):  # Sort by code ID (CODE_01, CODE_02, etc.)
         if info['count'] > 0:  # Only show active codes
             # Use LLM-generated label if available
-            display_label = info.get('llm_label', info['label'])
+            display_label = get_code_label(info)
             with st.expander(f"**{code_id}**: {display_label} ({info['count']} responses)"):
                 col1, col2 = st.columns([2, 1])
 
@@ -3501,7 +3435,7 @@ def page_export_results():
 
             row = {
                 'Code': code_id,
-                'Label': info.get('llm_label', info['label']),  # Use LLM label if available
+                'Label': get_code_label(info),  # Use LLM label if available
                 'Term-Based Label': info['label'],
                 'Alternative Labels': ', '.join(info.get('alternative_labels', [])[:3]),
                 'LLM Description': info.get('llm_description', ''),

@@ -387,5 +387,5 @@ As the framework evolves, consider these scaling paths:
 **Maintained By**: Agent-B (Tools & Dependencies)
 **Related Documents**:
 - [Data Specification](./03_input_data_specification.md)
-- [Data Validation](./04_data_validation.md)
-- [ML Pipeline](./05_ml_pipeline.md)
+- [Data Formatting Rules](./04_data_formatting_rules.md)
+- [Reporting and Visualization Standards](./05_reporting_and_visualization_standards.md)
