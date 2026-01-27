@@ -138,6 +138,202 @@ def get_cached_sentiment_analyzer(data_type: str):
 
 
 # ============================================================================
+# AUTO-SELECT BEST METHOD
+# ============================================================================
+# Analyzes data characteristics to recommend the optimal ML method.
+# ============================================================================
+
+
+def analyze_data_characteristics(texts):
+    """
+    Analyze text data to determine characteristics for method selection.
+
+    Returns a dict with:
+    - n_samples: number of texts
+    - avg_length: average word count per text
+    - vocab_diversity: unique words / total words ratio
+    - avg_sentence_length: average sentences per text
+    - characteristics: list of notable characteristics
+    """
+    import re
+
+    n_samples = len(texts)
+
+    # Calculate word counts
+    word_counts = []
+    all_words = []
+    sentence_counts = []
+
+    for text in texts:
+        if pd.isna(text) or not isinstance(text, str):
+            continue
+        words = text.lower().split()
+        word_counts.append(len(words))
+        all_words.extend(words)
+        # Simple sentence count (periods, !, ?)
+        sentences = len(re.findall(r'[.!?]+', text)) or 1
+        sentence_counts.append(sentences)
+
+    avg_length = np.mean(word_counts) if word_counts else 0
+    avg_sentences = np.mean(sentence_counts) if sentence_counts else 1
+
+    # Vocabulary diversity (type-token ratio)
+    total_words = len(all_words)
+    unique_words = len(set(all_words))
+    vocab_diversity = unique_words / total_words if total_words > 0 else 0
+
+    # Identify characteristics
+    characteristics = []
+    if n_samples < 100:
+        characteristics.append("small_dataset")
+    elif n_samples < 500:
+        characteristics.append("medium_dataset")
+    else:
+        characteristics.append("large_dataset")
+
+    if avg_length < 20:
+        characteristics.append("short_texts")
+    elif avg_length < 100:
+        characteristics.append("medium_texts")
+    else:
+        characteristics.append("long_texts")
+
+    if vocab_diversity > 0.7:
+        characteristics.append("high_diversity")
+    elif vocab_diversity < 0.3:
+        characteristics.append("low_diversity")
+    else:
+        characteristics.append("moderate_diversity")
+
+    return {
+        'n_samples': n_samples,
+        'avg_length': avg_length,
+        'vocab_diversity': vocab_diversity,
+        'avg_sentences': avg_sentences,
+        'total_words': total_words,
+        'unique_words': unique_words,
+        'characteristics': characteristics
+    }
+
+
+def auto_select_best_method(texts):
+    """
+    Automatically select the best ML method based on data characteristics.
+
+    Method selection logic:
+    - TF-IDF + K-Means: Fast, good for most cases, especially short-medium texts
+    - LDA: Better for larger datasets with longer texts, captures topics well
+    - BERT + K-Means: Best for semantic understanding, good for short texts where context matters
+    - LSTM + K-Means: Good for sequential patterns, when word order matters
+    - SVM Spectral: Good for non-linear patterns, smaller datasets
+
+    Returns:
+    - method: selected method string
+    - reasoning: list of reasons for selection
+    - characteristics: analyzed data characteristics
+    - scores: dict of scores for each method
+    """
+    chars = analyze_data_characteristics(texts)
+
+    # Score each method based on characteristics
+    scores = {
+        'tfidf_kmeans': 50,  # Baseline - reliable default
+        'lda': 40,
+        'bert_kmeans': 30,
+        'lstm_kmeans': 25,
+        'svm': 20
+    }
+
+    reasoning = []
+    n_samples = chars['n_samples']
+    avg_length = chars['avg_length']
+    vocab_diversity = chars['vocab_diversity']
+
+    # Dataset size factors
+    if n_samples < 100:
+        # Small dataset - prefer simpler, faster methods
+        scores['tfidf_kmeans'] += 20
+        scores['svm'] += 15
+        scores['bert_kmeans'] += 10  # BERT can work well on small data
+        scores['lda'] -= 10  # LDA needs more data for stable topics
+        scores['lstm_kmeans'] -= 15  # LSTM needs more data
+        reasoning.append(f"Small dataset ({n_samples} samples) favors faster methods")
+    elif n_samples < 500:
+        # Medium dataset - most methods work well
+        scores['tfidf_kmeans'] += 15
+        scores['lda'] += 10
+        scores['bert_kmeans'] += 10
+        reasoning.append(f"Medium dataset ({n_samples} samples) suitable for most methods")
+    else:
+        # Large dataset - LDA shines, BERT/LSTM become more viable
+        scores['lda'] += 25
+        scores['tfidf_kmeans'] += 10
+        scores['bert_kmeans'] += 5
+        scores['lstm_kmeans'] += 10
+        reasoning.append(f"Large dataset ({n_samples} samples) benefits from topic modeling")
+
+    # Text length factors
+    if avg_length < 20:
+        # Short texts - BERT for semantics, TF-IDF for speed
+        scores['bert_kmeans'] += 20
+        scores['tfidf_kmeans'] += 15
+        scores['lda'] -= 5  # LDA prefers longer documents
+        reasoning.append(f"Short texts (avg {avg_length:.0f} words) benefit from semantic methods")
+    elif avg_length < 100:
+        # Medium length - all methods work
+        scores['tfidf_kmeans'] += 10
+        scores['lda'] += 10
+        reasoning.append(f"Medium text length (avg {avg_length:.0f} words) works with all methods")
+    else:
+        # Long texts - LDA excels at topic extraction
+        scores['lda'] += 20
+        scores['tfidf_kmeans'] += 5
+        scores['lstm_kmeans'] += 10  # Sequential patterns in long text
+        reasoning.append(f"Long texts (avg {avg_length:.0f} words) ideal for topic modeling")
+
+    # Vocabulary diversity factors
+    if vocab_diversity > 0.6:
+        # High diversity - LDA can find distinct topics
+        scores['lda'] += 15
+        scores['bert_kmeans'] += 10
+        reasoning.append(f"High vocabulary diversity ({vocab_diversity:.2%}) supports topic discovery")
+    elif vocab_diversity < 0.3:
+        # Low diversity - simpler methods sufficient
+        scores['tfidf_kmeans'] += 15
+        scores['svm'] += 10
+        reasoning.append(f"Lower vocabulary diversity ({vocab_diversity:.2%}) suits simpler methods")
+
+    # Performance/practicality adjustments
+    if n_samples > 1000:
+        # For very large datasets, penalize slow methods
+        scores['bert_kmeans'] -= 15  # BERT is slow on large data
+        scores['lstm_kmeans'] -= 10
+        reasoning.append("Large dataset size prioritizes computational efficiency")
+
+    # Select best method
+    best_method = max(scores, key=scores.get)
+
+    # Add final reasoning
+    method_names = {
+        'tfidf_kmeans': 'TF-IDF + K-Means',
+        'lda': 'LDA (Latent Dirichlet Allocation)',
+        'bert_kmeans': 'BERT + K-Means',
+        'lstm_kmeans': 'LSTM + K-Means',
+        'svm': 'SVM Spectral Clustering'
+    }
+
+    reasoning.append(f"Selected **{method_names[best_method]}** with score {scores[best_method]}")
+
+    return {
+        'method': best_method,
+        'reasoning': reasoning,
+        'characteristics': chars,
+        'scores': scores,
+        'method_names': method_names
+    }
+
+
+# ============================================================================
 # VISUALIZATION PRE-COMPUTATION SYSTEM
 # ============================================================================
 # All visualization data is pre-computed once after analysis completes.
@@ -1776,13 +1972,38 @@ def page_configuration():
         st.error("❌ No text columns found in the data")
         return
 
+    # Auto-select processed column if available
+    # Find columns ending with '_processed' and prefer them
+    processed_columns = [col for col in text_columns if col.endswith('_processed')]
+
+    # Determine default index: prefer processed column, fall back to text_column from session, then index 0
+    default_index = 0
+    if processed_columns:
+        # Prefer the first processed column
+        default_index = text_columns.index(processed_columns[0])
+    elif st.session_state.get('text_column') in text_columns:
+        # Fall back to previously selected column
+        default_index = text_columns.index(st.session_state.text_column)
+
     selected_column = st.selectbox(
         "Choose the column containing responses:",
         text_columns,
-        index=0
+        index=default_index,
+        help="Select the column to analyze. If you preprocessed your data, the processed column will be auto-selected."
     )
 
     st.session_state.text_column = selected_column
+
+    # Warn if user selects raw column when processed version exists
+    if not selected_column.endswith('_processed'):
+        processed_version = f"{selected_column}_processed"
+        if processed_version in text_columns:
+            st.warning(f"""
+            **Note:** A processed version of this column exists: `{processed_version}`
+
+            If you ran text preprocessing, you should select `{processed_version}` to analyze the cleaned data.
+            Selecting `{selected_column}` will analyze the raw, unprocessed text.
+            """)
 
     # Show sample responses
     st.markdown("#### Sample Responses")
@@ -1903,6 +2124,12 @@ def page_configuration():
             help="Let the algorithm automatically determine the optimal number of codes based on your data using silhouette analysis"
         )
 
+        auto_optimal_method = st.checkbox(
+            "Auto-select best method",
+            value=False,
+            help="Automatically select the best ML method based on dataset size and text characteristics"
+        )
+
         n_codes = st.slider(
             "Number of codes to discover",
             min_value=3,
@@ -1924,19 +2151,36 @@ def page_configuration():
             </div>
             """, unsafe_allow_html=True)
 
-        method = st.selectbox(
-            "ML Algorithm",
-            options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'],
-            index=0,
-            format_func=lambda x: {
-                'tfidf_kmeans': 'TF-IDF + K-Means (Fast, Recommended)',
-                'lda': 'Latent Dirichlet Allocation (Topic Modeling)',
-                'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
-                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)',
-                'svm': 'SVM Spectral Clustering (Kernel-based)'
-            }[x],
-            help="Choose the machine learning algorithm"
-        )
+        if auto_optimal_method:
+            st.markdown("""
+            <div class="info-box" style="padding: 10px;">
+            🤖 <strong>Auto method selection enabled:</strong>
+            <p style="margin: 5px 0;">The algorithm will analyze your data and select the best method based on:</p>
+            <ul style="margin: 5px 0 0 0;">
+            <li><strong>Dataset size</strong> - Larger datasets benefit from topic modeling (LDA)</li>
+            <li><strong>Text length</strong> - Short texts benefit from semantic methods (BERT)</li>
+            <li><strong>Vocabulary diversity</strong> - High diversity supports topic discovery</li>
+            </ul>
+            <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">
+            All 5 methods are considered: TF-IDF, LDA, BERT, LSTM, and SVM
+            </p>
+            </div>
+            """, unsafe_allow_html=True)
+            method = 'tfidf_kmeans'  # Default, will be auto-selected during analysis
+        else:
+            method = st.selectbox(
+                "ML Algorithm",
+                options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'],
+                index=0,
+                format_func=lambda x: {
+                    'tfidf_kmeans': 'TF-IDF + K-Means (Fast, Recommended)',
+                    'lda': 'Latent Dirichlet Allocation (Topic Modeling)',
+                    'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
+                    'bert_kmeans': 'BERT + K-Means (Semantic Understanding)',
+                    'svm': 'SVM Spectral Clustering (Kernel-based)'
+                }[x],
+                help="Choose the machine learning algorithm"
+            )
 
         # Algorithm descriptions with runtime hints and pros/cons
         algorithm_info = {
@@ -2069,6 +2313,7 @@ def page_configuration():
         'text_column': selected_column,
         'n_codes': n_codes,
         'auto_optimal_codes': auto_optimal_codes,
+        'auto_optimal_method': auto_optimal_method,
         'method': method,
         'min_confidence': min_confidence,
         'stop_words': stop_words,
@@ -2094,7 +2339,7 @@ def page_configuration():
     with config_col2:
         st.metric("Codes to Find", "Auto" if auto_optimal_codes else n_codes)
     with config_col3:
-        st.metric("Algorithm", method.upper())
+        st.metric("Algorithm", "Auto" if auto_optimal_method else method.upper())
     with config_col4:
         st.metric("Response Type", selected_type_info['name'].split()[0])
 
@@ -2162,6 +2407,7 @@ def page_run_analysis():
     st.markdown("### 📋 Ready to Analyze")
 
     auto_optimal = config.get('auto_optimal_codes', False)
+    auto_optimal_method = config.get('auto_optimal_method', False)
 
     # Sentiment analysis is mandatory when available - model is determined by response type
     enable_sentiment = SENTIMENT_ANALYSIS_AVAILABLE
@@ -2193,12 +2439,15 @@ def page_run_analysis():
     with col3:
         st.metric("Codes", "Auto" if auto_optimal else config['n_codes'])
     with col4:
-        st.metric("Method", config['method'].upper())
+        st.metric("Method", "Auto" if auto_optimal_method else config['method'].upper())
     with col5:
         st.metric("Response Type", data_type_label)
 
     if auto_optimal:
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
+
+    if auto_optimal_method:
+        st.info("🤖 The algorithm will analyze your data (size, text length, vocabulary diversity) and select the best method from all 5 available options.")
 
     if enable_sentiment:
         data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT', 'news': 'Review-BERT'}
@@ -2241,6 +2490,50 @@ def page_run_analysis():
             # Run analysis
             start_time = time.time()
 
+            # Determine method (auto-select based on data characteristics if enabled)
+            method = config['method']
+
+            if auto_optimal_method:
+                update_progress(0.05, "🤖 Analyzing data characteristics to select best method...", 0)
+
+                # Get the texts for analysis
+                texts = df[config['text_column']].dropna().tolist()
+
+                # Run sophisticated auto-selection
+                selection_result = auto_select_best_method(texts)
+                method = selection_result['method']
+                chars = selection_result['characteristics']
+                scores = selection_result['scores']
+
+                # Display selection results
+                method_name = selection_result['method_names'][method]
+                st.success(f"🤖 Auto-selected **{method_name}**")
+
+                # Show analysis details in an expander
+                with st.expander("📊 View selection analysis", expanded=False):
+                    # Data characteristics
+                    st.markdown("**Data Characteristics:**")
+                    char_col1, char_col2, char_col3 = st.columns(3)
+                    with char_col1:
+                        st.metric("Samples", f"{chars['n_samples']:,}")
+                    with char_col2:
+                        st.metric("Avg Words/Text", f"{chars['avg_length']:.1f}")
+                    with char_col3:
+                        st.metric("Vocab Diversity", f"{chars['vocab_diversity']:.1%}")
+
+                    # Reasoning
+                    st.markdown("**Selection Reasoning:**")
+                    for reason in selection_result['reasoning'][:-1]:  # Exclude final "Selected..." line
+                        st.markdown(f"- {reason}")
+
+                    # Method scores
+                    st.markdown("**Method Scores:**")
+                    scores_df = pd.DataFrame([
+                        {'Method': selection_result['method_names'][m], 'Score': s}
+                        for m, s in sorted(scores.items(), key=lambda x: x[1], reverse=True)
+                    ])
+                    st.dataframe(scores_df, hide_index=True, use_container_width=True)
+
             # Determine number of codes
             n_codes = config['n_codes']
 
@@ -2251,7 +2544,7 @@ def page_run_analysis():
                     optimal_n, optimal_results = find_optimal_codes(
                         df=df,
                         text_column=config['text_column'],
-                        method=config['method'],
+                        method=method,
                         stop_words=config.get('stop_words', 'english'),
                         progress_callback=lambda p, m: update_progress(0.1 + p * 0.3, m, 0)
                     )
@@ -2281,7 +2574,7 @@ def page_run_analysis():
                 df=df,
                 text_column=config['text_column'],
                 n_codes=n_codes,
-                method=config['method'],
+                method=method,
                 min_confidence=config['min_confidence'],
                 progress_callback=adjusted_progress
             )
@@ -2290,6 +2583,16 @@ def page_run_analysis():
             if auto_optimal:
                 metrics['auto_optimal'] = True
                 metrics['optimal_analysis'] = optimal_results
+
+            # Store auto method selection info if used
+            if auto_optimal_method:
+                metrics['auto_optimal_method'] = True
+                metrics['auto_selected_method'] = method
+                metrics['method_selection_details'] = {
+                    'characteristics': selection_result['characteristics'],
+                    'scores': selection_result['scores'],
+                    'reasoning': selection_result['reasoning']
+                }
 
             # Run sentiment analysis (mandatory when available)
             sentiment_results = None
