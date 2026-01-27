@@ -1,0 +1,51 @@
+id,response,respondent_id,timestamp
+1,"I love the flexibility of working from home, it allows me to manage my schedule and spend more time with family",R001,2024-01-15 08:30:00
+2,"The biggest challenge has been communication with my team - video call fatigue is real and I miss face-to-face interactions",R002,2024-01-15 09:15:00
+3,"My productivity has actually increased since going remote, I can focus better without office distractions",R003,2024-01-15 10:00:00
+4,"I feel isolated sometimes, miss the social aspects of the office and grabbing coffee with colleagues",R004,2024-01-15 11:30:00
+5,"The cost savings from not commuting have been significant - saving money on gas and reduced stress from traffic",R005,2024-01-15 12:45:00
+6,"Separating work from personal life has been difficult, I find myself working longer hours",R006,2024-01-15 13:20:00
+7,"Remote work has improved my work-life balance significantly, I can do personal activities during lunch",R007,2024-01-15 14:00:00
+8,"Technology issues and internet connectivity problems have been frustrating at times",R008,2024-01-15 15:30:00
+9,"I appreciate the autonomy to structure my own day and take breaks when needed",R009,2024-01-15 16:15:00
+10,"Missing team relationships and the spontaneous conversations that happen in an office",R010,2024-01-16 08:00:00
+11,"My home office setup is great now, much more efficient than the open plan office",R011,2024-01-16 09:30:00
+12,"Communication challenges with colleagues in different time zones have been difficult",R012,2024-01-16 10:45:00
+13,"The flexible schedule allows me to exercise and maintain better health habits",R013,2024-01-16 11:15:00
+14,"I struggle to stay motivated without the accountability of being in an office",R014,2024-01-16 12:00:00
+15,"Love not having to commute - saving 2 hours every day that I can use productively",R015,2024-01-16 13:30:00
+16,"It's hard to maintain boundaries when your home is your office",R016,2024-01-16 14:20:00
+17,"The flexibility to work from anywhere has been liberating, I've traveled while working",R017,2024-01-16 15:00:00
+18,"I feel lonely working alone all day, miss the camaraderie of the office environment",R018,2024-01-16 16:30:00
+19,"My focus and deep work time has improved dramatically without interruptions",R019,2024-01-17 08:30:00
+20,"Technical difficulties during important video calls have been embarrassing",R020,2024-01-17 09:00:00
+21,"I have better time management now and can attend to family needs when necessary",R021,2024-01-17 10:15:00
+22,"The lack of social interaction is affecting my mental health sometimes",R022,2024-01-17 11:00:00
+23,"Reduced stress from commuting has been a major positive impact",R023,2024-01-17 12:30:00
+24,"Difficult to separate work hours from personal time in a home environment",R024,2024-01-17 13:45:00
+25,"Being productive at home requires discipline but the rewards are worth it",R025,2024-01-17 14:30:00
+26,"I miss the informal learning that happens naturally in an office setting",R026,2024-01-17 15:15:00
+27,"Working remotely has given me more time for hobbies and personal activities",R027,2024-01-17 16:00:00
+28,"Internet outages have caused major disruptions to my work schedule",R028,2024-01-18 08:00:00
+29,"The autonomy and freedom of remote work suits my personality perfectly",R029,2024-01-18 09:30:00
+30,"Finding it hard to build relationships with new team members remotely",R030,2024-01-18 10:45:00
+31,"My overall job satisfaction has improved with the flexibility of remote work",R031,2024-01-18 11:30:00
+32,"Video call fatigue is exhausting - too many meetings drain my energy",R032,2024-01-18 12:15:00
+33,"The money saved on work clothes, lunches, and commuting adds up significantly",R033,2024-01-18 13:00:00
+34,"Sometimes feel like I'm always at work since my office is at home",R034,2024-01-18 14:30:00
+35,"Remote work has made me more efficient with my time and communication",R035,2024-01-18 15:15:00
+36,"Miss the energy and buzz of a busy office environment",R036,2024-01-18 16:00:00
+37,"The flexibility to manage my own schedule has been life-changing",R037,2024-01-19 08:30:00
+38,"Collaboration on complex projects is harder without in-person whiteboard sessions",R038,2024-01-19 09:15:00
+39,"Working from home allows me to be more present for my children",R039,2024-01-19 10:00:00
+40,"The isolation is real - some days I don't speak to anyone in person",R040,2024-01-19 11:30:00
+41,"My productivity metrics have actually improved since switching to remote",R041,2024-01-19 12:45:00
+42,"Technical issues with VPN and company systems are frustrating",R042,2024-01-19 13:30:00
+43,"The work-life balance improvement has been the biggest benefit for me",R043,2024-01-19 14:15:00
+44,"Hard to get promoted when management can't see your work directly",R044,2024-01-19 15:00:00
+45,"Eliminating the commute has reduced my stress levels considerably",R045,2024-01-19 16:30:00
+46,"Struggling with boundaries between professional and personal space",R046,2024-01-20 08:00:00
+47,"The freedom to structure my day around my peak productivity hours is invaluable",R047,2024-01-20 09:30:00
+48,"Miss the spontaneous brainstorming sessions that happened in the office kitchen",R048,2024-01-20 10:15:00
+49,"Remote work has allowed me to move to a more affordable area",R049,2024-01-20 11:00:00
+50,"Connectivity problems during critical meetings have been a major issue",R050,2024-01-20 12:30:00

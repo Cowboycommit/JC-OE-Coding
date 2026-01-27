@@ -1,0 +1,41 @@
+id,response,respondent_id,timestamp,topic
+1,"Test cricket is the purest form of the game, it requires resilience, strategy and mental strength over five days",R001,2024-01-15 08:30:00,Format
+2,"The IPL has revolutionized cricket, making it more accessible and entertaining for younger audiences",R002,2024-01-15 09:15:00,T20
+3,"Fast bowling is an art form that combines athleticism, skill and intimidation",R003,2024-01-15 10:00:00,Bowling
+4,"The India-Pakistan rivalry is unmatched in sporting intensity and passion",R004,2024-01-15 11:30:00,Rivalry
+5,"Women's cricket deserves more recognition and investment, the talent pool is growing rapidly",R005,2024-01-15 12:45:00,Development
+6,"The atmosphere at a cricket ground is electric, especially during a close finish",R006,2024-01-15 13:20:00,Experience
+7,"DRS technology has improved decision-making accuracy but sometimes slows down the game",R007,2024-01-15 14:00:00,Technology
+8,"Cricket statistics offer incredible depth for analysis and understanding the game",R008,2024-01-15 15:30:00,Statistics
+9,"The World Cup is the pinnacle of one-day cricket, bringing nations together in competition",R009,2024-01-15 16:15:00,Tournament
+10,"Spin bowling in subcontinent conditions is a completely different challenge",R010,2024-01-16 08:00:00,Bowling
+11,"T20 innovations like switch hits and ramp shots have transformed batting technique",R011,2024-01-16 09:30:00,T20
+12,"The Ashes series between England and Australia carries immense historical significance",R012,2024-01-16 10:45:00,Rivalry
+13,"Cricket clubs build community and bring people together at grassroots level",R013,2024-01-16 11:15:00,Community
+14,"Match-fixing scandals need to be taken seriously to protect cricket's integrity",R014,2024-01-16 12:00:00,Integrity
+15,"The county championship system in England develops player skills and endurance",R015,2024-01-16 13:30:00,Development
+16,"Watching cricket with friends and family creates lasting childhood memories",R016,2024-01-16 14:20:00,Community
+17,"Modern coaching has brought a more scientific approach to player development",R017,2024-01-16 15:00:00,Coaching
+18,"The Big Bash League has made cricket entertainment more accessible in Australia",R018,2024-01-16 16:30:00,T20
+19,"Test cricket's survival depends on scheduling and making it attractive to fans",R019,2024-01-17 08:30:00,Format
+20,"The mental aspects of batting under pressure separate good players from great ones",R020,2024-01-17 09:00:00,Mental
+21,"Cricket should be in the Olympics to expand its global reach",R021,2024-01-17 10:15:00,Development
+22,"The sound of leather on willow is one of sport's most satisfying sounds",R022,2024-01-17 11:00:00,Experience
+23,"Sledging and gamesmanship debates continue to divide opinions on the spirit of cricket",R023,2024-01-17 12:30:00,Spirit
+24,"The rise of Bangladesh cricket shows how investment can develop new cricketing nations",R024,2024-01-17 13:45:00,Development
+25,"Commentary adds so much to the viewing experience of cricket matches",R025,2024-01-17 14:30:00,Experience
+26,"The commercialization of cricket through IPL has changed player careers forever",R026,2024-01-17 15:15:00,Commercial
+27,"Cricket records and statistics provide endless fascinating comparisons across eras",R027,2024-01-17 16:00:00,Statistics
+28,"The hundred format in England is an interesting experiment for attracting new audiences",R028,2024-01-18 08:00:00,Format
+29,"Fast bowling injuries have become more common with packed international schedules",R029,2024-01-18 09:30:00,Player welfare
+30,"Playing cricket at the grassroots level teaches teamwork and discipline",R030,2024-01-18 10:45:00,Community
+31,"The LDA topic model identifies strategic discussion patterns in cricket analysis",R031,2024-01-18 11:30:00,Analysis
+32,"T20 cricket has made the game more exciting but purists miss the longer format",R032,2024-01-18 12:15:00,Format
+33,"Women's cricket viewing figures have grown significantly in recent years",R033,2024-01-18 13:00:00,Development
+34,"The spirit of cricket should always emphasize fair play and sportsmanship",R034,2024-01-18 14:30:00,Spirit
+35,"Cricket leagues around the world have created new career opportunities for players",R035,2024-01-18 15:15:00,Commercial
+36,"The mental resilience required for Test cricket is extraordinary",R036,2024-01-18 16:00:00,Mental
+37,"Technology in cricket continues to evolve with ball-tracking and UltraEdge",R037,2024-01-19 08:30:00,Technology
+38,"Cricket brings families and communities together like few other sports can",R038,2024-01-19 09:15:00,Community
+39,"The tactical battle between captain and bowler makes cricket intellectually stimulating",R039,2024-01-19 10:00:00,Strategy
+40,"Test cricket requires patience from both players and spectators",R040,2024-01-19 11:30:00,Format

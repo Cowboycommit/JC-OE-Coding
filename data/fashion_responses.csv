@@ -1,0 +1,41 @@
+id,response,respondent_id,timestamp,topic
+1,"Sustainable fashion is no longer optional - it's essential for our planet's future",R001,2024-01-15 08:30:00,Sustainability
+2,"Fast fashion creates excessive waste and environmental damage we cannot ignore",R002,2024-01-15 09:15:00,Sustainability
+3,"Personal style expresses individuality and confidence in unique ways",R003,2024-01-15 10:00:00,Identity
+4,"The resale market is reshaping how we think about fashion consumption",R004,2024-01-15 11:30:00,Consumption
+5,"Size inclusivity in fashion has improved but still has a long way to go",R005,2024-01-15 12:45:00,Inclusivity
+6,"Ethical fashion principles should guide purchasing decisions",R006,2024-01-15 13:20:00,Ethics
+7,"Luxury fashion craftsmanship represents extraordinary skill and artistry",R007,2024-01-15 14:00:00,Luxury
+8,"Vintage clothing offers unique pieces with character and history",R008,2024-01-15 15:30:00,Vintage
+9,"Streetwear has moved from subculture to mainstream fashion influence",R009,2024-01-15 16:15:00,Trends
+10,"Fashion week trends set the direction for the industry each season",R010,2024-01-16 08:00:00,Industry
+11,"Quality over quantity should guide purchasing - invest in pieces that last",R011,2024-01-16 09:30:00,Consumption
+12,"Social media influencers have democratized fashion and style advice",R012,2024-01-16 10:45:00,Media
+13,"Body positivity is finally changing how fashion advertising portrays people",R013,2024-01-16 11:15:00,Inclusivity
+14,"The cost of sustainable fashion can be prohibitive for many consumers",R014,2024-01-16 12:00:00,Cost
+15,"Fashion rental services offer interesting alternatives to ownership",R015,2024-01-16 13:30:00,Consumption
+16,"Digital fashion and NFTs represent an interesting future direction",R016,2024-01-16 14:20:00,Innovation
+17,"Tailoring is a dying art form that deserves preservation and appreciation",R017,2024-01-16 15:00:00,Craftsmanship
+18,"Cultural appropriation in fashion needs to be addressed more seriously",R018,2024-01-16 16:30:00,Culture
+19,"Minimalist wardrobes reduce decision fatigue and environmental impact",R019,2024-01-17 08:30:00,Lifestyle
+20,"Fashion education should include sustainability and ethics as core principles",R020,2024-01-17 09:00:00,Education
+21,"The carbon footprint of the fashion industry is alarming and needs addressing",R021,2024-01-17 10:15:00,Environment
+22,"Self-care through fashion boosts confidence and wellbeing",R022,2024-01-17 11:00:00,Identity
+23,"Gender-neutral fashion is breaking traditional clothing boundaries",R023,2024-01-17 12:30:00,Trends
+24,"Haute couture represents the pinnacle of fashion artistry and craftsmanship",R024,2024-01-17 13:45:00,Luxury
+25,"Supporting local designers strengthens community fashion ecosystems",R025,2024-01-17 14:30:00,Community
+26,"Fashion photography has evolved significantly in the digital age",R026,2024-01-17 15:15:00,Media
+27,"Workplace dress codes have relaxed significantly post-pandemic",R027,2024-01-17 16:00:00,Workplace
+28,"Comfort is increasingly prioritized over aesthetics in daily wear",R028,2024-01-18 08:00:00,Comfort
+29,"Fashion history provides fascinating insights into social and cultural changes",R029,2024-01-18 09:30:00,History
+30,"The secondhand market has become a mainstream shopping option",R030,2024-01-18 10:45:00,Consumption
+31,"Fashion expresses cultural identity and heritage in meaningful ways",R031,2024-01-18 11:30:00,Culture
+32,"Sustainable materials and innovative fabrics are transforming production",R032,2024-01-18 12:15:00,Innovation
+33,"Fashion blogs have been largely replaced by Instagram and TikTok",R033,2024-01-18 13:00:00,Media
+34,"Personal style should prioritize comfort and self-expression over trends",R034,2024-01-18 14:30:00,Identity
+35,"The fashion industry must address worker exploitation in supply chains",R035,2024-01-18 15:15:00,Ethics
+36,"Capsule wardrobes simplify dressing decisions while reducing waste",R036,2024-01-18 16:00:00,Lifestyle
+37,"Fashion accessibility for people with disabilities needs more attention",R037,2024-01-19 08:30:00,Inclusivity
+38,"Luxury resale platforms have made designer fashion more accessible",R038,2024-01-19 09:15:00,Consumption
+39,"Fashion trends increasingly emphasize individuality over conformity",R039,2024-01-19 10:00:00,Trends
+40,"The environmental cost of fashion returns is significant and overlooked",R040,2024-01-19 11:30:00,Environment

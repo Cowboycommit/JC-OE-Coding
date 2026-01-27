@@ -8,9 +8,9 @@
 
 ## Executive Summary
 
-This report assesses **9 datasets** available in the project to determine which best demonstrate the framework's capabilities. The analysis considers text quality, realism, theme clarity, and alignment with key project features.
+This report assesses **12 datasets** available in the project to determine which best demonstrate the framework's capabilities. The analysis considers text quality, realism, theme clarity, and alignment with key project features.
 
-> **Note:** 4 low-quality datasets were removed following this assessment (Remote Work Survey, Fashion Trends Survey, Cricket Lovers Survey, IMDB Movie Reviews).
+> **Note:** 3 simple datasets (sample_responses.csv, cricket_responses.csv, fashion_responses.csv) are provided for the keyword-based coding notebook demonstrations.
 
 ### Top Recommendations
 
@@ -343,12 +343,16 @@ Use the **three 300-row test datasets** in order:
 | Large-scale processing | AG News or SNIPS |
 | Sentiment analysis | SST-5 or SemEval Twitter |
 
-### Datasets Removed (Low Quality)
-The following datasets were removed from the project after this assessment:
-- **Remote Work Survey Data** - Too pre-processed, lacks authenticity
-- **Fashion Trends Survey Data** - Same issue
-- **Cricket Lovers Survey Data** - Same issue
-- **IMDB Movie Reviews** - Only 36 samples, too small
+### Notebook Demo Datasets (Recreated)
+The following datasets are provided for notebook demonstration purposes:
+- **sample_responses.csv** (50 rows) - Remote work experiences for `open_ended_coding_analysis.ipynb`
+- **cricket_responses.csv** (40 rows) - Cricket perspectives for theme analysis demos
+- **fashion_responses.csv** (40 rows) - Fashion industry opinions for coding framework demos
+
+These are simpler datasets designed to demonstrate the manual keyword-based coding workflow in `open_ended_coding_analysis.ipynb`, complementing the more sophisticated ML-based analysis datasets.
+
+### Datasets Not Included
+- **IMDB Movie Reviews** - Only 36 samples, too small for meaningful analysis
 
 ---
 
