@@ -325,7 +325,7 @@ NMF typically produces **sparser, more interpretable topics** than LDA:
 
 #### Example 1.3.2: Sample Remote Work Responses
 
-**Dataset**: `data/sample_responses.csv`
+**Dataset**: `data/Remote_Work_Experiences_200.csv`
 **Use Case**: Analyzing remote work feedback with distinct themes
 **Objective**: Identify 8-10 clear themes in remote work experiences
 
@@ -333,7 +333,7 @@ NMF typically produces **sparser, more interpretable topics** than LDA:
 
 ```python
 # Load sample data
-df = pd.read_csv('data/sample_responses.csv')
+df = pd.read_csv('data/Remote_Work_Experiences_200.csv')
 
 # Configure NMF model
 coder = MLOpenCoder(

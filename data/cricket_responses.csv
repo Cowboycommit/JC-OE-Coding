@@ -1,0 +1,201 @@
+id,response,respondent_id,timestamp,topic
+1,"Test cricket is the purest form of the game requiring resilience strategy and mental strength over five days",R001,2024-01-15 08:30:00,Format
+2,"The IPL has revolutionized cricket making it more accessible and entertaining for younger audiences",R002,2024-01-15 09:15:00,T20
+3,"Fast bowling is an art form that combines athleticism skill and intimidation",R003,2024-01-15 10:00:00,Bowling
+4,"The India-Pakistan rivalry is unmatched in sporting intensity and passion",R004,2024-01-15 11:30:00,Rivalry
+5,"Spin bowling requires exceptional control patience and the ability to read batsmen",R005,2024-01-15 12:45:00,Bowling
+6,"The Ashes series represents the pinnacle of cricket tradition and sporting heritage",R006,2024-01-15 13:20:00,Tournament
+7,"T20 cricket has made the sport more exciting but sometimes sacrifices technique for entertainment",R007,2024-01-15 14:00:00,T20
+8,"The atmosphere at a full cricket ground is electric and creates unforgettable memories",R008,2024-01-15 15:30:00,Experience
+9,"Women's cricket has grown tremendously and deserves equal recognition and support",R009,2024-01-15 16:15:00,Development
+10,"DRS technology has improved decision-making but sometimes takes away from the human element",R010,2024-01-16 08:00:00,Technology
+11,"The World Cup is the ultimate stage for any cricketer representing their nation",R011,2024-01-16 09:30:00,Tournament
+12,"Cricket statistics provide fascinating depth and context to player performances",R012,2024-01-16 10:45:00,Statistics
+13,"The sound of leather on willow is one of the most satisfying sounds in sport",R013,2024-01-16 11:15:00,Experience
+14,"Modern coaching has transformed how players approach fitness and mental preparation",R014,2024-01-16 12:00:00,Development
+15,"Test cricket teaches patience and perseverance unlike any other format",R015,2024-01-16 13:30:00,Format
+16,"The community aspect of club cricket brings people together across generations",R016,2024-01-16 14:20:00,Community
+17,"Cricket commentary has evolved with more analysis and entertainment value",R017,2024-01-16 15:00:00,Media
+18,"The spirit of cricket should prioritize fair play over gamesmanship and sledging",R018,2024-01-16 16:30:00,Spirit
+19,"Limited overs cricket has produced some of the most thrilling finishes in sporting history",R019,2024-01-17 08:30:00,Format
+20,"The Hundred format is an interesting experiment to attract new audiences",R020,2024-01-17 09:00:00,T20
+21,"Batting in challenging conditions separates great players from good ones",R021,2024-01-17 10:15:00,Batting
+22,"Cricket's global expansion to new markets is essential for the sport's future",R022,2024-01-17 11:00:00,Development
+23,"The County Championship remains the bedrock of English cricket development",R023,2024-01-17 12:30:00,Domestic
+24,"Match-fixing scandals have damaged cricket's integrity and trust with fans",R024,2024-01-17 13:45:00,Integrity
+25,"Watching cricket with family has created cherished childhood memories",R025,2024-01-17 14:30:00,Community
+26,"The mental strength required for Test cricket makes it the ultimate examination",R026,2024-01-17 15:15:00,Psychology
+27,"Cricket has a unique ability to bring together people from diverse backgrounds",R027,2024-01-17 16:00:00,Community
+28,"The evolution of batting techniques reflects changing pitch conditions and formats",R028,2024-01-18 08:00:00,Batting
+29,"Radio commentary paints pictures that television cannot replicate",R029,2024-01-18 09:30:00,Media
+30,"Cricket academies are developing talent earlier than ever before",R030,2024-01-18 10:45:00,Development
+31,"The pressure of a five-day Test match reveals true character and temperament",R031,2024-01-18 11:30:00,Psychology
+32,"Reverse swing bowling is one of the most skillful arts in cricket",R032,2024-01-18 12:15:00,Bowling
+33,"The Sheffield Shield has produced some of Australia's greatest cricketers",R033,2024-01-18 13:00:00,Domestic
+34,"Cricket's colonial history adds complex layers to international rivalries",R034,2024-01-18 14:30:00,History
+35,"The emergence of associate nations has added depth to world cricket",R035,2024-01-18 15:15:00,Development
+36,"A perfectly timed cover drive is the most elegant shot in cricket",R036,2024-01-18 16:00:00,Batting
+37,"Cricket brings families together on lazy summer afternoons",R037,2024-01-19 08:30:00,Community
+38,"The tactical battle between captain and opposition fascinates me",R038,2024-01-19 09:15:00,Strategy
+39,"Wicketkeeping is an underappreciated skill that requires exceptional concentration",R039,2024-01-19 10:00:00,Skills
+40,"The Big Bash League has successfully attracted casual fans to the sport",R040,2024-01-19 11:30:00,T20
+41,"Test cricket needs innovation to remain relevant to younger audiences",R041,2024-01-19 12:00:00,Format
+42,"The rivalry between bat and ball makes every delivery an individual contest",R042,2024-01-19 13:30:00,Competition
+43,"Cricket grounds with historical significance provide a unique atmosphere",R043,2024-01-19 14:15:00,Experience
+44,"The development of power hitting has changed limited overs cricket dramatically",R044,2024-01-19 15:00:00,Batting
+45,"Playing cricket taught me valuable lessons about teamwork and sportsmanship",R045,2024-01-20 08:00:00,Values
+46,"The statistical depth of cricket appeals to analytically minded fans",R046,2024-01-20 09:30:00,Statistics
+47,"Cricket's traditions should be preserved while embracing necessary innovation",R047,2024-01-20 10:15:00,Tradition
+48,"The art of swing bowling seems to be declining in modern cricket",R048,2024-01-20 11:00:00,Bowling
+49,"Night Tests have added a new dimension to traditional cricket",R049,2024-01-20 12:30:00,Innovation
+50,"The camaraderie in cricket dressing rooms creates lifelong friendships",R050,2024-01-20 13:45:00,Community
+51,"Young cricketers today have access to coaching and facilities previous generations could only dream of",R051,2024-01-20 14:30:00,Development
+52,"The mental game in cricket is as important as physical skills",R052,2024-01-20 15:15:00,Psychology
+53,"Cricket provides opportunities for players from disadvantaged backgrounds",R053,2024-01-20 16:00:00,Social
+54,"The rivalry between Australia and England defines the sport's heritage",R054,2024-01-21 08:30:00,Rivalry
+55,"Wrist spin bowling is experiencing a welcome renaissance in modern cricket",R055,2024-01-21 09:15:00,Bowling
+56,"The ICC needs to do more to support cricket in emerging nations",R056,2024-01-21 10:00:00,Governance
+57,"Local cricket clubs are the foundation of the sport's grassroots development",R057,2024-01-21 11:30:00,Community
+58,"The tension of a close Test match is incomparable to any other sporting experience",R058,2024-01-21 12:00:00,Experience
+59,"Cricket has given me some of my closest friendships and fondest memories",R059,2024-01-21 13:30:00,Personal
+60,"The emergence of franchise cricket has changed player priorities significantly",R060,2024-01-21 14:15:00,T20
+61,"Building an innings in Test cricket is a lost art that needs revival",R061,2024-01-21 15:00:00,Batting
+62,"The strategic nuances of field placements fascinate me as a cricket fan",R062,2024-01-22 08:00:00,Strategy
+63,"Cricket teaches children discipline patience and respect for opponents",R063,2024-01-22 09:30:00,Values
+64,"The transformation of fielding standards has raised the overall level of cricket",R064,2024-01-22 10:15:00,Skills
+65,"Watching a spinner turn the ball sharply never gets old",R065,2024-01-22 11:00:00,Bowling
+66,"The financial disparity between cricket boards threatens the sport's competitive balance",R066,2024-01-22 12:30:00,Governance
+67,"Cricket's gentle pace allows for appreciation of individual battles within the team context",R067,2024-01-22 13:45:00,Experience
+68,"The Ranji Trophy remains India's most prestigious domestic competition",R068,2024-01-22 14:30:00,Domestic
+69,"Pink ball Tests have shown promise in attracting evening crowds",R069,2024-01-22 15:15:00,Innovation
+70,"The role of the third umpire has become increasingly important in modern cricket",R070,2024-01-22 16:00:00,Technology
+71,"Cricket statistics help us appreciate performances across different eras",R071,2024-01-23 08:30:00,Statistics
+72,"The sense of belonging to a cricket club extends beyond just playing",R072,2024-01-23 09:15:00,Community
+73,"Pace bowlers today are stronger and faster than ever before",R073,2024-01-23 10:00:00,Bowling
+74,"The psychological battle between bowler and batsman is endlessly fascinating",R074,2024-01-23 11:30:00,Psychology
+75,"Cricket commentary has become too focused on entertainment over analysis",R075,2024-01-23 12:00:00,Media
+76,"The quality of pitches significantly impacts the balance between bat and ball",R076,2024-01-23 13:30:00,Conditions
+77,"Former players bring invaluable insights to coaching and development",R077,2024-01-23 14:15:00,Development
+78,"The atmosphere during a World Cup final is indescribable",R078,2024-01-23 15:00:00,Tournament
+79,"Cricket has helped me develop resilience and handle pressure situations",R079,2024-01-24 08:00:00,Personal
+80,"The growth of women's cricket has been one of the sport's great success stories",R080,2024-01-24 09:30:00,Development
+81,"Test cricket attendance has declined but television audiences remain strong",R081,2024-01-24 10:15:00,Future
+82,"The artistry of batting against spin on turning pitches is beautiful to watch",R082,2024-01-24 11:00:00,Batting
+83,"Cricket needs to be more accessible to people from all socioeconomic backgrounds",R083,2024-01-24 12:30:00,Social
+84,"The rivalry between subcontinent teams creates unparalleled passion",R084,2024-01-24 13:45:00,Rivalry
+85,"Modern batsmen struggle against quality spin bowling compared to previous generations",R085,2024-01-24 14:30:00,Skills
+86,"The role of data analytics in cricket strategy has transformed team preparation",R086,2024-01-24 15:15:00,Technology
+87,"Cricket's long matches allow for natural ebbs and flows that shorter sports lack",R087,2024-01-24 16:00:00,Format
+88,"The experience of playing cricket at iconic venues is something special",R088,2024-01-25 08:30:00,Experience
+89,"Young players need more exposure to red-ball cricket to develop properly",R089,2024-01-25 09:15:00,Development
+90,"The tactical battle in a Test match can shift multiple times across five days",R090,2024-01-25 10:00:00,Strategy
+91,"Cricket brings out both the best and worst in terms of crowd behavior",R091,2024-01-25 11:30:00,Culture
+92,"The legacy of great players inspires new generations to take up the sport",R092,2024-01-25 12:00:00,History
+93,"Playing cricket has taught me more about myself than any other activity",R093,2024-01-25 13:30:00,Personal
+94,"The unpredictability of cricket on different surfaces keeps the game fascinating",R094,2024-01-25 14:15:00,Conditions
+95,"Cricket boards need better governance and transparency in decision-making",R095,2024-01-25 15:00:00,Governance
+96,"The social aspect of village cricket is as important as the game itself",R096,2024-01-26 08:00:00,Community
+97,"Fast bowling injuries remain a significant concern for player welfare",R097,2024-01-26 09:30:00,Health
+98,"The commercialization of cricket has both positive and negative consequences",R098,2024-01-26 10:15:00,Business
+99,"Cricket teaches the value of patience in an increasingly impatient world",R099,2024-01-26 11:00:00,Values
+100,"The excitement of a super over finish captures everything great about T20",R100,2024-01-26 12:30:00,T20
+101,"Test cricket demands sustained concentration that other formats don't require",R101,2024-01-26 13:45:00,Format
+102,"The bond between cricket teammates often lasts long after playing days end",R102,2024-01-26 14:30:00,Relationships
+103,"Cricket's colonial history creates complex dynamics in international competition",R103,2024-01-26 15:15:00,History
+104,"The development of switch-hitting has added new dimensions to batting",R104,2024-01-26 16:00:00,Innovation
+105,"Watching cricket with knowledgeable fans enhances the viewing experience",R105,2024-01-27 08:30:00,Community
+106,"The pressure on modern cricketers from social media is unprecedented",R106,2024-01-27 09:15:00,Media
+107,"Cricket provides a healthy outlet for competitive instincts",R107,2024-01-27 10:00:00,Personal
+108,"The rotation of strike in limited overs cricket requires intelligent running",R108,2024-01-27 11:30:00,Skills
+109,"Test cricket should maintain its five-day format despite commercial pressures",R109,2024-01-27 12:00:00,Tradition
+110,"The emergence of Afghan cricket has been remarkable given the country's challenges",R110,2024-01-27 13:30:00,Development
+111,"Cricket administrators must balance tradition with necessary modernization",R111,2024-01-27 14:15:00,Governance
+112,"The mental fortitude required to bat for a full day is extraordinary",R112,2024-01-27 15:00:00,Psychology
+113,"Local derby matches create intense rivalries in domestic cricket",R113,2024-01-28 08:00:00,Domestic
+114,"The variation in bowling speeds and lengths keeps batsmen guessing",R114,2024-01-28 09:30:00,Bowling
+115,"Cricket in schools is essential for developing future players and fans",R115,2024-01-28 10:15:00,Development
+116,"The economic impact of major cricket tournaments benefits local communities",R116,2024-01-28 11:00:00,Business
+117,"Playing cricket in different conditions teaches adaptability and resilience",R117,2024-01-28 12:30:00,Personal
+118,"The role of the all-rounder has become increasingly valued in modern cricket",R118,2024-01-28 13:45:00,Skills
+119,"Cricket's global calendar needs better coordination between boards",R119,2024-01-28 14:30:00,Governance
+120,"The atmosphere of a full house at Lord's is unmatched in cricket",R120,2024-01-28 15:15:00,Experience
+121,"Young fast bowlers need better workload management to prevent injuries",R121,2024-01-28 16:00:00,Health
+122,"Cricket has helped many players develop confidence and leadership skills",R122,2024-01-29 08:30:00,Personal
+123,"The tactical use of the new ball can determine the outcome of a match",R123,2024-01-29 09:15:00,Strategy
+124,"Cricket's appeal lies in its combination of individual excellence and team success",R124,2024-01-29 10:00:00,Values
+125,"The importance of a solid defensive technique is often undervalued in modern cricket",R125,2024-01-29 11:30:00,Batting
+126,"Women's cricket coverage has improved dramatically in recent years",R126,2024-01-29 12:00:00,Media
+127,"The variety of shots in a batsman's repertoire reflects years of practice",R127,2024-01-29 13:30:00,Skills
+128,"Cricket brings communities together during major international tournaments",R128,2024-01-29 14:15:00,Community
+129,"The decline of leg-spin bowling in some countries is concerning",R129,2024-01-29 15:00:00,Bowling
+130,"Test match cricket provides the ultimate examination of technique and temperament",R130,2024-01-30 08:00:00,Format
+131,"The passion of cricket fans in South Asia is unmatched anywhere in the world",R131,2024-01-30 09:30:00,Culture
+132,"Cricket has produced some of the greatest sporting rivalries in history",R132,2024-01-30 10:15:00,Rivalry
+133,"The evolution of protective equipment has made batting safer but changed techniques",R133,2024-01-30 11:00:00,Equipment
+134,"Local cricket leagues provide valuable competitive experience for aspiring players",R134,2024-01-30 12:30:00,Domestic
+135,"The unpredictability of weather in Test cricket adds an extra strategic element",R135,2024-01-30 13:45:00,Conditions
+136,"Cricket's etiquette and traditions distinguish it from other sports",R136,2024-01-30 14:30:00,Tradition
+137,"The physical demands on modern cricketers require rigorous fitness regimes",R137,2024-01-30 15:15:00,Fitness
+138,"Watching replay analysis has deepened my understanding of the game",R138,2024-01-30 16:00:00,Technology
+139,"The emergence of cricket in non-traditional markets shows the sport's potential",R139,2024-01-31 08:30:00,Development
+140,"Cricket teaches you to respect your opponents while competing fiercely",R140,2024-01-31 09:15:00,Values
+141,"The tactical complexity of field placements reveals a captain's acumen",R141,2024-01-31 10:00:00,Strategy
+142,"The quality of first-class cricket varies significantly between nations",R142,2024-01-31 11:30:00,Domestic
+143,"Cricket has given me a framework for understanding team dynamics",R143,2024-01-31 12:00:00,Personal
+144,"The financial rewards in T20 leagues have changed player career decisions",R144,2024-01-31 13:30:00,Business
+145,"Playing cricket overseas broadens perspectives and builds global connections",R145,2024-01-31 14:15:00,Culture
+146,"The art of building partnerships is fundamental to successful batting",R146,2024-01-31 15:00:00,Batting
+147,"Cricket needs to address issues of inclusivity and diversity more actively",R147,2024-02-01 08:00:00,Social
+148,"The psychological impact of a dropped catch can shift momentum dramatically",R148,2024-02-01 09:30:00,Psychology
+149,"Local cricket clubs struggle with declining participation and funding",R149,2024-02-01 10:15:00,Community
+150,"The beauty of cricket lies in its ability to produce unexpected results",R150,2024-02-01 11:00:00,Experience
+151,"Modern technology has revealed the complexity of bowling actions",R151,2024-02-01 12:30:00,Technology
+152,"Cricket provides valuable life lessons about handling success and failure",R152,2024-02-01 13:45:00,Values
+153,"The standard of catching in international cricket has improved dramatically",R153,2024-02-01 14:30:00,Skills
+154,"Test cricket needs better marketing to attract new audiences",R154,2024-02-01 15:15:00,Marketing
+155,"The rivalry between India and Australia has produced memorable series",R155,2024-02-01 16:00:00,Rivalry
+156,"Playing conditions should favor a fair contest between bat and ball",R156,2024-02-02 08:30:00,Conditions
+157,"Cricket has helped me develop long-term thinking and strategic planning",R157,2024-02-02 09:15:00,Personal
+158,"The decline of traditional batting techniques concerns many cricket purists",R158,2024-02-02 10:00:00,Skills
+159,"Cricket's slow pace allows for detailed analysis and appreciation of subtlety",R159,2024-02-02 11:30:00,Experience
+160,"Young players need mentorship from experienced cricketers to develop properly",R160,2024-02-02 12:00:00,Development
+161,"The excitement of a new innings starting brings fresh hope and possibilities",R161,2024-02-02 13:30:00,Experience
+162,"Cricket has produced iconic moments that transcend the sport itself",R162,2024-02-02 14:15:00,History
+163,"The pressure of representing your country in cricket is immense",R163,2024-02-02 15:00:00,Psychology
+164,"Modern batting techniques have evolved to counter specific bowling threats",R164,2024-02-03 08:00:00,Batting
+165,"The commercial success of T20 has funded development in other formats",R165,2024-02-03 09:30:00,Business
+166,"Cricket grounds with character and history provide unique playing experiences",R166,2024-02-03 10:15:00,Experience
+167,"The role of the captain in cricket is more significant than in most team sports",R167,2024-02-03 11:00:00,Leadership
+168,"Playing cricket builds character and teaches handling of adversity",R168,2024-02-03 12:30:00,Personal
+169,"The tradition of tea intervals adds to cricket's unique charm",R169,2024-02-03 13:45:00,Tradition
+170,"Cricket commentary should balance entertainment with insightful analysis",R170,2024-02-03 14:30:00,Media
+171,"The emergence of data-driven selection policies has changed team management",R171,2024-02-03 15:15:00,Technology
+172,"Local cricket creates social bonds that extend far beyond the playing field",R172,2024-02-03 16:00:00,Community
+173,"The physical and mental demands of fast bowling deserve greater recognition",R173,2024-02-04 08:30:00,Bowling
+174,"Cricket's ability to produce draws adds a unique strategic dimension",R174,2024-02-04 09:15:00,Format
+175,"The passion for cricket in the Indian subcontinent is extraordinary",R175,2024-02-04 10:00:00,Culture
+176,"Playing conditions that favor one side excessively damage the sport's credibility",R176,2024-02-04 11:30:00,Fairness
+177,"Cricket teaches the importance of playing within the rules while competing hard",R177,2024-02-04 12:00:00,Values
+178,"The role of the wicketkeeper has evolved with new batting demands",R178,2024-02-04 13:30:00,Skills
+179,"Cricket's long matches create unique opportunities for comebacks and drama",R179,2024-02-04 14:15:00,Experience
+180,"Investment in women's cricket is beginning to show results at the highest level",R180,2024-02-04 15:00:00,Development
+181,"The tactical awareness required in cricket develops with experience and study",R181,2024-02-05 08:00:00,Strategy
+182,"Cricket has produced friendships across national boundaries and rivalries",R182,2024-02-05 09:30:00,Relationships
+183,"The importance of rotating strike in limited overs is often underestimated",R183,2024-02-05 10:15:00,Batting
+184,"Cricket's slow reveal of narratives makes it perfect for radio commentary",R184,2024-02-05 11:00:00,Media
+185,"Modern umpiring technology has improved decision accuracy significantly",R185,2024-02-05 12:30:00,Technology
+186,"The atmosphere at regional cricket matches can be incredibly passionate",R186,2024-02-05 13:45:00,Experience
+187,"Cricket development programs need sustained funding and commitment",R187,2024-02-05 14:30:00,Development
+188,"The mental strength to recover from poor form separates great players",R188,2024-02-05 15:15:00,Psychology
+189,"Cricket's traditions should evolve naturally rather than be artificially preserved",R189,2024-02-05 16:00:00,Tradition
+190,"The variety of cricket formats now available caters to different preferences",R190,2024-02-06 08:30:00,Format
+191,"Playing cricket has helped me develop leadership and communication skills",R191,2024-02-06 09:15:00,Personal
+192,"The financial sustainability of domestic cricket remains a significant challenge",R192,2024-02-06 10:00:00,Business
+193,"Cricket's global reach continues to expand into new territories",R193,2024-02-06 11:30:00,Development
+194,"The tactical battle between bowling attacks and batting lineups is fascinating",R194,2024-02-06 12:00:00,Strategy
+195,"Cricket needs to address issues of player burnout more seriously",R195,2024-02-06 13:30:00,Health
+196,"The experience of watching cricket live is far superior to television",R196,2024-02-06 14:15:00,Experience
+197,"Local cricket clubs form the foundation of the sport's development pyramid",R197,2024-02-06 15:00:00,Community
+198,"The complexity of cricket rules can be daunting for new fans",R198,2024-02-07 08:00:00,Accessibility
+199,"Cricket has provided me with lifelong friendships and cherished memories",R199,2024-02-07 09:30:00,Personal
+200,"The future of cricket depends on balancing commercial interests with sporting integrity",R200,2024-02-07 10:15:00,Future
