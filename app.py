@@ -964,8 +964,9 @@ def page_data_upload():
     st.markdown("### 📊 Select a Sample Dataset")
 
     # Define available sample datasets with metadata
+    # Curated for open-ended qualitative coding analysis (6 datasets, 1,500 total rows)
     sample_datasets = {
-        # Primary demo datasets - qualitative survey data
+        # Primary research datasets - 300 rows each, rich qualitative content
         "Healthcare Patient Feedback": {
             "path": "data/Healthcare_Patient_Feedback_300.csv",
             "description": "Patient feedback across hospital departments (Emergency, Cardiology, etc.). Rich qualitative data ideal for thematic analysis and department-based segmentation.",
@@ -984,48 +985,24 @@ def page_data_upload():
             "text_column": "response",
             "type": "Psychology"
         },
-        # Sentiment analysis benchmark datasets
-        "SST-2 (Binary Sentiment)": {
-            "path": "data/SST-2 Sentiment Dataset.csv",
-            "description": "Stanford Sentiment Treebank - Binary classification. Expert-labeled movie review sentences with positive/negative sentiment labels. Industry standard benchmark.",
-            "text_column": "text",
-            "type": "Sentiment",
-            "labels": "positive, negative"
+        # Demo datasets - 200 rows each, diverse thematic content
+        "Remote Work Experiences": {
+            "path": "data/Remote_Work_Experiences_200.csv",
+            "description": "Remote work feedback covering 30+ themes: flexibility, isolation, productivity, communication, work-life balance, and management challenges.",
+            "text_column": "response",
+            "type": "Workplace"
         },
-        "SST-5 (Fine-grained Sentiment)": {
-            "path": "data/SST-5 Sentiment Dataset.csv",
-            "description": "Stanford Sentiment Treebank - 5-class sentiment. Fine-grained labels from very negative to very positive. Tests nuanced sentiment detection.",
-            "text_column": "text",
-            "type": "Sentiment",
-            "labels": "very negative, negative, neutral, positive, very positive"
+        "Cricket Commentary": {
+            "path": "data/cricket_responses.csv",
+            "description": "Cricket perspectives with 40+ topics: technique, strategy, tournaments, player analysis, fan culture, and sporting traditions.",
+            "text_column": "response",
+            "type": "Sports"
         },
-        "Twitter Sentiment (SemEval)": {
-            "path": "data/SemEval Twitter Sentiment.csv",
-            "description": "SemEval Twitter sentiment benchmark. Professionally annotated tweets with 3-class sentiment. Tests short, informal text analysis.",
-            "text_column": "text",
-            "type": "Sentiment",
-            "labels": "positive, neutral, negative"
-        },
-        "GoEmotions (Multi-label)": {
-            "path": "data/GoEmotions Multi-Label.csv",
-            "description": "Google's emotion dataset with 27 emotion categories. Multi-label annotations from Reddit comments. Tests fine-grained emotion detection.",
-            "text_column": "text",
-            "type": "Emotion",
-            "labels": "admiration, amusement, anger, joy, sadness, fear, surprise, + 21 more"
-        },
-        "AG News Classification": {
-            "path": "data/AG News Classification.csv",
-            "description": "News article classification benchmark. Clean, human-curated news snippets in 4 categories. Tests topic/domain classification.",
-            "text_column": "text",
-            "type": "Topic",
-            "labels": "World, Sports, Business, Sci/Tech"
-        },
-        "SNIPS Intent Classification": {
-            "path": "data/SNIPS Intent Classification.csv",
-            "description": "Voice assistant intent dataset. Human-annotated queries across 7 intent categories. Tests command/intent understanding.",
-            "text_column": "text",
-            "type": "Intent",
-            "labels": "PlayMusic, BookRestaurant, GetWeather, + 4 more"
+        "Fashion Opinions": {
+            "path": "data/fashion_responses.csv",
+            "description": "Fashion industry opinions covering 45+ topics: sustainability, trends, personal style, cultural influences, and industry practices.",
+            "text_column": "response",
+            "type": "Lifestyle"
         },
     }
 

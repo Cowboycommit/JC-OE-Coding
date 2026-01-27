@@ -64,16 +64,13 @@ The framework provides **15 essential outputs** for qualitative analysis:
 | Market_Research_Survey_300.csv | 32 KB | 300 | `demographic_segment` | Quality, price, service, loyalty |
 | Psychology_Wellbeing_Study_300.csv | 39 KB | 300 | `age_group` | Burnout, balance, mental health, growth |
 
-### Benchmark Datasets (Classification/Sentiment)
+### Demo Datasets (200 rows each)
 
-| Dataset | Size | Records | Label Column | Classes |
-|---------|------|---------|--------------|---------|
-| GoEmotions Multi-Label.csv | 179 KB | 2,000 | `emotions` | 27 emotions (multi-label) |
-| SNIPS Intent Classification.csv | 129 KB | 2,001 | `intent` | 7 intent classes |
-| AG News Classification.csv | 487 KB | 2,000 | `category` | 4 news categories |
-| SemEval Twitter Sentiment.csv | 218 KB | 2,116 | `sentiment` | 3 sentiment classes |
-| SST-5 Sentiment Dataset.csv | 4.5 KB | 75 | `sentiment` | 5 sentiment levels |
-| SST-2 Sentiment Dataset.csv | 6.8 KB | 150 | `sentiment` | Binary (pos/neg) |
+| Dataset | Size | Records | Topic Column | Content Focus |
+|---------|------|---------|--------------|---------------|
+| Remote_Work_Experiences_200.csv | 22 KB | 200 | `topic` | Remote work themes (30+ topics) |
+| cricket_responses.csv | 21 KB | 200 | `topic` | Cricket perspectives (40+ topics) |
+| fashion_responses.csv | 19 KB | 200 | `topic` | Fashion opinions (45+ topics) |
 
 ---
 
@@ -172,74 +169,63 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ---
 
-### Tier 2: Good Demo Datasets
+### Tier 2: Demo Datasets
 
-#### 4. GoEmotions Multi-Label.csv
-**Overall Rating: 4/5 Stars**
+#### 4. Remote_Work_Experiences_200.csv
+**Overall Rating: 4.5/5 Stars**
 
 | Criterion | Score | Notes |
 |-----------|-------|-------|
-| Text Quality | Good | Reddit-style, raw social media text |
-| Multi-label Support | Excellent | Multiple emotions per response |
-| Topic Diversity | Very High | Wide-ranging subjects |
-| Theme Focus | Moderate | Scattered rather than domain-focused |
+| Text Quality | Excellent | Natural remote work feedback |
+| Topic Variety | High | 30+ distinct themes |
+| Realism | Excellent | Authentic workplace experiences |
+| Demo Suitability | High | Quick, effective demonstrations |
 
 **Best For Demonstrating:**
-- Multi-label classification capability
-- Emotion detection features
-- Handling informal online discourse
-- Algorithm robustness with messy data
+- Quick demos and testing
+- Workplace theme discovery
+- Work-life balance patterns
 
 **Sample:**
-> "Whoa this is really creepy" → emotions: disgust
+> "Working from home has improved my productivity, though I miss the spontaneous conversations with colleagues"
 
 ---
 
-#### 5. SNIPS Intent Classification.csv
-**Overall Rating: 4/5 Stars**
+#### 5. cricket_responses.csv
+**Overall Rating: 4.5/5 Stars**
 
 | Criterion | Score | Notes |
 |-----------|-------|-------|
-| Size | Large | 2,001 responses |
-| Classification Clarity | Excellent | 7 well-defined intent classes |
-| Text Type | Conversational | Voice assistant queries |
+| Topic Diversity | Very High | 40+ cricket-related topics |
+| Theme Clarity | Good | Clear sporting themes emerge |
+| Enthusiasm | High | Authentic fan perspectives |
 
 **Best For Demonstrating:**
-- Classification accuracy metrics
-- Intent/action-oriented coding
-- Algorithm comparison on structured tasks
+- High topic variety analysis
+- Sports/enthusiasm detection
+- Cultural content handling
 
 **Sample:**
-> "Book a restaurant in Nevada for two people" → BookRestaurant
+> "The IPL has revolutionized cricket with its T20 format and brought international players together"
 
 ---
 
-#### 6. AG News Classification.csv
-**Overall Rating: 4/5 Stars**
+#### 6. fashion_responses.csv
+**Overall Rating: 4.5/5 Stars**
 
 | Criterion | Score | Notes |
 |-----------|-------|-------|
-| Size | Large | 2,000 articles, 487 KB |
-| Text Length | Long | Full news article paragraphs |
-| Category Clarity | Excellent | Business, Sports, Sci/Tech |
+| Theme Diversity | Very High | 45+ fashion topics |
+| Content Range | Excellent | Sustainability, trends, personal style |
+| Opinion Variety | High | Mixed perspectives |
 
 **Best For Demonstrating:**
-- Long-form text processing
-- Topic modeling at scale
-- BERT/semantic embedding advantages
+- Theme diversity and complexity
+- Lifestyle/cultural analysis
+- Sustainability discussions
 
----
-
-### Tier 3: Specialized/Limited Datasets
-
-#### 7. SemEval Twitter Sentiment.csv
-**Rating: 3.5/5 Stars** - Good for sentiment analysis demo, 2,116 tweets
-
-#### 8. SST-5 Sentiment Dataset.csv
-**Rating: 3/5 Stars** - Fine-grained 5-class sentiment, only 75 samples
-
-#### 9. SST-2 Sentiment Dataset.csv
-**Rating: 3/5 Stars** - Binary sentiment, 150 samples
+**Sample:**
+> "Fast fashion needs to change - I'm trying to buy more sustainable pieces even if they cost more"
 
 ---
 
@@ -249,16 +235,15 @@ The framework provides **15 essential outputs** for qualitative analysis:
 |-----------------|-----------------|-----|
 | **Theme Discovery** | Healthcare, Market Research, Psychology | Authentic text with discoverable themes |
 | **Segmentation Analysis** | Market Research (demographics), Healthcare (departments) | Built-in segment columns |
-| **Multi-label Classification** | GoEmotions | Multiple emotions per response |
+| **Topic Variety Analysis** | Cricket (40+ topics), Fashion (45+ topics) | High natural topic diversity |
 | **Confidence Scoring** | Psychology (nuanced themes) | Overlapping concepts test confidence |
 | **Co-occurrence Analysis** | Healthcare | Related issues co-occur (wait + communication) |
-| **Representative Quotes** | All Tier 1 datasets | Authentic, quotable responses |
+| **Representative Quotes** | All 6 datasets | Authentic, quotable responses |
 | **Text Preprocessing** | Healthcare, Market Research | Intentional errors test robustness |
-| **Long-form Text** | AG News | Paragraph-level content |
-| **Short-form Text** | Twitter Sentiment | Tweet-length responses |
-| **Sentiment Analysis** | SST-5 (5-class), SST-2 (binary), Twitter | Pre-labeled sentiment data |
+| **Quick Demonstrations** | Remote Work Experiences | Balanced size and content |
 | **Algorithm Comparison** | Psychology (nuanced) | Tests separation of subtle themes |
 | **Executive Reporting** | Market Research | Business-relevant insights |
+| **Lifestyle/Cultural** | Fashion, Cricket | Domain-specific theme extraction |
 
 ---
 
@@ -303,26 +288,27 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ---
 
-### Configuration 4: Multi-label/Emotion Demo
-**Dataset:** GoEmotions Multi-Label.csv
+### Configuration 4: Topic Variety Demo
+**Dataset:** cricket_responses.csv
 ```
-- Algorithm: BERT + K-Means (semantic)
-- Focus: Emotion detection, multi-label handling
-- Advanced: Compare with TF-IDF for baseline
+- Algorithm: TF-IDF + K-Means or LDA
+- Number of codes: 8-12
+- Focus: High topic diversity handling
 ```
 
-**Rationale:** Showcases multi-label capability and semantic embedding advantages.
+**Rationale:** Demonstrates framework's ability to discover and organize 40+ natural topics.
 
 ---
 
-### Configuration 5: Scale/Performance Demo
-**Dataset:** AG News Classification.csv (2,000 rows)
+### Configuration 5: Lifestyle/Cultural Demo
+**Dataset:** fashion_responses.csv
 ```
-- Algorithm: TF-IDF + K-Means (fast), then BERT (quality)
-- Focus: Processing speed, large dataset handling
+- Algorithm: NMF or LDA
+- Number of codes: 8-10
+- Focus: Theme diversity, sustainability discussions
 ```
 
-**Rationale:** Demonstrates performance with larger datasets.
+**Rationale:** Shows cultural content analysis with 45+ diverse fashion-related themes.
 
 ---
 
