@@ -18,7 +18,7 @@ This report documents the comprehensive validation of the Open-Ended Coding Anal
 | Engineering UI (app_lite.py) | ✅ Valid | Uses same shared module |
 | ML Notebook (ml_open_coding_analysis.ipynb) | ✅ Valid | Self-contained with consistent results |
 | Traditional Notebook (open_ended_coding_analysis.ipynb) | ✅ Valid | Uses src/ modules |
-| Data Files | ✅ Valid | 12 datasets available |
+| Data Files | ✅ Valid | 6 curated datasets (1,500 total rows) |
 | Documentation | ✅ Updated | README and DATASET_ASSESSMENT_REPORT updated |
 
 ---
@@ -121,22 +121,22 @@ The project uses a layered architecture ensuring consistency:
 
 ## 3. Data Consistency Verification
 
-### 3.1 Data File Inventory
+### 3.1 Data File Inventory (Rationalized)
+
+**6 Curated Datasets** optimized for open-ended qualitative analysis:
 
 | File | Rows | Columns | Primary Text Column | Status |
 |------|------|---------|---------------------|--------|
-| Healthcare_Patient_Feedback_300.csv | 300 | 5 | response | ✅ |
-| Market_Research_Survey_300.csv | 300 | 5 | response | ✅ |
-| Psychology_Wellbeing_Study_300.csv | 300 | 5 | response | ✅ |
-| AG News Classification.csv | 2,000 | 3 | text | ✅ |
-| GoEmotions Multi-Label.csv | 2,000 | 3 | text | ✅ |
-| SemEval Twitter Sentiment.csv | 2,000 | 3 | text | ✅ |
-| SNIPS Intent Classification.csv | 2,000 | 3 | text | ✅ |
-| SST-2 Sentiment Dataset.csv | 150 | 3 | text | ✅ |
-| SST-5 Sentiment Dataset.csv | 75 | 3 | text | ✅ |
-| sample_responses.csv | 50 | 4 | response | ✅ **NEW** |
-| cricket_responses.csv | 40 | 5 | response | ✅ **NEW** |
-| fashion_responses.csv | 40 | 5 | response | ✅ **NEW** |
+| Psychology_Wellbeing_Study_300.csv | 300 | 5 | response | ✅ Best quality |
+| Healthcare_Patient_Feedback_300.csv | 300 | 5 | response | ✅ Domain-specific |
+| Market_Research_Survey_300.csv | 300 | 5 | response | ✅ Business use |
+| sample_responses.csv | 200 | 5 | response | ✅ Quick demos |
+| cricket_responses.csv | 200 | 5 | response | ✅ Topic variety |
+| fashion_responses.csv | 200 | 5 | response | ✅ Theme diversity |
+
+**Total:** 1,500 rows of high-quality, curated qualitative data
+
+**Removed datasets:** AG News, GoEmotions, SNIPS, SemEval, SST-2, SST-5 (pre-labeled classification datasets not suitable for theme discovery)
 
 ### 3.2 Data Loading Consistency
 

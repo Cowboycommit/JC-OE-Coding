@@ -162,7 +162,7 @@ jupyter notebook open_ended_coding_analysis.ipynb
 │   ├── theme_analyzer.py           # Theme identification
 │   └── category_manager.py         # Categorization system
 ├── data/
-│   ├── *.csv                       # Sample datasets (12 datasets)
+│   ├── *.csv                       # Sample datasets (6 curated datasets)
 │   └── stopwords_domain.txt        # Domain-specific stopwords
 ├── documentation/                  # 7-document comprehensive suite
 ├── tests/                          # Unit and integration tests (21 files)

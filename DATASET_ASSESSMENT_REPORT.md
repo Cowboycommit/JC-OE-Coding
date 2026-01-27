@@ -8,19 +8,20 @@
 
 ## Executive Summary
 
-This report assesses **12 datasets** available in the project to determine which best demonstrate the framework's capabilities. The analysis considers text quality, realism, theme clarity, and alignment with key project features.
+This report assesses the **6 curated datasets** available in the project, optimized for demonstrating the framework's capabilities. The datasets were rationalized from 12 to 6, removing pre-classified benchmark datasets that don't align with the tool's open-ended qualitative analysis purpose.
 
-> **Note:** 3 simple datasets (sample_responses.csv, cricket_responses.csv, fashion_responses.csv) are provided for the keyword-based coding notebook demonstrations.
+> **Dataset Rationalization (January 2026):** Removed 6 low-value datasets (AG News, GoEmotions, SNIPS, SemEval, SST-2, SST-5) that were pre-labeled classification datasets unsuitable for theme discovery. Expanded demo datasets to 200 rows each for better ML clustering results.
 
-### Top Recommendations
+### Curated Dataset Inventory
 
-| Rank | Dataset | Records | Best For |
-|------|---------|---------|----------|
-| 1 | Healthcare_Patient_Feedback_300.csv | 300 | **Primary demo** - Authentic text, clear themes, segmentation |
-| 2 | Market_Research_Survey_300.csv | 300 | **Primary demo** - Demographics, consumer insights |
-| 3 | Psychology_Wellbeing_Study_300.csv | 300 | **Complex themes** - Nuanced emotional analysis |
-| 4 | GoEmotions Multi-Label.csv | 2,000 | **Multi-label demo** - 27 emotion categories |
-| 5 | SNIPS Intent Classification.csv | 2,001 | **Classification accuracy** - Intent detection |
+| Dataset | Records | Avg Length | Best For |
+|---------|---------|------------|----------|
+| Psychology_Wellbeing_Study_300.csv | 300 | 95 chars | **Best quality** - Rich emotional content, natural themes |
+| Healthcare_Patient_Feedback_300.csv | 300 | 69 chars | **Domain-specific** - Patient experience patterns |
+| Market_Research_Survey_300.csv | 300 | 60 chars | **Business use** - Consumer insights, demographics |
+| sample_responses.csv | 200 | 77 chars | **Quick demos** - Remote work themes |
+| cricket_responses.csv | 200 | 79 chars | **Topic variety** - 40+ natural topics |
+| fashion_responses.csv | 200 | 69 chars | **Theme diversity** - 45+ natural topics |
 
 ---
 
@@ -339,35 +340,54 @@ Use the **three 300-row test datasets** in order:
 | Preprocessing pipeline | Healthcare (has intentional errors) |
 | Demographic segmentation | Market Research |
 | Complex theme extraction | Psychology Wellbeing |
-| Multi-label classification | GoEmotions |
-| Large-scale processing | AG News or SNIPS |
-| Sentiment analysis | SST-5 or SemEval Twitter |
+| Quick demos | sample_responses (remote work) |
+| Topic variety | cricket_responses (40+ topics) |
+| Theme diversity | fashion_responses (45+ topics) |
 
-### Notebook Demo Datasets (Recreated)
-The following datasets are provided for notebook demonstration purposes:
-- **sample_responses.csv** (50 rows) - Remote work experiences for `open_ended_coding_analysis.ipynb`
-- **cricket_responses.csv** (40 rows) - Cricket perspectives for theme analysis demos
-- **fashion_responses.csv** (40 rows) - Fashion industry opinions for coding framework demos
+### Dataset Column Structure
 
-These are simpler datasets designed to demonstrate the manual keyword-based coding workflow in `open_ended_coding_analysis.ipynb`, complementing the more sophisticated ML-based analysis datasets.
+All datasets follow a consistent structure optimized for the analysis pipeline:
 
-### Datasets Not Included
-- **IMDB Movie Reviews** - Only 36 samples, too small for meaningful analysis
+| Column | Description | Required |
+|--------|-------------|----------|
+| `id` | Unique row identifier | Yes |
+| `response` | Primary text for analysis | Yes |
+| `*_id` | Respondent/participant identifier | Yes |
+| `timestamp` | Response timestamp | Yes |
+| `topic/segment` | Category/segmentation column | Yes |
+
+### Datasets Removed (Rationalization)
+The following datasets were removed as they don't align with open-ended qualitative analysis:
+- **AG News Classification** (2,000 rows) - Pre-classified news categories
+- **GoEmotions Multi-Label** (2,000 rows) - Pre-labeled emotion classification
+- **SNIPS Intent Classification** (2,000 rows) - Templated voice commands
+- **SemEval Twitter Sentiment** (2,000 rows) - Pre-labeled sentiment
+- **SST-2 Sentiment Dataset** (150 rows) - Too short (34 chars avg)
+- **SST-5 Sentiment Dataset** (75 rows) - Too short (47 chars avg)
 
 ---
 
 ## Conclusion
 
-The **Healthcare_Patient_Feedback_300**, **Market_Research_Survey_300**, and **Psychology_Wellbeing_Study_300** datasets are specifically designed for pipeline validation and represent the best choices for demonstrating the framework's full capabilities. They provide:
+The **6 curated datasets** provide optimal coverage for the framework's capabilities:
 
-- Authentic, realistic text with natural imperfections
-- Clear, discoverable themes across multiple domains
-- Built-in segmentation columns for demographic/group analysis
-- Sufficient size (300 responses) for meaningful analysis
-- Intentional preprocessing challenges to showcase robustness
+### Primary Analysis Datasets (300 rows each)
+- **Psychology_Wellbeing_Study_300** - Best overall quality, rich emotional content
+- **Healthcare_Patient_Feedback_300** - Domain-specific feedback patterns
+- **Market_Research_Survey_300** - Business/consumer insights
 
-For specialized demonstrations of specific features (multi-label, sentiment, large-scale), the benchmark datasets provide appropriate test cases.
+### Demo Datasets (200 rows each)
+- **sample_responses** - Remote work themes (ideal for quick demos)
+- **cricket_responses** - Topic variety (40+ natural topics)
+- **fashion_responses** - Theme diversity (45+ natural topics)
+
+All datasets feature:
+- Authentic, open-ended qualitative text
+- 60-95 character average length (optimal for theme discovery)
+- Consistent column structure for pipeline compatibility
+- Natural topic variety for demonstrating ML clustering
+- Suitable size for meaningful analysis (200-300 rows)
 
 ---
 
-*Report generated by multi-agent analysis assessing project features, dataset inventory, test patterns, and data quality.*
+*Report updated January 2026 following dataset rationalization and optimization.*

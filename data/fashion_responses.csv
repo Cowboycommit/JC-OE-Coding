@@ -1,5 +1,5 @@
 id,response,respondent_id,timestamp,topic
-1,"Sustainable fashion is no longer optional - it's essential for our planet's future",R001,2024-01-15 08:30:00,Sustainability
+1,"Sustainable fashion is no longer optional it's essential for our planet's future",R001,2024-01-15 08:30:00,Sustainability
 2,"Fast fashion creates excessive waste and environmental damage we cannot ignore",R002,2024-01-15 09:15:00,Sustainability
 3,"Personal style expresses individuality and confidence in unique ways",R003,2024-01-15 10:00:00,Identity
 4,"The resale market is reshaping how we think about fashion consumption",R004,2024-01-15 11:30:00,Consumption
@@ -9,7 +9,7 @@ id,response,respondent_id,timestamp,topic
 8,"Vintage clothing offers unique pieces with character and history",R008,2024-01-15 15:30:00,Vintage
 9,"Streetwear has moved from subculture to mainstream fashion influence",R009,2024-01-15 16:15:00,Trends
 10,"Fashion week trends set the direction for the industry each season",R010,2024-01-16 08:00:00,Industry
-11,"Quality over quantity should guide purchasing - invest in pieces that last",R011,2024-01-16 09:30:00,Consumption
+11,"Quality over quantity should guide purchasing invest in pieces that last",R011,2024-01-16 09:30:00,Consumption
 12,"Social media influencers have democratized fashion and style advice",R012,2024-01-16 10:45:00,Media
 13,"Body positivity is finally changing how fashion advertising portrays people",R013,2024-01-16 11:15:00,Inclusivity
 14,"The cost of sustainable fashion can be prohibitive for many consumers",R014,2024-01-16 12:00:00,Cost
@@ -39,3 +39,163 @@ id,response,respondent_id,timestamp,topic
 38,"Luxury resale platforms have made designer fashion more accessible",R038,2024-01-19 09:15:00,Consumption
 39,"Fashion trends increasingly emphasize individuality over conformity",R039,2024-01-19 10:00:00,Trends
 40,"The environmental cost of fashion returns is significant and overlooked",R040,2024-01-19 11:30:00,Environment
+41,"Athleisure has blurred the lines between workout wear and everyday fashion",R041,2024-01-19 12:00:00,Trends
+42,"Traditional textile crafts are being preserved through fashion collaborations",R042,2024-01-19 13:30:00,Craftsmanship
+43,"The psychology of color in fashion influences mood and perception",R043,2024-01-19 14:15:00,Psychology
+44,"Fast fashion brands are attempting to greenwash their sustainability claims",R044,2024-01-19 15:00:00,Ethics
+45,"Investment pieces should be timeless rather than trend-driven",R045,2024-01-20 08:00:00,Consumption
+46,"Fashion shows have become more theatrical and experiential events",R046,2024-01-20 09:30:00,Industry
+47,"The circular economy model is essential for fashion's sustainability",R047,2024-01-20 10:15:00,Sustainability
+48,"Personal shoppers and stylists are becoming more accessible online",R048,2024-01-20 11:00:00,Services
+49,"The slow fashion movement encourages mindful consumption habits",R049,2024-01-20 12:30:00,Sustainability
+50,"Fashion technology like smart fabrics is opening new possibilities",R050,2024-01-20 13:45:00,Innovation
+51,"The influence of K-fashion has grown significantly globally",R051,2024-01-20 14:30:00,Culture
+52,"Upcycling old garments gives them new life and reduces waste",R052,2024-01-20 15:15:00,Sustainability
+53,"Fashion magazines are struggling to remain relevant in the digital age",R053,2024-01-20 16:00:00,Media
+54,"The emotional attachment to clothing affects our consumption patterns",R054,2024-01-21 08:30:00,Psychology
+55,"Transparency in supply chains should be mandatory for all brands",R055,2024-01-21 09:15:00,Ethics
+56,"Fashion collaborations between brands create excitement and exclusivity",R056,2024-01-21 10:00:00,Industry
+57,"Age-appropriate dressing norms are becoming increasingly outdated",R057,2024-01-21 11:30:00,Identity
+58,"The impact of fashion on body image requires ongoing attention",R058,2024-01-21 12:00:00,Psychology
+59,"Local manufacturing reduces environmental impact and supports communities",R059,2024-01-21 13:30:00,Sustainability
+60,"Fashion weeks need to become more inclusive and diverse",R060,2024-01-21 14:15:00,Inclusivity
+61,"The rise of direct-to-consumer brands has disrupted traditional retail",R061,2024-01-21 15:00:00,Business
+62,"Seasonal collections create unnecessary pressure to constantly buy new",R062,2024-01-22 08:00:00,Consumption
+63,"Fashion archives and museums preserve important cultural heritage",R063,2024-01-22 09:30:00,History
+64,"The democratization of fashion has made style more accessible to all",R064,2024-01-22 10:15:00,Accessibility
+65,"Sustainable fashion should not just be for the wealthy",R065,2024-01-22 11:00:00,Cost
+66,"Fashion forecasting has become less relevant in our fast-paced world",R066,2024-01-22 12:30:00,Industry
+67,"The craftsmanship behind handmade garments deserves greater appreciation",R067,2024-01-22 13:45:00,Craftsmanship
+68,"Fashion rental is a practical solution for special occasion wear",R068,2024-01-22 14:30:00,Consumption
+69,"The influence of celebrities on fashion trends remains significant",R069,2024-01-22 15:15:00,Media
+70,"Sustainable packaging is as important as sustainable clothing",R070,2024-01-22 16:00:00,Environment
+71,"Fashion should celebrate all body types and ages equally",R071,2024-01-23 08:30:00,Inclusivity
+72,"The emotional value of vintage clothing goes beyond its style",R072,2024-01-23 09:15:00,Vintage
+73,"Fashion education needs to adapt to industry changes more quickly",R073,2024-01-23 10:00:00,Education
+74,"Personal style evolves throughout life reflecting our experiences",R074,2024-01-23 11:30:00,Identity
+75,"The environmental impact of textile dyeing is often overlooked",R075,2024-01-23 12:00:00,Environment
+76,"Fashion activism is becoming an important form of self-expression",R076,2024-01-23 13:30:00,Culture
+77,"The resurgence of craft skills shows a desire for authenticity",R077,2024-01-23 14:15:00,Craftsmanship
+78,"Fashion subscription services are changing how people build wardrobes",R078,2024-01-23 15:00:00,Services
+79,"The fashion industry needs more diverse leadership and decision-makers",R079,2024-01-24 08:00:00,Inclusivity
+80,"Microtrends driven by social media create more waste and consumption",R080,2024-01-24 09:30:00,Sustainability
+81,"Fashion can be a powerful tool for cultural preservation",R081,2024-01-24 10:15:00,Culture
+82,"The convenience of online shopping has transformed fashion retail",R082,2024-01-24 11:00:00,Business
+83,"Wardrobe organization and curation reflect personal values",R083,2024-01-24 12:30:00,Lifestyle
+84,"The true cost of cheap fashion includes human and environmental exploitation",R084,2024-01-24 13:45:00,Ethics
+85,"Fashion technology enables more personalized shopping experiences",R085,2024-01-24 14:30:00,Innovation
+86,"Traditional dress codes are becoming more flexible and inclusive",R086,2024-01-24 15:15:00,Workplace
+87,"The storytelling aspect of fashion brands creates emotional connections",R087,2024-01-24 16:00:00,Marketing
+88,"Fashion's relationship with art continues to deepen and evolve",R088,2024-01-25 08:30:00,Culture
+89,"The importance of fabric quality is often underestimated by consumers",R089,2024-01-25 09:15:00,Quality
+90,"Fashion influencers have more power than traditional media now",R090,2024-01-25 10:00:00,Media
+91,"The seasonality of fashion is becoming less relevant in globalized markets",R091,2024-01-25 11:30:00,Industry
+92,"Clothing repair and alteration skills should be more widely taught",R092,2024-01-25 12:00:00,Education
+93,"The psychology of retail environments influences purchasing decisions",R093,2024-01-25 13:30:00,Psychology
+94,"Fashion should be fun and not taken too seriously",R094,2024-01-25 14:15:00,Identity
+95,"The carbon footprint of shipping fashion globally is substantial",R095,2024-01-25 15:00:00,Environment
+96,"Vintage fashion offers unique finds that mass production cannot replicate",R096,2024-01-26 08:00:00,Vintage
+97,"The fashion industry's water consumption is unsustainable",R097,2024-01-26 09:30:00,Environment
+98,"Personal branding through fashion has become essential in professional settings",R098,2024-01-26 10:15:00,Identity
+99,"Fashion weeks need to become more environmentally responsible events",R099,2024-01-26 11:00:00,Sustainability
+100,"The emotional labor of getting dressed each day is real and valid",R100,2024-01-26 12:30:00,Psychology
+101,"Local fashion scenes deserve more recognition and support",R101,2024-01-26 13:45:00,Community
+102,"The pressure to follow trends can be financially and emotionally draining",R102,2024-01-26 14:30:00,Consumption
+103,"Fashion literacy should include understanding production and sourcing",R103,2024-01-26 15:15:00,Education
+104,"The intersection of fashion and technology offers exciting possibilities",R104,2024-01-26 16:00:00,Innovation
+105,"Sustainable fashion brands often lack the marketing budgets of fast fashion",R105,2024-01-27 08:30:00,Business
+106,"Fashion can be a form of self-care and emotional expression",R106,2024-01-27 09:15:00,Identity
+107,"The resale value of luxury items makes them more accessible investments",R107,2024-01-27 10:00:00,Luxury
+108,"Fashion industry waste management needs urgent improvement",R108,2024-01-27 11:30:00,Environment
+109,"The confidence boost from wearing favorite outfits is significant",R109,2024-01-27 12:00:00,Psychology
+110,"Fashion supply chain transparency benefits consumers and workers",R110,2024-01-27 13:30:00,Ethics
+111,"The nostalgia for past fashion eras influences current trends",R111,2024-01-27 14:15:00,History
+112,"Fashion should adapt to diverse cultural contexts and preferences",R112,2024-01-27 15:00:00,Culture
+113,"The rise of gender-fluid fashion reflects changing social attitudes",R113,2024-01-28 08:00:00,Trends
+114,"Fashion criticism and review platforms help consumers make informed choices",R114,2024-01-28 09:30:00,Media
+115,"The durability of clothing should be a key purchasing consideration",R115,2024-01-28 10:15:00,Quality
+116,"Fashion entrepreneurship has become more accessible through e-commerce",R116,2024-01-28 11:00:00,Business
+117,"The cultural exchange in fashion can be positive when done respectfully",R117,2024-01-28 12:30:00,Culture
+118,"Fashion industry seasonality creates artificial scarcity and urgency",R118,2024-01-28 13:45:00,Industry
+119,"Personal style development is a journey of self-discovery",R119,2024-01-28 14:30:00,Identity
+120,"The fashion industry's labor practices require constant scrutiny",R120,2024-01-28 15:15:00,Ethics
+121,"Innovative materials are key to sustainable fashion's future",R121,2024-01-28 16:00:00,Innovation
+122,"Fashion communities online provide support and inspiration",R122,2024-01-29 08:30:00,Community
+123,"The investment in quality basics pays dividends over time",R123,2024-01-29 09:15:00,Consumption
+124,"Fashion brands should prioritize authenticity over trend-chasing",R124,2024-01-29 10:00:00,Marketing
+125,"The emotional attachment to certain garments reflects memories and identity",R125,2024-01-29 11:30:00,Psychology
+126,"Fashion education should prepare students for a sustainable industry",R126,2024-01-29 12:00:00,Education
+127,"The resurgence of DIY fashion shows creativity and sustainability",R127,2024-01-29 13:30:00,Sustainability
+128,"Fashion's role in cultural identity should be celebrated and protected",R128,2024-01-29 14:15:00,Culture
+129,"The pressure on fashion models' mental health needs more attention",R129,2024-01-29 15:00:00,Ethics
+130,"Clothing swaps are a great way to refresh wardrobes sustainably",R130,2024-01-30 08:00:00,Sustainability
+131,"Fashion technology could revolutionize fit and sizing issues",R131,2024-01-30 09:30:00,Innovation
+132,"The fashion industry's response to climate change has been inadequate",R132,2024-01-30 10:15:00,Environment
+133,"Personal styling services help people develop their unique aesthetic",R133,2024-01-30 11:00:00,Services
+134,"Fashion heritage brands face challenges adapting to modern consumers",R134,2024-01-30 12:30:00,Industry
+135,"The joy of finding perfect vintage pieces is unmatched",R135,2024-01-30 13:45:00,Vintage
+136,"Fashion should be accessible to people of all abilities and needs",R136,2024-01-30 14:30:00,Inclusivity
+137,"The social aspects of fashion bring communities together",R137,2024-01-30 15:15:00,Community
+138,"Fashion magazines need to feature more diverse representation",R138,2024-01-30 16:00:00,Media
+139,"The cost-per-wear approach helps justify quality investments",R139,2024-01-31 08:30:00,Consumption
+140,"Fashion's influence on self-esteem can be both positive and negative",R140,2024-01-31 09:15:00,Psychology
+141,"Local tailoring services are valuable for sustainable wardrobes",R141,2024-01-31 10:00:00,Services
+142,"The fashion industry must address its role in promoting unrealistic ideals",R142,2024-01-31 11:30:00,Ethics
+143,"Fashion documentaries have raised awareness about industry issues",R143,2024-01-31 12:00:00,Media
+144,"Personal style confidence comes from understanding what works for you",R144,2024-01-31 13:30:00,Identity
+145,"The fashion calendar is due for a major overhaul and simplification",R145,2024-01-31 14:15:00,Industry
+146,"Supporting emerging designers helps foster innovation in fashion",R146,2024-01-31 15:00:00,Community
+147,"Fashion's environmental impact extends far beyond just manufacturing",R147,2024-02-01 08:00:00,Environment
+148,"The therapeutic value of organizing and curating wardrobes is real",R148,2024-02-01 09:30:00,Psychology
+149,"Fashion brands should be more transparent about pricing markups",R149,2024-02-01 10:15:00,Business
+150,"Traditional fashion retail stores offer experiences online cannot match",R150,2024-02-01 11:00:00,Business
+151,"The influence of music on fashion trends remains significant",R151,2024-02-01 12:30:00,Culture
+152,"Fashion literacy helps consumers make more informed purchasing decisions",R152,2024-02-01 13:45:00,Education
+153,"The secondhand luxury market has grown substantially in recent years",R153,2024-02-01 14:30:00,Consumption
+154,"Fashion's role in cultural appropriation requires ongoing dialogue",R154,2024-02-01 15:15:00,Ethics
+155,"Personal style should evolve naturally without forced reinvention",R155,2024-02-01 16:00:00,Identity
+156,"The fashion industry needs more mentorship programs for newcomers",R156,2024-02-02 08:30:00,Education
+157,"Sustainable certifications help consumers identify ethical brands",R157,2024-02-02 09:15:00,Sustainability
+158,"The comfort revolution in fashion reflects changing priorities",R158,2024-02-02 10:00:00,Comfort
+159,"Fashion shows could be more inclusive of diverse body types",R159,2024-02-02 11:30:00,Inclusivity
+160,"The emotional connection to clothing from different life phases is powerful",R160,2024-02-02 12:00:00,Psychology
+161,"Fashion brands are starting to embrace extended sizing more widely",R161,2024-02-02 13:30:00,Inclusivity
+162,"The craftsmanship of couture deserves preservation and celebration",R162,2024-02-02 14:15:00,Craftsmanship
+163,"Fashion rental makes designer pieces accessible for special occasions",R163,2024-02-02 15:00:00,Consumption
+164,"The global nature of fashion creates both opportunities and challenges",R164,2024-02-03 08:00:00,Industry
+165,"Personal style icons inspire without requiring exact imitation",R165,2024-02-03 09:30:00,Identity
+166,"The fashion industry's pace of change can be overwhelming for consumers",R166,2024-02-03 10:15:00,Consumption
+167,"Sustainable fashion needs to become the norm rather than the exception",R167,2024-02-03 11:00:00,Sustainability
+168,"Fashion's role in personal expression transcends socioeconomic boundaries",R168,2024-02-03 12:30:00,Identity
+169,"The revival of heritage techniques adds value to contemporary fashion",R169,2024-02-03 13:45:00,Craftsmanship
+170,"Fashion brands should invest more in sustainable innovation research",R170,2024-02-03 14:30:00,Innovation
+171,"The social media pressure to never repeat outfits is harmful",R171,2024-02-03 15:15:00,Psychology
+172,"Fashion's relationship with identity is deeply personal and meaningful",R172,2024-02-03 16:00:00,Identity
+173,"The importance of fit over size in fashion needs more emphasis",R173,2024-02-04 08:30:00,Quality
+174,"Fashion communities provide valuable support for sustainable choices",R174,2024-02-04 09:15:00,Community
+175,"The intersection of fashion and wellness is increasingly important",R175,2024-02-04 10:00:00,Lifestyle
+176,"Traditional fashion retail is adapting to compete with online",R176,2024-02-04 11:30:00,Business
+177,"Fashion should celebrate cultural heritage without exploitation",R177,2024-02-04 12:00:00,Culture
+178,"The fashion industry's marketing creates unrealistic expectations",R178,2024-02-04 13:30:00,Marketing
+179,"Personal style development requires experimentation and confidence",R179,2024-02-04 14:15:00,Identity
+180,"The cost of truly sustainable fashion reflects fair labor and materials",R180,2024-02-04 15:00:00,Cost
+181,"Fashion's influence on mood and productivity is underestimated",R181,2024-02-05 08:00:00,Psychology
+182,"The vintage market offers sustainable alternatives to new purchases",R182,2024-02-05 09:30:00,Vintage
+183,"Fashion industry consolidation threatens diversity and creativity",R183,2024-02-05 10:15:00,Industry
+184,"The rise of conscious consumerism is reshaping fashion retail",R184,2024-02-05 11:00:00,Sustainability
+185,"Personal style confidence comes with age and self-acceptance",R185,2024-02-05 12:30:00,Identity
+186,"The fashion industry needs clearer standards for sustainability claims",R186,2024-02-05 13:45:00,Ethics
+187,"Fashion's creative expression provides joy and personal fulfillment",R187,2024-02-05 14:30:00,Identity
+188,"The environmental cost of fashion trends needs greater visibility",R188,2024-02-05 15:15:00,Environment
+189,"Fashion education should include business and sustainability equally",R189,2024-02-05 16:00:00,Education
+190,"The accessibility of fashion advice online has democratized style",R190,2024-02-06 08:30:00,Accessibility
+191,"Wardrobe staples provide foundation for personal style expression",R191,2024-02-06 09:15:00,Consumption
+192,"Fashion's role in professional success is often underestimated",R192,2024-02-06 10:00:00,Workplace
+193,"The emotional labor of maintaining a wardrobe deserves recognition",R193,2024-02-06 11:30:00,Psychology
+194,"Fashion brands need to address size discrimination more seriously",R194,2024-02-06 12:00:00,Inclusivity
+195,"The preservation of textile traditions benefits future generations",R195,2024-02-06 13:30:00,History
+196,"Fashion should empower rather than constrain personal expression",R196,2024-02-06 14:15:00,Identity
+197,"The fashion industry's future depends on genuine sustainability commitment",R197,2024-02-06 15:00:00,Sustainability
+198,"Personal style should bring joy rather than anxiety or pressure",R198,2024-02-07 08:00:00,Psychology
+199,"Fashion connects us to culture history and personal identity",R199,2024-02-07 09:30:00,Culture
+200,"The transformation of fashion towards sustainability is inevitable and necessary",R200,2024-02-07 10:15:00,Future
