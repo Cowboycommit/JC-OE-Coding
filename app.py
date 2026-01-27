@@ -2735,11 +2735,11 @@ def page_results_overview():
             pos_pct = (pos_count / total_sentiment * 100)
             neu_pct = (neu_count / total_sentiment * 100)
             neg_pct = (neg_count / total_sentiment * 100)
-            sentiment_chips = f"""
-            <span class="stat-chip sentiment-positive">😊 Positive: {pos_pct:.1f}%</span>
-            <span class="stat-chip sentiment-neutral">😐 Neutral: {neu_pct:.1f}%</span>
-            <span class="stat-chip sentiment-negative">😞 Negative: {neg_pct:.1f}%</span>
-            """
+            sentiment_chips = (
+                f'<span class="stat-chip sentiment-positive">😊 Positive: {pos_pct:.1f}%</span>'
+                f'<span class="stat-chip sentiment-neutral">😐 Neutral: {neu_pct:.1f}%</span>'
+                f'<span class="stat-chip sentiment-negative">😞 Negative: {neg_pct:.1f}%</span>'
+            )
 
     stat_chips_html = f"""
     <div style="margin: 10px 0 20px 0;">
