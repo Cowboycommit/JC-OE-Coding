@@ -1776,13 +1776,38 @@ def page_configuration():
         st.error("❌ No text columns found in the data")
         return
 
+    # Auto-select processed column if available
+    # Find columns ending with '_processed' and prefer them
+    processed_columns = [col for col in text_columns if col.endswith('_processed')]
+
+    # Determine default index: prefer processed column, fall back to text_column from session, then index 0
+    default_index = 0
+    if processed_columns:
+        # Prefer the first processed column
+        default_index = text_columns.index(processed_columns[0])
+    elif st.session_state.get('text_column') in text_columns:
+        # Fall back to previously selected column
+        default_index = text_columns.index(st.session_state.text_column)
+
     selected_column = st.selectbox(
         "Choose the column containing responses:",
         text_columns,
-        index=0
+        index=default_index,
+        help="Select the column to analyze. If you preprocessed your data, the processed column will be auto-selected."
     )
 
     st.session_state.text_column = selected_column
+
+    # Warn if user selects raw column when processed version exists
+    if not selected_column.endswith('_processed'):
+        processed_version = f"{selected_column}_processed"
+        if processed_version in text_columns:
+            st.warning(f"""
+            **Note:** A processed version of this column exists: `{processed_version}`
+
+            If you ran text preprocessing, you should select `{processed_version}` to analyze the cleaned data.
+            Selecting `{selected_column}` will analyze the raw, unprocessed text.
+            """)
 
     # Show sample responses
     st.markdown("#### Sample Responses")
@@ -1903,6 +1928,12 @@ def page_configuration():
             help="Let the algorithm automatically determine the optimal number of codes based on your data using silhouette analysis"
         )
 
+        auto_optimal_method = st.checkbox(
+            "Auto-select best method",
+            value=False,
+            help="Automatically select the best ML method based on dataset size and text characteristics"
+        )
+
         n_codes = st.slider(
             "Number of codes to discover",
             min_value=3,
@@ -1924,19 +1955,32 @@ def page_configuration():
             </div>
             """, unsafe_allow_html=True)
 
-        method = st.selectbox(
-            "ML Algorithm",
-            options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'],
-            index=0,
-            format_func=lambda x: {
-                'tfidf_kmeans': 'TF-IDF + K-Means (Fast, Recommended)',
-                'lda': 'Latent Dirichlet Allocation (Topic Modeling)',
-                'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
-                'bert_kmeans': 'BERT + K-Means (Semantic Understanding)',
-                'svm': 'SVM Spectral Clustering (Kernel-based)'
-            }[x],
-            help="Choose the machine learning algorithm"
-        )
+        if auto_optimal_method:
+            st.markdown("""
+            <div class="info-box" style="padding: 10px;">
+            🤖 <strong>Auto method selection enabled:</strong>
+            <ul style="margin: 5px 0 0 0;">
+            <li>Method will be selected based on dataset size</li>
+            <li>LDA for larger datasets (>500 responses)</li>
+            <li>TF-IDF + K-Means for smaller datasets</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            method = 'tfidf_kmeans'  # Default, will be auto-selected during analysis
+        else:
+            method = st.selectbox(
+                "ML Algorithm",
+                options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'],
+                index=0,
+                format_func=lambda x: {
+                    'tfidf_kmeans': 'TF-IDF + K-Means (Fast, Recommended)',
+                    'lda': 'Latent Dirichlet Allocation (Topic Modeling)',
+                    'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
+                    'bert_kmeans': 'BERT + K-Means (Semantic Understanding)',
+                    'svm': 'SVM Spectral Clustering (Kernel-based)'
+                }[x],
+                help="Choose the machine learning algorithm"
+            )
 
         # Algorithm descriptions with runtime hints and pros/cons
         algorithm_info = {
@@ -2069,6 +2113,7 @@ def page_configuration():
         'text_column': selected_column,
         'n_codes': n_codes,
         'auto_optimal_codes': auto_optimal_codes,
+        'auto_optimal_method': auto_optimal_method,
         'method': method,
         'min_confidence': min_confidence,
         'stop_words': stop_words,
@@ -2094,7 +2139,7 @@ def page_configuration():
     with config_col2:
         st.metric("Codes to Find", "Auto" if auto_optimal_codes else n_codes)
     with config_col3:
-        st.metric("Algorithm", method.upper())
+        st.metric("Algorithm", "Auto" if auto_optimal_method else method.upper())
     with config_col4:
         st.metric("Response Type", selected_type_info['name'].split()[0])
 
@@ -2162,6 +2207,7 @@ def page_run_analysis():
     st.markdown("### 📋 Ready to Analyze")
 
     auto_optimal = config.get('auto_optimal_codes', False)
+    auto_optimal_method = config.get('auto_optimal_method', False)
 
     # Sentiment analysis is mandatory when available - model is determined by response type
     enable_sentiment = SENTIMENT_ANALYSIS_AVAILABLE
@@ -2193,12 +2239,15 @@ def page_run_analysis():
     with col3:
         st.metric("Codes", "Auto" if auto_optimal else config['n_codes'])
     with col4:
-        st.metric("Method", config['method'].upper())
+        st.metric("Method", "Auto" if auto_optimal_method else config['method'].upper())
     with col5:
         st.metric("Response Type", data_type_label)
 
     if auto_optimal:
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
+
+    if auto_optimal_method:
+        st.info("🤖 The algorithm will automatically select the best ML method based on dataset size.")
 
     if enable_sentiment:
         data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT', 'news': 'Review-BERT'}
@@ -2241,6 +2290,19 @@ def page_run_analysis():
             # Run analysis
             start_time = time.time()
 
+            # Determine method (auto-select based on dataset size if enabled)
+            method = config['method']
+
+            if auto_optimal_method:
+                update_progress(0.05, "🤖 Analyzing data characteristics to select best method...", 0)
+                n_samples = valid_count
+                if n_samples > 500:
+                    method = 'lda'
+                    st.success(f"🤖 Auto-selected **LDA** for larger dataset ({n_samples} samples)")
+                else:
+                    method = 'tfidf_kmeans'
+                    st.success(f"🤖 Auto-selected **TF-IDF + K-Means** for dataset ({n_samples} samples)")
+
             # Determine number of codes
             n_codes = config['n_codes']
 
@@ -2251,7 +2313,7 @@ def page_run_analysis():
                     optimal_n, optimal_results = find_optimal_codes(
                         df=df,
                         text_column=config['text_column'],
-                        method=config['method'],
+                        method=method,
                         stop_words=config.get('stop_words', 'english'),
                         progress_callback=lambda p, m: update_progress(0.1 + p * 0.3, m, 0)
                     )
@@ -2281,7 +2343,7 @@ def page_run_analysis():
                 df=df,
                 text_column=config['text_column'],
                 n_codes=n_codes,
-                method=config['method'],
+                method=method,
                 min_confidence=config['min_confidence'],
                 progress_callback=adjusted_progress
             )
@@ -2290,6 +2352,11 @@ def page_run_analysis():
             if auto_optimal:
                 metrics['auto_optimal'] = True
                 metrics['optimal_analysis'] = optimal_results
+
+            # Store auto method selection info if used
+            if auto_optimal_method:
+                metrics['auto_optimal_method'] = True
+                metrics['auto_selected_method'] = method
 
             # Run sentiment analysis (mandatory when available)
             sentiment_results = None
