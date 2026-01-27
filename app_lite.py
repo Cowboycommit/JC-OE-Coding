@@ -402,15 +402,15 @@ def main():
     4. Artifacts Panel (outputs)
     5. Separation of Concerns Callouts
     """
-    # Initialize state
-    init_session_state()
-
-    # Page config
+    # Page config - MUST be first Streamlit command
     st.set_page_config(
         page_title="ML Open Coding - Lite/Engineering View",
         page_icon="🔧",
         layout="wide",
     )
+
+    # Initialize state - must come after set_page_config
+    init_session_state()
 
     # ==========================================================================
     # SECTION: HEADER & PIPELINE OVERVIEW
