@@ -19,7 +19,7 @@ This report assesses the **6 curated datasets** available in the project, optimi
 | Psychology_Wellbeing_Study_300.csv | 300 | 95 chars | **Best quality** - Rich emotional content, natural themes |
 | Healthcare_Patient_Feedback_300.csv | 300 | 69 chars | **Domain-specific** - Patient experience patterns |
 | Market_Research_Survey_300.csv | 300 | 60 chars | **Business use** - Consumer insights, demographics |
-| sample_responses.csv | 200 | 77 chars | **Quick demos** - Remote work themes |
+| Remote_Work_Experiences_200.csv | 200 | 77 chars | **Quick demos** - Remote work themes |
 | cricket_responses.csv | 200 | 79 chars | **Topic variety** - 40+ natural topics |
 | fashion_responses.csv | 200 | 69 chars | **Theme diversity** - 45+ natural topics |
 
@@ -340,7 +340,7 @@ Use the **three 300-row test datasets** in order:
 | Preprocessing pipeline | Healthcare (has intentional errors) |
 | Demographic segmentation | Market Research |
 | Complex theme extraction | Psychology Wellbeing |
-| Quick demos | sample_responses (remote work) |
+| Quick demos | Remote_Work_Experiences_200 |
 | Topic variety | cricket_responses (40+ topics) |
 | Theme diversity | fashion_responses (45+ topics) |
 
@@ -377,7 +377,7 @@ The **6 curated datasets** provide optimal coverage for the framework's capabili
 - **Market_Research_Survey_300** - Business/consumer insights
 
 ### Demo Datasets (200 rows each)
-- **sample_responses** - Remote work themes (ideal for quick demos)
+- **Remote_Work_Experiences_200** - Remote work themes (ideal for quick demos)
 - **cricket_responses** - Topic variety (40+ natural topics)
 - **fashion_responses** - Theme diversity (45+ natural topics)
 

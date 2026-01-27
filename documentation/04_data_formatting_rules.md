@@ -1011,7 +1011,7 @@ print(f"Analytic responses: {summary['analytic_percentage']}%")
 - `src/content_quality.py` - Content quality filtering logic
 
 **Sample Data:**
-- `/home/user/JC-OE-Coding/data/sample_responses.csv`
+- `/home/user/JC-OE-Coding/data/Remote_Work_Experiences_200.csv`
 - `/home/user/JC-OE-Coding/data/consumer_perspectives_responses.csv`
 
 ---

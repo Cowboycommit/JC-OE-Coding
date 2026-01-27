@@ -437,7 +437,7 @@ Based on actual sample files in the `/home/user/JC-OE-Coding/data/` directory:
 
 ### Basic Schema (Minimal Required)
 
-**File:** `sample_responses.csv`
+**File:** `Remote_Work_Experiences_200.csv`
 
 ```csv
 id,response,respondent_id,timestamp

@@ -114,7 +114,7 @@ The project uses a layered architecture ensuring consistency:
 **open_ended_coding_analysis.ipynb**
 - **Status:** ✅ Valid (after data file creation)
 - **Approach:** Uses shared `src/` modules (CodeFrame, ThemeAnalyzer, CategoryManager)
-- **Data Files:** Uses `/data/sample_responses.csv`, `/data/cricket_responses.csv`, `/data/fashion_responses.csv`
+- **Data Files:** Uses `/data/Remote_Work_Experiences_200.csv`, `/data/cricket_responses.csv`, `/data/fashion_responses.csv`
 - **Issue Fixed:** Missing data files were created
 
 ---
@@ -130,7 +130,7 @@ The project uses a layered architecture ensuring consistency:
 | Psychology_Wellbeing_Study_300.csv | 300 | 5 | response | ✅ Best quality |
 | Healthcare_Patient_Feedback_300.csv | 300 | 5 | response | ✅ Domain-specific |
 | Market_Research_Survey_300.csv | 300 | 5 | response | ✅ Business use |
-| sample_responses.csv | 200 | 5 | response | ✅ Quick demos |
+| Remote_Work_Experiences_200.csv | 200 | 5 | response | ✅ Quick demos |
 | cricket_responses.csv | 200 | 5 | response | ✅ Topic variety |
 | fashion_responses.csv | 200 | 5 | response | ✅ Theme diversity |
 
@@ -151,7 +151,7 @@ df = loader.load_csv('data/filename.csv')
 # Traditional Notebook
 from src.data_loader import DataLoader
 loader = DataLoader()
-df = loader.load_csv('data/sample_responses.csv')
+df = loader.load_csv('data/Remote_Work_Experiences_200.csv')
 
 # ML Notebook (inline loading but same format)
 df = pd.read_csv('data/Healthcare_Patient_Feedback_300.csv')
@@ -164,7 +164,7 @@ df = pd.read_csv('data/Healthcare_Patient_Feedback_300.csv')
 ### 4.1 Missing Data Files (RESOLVED)
 
 **Issue:** The `open_ended_coding_analysis.ipynb` notebook referenced data files that did not exist:
-- `data/sample_responses.csv`
+- `data/Remote_Work_Experiences_200.csv`
 - `data/cricket_responses.csv`
 - `data/fashion_responses.csv`
 
@@ -251,9 +251,9 @@ PIPELINE VALIDATION TESTS
 
 1. Testing DataLoader...
    [PASS] Loaded 300 rows from Healthcare data
-   [PASS] Loaded 50 rows from sample_responses (newly created)
-   [PASS] Loaded 40 rows from cricket_responses (newly created)
-   [PASS] Loaded 40 rows from fashion_responses (newly created)
+   [PASS] Loaded 200 rows from Remote_Work_Experiences_200
+   [PASS] Loaded 200 rows from cricket_responses
+   [PASS] Loaded 200 rows from fashion_responses
 
 2. Testing CodeFrame...
    [PASS] CodeFrame applied codes: ['CODE1']
@@ -294,7 +294,7 @@ Core Module Tests Complete
 1. **Primary Demo:** Use `Healthcare_Patient_Feedback_300.csv` for best results
 2. **Business Use Case:** Use `Market_Research_Survey_300.csv` for consumer insights
 3. **Research Context:** Use `Psychology_Wellbeing_Study_300.csv` for academic demos
-4. **Notebook Demo:** Use `sample_responses.csv` for traditional coding workflow
+4. **Notebook Demo:** Use `Remote_Work_Experiences_200.csv` for traditional coding workflow
 
 ### 8.2 For Developers
 
