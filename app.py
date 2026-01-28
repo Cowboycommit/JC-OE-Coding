@@ -66,13 +66,15 @@ from helpers.analysis import (
     validate_dataframe,
     preprocess_responses,
     run_ml_analysis,
+    run_ml_analysis_with_tuning,
     find_optimal_codes,
     calculate_metrics_summary,
     generate_insights,
     get_analysis_summary,
     get_top_codes,
     get_cooccurrence_pairs,
-    export_results_package
+    export_results_package,
+    HYPERPARAMETER_TUNING_AVAILABLE
 )
 from helpers.ui_utils import (
     get_code_label,
@@ -2107,6 +2109,12 @@ def page_configuration():
             help="Automatically select the best ML method based on dataset size and text characteristics"
         )
 
+        enable_hyperparameter_tuning = st.checkbox(
+            "Enable Hyperparameter Tuning",
+            value=False,
+            help="Use Optuna to automatically find optimal hyperparameters for the selected method"
+        )
+
         n_codes = st.slider(
             "Number of codes to discover",
             min_value=3,
@@ -2127,6 +2135,56 @@ def page_configuration():
             </ul>
             </div>
             """, unsafe_allow_html=True)
+
+        # Hyperparameter tuning configuration
+        tuning_n_trials = 30
+        tuning_timeout = 180
+        tuning_metric = 'silhouette'
+
+        if enable_hyperparameter_tuning:
+            st.markdown("""
+            <div class="info-box" style="padding: 10px; background-color: #e8f4f8;">
+            🔬 <strong>Hyperparameter Tuning enabled:</strong>
+            <p style="margin: 5px 0;">Uses Bayesian optimization (Optuna) to find optimal parameters:</p>
+            <ul style="margin: 5px 0 0 0;">
+            <li>Vectorizer settings (max_features, n-grams, tf-idf options)</li>
+            <li>Clustering parameters (n_init, max_iter, algorithm)</li>
+            <li>Model-specific settings (LDA priors, spectral affinity, etc.)</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+            tuning_col1, tuning_col2 = st.columns(2)
+            with tuning_col1:
+                tuning_n_trials = st.slider(
+                    "Optimization trials",
+                    min_value=10,
+                    max_value=100,
+                    value=30,
+                    step=10,
+                    help="Number of parameter combinations to try (more = better results but slower)"
+                )
+            with tuning_col2:
+                tuning_timeout = st.slider(
+                    "Timeout (seconds)",
+                    min_value=60,
+                    max_value=600,
+                    value=180,
+                    step=30,
+                    help="Maximum time for optimization (stops after this even if trials remain)"
+                )
+
+            tuning_metric = st.selectbox(
+                "Optimization metric",
+                options=['silhouette', 'calinski_harabasz', 'combined'],
+                index=0,
+                format_func=lambda x: {
+                    'silhouette': 'Silhouette Score (cluster cohesion & separation)',
+                    'calinski_harabasz': 'Calinski-Harabasz (variance ratio)',
+                    'combined': 'Combined Score (weighted average of metrics)'
+                }[x],
+                help="Metric to optimize during hyperparameter search"
+            )
 
         if auto_optimal_method:
             st.markdown("""
@@ -2297,7 +2355,11 @@ def page_configuration():
         'data_type': selected_data_type,
         'enable_sentiment': enable_sentiment,
         'sentiment_model_override': sentiment_model_override,
-        'effective_sentiment_data_type': effective_sentiment_data_type
+        'effective_sentiment_data_type': effective_sentiment_data_type,
+        'enable_hyperparameter_tuning': enable_hyperparameter_tuning,
+        'tuning_n_trials': tuning_n_trials,
+        'tuning_timeout': tuning_timeout,
+        'tuning_metric': tuning_metric
     }
 
     # Show configuration summary
@@ -2319,6 +2381,9 @@ def page_configuration():
         st.metric("Algorithm", "Auto" if auto_optimal_method else method.upper())
     with config_col4:
         st.metric("Response Type", selected_type_info['name'].split()[0])
+
+    if enable_hyperparameter_tuning:
+        st.info(f"🔬 **Hyperparameter Tuning enabled**: {tuning_n_trials} trials, {tuning_timeout}s timeout, optimizing {tuning_metric}")
 
     st.success("✅ Configuration saved! Go to 'Run Analysis' to start.")
 
@@ -2547,14 +2612,58 @@ def page_run_analysis():
                     stage = map_progress_to_stage(p)
                     update_progress(p, m, stage)
 
-            coder, results_df, metrics = run_ml_analysis(
-                df=df,
-                text_column=config['text_column'],
-                n_codes=n_codes,
-                method=method,
-                min_confidence=config['min_confidence'],
-                progress_callback=adjusted_progress
-            )
+            # Check if hyperparameter tuning is enabled
+            enable_tuning = config.get('enable_hyperparameter_tuning', False)
+            tuning_result = None
+
+            if enable_tuning and HYPERPARAMETER_TUNING_AVAILABLE:
+                status_text.text("🔬 Running hyperparameter tuning...")
+                update_progress(0.1, "Optimizing hyperparameters with Optuna...", 1)
+
+                coder, results_df, metrics, tuning_result = run_ml_analysis_with_tuning(
+                    df=df,
+                    text_column=config['text_column'],
+                    method=method,
+                    min_confidence=config['min_confidence'],
+                    n_trials=config.get('tuning_n_trials', 30),
+                    timeout=config.get('tuning_timeout', 180),
+                    optimization_metric=config.get('tuning_metric', 'silhouette'),
+                    tune_n_codes=auto_optimal,  # Use auto code detection setting
+                    min_codes=3,
+                    max_codes=15,
+                    progress_callback=adjusted_progress
+                )
+
+                # Display tuning results
+                st.success(f"🔬 Hyperparameter tuning complete! Best {config.get('tuning_metric', 'silhouette')} score: **{tuning_result.best_score:.4f}** (from {tuning_result.n_trials_completed} trials)")
+
+                # Update n_codes if it was tuned
+                if 'n_codes' in tuning_result.best_params:
+                    n_codes = tuning_result.best_params['n_codes']
+
+            elif enable_tuning and not HYPERPARAMETER_TUNING_AVAILABLE:
+                st.warning("⚠️ Hyperparameter tuning requires optuna. Install with: pip install optuna. Running standard analysis instead.")
+                coder, results_df, metrics = run_ml_analysis(
+                    df=df,
+                    text_column=config['text_column'],
+                    n_codes=n_codes,
+                    method=method,
+                    min_confidence=config['min_confidence'],
+                    progress_callback=adjusted_progress
+                )
+            else:
+                coder, results_df, metrics = run_ml_analysis(
+                    df=df,
+                    text_column=config['text_column'],
+                    n_codes=n_codes,
+                    method=method,
+                    min_confidence=config['min_confidence'],
+                    progress_callback=adjusted_progress
+                )
+
+            # Store tuning result if available
+            if tuning_result is not None:
+                st.session_state.tuning_result = tuning_result
 
             # Store optimization info if auto-detection was used
             if auto_optimal:
