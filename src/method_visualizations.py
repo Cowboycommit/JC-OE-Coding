@@ -696,6 +696,31 @@ class MethodVisualizer:
 
         return None
 
+    def _load_domain_stopwords(self) -> set:
+        """
+        Load domain-specific stopwords from data/stopwords_domain.txt.
+
+        Returns:
+            Set of domain stopwords, or empty set if file not found.
+        """
+        import os
+        domain_stopwords = set()
+        # Try multiple possible paths relative to project root
+        for base_dir in [os.path.dirname(os.path.dirname(__file__)), os.getcwd()]:
+            stopwords_path = os.path.join(base_dir, 'data', 'stopwords_domain.txt')
+            if os.path.exists(stopwords_path):
+                try:
+                    with open(stopwords_path, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            line = line.strip()
+                            if line and not line.startswith('#'):
+                                domain_stopwords.add(line.lower())
+                    logger.debug(f"Loaded {len(domain_stopwords)} domain stopwords from {stopwords_path}")
+                    return domain_stopwords
+                except Exception as e:
+                    logger.debug(f"Failed to load domain stopwords: {e}")
+        return domain_stopwords
+
     def _extract_ngram_frequencies(
         self,
         texts: List[str],
@@ -704,7 +729,11 @@ class MethodVisualizer:
         phrase_boost: float = 0.3
     ) -> Optional[Dict[str, float]]:
         """
-        Extract n-gram term frequencies from raw text using TF-IDF with phrase boosting.
+        Extract n-gram term frequencies from preprocessed text using TF-IDF with phrase boosting.
+
+        Text is preprocessed through the coder's preprocessing pipeline (matching
+        the same pipeline used for clustering) before TF-IDF extraction. Domain-specific
+        stopwords are loaded and combined with sklearn's English stopwords.
 
         Uses sklearn's TfidfVectorizer to extract unigrams, bigrams, and trigrams,
         then applies a configurable boost to multi-word phrases so they appear
@@ -719,7 +748,7 @@ class MethodVisualizer:
             - Trigrams: 1.6x
 
         Args:
-            texts: List of text documents
+            texts: List of raw text documents (will be preprocessed internally)
             max_terms: Maximum number of terms to return
             ngram_range: Tuple of (min_n, max_n) for n-gram extraction
             phrase_boost: Boost factor per additional word (default 0.3)
@@ -731,15 +760,34 @@ class MethodVisualizer:
             return None
 
         try:
-            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
         except ImportError:
             logger.warning("sklearn not available for n-gram extraction")
             return None
 
-        # Clean texts
-        clean_texts = [str(t) for t in texts if t and str(t).strip()]
+        # Preprocess texts through the coder's pipeline (lowercase, remove non-alpha,
+        # collapse whitespace) to match the same preprocessing used for clustering
+        preprocessed = []
+        for t in texts:
+            if not t or not str(t).strip():
+                continue
+            if hasattr(self.coder, 'preprocess_text'):
+                preprocessed.append(self.coder.preprocess_text(t))
+            else:
+                # Minimal fallback: lowercase and remove non-alpha
+                import re as _re
+                text = str(t).lower()
+                text = _re.sub(r'[^a-z\s]', ' ', text)
+                text = ' '.join(text.split())
+                preprocessed.append(text)
+        clean_texts = [t for t in preprocessed if t.strip()]
         if not clean_texts:
             return None
+
+        # Combine sklearn English stopwords with domain-specific stopwords
+        combined_stopwords = set(ENGLISH_STOP_WORDS)
+        combined_stopwords.update(self._load_domain_stopwords())
+        combined_stopwords = list(combined_stopwords)
 
         try:
             vectorizer = TfidfVectorizer(
@@ -747,7 +795,7 @@ class MethodVisualizer:
                 max_features=max_terms * 3,  # Extract more than needed, filter after boosting
                 min_df=1 if len(clean_texts) < 5 else 2,
                 max_df=0.95,
-                stop_words='english',
+                stop_words=combined_stopwords,
                 lowercase=True,
                 token_pattern=r'(?u)\b[a-zA-Z][a-zA-Z]+\b'  # Words with 2+ alpha chars
             )
