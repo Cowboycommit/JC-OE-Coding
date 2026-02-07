@@ -696,6 +696,93 @@ class MethodVisualizer:
 
         return None
 
+    def _extract_ngram_frequencies(
+        self,
+        texts: List[str],
+        max_terms: int = 100,
+        ngram_range: Tuple[int, int] = (1, 3),
+        phrase_boost: float = 0.3
+    ) -> Optional[Dict[str, float]]:
+        """
+        Extract n-gram term frequencies from raw text using TF-IDF with phrase boosting.
+
+        Uses sklearn's TfidfVectorizer to extract unigrams, bigrams, and trigrams,
+        then applies a configurable boost to multi-word phrases so they appear
+        prominently alongside single words in word clouds.
+
+        The boost formula matches cluster_interpretation.py convention:
+            adjusted_weight = tfidf_weight * (1.0 + phrase_boost * (n_words - 1))
+
+        With the default 0.3 boost:
+            - Unigrams: 1.0x (no boost)
+            - Bigrams:  1.3x
+            - Trigrams: 1.6x
+
+        Args:
+            texts: List of text documents
+            max_terms: Maximum number of terms to return
+            ngram_range: Tuple of (min_n, max_n) for n-gram extraction
+            phrase_boost: Boost factor per additional word (default 0.3)
+
+        Returns:
+            Dictionary of term -> boosted weight (scaled 1-100), or None if extraction fails
+        """
+        if not texts:
+            return None
+
+        try:
+            from sklearn.feature_extraction.text import TfidfVectorizer
+        except ImportError:
+            logger.warning("sklearn not available for n-gram extraction")
+            return None
+
+        # Clean texts
+        clean_texts = [str(t) for t in texts if t and str(t).strip()]
+        if not clean_texts:
+            return None
+
+        try:
+            vectorizer = TfidfVectorizer(
+                ngram_range=ngram_range,
+                max_features=max_terms * 3,  # Extract more than needed, filter after boosting
+                min_df=1 if len(clean_texts) < 5 else 2,
+                max_df=0.95,
+                stop_words='english',
+                lowercase=True,
+                token_pattern=r'(?u)\b[a-zA-Z][a-zA-Z]+\b'  # Words with 2+ alpha chars
+            )
+            tfidf_matrix = vectorizer.fit_transform(clean_texts)
+        except ValueError as e:
+            logger.debug(f"TF-IDF n-gram extraction failed: {e}")
+            return None
+
+        # Get feature names and their mean TF-IDF scores across documents
+        feature_names = vectorizer.get_feature_names_out()
+        mean_scores = tfidf_matrix.mean(axis=0).A1  # Convert sparse to dense array
+
+        # Apply phrase boost: multi-word terms get weighted higher
+        boosted_scores = {}
+        for term, score in zip(feature_names, mean_scores):
+            if score <= 0:
+                continue
+            n_words = len(term.split())
+            boost = 1.0 + phrase_boost * (n_words - 1)
+            boosted_scores[term] = score * boost
+
+        if not boosted_scores:
+            return None
+
+        # Normalize to 1-100 scale and take top terms
+        sorted_terms = sorted(boosted_scores.items(), key=lambda x: x[1], reverse=True)[:max_terms]
+        max_weight = sorted_terms[0][1] if sorted_terms else 1.0
+        result = {}
+        for term, weight in sorted_terms:
+            normalized = (weight / max_weight) * 100
+            result[term] = max(normalized, 1)
+
+        logger.debug(f"Extracted {len(result)} n-gram terms (ngram_range={ngram_range}, phrase_boost={phrase_boost})")
+        return result
+
     def create_overall_wordcloud(
         self,
         max_words: int = 100,
@@ -748,7 +835,38 @@ class MethodVisualizer:
                 logger.warning(f"Aggregated term-based overall wordcloud failed: {e}")
                 wordcloud = None
 
-        # PRIORITY 2: Fall back to cleaned raw text with better filtering
+        # PRIORITY 2: Fall back to n-gram extraction from raw text
+        if wordcloud is None:
+            all_texts = self.results_df[self.text_column].tolist()
+            ngram_freqs = self._extract_ngram_frequencies(all_texts, max_terms=max_words)
+            if ngram_freqs:
+                try:
+                    if WORDCLOUD_AVAILABLE:
+                        wordcloud = WordCloud(
+                            width=width,
+                            height=height,
+                            background_color='white',
+                            colormap='viridis',
+                            max_words=max_words,
+                            min_font_size=10,
+                            max_font_size=100
+                        ).generate_from_frequencies(ngram_freqs)
+                        logger.info(f"Generated overall wordcloud from {len(ngram_freqs)} n-gram terms")
+                    elif PIL_AVAILABLE:
+                        wordcloud = PILWordCloud(
+                            width=width,
+                            height=height,
+                            background_color='white',
+                            max_words=max_words,
+                            min_font_size=10,
+                            max_font_size=100
+                        ).generate_from_frequencies(ngram_freqs)
+                        logger.info(f"Generated overall PIL wordcloud from {len(ngram_freqs)} n-gram terms")
+                except Exception as e:
+                    logger.warning(f"N-gram based overall wordcloud failed: {e}")
+                    wordcloud = None
+
+        # PRIORITY 3: Fall back to cleaned raw text with simple word splitting
         if wordcloud is None:
             all_texts = self.results_df[self.text_column].tolist()
             combined_text = ' '.join(str(t) for t in all_texts if t)
@@ -1500,7 +1618,44 @@ class MethodVisualizer:
                 logger.warning(f"Term-based wordcloud failed for cluster {cluster_id}: {e}")
                 wordcloud = None
 
-        # PRIORITY 2: Fall back to raw text extraction
+        # PRIORITY 2: Fall back to n-gram extraction from raw text
+        if wordcloud is None:
+            mask = self.assignments == cluster_id
+            cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
+
+            if not cluster_texts:
+                logger.warning(f"No documents in cluster {cluster_id}")
+                return None
+
+            ngram_freqs = self._extract_ngram_frequencies(cluster_texts, max_terms=max_words)
+            if ngram_freqs:
+                try:
+                    if WORDCLOUD_AVAILABLE:
+                        wordcloud = WordCloud(
+                            width=width,
+                            height=height,
+                            background_color='white',
+                            colormap='viridis',
+                            max_words=max_words,
+                            min_font_size=10,
+                            max_font_size=100
+                        ).generate_from_frequencies(ngram_freqs)
+                        logger.info(f"Generated wordcloud from n-gram terms for cluster {cluster_id}")
+                    elif PIL_AVAILABLE:
+                        wordcloud = PILWordCloud(
+                            width=width,
+                            height=height,
+                            background_color='white',
+                            max_words=max_words,
+                            min_font_size=10,
+                            max_font_size=100
+                        ).generate_from_frequencies(ngram_freqs)
+                        logger.info(f"Generated PIL wordcloud from n-gram terms for cluster {cluster_id}")
+                except Exception as e:
+                    logger.warning(f"N-gram wordcloud failed for cluster {cluster_id}: {e}")
+                    wordcloud = None
+
+        # PRIORITY 3: Fall back to cleaned raw text with simple word splitting
         if wordcloud is None:
             mask = self.assignments == cluster_id
             cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
@@ -1638,13 +1793,23 @@ class MethodVisualizer:
                 except Exception as e:
                     logger.debug(f"Term-based wordcloud failed for cluster {cluster_id}: {e}")
 
-            # PRIORITY 2: Fall back to raw text
+            # PRIORITY 2: Fall back to n-gram extraction from raw text
             mask = self.assignments == cluster_id
             cluster_texts = self.results_df.loc[mask, self.text_column].tolist()
 
             if not cluster_texts:
                 return None
 
+            ngram_freqs = self._extract_ngram_frequencies(cluster_texts, max_terms=max_words)
+            if ngram_freqs:
+                try:
+                    wordcloud = generate_wordcloud_from_freqs(ngram_freqs, cell_width, cell_height)
+                    logger.debug(f"Generated grid wordcloud from n-gram terms for cluster {cluster_id}")
+                    return wordcloud
+                except Exception as e:
+                    logger.debug(f"N-gram wordcloud failed for cluster {cluster_id}: {e}")
+
+            # PRIORITY 3: Fall back to cleaned raw text with simple word splitting
             combined_text = ' '.join(str(t) for t in cluster_texts)
             cleaned_text = re.sub(r'[^a-zA-Z\s]', ' ', combined_text.lower())
             # Filter out single/double letter words that come from contractions
@@ -1768,7 +1933,18 @@ class MethodVisualizer:
             top_words = dict(sorted(term_freqs.items(), key=lambda x: x[1], reverse=True)[:max_words])
             logger.info(f"Using pre-computed terms for semantic wordcloud cluster {cluster_id}: {len(top_words)} terms")
 
-        # PRIORITY 2: Fall back to raw text extraction
+        # PRIORITY 2: Fall back to n-gram extraction from raw text
+        if not top_words:
+            if not cluster_texts:
+                logger.warning(f"No documents in cluster {cluster_id}")
+                return None
+
+            ngram_freqs = self._extract_ngram_frequencies(cluster_texts, max_terms=max_words)
+            if ngram_freqs:
+                top_words = ngram_freqs
+                logger.info(f"Using n-gram terms for semantic wordcloud cluster {cluster_id}: {len(top_words)} terms")
+
+        # PRIORITY 3: Fall back to raw text with simple word frequency
         if not top_words:
             if not cluster_texts:
                 logger.warning(f"No documents in cluster {cluster_id}")
