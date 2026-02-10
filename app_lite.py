@@ -117,6 +117,7 @@ from helpers.analysis import (
     validate_dataframe,
     preprocess_responses,
     run_ml_analysis,
+    run_ml_analysis_with_tuning,
     calculate_metrics_summary,
     generate_insights,
     get_top_codes,
@@ -126,6 +127,7 @@ from helpers.analysis import (
     generate_methods_documentation,
     generate_executive_summary,
     find_optimal_codes,
+    HYPERPARAMETER_TUNING_AVAILABLE,
 )
 from helpers.ui_utils import (
     get_code_label,
@@ -655,6 +657,50 @@ def main():
                     help="Use silhouette analysis to find the optimal number of codes"
                 )
 
+            # Hyperparameter tuning option
+            enable_hp_tuning = st.checkbox(
+                "Enable Hyperparameter Tuning (Optuna)",
+                value=False,
+                key="hp_tuning_checkbox",
+                help="Use Bayesian optimization to find optimal hyperparameters for vectorizer and clustering"
+            )
+
+            if enable_hp_tuning:
+                hp_col1, hp_col2, hp_col3 = st.columns(3)
+                with hp_col1:
+                    hp_n_trials = st.slider(
+                        "Optimization trials",
+                        min_value=10,
+                        max_value=100,
+                        value=30,
+                        step=10,
+                        key="hp_n_trials",
+                        help="Number of parameter combinations to try"
+                    )
+                with hp_col2:
+                    hp_timeout = st.slider(
+                        "Timeout (seconds)",
+                        min_value=60,
+                        max_value=600,
+                        value=180,
+                        step=30,
+                        key="hp_timeout",
+                        help="Maximum optimization time"
+                    )
+                with hp_col3:
+                    hp_metric = st.selectbox(
+                        "Optimization metric",
+                        options=['silhouette', 'calinski_harabasz', 'combined'],
+                        index=0,
+                        key="hp_metric",
+                        help="Metric to optimize during search"
+                    )
+
+                if not HYPERPARAMETER_TUNING_AVAILABLE:
+                    st.warning("Optuna not installed. Run: pip install optuna")
+            else:
+                hp_n_trials, hp_timeout, hp_metric = 30, 180, 'silhouette'
+
             st.markdown("---")
 
             # Manual configuration options
@@ -775,10 +821,15 @@ def main():
                         st.session_state["stop_words"] = stop_words
                         st.session_state["auto_method"] = auto_method
                         st.session_state["auto_n_codes"] = auto_n_codes
+                        st.session_state["enable_hp_tuning"] = enable_hp_tuning
+                        st.session_state["hp_n_trials"] = hp_n_trials
+                        st.session_state["hp_timeout"] = hp_timeout
+                        st.session_state["hp_metric"] = hp_metric
                         st.session_state["stage_3_complete"] = True
                         reset_downstream_stages(3)
 
-                        st.success(f"Configuration set: {ML_METHODS[selected_method]}, {selected_n_codes} codes")
+                        tuning_msg = " (with hyperparameter tuning)" if enable_hp_tuning else ""
+                        st.success(f"Configuration set: {ML_METHODS[selected_method]}, {selected_n_codes} codes{tuning_msg}")
 
                 except Exception as e:
                     st.error(f"Configuration failed: {e}")
@@ -812,21 +863,44 @@ def main():
                     # This is THE entry point for all ML analysis
                     # NEVER implement ML logic in the UI
 
-                    with st.spinner("Running ML analysis... This may take a moment."):
-                        coder, results_df, metrics = run_ml_analysis(
-                            df=st.session_state["validated_df"],
-                            text_column=st.session_state["text_column"],
-                            n_codes=st.session_state["n_codes"],
-                            method=st.session_state["method"],
-                            min_confidence=st.session_state["min_confidence"],
-                            representation=st.session_state["representation"],
-                        )
+                    enable_tuning = st.session_state.get("enable_hp_tuning", False)
+                    tuning_result = None
+
+                    if enable_tuning and HYPERPARAMETER_TUNING_AVAILABLE:
+                        with st.spinner("Running hyperparameter tuning with Optuna... This may take several minutes."):
+                            coder, results_df, metrics, tuning_result = run_ml_analysis_with_tuning(
+                                df=st.session_state["validated_df"],
+                                text_column=st.session_state["text_column"],
+                                method=st.session_state["method"],
+                                min_confidence=st.session_state["min_confidence"],
+                                n_trials=st.session_state.get("hp_n_trials", 30),
+                                timeout=st.session_state.get("hp_timeout", 180),
+                                optimization_metric=st.session_state.get("hp_metric", "silhouette"),
+                                tune_n_codes=st.session_state.get("auto_n_codes", False),
+                                min_codes=3,
+                                max_codes=15,
+                            )
+                            st.session_state["tuning_result"] = tuning_result
+                    else:
+                        with st.spinner("Running ML analysis... This may take a moment."):
+                            coder, results_df, metrics = run_ml_analysis(
+                                df=st.session_state["validated_df"],
+                                text_column=st.session_state["text_column"],
+                                n_codes=st.session_state["n_codes"],
+                                method=st.session_state["method"],
+                                min_confidence=st.session_state["min_confidence"],
+                                representation=st.session_state["representation"],
+                            )
 
                     st.session_state["coder"] = coder
                     st.session_state["results_df"] = results_df
                     st.session_state["metrics"] = metrics
                     st.session_state["stage_4_complete"] = True
                     reset_downstream_stages(4)
+
+                    # Display tuning results if available
+                    if tuning_result is not None:
+                        st.info(f"Tuning complete: Best {st.session_state.get('hp_metric', 'silhouette')} score = {tuning_result.best_score:.4f} ({tuning_result.n_trials_completed} trials in {tuning_result.optimization_time:.1f}s)")
 
                     st.success(
                         f"Analysis complete. "
