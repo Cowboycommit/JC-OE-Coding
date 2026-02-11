@@ -596,10 +596,26 @@ class HyperparameterTuner:
         # Early stopping callback
         early_stop_callback = None
         if self.config.early_stopping_rounds > 0:
-            early_stop_callback = optuna.callbacks.EarlyStoppingCallback(
-                self.config.early_stopping_rounds,
-                direction="maximize"
-            )
+            patience = self.config.early_stopping_rounds
+
+            def early_stop_callback(study, trial):
+                """Stop optimization if no improvement for `patience` consecutive trials."""
+                if len(study.trials) < patience:
+                    return
+                recent_values = [
+                    t.value for t in study.trials[-patience:]
+                    if t.value is not None
+                ]
+                if not recent_values:
+                    return
+                if study.best_value is not None and all(
+                    v <= study.best_value for v in recent_values
+                ):
+                    # Check that the best trial is NOT among the last `patience` trials
+                    best_trial_number = study.best_trial.number
+                    last_n_numbers = {t.number for t in study.trials[-patience:]}
+                    if best_trial_number not in last_n_numbers:
+                        study.stop()
 
         self._study = optuna.create_study(
             direction="maximize",
