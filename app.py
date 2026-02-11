@@ -964,42 +964,42 @@ def page_data_upload():
     st.markdown("### 📊 Select a Sample Dataset")
 
     # Define available sample datasets with metadata
-    # Curated for open-ended qualitative coding analysis (6 datasets, 1,500 total rows)
+    # Curated for open-ended qualitative coding analysis (6 datasets, 1,000 rows each)
     sample_datasets = {
-        # Primary research datasets - 300 rows each, rich qualitative content
+        # Primary research datasets - 1000 rows each, rich qualitative content
         "Healthcare Patient Feedback": {
-            "path": "data/Healthcare_Patient_Feedback_300.csv",
+            "path": "data/Healthcare_Patient_Feedback_1000.csv",
             "description": "Patient feedback across hospital departments (Emergency, Cardiology, etc.). Rich qualitative data ideal for thematic analysis and department-based segmentation.",
             "text_column": "response",
             "type": "Healthcare"
         },
         "Market Research Survey": {
-            "path": "data/Market_Research_Survey_300.csv",
+            "path": "data/Market_Research_Survey_1000.csv",
             "description": "Consumer insights survey with demographic segmentation. Open-ended responses about products, services, and customer experiences.",
             "text_column": "response",
             "type": "Market Research"
         },
         "Psychology Wellbeing Study": {
-            "path": "data/Psychology_Wellbeing_Study_300.csv",
+            "path": "data/Psychology_Wellbeing_Study_1000.csv",
             "description": "Wellbeing and mental health study responses. Complex emotional themes around burnout, work-life balance, and personal challenges.",
             "text_column": "response",
             "type": "Psychology"
         },
-        # Demo datasets - 200 rows each, diverse thematic content
+        # Demo datasets - 1000 rows each, diverse thematic content
         "Remote Work Experiences": {
-            "path": "data/Remote_Work_Experiences_200.csv",
+            "path": "data/Remote_Work_Experiences_1000.csv",
             "description": "Remote work feedback covering 30+ themes: flexibility, isolation, productivity, communication, work-life balance, and management challenges.",
             "text_column": "response",
             "type": "Workplace"
         },
         "Cricket Commentary": {
-            "path": "data/cricket_responses.csv",
+            "path": "data/cricket_responses_1000.csv",
             "description": "Cricket perspectives with 40+ topics: technique, strategy, tournaments, player analysis, fan culture, and sporting traditions.",
             "text_column": "response",
             "type": "Sports"
         },
         "Fashion Opinions": {
-            "path": "data/fashion_responses.csv",
+            "path": "data/fashion_responses_1000.csv",
             "description": "Fashion industry opinions covering 45+ topics: sustainability, trends, personal style, cultural influences, and industry practices.",
             "text_column": "response",
             "type": "Lifestyle"
@@ -1033,6 +1033,92 @@ def page_data_upload():
             st.error(f"❌ Dataset file not found: {dataset_path}")
         except Exception as e:
             st.error(f"❌ Error loading dataset: {str(e)}")
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Optimal Sample Size Selector
+    # Based on analysis: maintain 30-50 responses per code for all methods
+    # to produce good results (TF-IDF, LDA, NMF, LSTM, BERT, SVM Spectral)
+    # ──────────────────────────────────────────────────────────────────────
+    if 'uploaded_df' in st.session_state and st.session_state.uploaded_df is not None:
+        st.markdown("---")
+        st.markdown("### 🎯 Optimal Sample Size for Analysis")
+        st.markdown("""
+        Select a target number of codes to **randomly sample** the optimal dataset size.
+        These sizes ensure all ML methods (TF-IDF, LDA, NMF, LSTM, BERT, SVM) produce
+        accurate, stable results.
+        """)
+
+        # Optimal sample sizes: 30-50 responses per code, ensuring all methods work well
+        # 5 codes  -> 150 (min viable for LSTM/LDA at 5 codes)
+        # 10 codes -> 300 (solid for all methods)
+        # 15 codes -> 500 (LDA + LSTM optimal range)
+        # 20 codes -> 700 (strong coverage for all methods)
+        OPTIMAL_SAMPLES = {
+            5:  {"size": 150, "label": "5 Codes", "desc": "150 responses (30 per code)"},
+            10: {"size": 300, "label": "10 Codes", "desc": "300 responses (30 per code)"},
+            15: {"size": 500, "label": "15 Codes", "desc": "500 responses (33 per code)"},
+            20: {"size": 700, "label": "20 Codes", "desc": "700 responses (35 per code)"},
+        }
+
+        full_df = st.session_state.uploaded_df
+        total_rows = len(full_df)
+
+        col_s1, col_s2, col_s3, col_s4 = st.columns(4)
+        sample_buttons = [
+            (col_s1, 5),
+            (col_s2, 10),
+            (col_s3, 15),
+            (col_s4, 20),
+        ]
+
+        for col, n_codes_opt in sample_buttons:
+            info = OPTIMAL_SAMPLES[n_codes_opt]
+            sample_size = min(info["size"], total_rows)
+            with col:
+                if st.button(
+                    f"🎯 {info['label']}\n({sample_size} rows)",
+                    key=f"sample_{n_codes_opt}",
+                    use_container_width=True,
+                    help=f"Randomly sample {sample_size} responses optimized for discovering {n_codes_opt} codes. "
+                         f"Ensures all 6 ML methods produce good accuracy."
+                ):
+                    sampled = full_df.sample(n=sample_size, random_state=42).reset_index(drop=True)
+                    sampled.iloc[:, 0] = range(1, len(sampled) + 1)  # Re-index IDs
+                    st.session_state.uploaded_df = sampled
+                    st.session_state.recommended_n_codes = n_codes_opt
+                    st.success(
+                        f"✅ Sampled **{sample_size}** of {total_rows} responses "
+                        f"(optimal for **{n_codes_opt} codes** across all methods)"
+                    )
+                    st.rerun()
+
+        # Show current dataset status
+        st.markdown(f"""
+        <div class="info-box" style="padding: 10px; margin-top: 10px;">
+        📊 <strong>Current dataset:</strong> {total_rows} responses loaded
+        {f' · Recommended codes: {st.session_state.recommended_n_codes}' if 'recommended_n_codes' in st.session_state else ''}
+        <br><small>
+        <strong>Optimal sizes by method:</strong>
+        TF-IDF/NMF: 50+ · BERT/SVM: 100+ · LDA/LSTM: 200+ ·
+        All methods: 300+
+        </small>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Option to reload full dataset
+        if total_rows < 1000 and 'recommended_n_codes' in st.session_state:
+            if st.button("🔄 Reload Full Dataset (1000 rows)", use_container_width=True):
+                # Re-read the original file
+                dataset_path = sample_datasets[selected_dataset]["path"]
+                try:
+                    full = pd.read_csv(dataset_path)
+                    st.session_state.uploaded_df = full
+                    if 'recommended_n_codes' in st.session_state:
+                        del st.session_state.recommended_n_codes
+                    st.success(f"✅ Full dataset reloaded ({len(full)} responses)")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error reloading: {str(e)}")
 
     # Upload your data section
     st.markdown("---")
@@ -2107,11 +2193,14 @@ def page_configuration():
             help="Automatically select the best ML method based on dataset size and text characteristics"
         )
 
+        # Use recommended n_codes from optimal sampling if available
+        default_n_codes = st.session_state.get('recommended_n_codes', 10)
+
         n_codes = st.slider(
             "Number of codes to discover",
             min_value=3,
             max_value=30,
-            value=10,
+            value=default_n_codes,
             step=1,
             help="How many themes/codes should the algorithm discover?",
             disabled=auto_optimal_codes

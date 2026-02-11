@@ -1,0 +1,1001 @@
+id,response,patient_id,timestamp,department
+1,The ER wait was wayyy too long!!!   Had to wait 3 hours &amp; nobody told us what was happening,P1001,2024-01-15 08:23:41,Emergency
+2,"Dr. Smith was very thorough, she explained everything clearly and I definately understood my treatment plan",P1002,2024-01-15 09:45:12,Cardiology
+3,"Room wasn't as clean as I expected, the bathroom needed attention",P1003,2024-01-15 10:12:33,General Medicine
+4,"The pain medication worked reallly well, felt comfortable within 30 minutes of receiving it",P1004,2024-01-15 11:34:56,Orthopedics
+5,Discharge instructions were confusing &amp; I didn't understand when to take my medications,P1005,2024-01-15 12:01:22,Cardiology
+6,fine,P1006,2024-01-15 13:22:45,Pediatrics
+7,The nursing staff was AMAZING!!! They checked on me every hour and were so caring,P1007,2024-01-15 14:33:18,General Medicine
+8,Waited three hrs in the waiting room before anyone even acknowledged us,P1008,2024-01-15 15:44:29,Emergency
+9,"My treatment outcomes exceeded expectations, the surgery was a complete success &amp; recovery is going well",P1009,2024-01-15 16:55:41,Orthopedics
+10,The RN who handled my IV was extremely professional   and made me feel at ease,P1010,2024-01-15 17:06:52,Cardiology
+11,"Bathroom in my room was dirty, found hair on the floor and the sink had water stains",P1011,2024-01-15 18:17:03,General Medicine
+12,"Dr. Johnson&#39;s bedside manner was exceptional, he took time to answer ALL my questions",P1012,2024-01-15 19:28:14,Pediatrics
+13,The pain pills they gave me caused nausea &amp; I wasn't warned about this side effect,P1013,2024-01-15 20:39:25,Emergency
+14,"Follow-up care instructions were crystal clear, the nurse went through everything step by step",P1014,2024-01-15 21:50:36,Orthopedics
+15,ok,P1015,2024-01-15 22:01:47,General Medicine
+16,HAD TO WAIT 2 HOURS FOR MY SCHEDULED APPOINTMENT this is unacceptable!!!,P1016,2024-01-16 07:12:58,Cardiology
+17,"The treatment I recieved was top notch, couldn't ask for better care",P1017,2024-01-16 08:24:09,General Medicine
+18,"Nurses didn't explain what medications they were giving me, just handed me pills",P1018,2024-01-16 09:35:20,Emergency
+19,The floor in the hallway was sticky   and hadn't been mopped in what looked like days,P1019,2024-01-16 10:46:31,Pediatrics
+20,"My post-surgery pain was managed sooo well, the team really knew what they were doing",P1020,2024-01-16 11:57:42,Orthopedics
+21,"Discharge paperwork was overwhelming, recieved about 20 pages with no explanation",P1021,2024-01-16 12:08:53,Cardiology
+22,The doctor was very accomodating and adjusted my treatment based on my concerns,P1022,2024-01-16 13:19:04,General Medicine
+23,"Emergency room wait time was reasonable, only waited about 45 minutes",P1023,2024-01-16 14:30:15,Emergency
+24,good,P1024,2024-01-16 15:41:26,Pediatrics
+25,The equipment in my room looked outdated &amp; some of the monitors had tape holding them together,P1025,2024-01-16 16:52:37,Cardiology
+26,"Recovery from my procedure is going exactly as Dr. Martinez predicted, very satisfied with results",P1026,2024-01-16 17:03:48,Orthopedics
+27,"The RN couldn't explain why I needed the blood test, just said &quot;doctor's orders&quot;",P1027,2024-01-16 18:14:59,General Medicine
+28,Pain management could have been better??? I had to ask multiple times for relief,P1028,2024-01-16 19:26:10,Emergency
+29,They gave me a detailed medication schedule   which was super helpful for home care,P1029,2024-01-16 20:37:21,Pediatrics
+30,"The treatment definately helped my condition, feeling much better now",P1030,2024-01-16 21:48:32,Cardiology
+31,"Appointment was scheduled for 9am but wasn't seen until 11:30am, ridiculous!!",P1031,2024-01-17 07:59:43,General Medicine
+32,The ER doctor took time to explain my diagnosis &amp; treatment options thoroughly,P1032,2024-01-17 08:10:54,Emergency
+33,"My room was spotless when I arrived, housekeeping did an excellent job",P1033,2024-01-17 09:22:05,Orthopedics
+34,The morphine drip was adjusted perfectly to manage my pain without making me too drowsy,P1034,2024-01-17 10:33:16,Cardiology
+35,Didn't recieve any follow-up call as promised   this was disappointing,P1035,2024-01-17 11:44:27,General Medicine
+36,"Dr. Williams was sooo patient with my elderly mother, explained everything multiple times",P1036,2024-01-17 12:55:38,Pediatrics
+37,"The wait was absolutley unacceptable, four hours in the ER with chest pain!!!",P1037,2024-01-17 13:06:49,Emergency
+38,"Treatment effectiveness was immediate, started feeling better within hours of admission",P1038,2024-01-17 14:17:00,Cardiology
+39,"The nurse&#39;s communication was poor, she seemed rushed and didn't listen to my concerns",P1039,2024-01-17 15:28:11,Orthopedics
+40,Trash cans in the waiting area were overflowing   nobody seemed to notice,P1040,2024-01-17 16:39:22,General Medicine
+41,The pain medication occured some dizziness but overall managed my discomfort well,P1041,2024-01-17 17:50:33,Emergency
+42,"Discharge was smooth, the pharmacist even called to make sure I understood my prescriptions",P1042,2024-01-17 18:01:44,Pediatrics
+43,fine I guess,P1043,2024-01-17 19:12:55,Cardiology
+44,HAD TO EXPLAIN MY SYMPTOMS TO 5 DIFFERENT PEOPLE before seeing a doctor,P1044,2024-01-17 20:24:06,Emergency
+45,The surgical outcomes were excellent &amp; I'm recovering faster than expected,P1045,2024-01-17 21:35:17,Orthopedics
+46,Staff was reallly friendly and made my child feel comfortable during the visit,P1046,2024-01-17 22:46:28,Pediatrics
+47,"The bathroom had mold in the shower, this is a HOSPITAL for crying out loud!!!",P1047,2024-01-18 07:57:39,General Medicine
+48,"Waited 2.5 hours past my appointment time, no apology or explanation given",P1048,2024-01-18 08:08:50,Cardiology
+49,My recovery has been smooth thanks to the excellent treatment I recieved here,P1049,2024-01-18 09:20:01,Orthopedics
+50,The Dr. didnt listen to my concerns about the medication side effects,P1050,2024-01-18 10:31:12,Emergency
+51,Room was clean but the sheets felt like they hadn't been changed   kind of gross,P1051,2024-01-18 11:42:23,General Medicine
+52,Pain was controlled wayyy better than at my last hospital stay,P1052,2024-01-18 12:53:34,Cardiology
+53,"The follow-up appointment was scheduled before I even left, very organized discharge process",P1053,2024-01-18 13:04:45,Pediatrics
+54,ok i guess,P1054,2024-01-18 14:15:56,Orthopedics
+55,The ER staff was overwhelmed but still managed to provide good care despite the wait,P1055,2024-01-18 15:27:07,Emergency
+56,My treatment plan wasn't explained well &amp; I left confused about next steps,P1056,2024-01-18 16:38:18,General Medicine
+57,"The nursing staff went above &amp; beyond, checking on me frequently throughout the night",P1057,2024-01-18 17:49:29,Cardiology
+58,"Dusty vents in the ceiling, couldn't believe a medical facility would have such poor air quality",P1058,2024-01-18 18:00:40,Orthopedics
+59,The pain meds worked immediately and I was comfortable for my entire stay,P1059,2024-01-18 19:11:51,Emergency
+60,"Discharge instructions were definately thorough, appreciated the detailed explanation",P1060,2024-01-18 20:23:02,Pediatrics
+61,"Treatment outcomes were exactly what was promised, very pleased with results",P1061,2024-01-18 21:34:13,General Medicine
+62,The RN was sooo helpful explaining my test results in terms I could understand,P1062,2024-01-18 22:45:24,Cardiology
+63,Scheduling an appointment took 3 weeks   this is too long for a follow-up,P1063,2024-01-19 07:56:35,Orthopedics
+64,"The room was immaculate, best hospital cleanliness I've experienced",P1064,2024-01-19 08:07:46,Emergency
+65,Pain management team was responsive &amp; adjusted my medication promptly when needed,P1065,2024-01-19 09:18:57,General Medicine
+66,"The medication info sheet was confusing, had to call back to clarify dosage times",P1066,2024-01-19 10:30:08,Pediatrics
+67,good service,P1067,2024-01-19 11:41:19,Cardiology
+68,"WAITED FOUR HOURS IN THE EMERGENCY ROOM with a broken arm, absolutely ridiculous",P1068,2024-01-19 12:52:30,Emergency
+69,The surgeon&#39;s explanation of the procedure was clear and put me at ease,P1069,2024-01-19 13:03:41,Orthopedics
+70,Dr. Patel was accomodating when I asked for a second opinion on my diagnosis,P1070,2024-01-19 14:14:52,General Medicine
+71,The hospital floors were spotless   clearly they take cleanliness seriously here,P1071,2024-01-19 15:26:03,Cardiology
+72,Had to beg for pain medication??? this shouldn't be so difficult,P1072,2024-01-19 16:37:14,Emergency
+73,Discharge was delayed by three hrs because paperwork wasn't ready,P1073,2024-01-19 17:48:25,Pediatrics
+74,"Recovery is going great, the treatment I recieved was excellent",P1074,2024-01-19 18:59:36,Orthopedics
+75,"The nurse explained each medication&#39;s purpose before administering it, very professional",P1075,2024-01-19 19:10:47,General Medicine
+76,"My scheduled surgery was delayed 2 hours due to an emergency, which was understandable",P1076,2024-01-19 20:21:58,Cardiology
+77,Hand sanitizer dispensers in the hallway were empty   concerning for a hospital,P1077,2024-01-19 21:33:09,Emergency
+78,The oxycodone managed my post-op pain reallly effectively,P1078,2024-01-19 22:44:20,Orthopedics
+79,"Follow-up care info was incomplete, didn't know when to remove my bandages",P1079,2024-01-19 23:55:31,General Medicine
+80,fine nothing special,P1080,2024-01-20 07:06:42,Pediatrics
+81,The treatment plan was customized to my specific needs &amp; I appreciated that personal touch,P1081,2024-01-20 08:17:53,Cardiology
+82,"Dr. Chen didn't make eye contact during our consultation, felt like she wasn't listening",P1082,2024-01-20 09:29:04,Emergency
+83,"Wait time for my cardiology appointment was only 10 minutes, very impressed!!!",P1083,2024-01-20 10:40:15,Cardiology
+84,"The room smelled like bleach which was reassuring, clearly recently cleaned",P1084,2024-01-20 11:51:26,Orthopedics
+85,Pain was managed adequately though I wish they had checked on me more frequently,P1085,2024-01-20 12:02:37,General Medicine
+86,They didn't explain what to do if my symptoms returned after discharge,P1086,2024-01-20 13:13:48,Pediatrics
+87,"Treatment was very effective, my symptoms improved dramatically within days",P1087,2024-01-20 14:24:59,Emergency
+88,"The ER nurse was wayyy more helpful than the doctor, she actually explained things",P1088,2024-01-20 15:36:10,Emergency
+89,Waited over 2 hours for a scheduled appointment this is rediculous,P1089,2024-01-20 16:47:21,General Medicine
+90,Equipment in the exam room looked modern and well-maintained,P1090,2024-01-20 17:58:32,Cardiology
+91,The Tylenol they gave me did nothing for my pain   needed something stronger,P1091,2024-01-20 18:09:43,Orthopedics
+92,Recieved detailed written instructions &amp; a phone number to call with questions,P1092,2024-01-20 19:20:54,Pediatrics
+93,ok,P1093,2024-01-20 20:32:05,General Medicine
+94,"The surgical team kept my family updated throughout the procedure, GREATLY APPRECIATED",P1094,2024-01-20 21:43:16,Cardiology
+95,"My doctor&#39;s communication was excellent, couldn't ask for a better experience",P1095,2024-01-20 22:54:27,Emergency
+96,Bathroom in the ER waiting area was out of toilet paper and paper towels,P1096,2024-01-20 23:05:38,Emergency
+97,"Pain management was prioritized from the moment I arrived, felt cared for",P1097,2024-01-21 07:16:49,Orthopedics
+98,"The discharge process took wayyy too long, waited 4 hours to leave!!!",P1098,2024-01-21 08:28:00,General Medicine
+99,My recovery is going smoothly thanks to the excellent treatment &amp; care recieved,P1099,2024-01-21 09:39:11,Cardiology
+100,The RN was very patient explaining the blood test results to me,P1100,2024-01-21 10:50:22,Pediatrics
+101,Appointment was on time which was a pleasant surprise   usually have to wait,P1101,2024-01-21 11:01:33,Emergency
+102,"Found dust bunnies under my hospital bed, housekeeping needs improvement",P1102,2024-01-21 12:12:44,Orthopedics
+103,The ibuprofen wasn't strong enough for my level of pain &amp; I had to request something else,P1103,2024-01-21 13:23:55,General Medicine
+104,"Medication instructions were clear, the pharmacist took time to explain everything",P1104,2024-01-21 14:35:06,Cardiology
+105,"Treatment results have been phenomenal, I'm feeling like myself again",P1105,2024-01-21 15:46:17,Pediatrics
+106,The nurse was definately overwhelmed and made a mistake with my medication timing,P1106,2024-01-21 16:57:28,Emergency
+107,ER wait was about 1 hour which seemed reasonable given how busy they were,P1107,2024-01-21 17:08:39,Emergency
+108,good care overall,P1108,2024-01-21 18:19:50,Orthopedics
+109,MY ROOM WASN'T CLEANED THE ENTIRE 3 DAYS I WAS THERE this is unacceptable,P1109,2024-01-21 19:31:01,General Medicine
+110,"Pain was well-controlled throughout my stay, the team was very attentive",P1110,2024-01-21 20:42:12,Cardiology
+111,"The follow-up appointment was scheduled too far out, 6 weeks seems excessive",P1111,2024-01-21 21:53:23,Pediatrics
+112,Dr. Brown took time to answer all my questions &amp; didn't rush the appointment,P1112,2024-01-21 22:04:34,Orthopedics
+113,The treatment I recieved was adequate but nothing exceptional,P1113,2024-01-22 07:15:45,Emergency
+114,Nurses were reallly communicative and kept me informed about everything,P1114,2024-01-22 08:26:56,General Medicine
+115,Had to wait 5 hours in the ER   this is completely unacceptable!!!,P1115,2024-01-22 09:38:07,Emergency
+116,The room was clean except for some stains on the ceiling tiles,P1116,2024-01-22 10:49:18,Cardiology
+117,Morphine was administered promptly and my pain was managed very well,P1117,2024-01-22 11:00:29,Orthopedics
+118,"Discharge papers had the wrong medication dosage listed, caught it before leaving thankfully",P1118,2024-01-22 12:11:40,Pediatrics
+119,fine,P1119,2024-01-22 13:22:51,General Medicine
+120,"The treatment was sooo effective, my symptoms are almost completely gone",P1120,2024-01-22 14:34:02,Cardiology
+121,"Dr. Davis&#39;s explanation of my condition was confusing, used too much medical jargon",P1121,2024-01-22 15:45:13,Emergency
+122,"Waited three hours past my scheduled appointment time, no one apologized",P1122,2024-01-22 16:56:24,Orthopedics
+123,"The hospital was spotless from the lobby to my room, very impressed",P1123,2024-01-22 17:07:35,General Medicine
+124,Pain medication caused severe constipation &amp; I wasn't warned about this side effect,P1124,2024-01-22 18:18:46,Cardiology
+125,The discharge nurse was accomodating and answered all my questions patiently,P1125,2024-01-22 19:29:57,Pediatrics
+126,"My surgical outcomes exceeded expectations, the incision is healing beautifully",P1126,2024-01-22 20:41:08,Orthopedics
+127,The ER doctor was dismissive &amp; didn't take my symptoms seriously at first,P1127,2024-01-22 21:52:19,Emergency
+128,Scheduling was easy and I got an appointment within 2 days,P1128,2024-01-22 22:03:30,General Medicine
+129,Dirty sheets on the bed when I arrived   had to ask for clean ones,P1129,2024-01-22 23:14:41,Cardiology
+130,The pain management team was responsive and adjusted my meds as needed,P1130,2024-01-23 07:25:52,Pediatrics
+131,Follow-up instructions were detailed but I wish they had been explained verbally too,P1131,2024-01-23 08:37:03,Orthopedics
+132,ok service,P1132,2024-01-23 09:48:14,Emergency
+133,"Treatment has been wayyy more effective than I anticipated, very grateful",P1133,2024-01-23 10:59:25,General Medicine
+134,"The RN took time to explain every step of my care, excellent communication",P1134,2024-01-23 11:10:36,Cardiology
+135,WAITED OVER 6 HOURS IN THE ER this needs to be addressed immediately!!!,P1135,2024-01-23 12:21:47,Emergency
+136,"Room was clean and comfortable, no complaints about the facility",P1136,2024-01-23 13:32:58,Pediatrics
+137,The Dilaudid they gave me managed my pain perfectly without too many side effects,P1137,2024-01-23 14:44:09,Orthopedics
+138,"Didn't recieve the follow-up call that was promised, had to call them instead",P1138,2024-01-23 15:55:20,General Medicine
+139,"The surgeon was definately skilled, my operation went perfectly",P1139,2024-01-23 16:06:31,Cardiology
+140,Staff was friendly but communication between departments seemed poor,P1140,2024-01-23 17:17:42,Emergency
+141,My appointment was on time and the whole visit only took 45 minutes,P1141,2024-01-23 18:28:53,Pediatrics
+142,Trash hadn't been emptied in my room   overflowing by the second day,P1142,2024-01-23 19:40:04,Orthopedics
+143,Pain was undertreated initially but they adjusted once I spoke up,P1143,2024-01-23 20:51:15,General Medicine
+144,The discharge process was smooth &amp; I was out within an hour of the doctor's order,P1144,2024-01-23 21:02:26,Cardiology
+145,Treatment was effective and I'm feeling much better now,P1145,2024-01-23 22:13:37,Emergency
+146,"Dr. Wilson was sooo thorough, spent 30 minutes going over my test results",P1146,2024-01-23 23:24:48,Pediatrics
+147,"The wait was absolutley ridiculous, 4 hrs for a scheduled procedure!!!",P1147,2024-01-24 07:35:59,Orthopedics
+148,Bathroom was clean and well-stocked with supplies throughout my stay,P1148,2024-01-24 08:47:10,General Medicine
+149,The fentanyl patch managed my chronic pain very effectively,P1149,2024-01-24 09:58:21,Cardiology
+150,good overall experience,P1150,2024-01-24 10:09:32,Emergency
+151,Follow-up care was arranged before discharge which made things much easier,P1151,2024-01-24 11:20:43,Pediatrics
+152,"The treatment I recieved completely resolved my symptoms, very satisfied",P1152,2024-01-24 12:31:54,Orthopedics
+153,"Nurses&#39; communication was excellent, always knew what was happening with my care",P1153,2024-01-24 13:43:05,General Medicine
+154,Had to wait 2 hours past my appointment   no explanation given,P1154,2024-01-24 14:54:16,Cardiology
+155,The ER was surprisingly clean given how busy it was,P1155,2024-01-24 15:05:27,Emergency
+156,Pain meds caused nausea but overall my discomfort was well managed,P1156,2024-01-24 16:16:38,Pediatrics
+157,"Discharge instructions were reallly confusing, had to call twice for clarification",P1157,2024-01-24 17:27:49,Orthopedics
+158,My recovery is going well thanks to the excellent surgical team,P1158,2024-01-24 18:39:00,General Medicine
+159,The doctor didn't listen to my concerns &amp; just prescribed medication,P1159,2024-01-24 19:50:11,Cardiology
+160,"Waited only 20 minutes for my ER visit, very efficient!!!",P1160,2024-01-24 20:01:22,Emergency
+161,Room cleanliness was acceptable but could have been better,P1161,2024-01-24 21:12:33,Pediatrics
+162,The pain management protocol worked perfectly for my knee replacement recovery,P1162,2024-01-24 22:23:44,Orthopedics
+163,Medication info provided at discharge was thorough &amp; easy to understand,P1163,2024-01-24 23:34:55,General Medicine
+164,fine I suppose,P1164,2024-01-25 07:46:06,Cardiology
+165,"Treatment outcomes were positive, definitely recommend this facility",P1165,2024-01-25 08:57:17,Emergency
+166,The RN was accomodating when I needed to reschedule my medication times,P1166,2024-01-25 09:08:28,Pediatrics
+167,Appointment was delayed by 90 minutes with no communication about the wait,P1167,2024-01-25 10:19:39,Orthopedics
+168,Floors in my room were sticky   housekeeping needs to do better,P1168,2024-01-25 11:30:50,General Medicine
+169,The Percocet controlled my pain but made me very drowsy,P1169,2024-01-25 12:42:01,Cardiology
+170,The discharge nurse was wayyy more helpful than the admitting staff,P1170,2024-01-25 13:53:12,Emergency
+171,My treatment has been very effective and I'm recovering well,P1171,2024-01-25 14:04:23,Pediatrics
+172,"Dr. Anderson took time to explain everything clearly, no complaints",P1172,2024-01-25 15:15:34,Orthopedics
+173,THE WAIT TIME IN THIS ER IS ABSOLUTELY UNACCEPTABLE needed to wait 5 hrs,P1173,2024-01-25 16:26:45,Emergency
+174,Equipment in the room was modern and appeared well-maintained,P1174,2024-01-25 17:37:56,General Medicine
+175,"Pain was managed adequately, though I had to ask for medication a few times",P1175,2024-01-25 18:49:07,Cardiology
+176,Follow-up appointment was easy to schedule   appreciated the flexibility,P1176,2024-01-25 19:00:18,Pediatrics
+177,ok I guess it was fine,P1177,2024-01-25 20:11:29,Orthopedics
+178,The treatment I recieved here was much better than at my previous hospital,P1178,2024-01-25 21:22:40,Emergency
+179,Communication from the nursing staff was definately lacking,P1179,2024-01-25 22:33:51,General Medicine
+180,Wait time was about 1.5 hours which seemed long for a scheduled appointment,P1180,2024-01-25 23:45:02,Cardiology
+181,The room was immaculate &amp; I was very comfortable during my stay,P1181,2024-01-26 07:56:13,Pediatrics
+182,Pain medication was effective but I wish they had offered alternatives to opioids,P1182,2024-01-26 08:07:24,Orthopedics
+183,Discharge process was slow   took over 3 hours to get my paperwork,P1183,2024-01-26 09:18:35,Emergency
+184,"Treatment results have been excellent, my condition has improved significantly",P1184,2024-01-26 10:29:46,General Medicine
+185,The ER doctor was reallly attentive and addressed all my concerns,P1185,2024-01-26 11:40:57,Emergency
+186,Had to wait four hours for a follow-up appointment that was scheduled weeks ago!!!,P1186,2024-01-26 12:52:08,Cardiology
+187,Bathroom in my room had a broken toilet seat that wasn't fixed during my stay,P1187,2024-01-26 13:03:19,Pediatrics
+188,The Tramadol managed my pain without the grogginess of stronger medications,P1188,2024-01-26 14:14:30,Orthopedics
+189,"Recieved clear written instructions and a follow-up phone call, great discharge process",P1189,2024-01-26 15:25:41,General Medicine
+190,good,P1190,2024-01-26 16:36:52,Cardiology
+191,"My surgical recovery is going exactly as predicted, very satisfied with outcomes",P1191,2024-01-26 17:48:03,Emergency
+192,"Dr. Taylor&#39;s communication style was excellent, explained everything in plain terms",P1192,2024-01-26 18:59:14,Pediatrics
+193,The scheduling system is terrible   couldn't get an appointment for 6 weeks,P1193,2024-01-26 19:10:25,Orthopedics
+194,"Room was clean and the linens were fresh, no issues with facility cleanliness",P1194,2024-01-26 20:21:36,General Medicine
+195,Pain management was sooo much better than my last hospital experience,P1195,2024-01-26 21:32:47,Cardiology
+196,The medication reconciliation at discharge was thorough &amp; caught a potential interaction,P1196,2024-01-26 22:43:58,Emergency
+197,Treatment was effective though I wish the doctor had spent more time with me,P1197,2024-01-26 23:55:09,Pediatrics
+198,The RN was patient and answered all my questions about the procedure,P1198,2024-01-27 07:06:20,Orthopedics
+199,Waited 3 hrs past my appointment time   this is unacceptable!!!,P1199,2024-01-27 08:17:31,General Medicine
+200,The operating room was visibly clean and the staff followed all hygiene protocols,P1200,2024-01-27 09:28:42,Cardiology
+201,Pain was undertreated for the first day but improved after I complained,P1201,2024-01-27 10:39:53,Emergency
+202,Discharge instructions weren't clear about dietary restrictions post-surgery,P1202,2024-01-27 11:51:04,Pediatrics
+203,fine nothing to complain about,P1203,2024-01-27 12:02:15,Orthopedics
+204,The treatment plan was definately tailored to my specific needs,P1204,2024-01-27 13:13:26,General Medicine
+205,Staff communication was excellent throughout my entire hospital stay,P1205,2024-01-27 14:24:37,Cardiology
+206,APPOINTMENT WAS 2 HOURS LATE and nobody seemed to care!!!,P1206,2024-01-27 15:35:48,Emergency
+207,"The facility was clean and well-maintained, modern equipment throughout",P1207,2024-01-27 16:46:59,Pediatrics
+208,The nerve block worked wayyy better than expected for my knee surgery,P1208,2024-01-27 17:58:10,Orthopedics
+209,Follow-up care was arranged seamlessly &amp; I knew exactly what to expect,P1209,2024-01-27 18:09:21,General Medicine
+210,My recovery is progressing well thanks to the excellent treatment I recieved,P1210,2024-01-27 19:20:32,Cardiology
+211,The doctor was accomodating when I asked questions about alternative treatments,P1211,2024-01-27 20:31:43,Emergency
+212,"Had to wait about 2 hours for my scheduled surgery, delayed without explanation",P1212,2024-01-27 21:42:54,Pediatrics
+213,Dust on the window sills and curtains hadn't been cleaned in weeks,P1213,2024-01-27 22:54:05,Orthopedics
+214,Pain medication was administered promptly whenever I requested it,P1214,2024-01-27 23:05:16,General Medicine
+215,The discharge process took too long   over 4 hours to be released!!!,P1215,2024-01-28 07:16:27,Cardiology
+216,ok service I guess,P1216,2024-01-28 08:27:38,Emergency
+217,"Treatment outcomes have been positive, feeling much better than before admission",P1217,2024-01-28 09:38:49,Pediatrics
+218,"The RN explained my lab results reallly well, appreciated the clear communication",P1218,2024-01-28 10:50:00,Orthopedics
+219,Scheduling was easy but the wait on the day of the appointment was excessive,P1219,2024-01-28 11:01:11,General Medicine
+220,The room was spotless &amp; housekeeping came by twice daily,P1220,2024-01-28 12:12:22,Cardiology
+221,My pain was managed adequately though I had some breakthrough pain at night,P1221,2024-01-28 13:23:33,Emergency
+222,Discharge instructions were confusing and I didn't understand the follow-up schedule,P1222,2024-01-28 14:34:44,Pediatrics
+223,The surgical team was professional &amp; the operation was a complete success,P1223,2024-01-28 15:45:55,Orthopedics
+224,"Dr. White was sooo dismissive, didn't take time to listen to my concerns",P1224,2024-01-28 16:57:06,General Medicine
+225,"Wait time was reasonable, only about 30 minutes past my appointment",P1225,2024-01-28 17:08:17,Cardiology
+226,Floor in the ER waiting area was visibly dirty with stains and debris,P1226,2024-01-28 18:19:28,Emergency
+227,"The pain management protocol was excellent, never felt uncomfortable",P1227,2024-01-28 19:30:39,Pediatrics
+228,"Recieved thorough medication counseling at discharge, very helpful",P1228,2024-01-28 20:41:50,Orthopedics
+229,good overall,P1229,2024-01-28 21:53:01,General Medicine
+230,My treatment was effective and I'm recovering faster than expected,P1230,2024-01-28 22:04:12,Cardiology
+231,"The ER nurse&#39;s communication was poor, felt like I was bothering her with questions",P1231,2024-01-28 23:15:23,Emergency
+232,Had to wait 5 hrs for emergency treatment of my child&#39;s broken arm!!!,P1232,2024-01-29 07:26:34,Pediatrics
+233,"Room cleanliness was excellent, no complaints about the facility",P1233,2024-01-29 08:37:45,Orthopedics
+234,The Vicodin made me nauseous but effectively managed my pain,P1234,2024-01-29 09:48:56,General Medicine
+235,Follow-up appointment was scheduled conveniently &amp; the process was smooth,P1235,2024-01-29 10:00:07,Cardiology
+236,"Treatment was definately effective, my symptoms resolved completely",P1236,2024-01-29 11:11:18,Emergency
+237,Nurses were wayyy more helpful than the doctors at explaining my care,P1237,2024-01-29 12:22:29,Pediatrics
+238,The scheduling department was unresponsive   had to call multiple times,P1238,2024-01-29 13:33:40,Orthopedics
+239,Bathroom had a strong chemical smell but was otherwise clean,P1239,2024-01-29 14:44:51,General Medicine
+240,Pain was controlled well throughout my hospital stay,P1240,2024-01-29 15:56:02,Cardiology
+241,The discharge nurse was accomodating and took time to answer all my questions,P1241,2024-01-29 16:07:13,Emergency
+242,fine I guess nothing special,P1242,2024-01-29 17:18:24,Pediatrics
+243,The ER wait was wayyy too long!!!   Had to wait 3 hours &amp; nobody told us what was happening,P1243,2024-01-29 18:29:35,Emergency
+244,"My treatment results have been excellent, feeling like myself again",P1244,2024-01-29 19:40:46,Orthopedics
+245,Dr. Lee was very thorough in explaining my diagnosis and treatment options,P1245,2024-01-29 20:51:57,General Medicine
+246,Waited 2 hours for an ER visit that took 15 minutes once I was seen,P1246,2024-01-29 21:03:08,Cardiology
+247,The room had a musty smell and the ventilation seemed poor,P1247,2024-01-29 22:14:19,Emergency
+248,"Pain medication was reallly effective, never felt uncomfortable during recovery",P1248,2024-01-29 23:25:30,Pediatrics
+249,Discharge process was efficient &amp; I was released within an hour,P1249,2024-01-30 07:36:41,Orthopedics
+250,Treatment was adequate but I expected more personalized care,P1250,2024-01-30 08:47:52,General Medicine
+251,"The RN was definately the highlight of my visit, so caring and professional",P1251,2024-01-30 09:59:03,Cardiology
+252,"SCHEDULING IS A NIGHTMARE at this hospital, waited 3 weeks for an appointment!!!",P1252,2024-01-30 10:10:14,Emergency
+253,Room was clean and the staff maintained good hygiene throughout,P1253,2024-01-30 11:21:25,Pediatrics
+254,The epidural worked perfectly for my labor &amp; delivery,P1254,2024-01-30 12:32:36,Orthopedics
+255,"Follow-up instructions were confusing, didn't know when to return",P1255,2024-01-30 13:43:47,General Medicine
+256,ok,P1256,2024-01-30 14:54:58,Cardiology
+257,"My surgical outcomes were excellent, the surgeon was very skilled",P1257,2024-01-30 15:06:09,Emergency
+258,"Staff communication could have been better, felt uninformed at times",P1258,2024-01-30 16:17:20,Pediatrics
+259,The appointment was on time which was a pleasant surprise,P1259,2024-01-30 17:28:31,Orthopedics
+260,Dirty fingerprints on the door handles and light switches in my room,P1260,2024-01-30 18:39:42,General Medicine
+261,"Pain was managed sooo effectively, the anesthesia team was excellent",P1261,2024-01-30 19:50:53,Cardiology
+262,Recieved a phone call the day after discharge to check on my recovery,P1262,2024-01-30 20:02:04,Emergency
+263,Treatment was effective &amp; I'm feeling much better now,P1263,2024-01-30 21:13:15,Pediatrics
+264,"The doctor&#39;s explanation was wayyy too technical, couldn't understand anything",P1264,2024-01-30 22:24:26,Orthopedics
+265,Had to wait four hours past my scheduled appointment time!!!,P1265,2024-01-30 23:35:37,General Medicine
+266,"The facility was clean from entrance to exam room, very impressed",P1266,2024-01-31 07:46:48,Cardiology
+267,Morphine managed my post-surgical pain effectively without too many side effects,P1267,2024-01-31 08:57:59,Emergency
+268,Discharge was delayed because the pharmacy was slow filling my prescriptions,P1268,2024-01-31 09:09:10,Pediatrics
+269,"My recovery is going exactly as planned, the treatment was excellent",P1269,2024-01-31 10:20:21,Orthopedics
+270,The nursing staff was reallly attentive and professional throughout my stay,P1270,2024-01-31 11:31:32,General Medicine
+271,Wait time in the ER was about 2 hours which seemed average,P1271,2024-01-31 12:42:43,Cardiology
+272,Room cleanliness was adequate but the bathroom could have been better,P1272,2024-01-31 13:53:54,Emergency
+273,The pain medication worked well but caused constipation as a side effect,P1273,2024-01-31 14:05:05,Pediatrics
+274,Follow-up care was arranged before I left &amp; instructions were clear,P1274,2024-01-31 15:16:16,Orthopedics
+275,good experience overall,P1275,2024-01-31 16:27:27,General Medicine
+276,"Dr. Smith was very thorough, she explained everything clearly and I definately understood my treatment plan",P1276,2024-01-31 17:38:38,Cardiology
+277,The ER was understaffed &amp; everyone seemed overwhelmed,P1277,2024-01-31 18:49:49,Emergency
+278,"My scheduled appointment was cancelled without notice, very frustrating!!!",P1278,2024-01-31 19:00:00,Pediatrics
+279,Equipment in my room was outdated but functional,P1279,2024-01-31 20:11:11,Orthopedics
+280,Pain management team responded quickly when I reported breakthrough pain,P1280,2024-01-31 21:22:22,General Medicine
+281,The discharge process was smooth &amp; the nurse answered all my questions,P1281,2024-01-31 22:33:33,Cardiology
+282,Treatment I recieved was accomodating to my special dietary needs,P1282,2024-01-31 23:44:44,Emergency
+283,"Room wasn't as clean as I expected, the bathroom needed attention",P1283,2024-02-01 07:55:55,Pediatrics
+284,Nurses were sooo friendly and made my child feel comfortable,P1284,2024-02-01 08:07:06,Orthopedics
+285,Waited three hrs in the waiting room before anyone even acknowledged us,P1285,2024-02-01 09:18:17,General Medicine
+286,The hospital was spotless   clearly cleanliness is a priority here,P1286,2024-02-01 10:29:28,Cardiology
+287,"Pain was well managed throughout my stay, no complaints",P1287,2024-02-01 11:40:39,Emergency
+288,Discharge instructions were definately clear and thorough,P1288,2024-02-01 12:51:50,Pediatrics
+289,"Treatment outcomes exceeded my expectations, very satisfied with care",P1289,2024-02-01 13:03:01,Orthopedics
+290,The ER doctor was dismissive &amp; didn't take my symptoms seriously at first,P1290,2024-02-01 14:14:12,General Medicine
+291,Appointment was on time and the whole process was efficient,P1291,2024-02-01 15:25:23,Cardiology
+292,"Found hair on my hospital bed sheets, this is unacceptable hygiene!!!",P1292,2024-02-01 16:36:34,Emergency
+293,"The pain medication worked reallly well, felt comfortable within 30 minutes of receiving it",P1293,2024-02-01 17:47:45,Pediatrics
+294,"Follow-up call was made as promised, appreciated the thorough care",P1294,2024-02-01 18:58:56,Orthopedics
+295,ok care I suppose,P1295,2024-02-01 19:10:07,General Medicine
+296,THE WAIT WAS ABSOLUTELY RIDICULOUS had to wait 4 hrs for a scheduled appointment,P1296,2024-02-01 20:21:18,Cardiology
+297,"Dr. Garcia&#39;s bedside manner was exceptional, took time to answer all questions",P1297,2024-02-01 21:32:29,Emergency
+298,"Room was clean and comfortable, housekeeping did a great job",P1298,2024-02-01 22:43:40,Pediatrics
+299,My pain was managed adequately &amp; the team was responsive to my needs,P1299,2024-02-01 23:54:51,Orthopedics
+300,Discharge process was efficient and I recieved all necessary documentation,P1300,2024-02-02 07:06:02,General Medicine
+301,"To be honest, waited only 20 minutes for my ER visit, very efficient!!!",P301,2024-02-02 07:36:04,Emergency
+302,"Looking back, dr. Davis&#39;s explanation of my condition was confusing, used too much medical jargon",P302,2024-02-02 08:00:10,Emergency
+303,"Looking back, pain was undertreated for the first day but improved after I complained. Additionally, good overall experience honestly",P303,2024-02-02 08:26:46,Emergency
+304,ok I guess,P304,2024-02-02 08:47:51,Emergency
+305,"Follow-up appointment was easy to schedule   appreciated the flexibility, also had to wait 5 hrs for emergency treatment of my child",P305,2024-02-02 08:55:29,Pediatrics
+306,"Looking back, pain medication was effective but I wish they had offered alternatives to opioids all in all",P306,2024-02-02 09:19:22,Orthopedics
+307,"I'd say that my post-surgery pain was managed sooo well, the team really knew what they were doing",P307,2024-02-02 09:59:18,Orthopedics
+308,"The Tylenol they gave me did nothing for my pain   needed something stronger, also i was released within an hour",P308,2024-02-02 10:06:13,Orthopedics
+309,"My doctor&#39;s communication was excellent, couldn't ask for a upgraded experience",P309,2024-02-02 10:09:56,Emergency
+310,"Recieved thorough medication counseling at discharge, very helpful for sure",P310,2024-02-02 10:46:54,Orthopedics
+311,absolutely ridiculous and the doctor was accomodating when I asked questions about alternative treatments,P311,2024-02-02 10:54:42,Emergency
+312,Wait time was reasonable but the discharge process took too long   over 4 hours to be released,P312,2024-02-02 11:04:57,Cardiology
+313,decent,P313,2024-02-02 11:22:34,General Medicine
+314,"The treatment I recieved was top notch, couldn't ask for improved care",P314,2024-02-02 12:08:05,General Medicine
+315,Hand sanitizer dispensers in the hallway were empty concerning for a hospital,P315,2024-02-02 12:37:17,Emergency
+316,The discharge nurse was accomodating and took time to answer all my questions and room cleanliness was adequate but the bathroom could have been better,P316,2024-02-02 12:52:51,Emergency
+317,"Basically, seriously Dirty sheets on the bed when I arrived had to ask for clean ones",P317,2024-02-02 13:11:01,Cardiology
+318,PAIN WAS UNDERTREATED INITIALLY BUT THEY ADJUSTED ONCE I SPOKE UP REALLY,P318,2024-02-02 13:43:19,General Medicine
+319,"In all honesty, discharge process was efficient and I recieved all necessary documentation",P319,2024-02-02 14:23:49,General Medicine
+320,HAD TO WAIT 2 HOURS FOR MY SCHEDULED APPOINTMENT this is unacceptable and had to wait 2 hours past my appointment   no explanation given,P320,2024-02-02 15:03:04,Cardiology
+321,The RN who handled my IV was extremely professional and made me feel at ease,P321,2024-02-02 15:26:19,Cardiology
+322,I'd say that didn't recieve any follow-up call as promised this was disappointing,P322,2024-02-02 16:08:55,General Medicine
+323,s communication style was excellent and i'm feeling like myself again,P323,2024-02-02 16:31:34,Pediatrics
+324,"All things considered, discharge instructions were definately clear and thorough",P324,2024-02-02 16:42:50,Pediatrics
+325,"From my perspective, the room was immaculate, best hospital cleanliness I've experienced",P325,2024-02-02 17:26:44,Emergency
+326,Bathroom was seriously clean and well-stocked with supplies throughout my stay to be honest,P326,2024-02-02 17:58:19,General Medicine
+327,The Tramadol managed my pain without the grogginess of stronger medications overall,P327,2024-02-02 18:10:46,Orthopedics
+328,"I have to say, pain management could have been better - aPPOINTMENT WAS 2 HOURS LATE and nobody seemed to care",P328,2024-02-02 18:23:45,Emergency
+329,"In all honesty, the medication info sheet was confusing, had to call back to clarify dosage times",P329,2024-02-02 19:09:40,Pediatrics
+330,"The room smelled like bleach which was reassuring, clearly recently cleaned overall",P330,2024-02-02 19:42:02,Orthopedics
+331,"Truthfully, dr. Lee was very thorough in explaining my diagnosis and treatment options for sure",P331,2024-02-02 20:02:24,General Medicine
+332,THE DILAUDID THEY GAVE ME MANAGED MY PAIN PERFECTLY WITHOUT TOO MANY SIDE EFFECTS,P332,2024-02-02 20:21:35,Orthopedics
+333,satisfactory,P333,2024-02-02 20:51:57,Cardiology
+334,"Looking back, no complaints, also the surgical outcomes were excellent in my opinion",P334,2024-02-02 21:37:09,Orthopedics
+335,"The treatment I recieved was top notch, couldn't ask for better care honestly",P335,2024-02-02 22:00:34,General Medicine
+336,THE TRAMADOL MANAGED MY PAIN WITHOUT THE GROGGINESS OF STRONGER MEDICATIONS,P336,2024-02-02 22:31:24,Orthopedics
+337,"Honestly, the operating room was visibly immaculate and the staff followed all hygiene protocols",P337,2024-02-02 22:38:53,Cardiology
+338,SCHEDULING WAS EASY BUT THE WAIT ON THE DAY OF THE APPOINTMENT WAS EXCESSIVE BUT PAIN MEDICATION WAS ADMINISTERED PROMPTLY WHENEVER I REQUESTED IT,P338,2024-02-02 22:48:42,General Medicine
+339,"just prescribed medication. Additionally, the Percocet controlled my pain but made me very drowsy",P339,2024-02-02 23:20:39,Cardiology
+340,"Staff was friendly but communication between departments seemed poor, also waited only 20 minutes for my ER visit",P340,2024-02-02 23:57:44,Emergency
+341,The ER nurse was wayyy more helpful than the doctor but used too much medical jargon,P341,2024-02-03 00:25:41,Emergency
+342,alright,P342,2024-02-03 00:53:11,Orthopedics
+343,Floor in the ER waiting area was visibly dirty with stains and debris but the medication reconciliation at discharge was thorough,P343,2024-02-03 01:33:47,Emergency
+344,"From my perspective, my room was spotless when I arrived, housekeeping did an first-rate job",P344,2024-02-03 02:01:04,Orthopedics
+345,Equipment in my room was outdated but functional - my room was spotless when I arrived,P345,2024-02-03 02:45:06,Orthopedics
+346,"I gotta say, the room smelled like bleach which was reassuring, clearly recently cleaned",P346,2024-02-03 03:01:35,Orthopedics
+347,"Honestly, fine nothing to complain about, also discharge process was efficient",P347,2024-02-03 03:29:00,Orthopedics
+348,fine nothing special if I'm being honest,P348,2024-02-03 03:59:42,Pediatrics
+349,"Nurses&#39; communication was first-rate, always knew what was happening with my care for sure",P349,2024-02-03 04:12:09,General Medicine
+350,The ER was surprisingly spotless given how busy it was,P350,2024-02-03 04:57:33,Emergency
+351,Bathroom was immaculate and well-stocked with supplies throughout my stay,P351,2024-02-03 05:18:08,General Medicine
+352,"very satisfied with outcomes, also aPPOINTMENT WAS 2 HOURS LATE and nobody seemed to care I think",P352,2024-02-03 05:32:20,Emergency
+353,"Honestly, treatment I recieved was accomodating to my special dietary needs",P353,2024-02-03 06:06:26,Emergency
+354,"To be honest, had to wait about 2 hours for my scheduled surgery, delayed without explanation",P354,2024-02-03 06:12:35,Pediatrics
+355,The room had a musty smell and the ventilation seemed poor. the treatment I recieved here was much better than at my previous hospital,P355,2024-02-03 06:50:39,Emergency
+356,"The ER was understaffed, also the discharge nurse was wayyy more helpful than the admitting staff",P356,2024-02-03 07:10:29,Emergency
+357,The RN was patient and answered all my questions about the procedure to be honest,P357,2024-02-03 07:50:27,Orthopedics
+358,"Waited over 2 hours for a scheduled appointment this is rediculous. Additionally, pain medication was administered promptly whenever I requested it",P358,2024-02-03 08:14:05,General Medicine
+359,"very grateful. Additionally, waited three hrs in the waiting room before anyone even acknowledged us",P359,2024-02-03 08:43:26,General Medicine
+360,"The RN couldn't explain why I needed the blood test, just said &quot;doctor's orders&quot; honestly",P360,2024-02-03 08:53:27,General Medicine
+361,Discharge instructions were confusing and I didn't understand the follow-up schedule really,P361,2024-02-03 09:03:56,Pediatrics
+362,Nurses were wayyy more helpful than the doctors at explaining my care in my opinion,P362,2024-02-03 09:41:20,Pediatrics
+363,"The surgical team kept my family updated throughout the procedure, GREATLY APPRECIATED really",P363,2024-02-03 09:46:40,Cardiology
+364,The scheduling department was unresponsive had to call multiple times,P364,2024-02-03 09:59:11,Orthopedics
+365,Treatment outcomes have been positive and no complaints about the facility,P365,2024-02-03 10:43:20,Pediatrics
+366,good overall experience in general,P366,2024-02-03 11:04:34,Emergency
+367,"I'd say that the wait was absolutley ridiculous, 4 hrs for a scheduled procedure!!!",P367,2024-02-03 11:16:49,Orthopedics
+368,"I gotta say, pain was managed adequately, though I had to ask for medication a few times really",P368,2024-02-03 11:56:58,Cardiology
+369,"Room was spotless and the linens were fresh, no issues with facility cleanliness",P369,2024-02-03 12:04:26,General Medicine
+370,"TREATMENT OUTCOMES HAVE BEEN POSITIVE, FEELING MUCH BETTER THAN BEFORE ADMISSION",P370,2024-02-03 12:32:43,Pediatrics
+371,"I have to say, the ER doctor took time to explain my diagnosis &amp; treatment options thoroughly",P371,2024-02-03 12:41:41,Emergency
+372,I left confused about next steps. didn't recieve any follow-up call as promised   this was disappointing,P372,2024-02-03 13:06:32,General Medicine
+373,Morphine managed my post-surgical pain effectively without too many side effects - ok service I guess I think,P373,2024-02-03 13:44:52,Emergency
+374,"Honestly, recieved detailed written instructions &amp; a phone number to call with questions",P374,2024-02-03 14:22:00,Pediatrics
+375,MY ROOM WASN'T CLEANED THE ENTIRE 3 DAYS I WAS THERE this is unacceptable tbh,P375,2024-02-03 14:42:02,General Medicine
+376,clearly recently cleaned - nurses were sooo friendly and made my child feel comfortable,P376,2024-02-03 15:02:14,Orthopedics
+377,"fine I guess nothing special, also they didn't explain what to do if my symptoms returned after discharge if I'm being honest",P377,2024-02-03 15:40:27,Pediatrics
+378,OK IF I'M BEING HONEST,P378,2024-02-03 15:52:35,Cardiology
+379,"THE RN WAS DEFINATELY THE HIGHLIGHT OF MY VISIT, SO CARING AND PRETTY PROFESSIONAL",P379,2024-02-03 16:04:22,Cardiology
+380,ok care I suppose but great discharge process tbh,P380,2024-02-03 16:13:53,General Medicine
+381,"I mean, the treatment I recieved completely resolved my symptoms, very satisfied to be honest",P381,2024-02-03 16:52:38,Orthopedics
+382,"Truthfully, had to call them instead - communication was excellent",P382,2024-02-03 17:09:05,General Medicine
+383,"The treatment was sooo effective, my symptoms are almost completely gone really",P383,2024-02-03 17:21:48,Cardiology
+384,"In all honesty, they gave me a detailed medication schedule which was super responsive for home care",P384,2024-02-03 18:00:23,Pediatrics
+385,"The nursing staff was reallly attentive and professional throughout my stay, also the treatment plan was definately tailored to my specific needs",P385,2024-02-03 18:45:53,General Medicine
+386,"Floors in my room were sticky   housekeeping needs to do better. Additionally, mY ROOM WASN'T CLEANED THE ENTIRE 3 DAYS I WAS THERE this is unacceptable",P386,2024-02-03 19:28:32,General Medicine
+387,it was okay,P387,2024-02-03 19:48:33,Orthopedics
+388,The treatment I recieved here was much superior than at my previous hospital,P388,2024-02-03 20:31:34,Emergency
+389,"Morphine managed my post-surgical pain effectively without too many side effects, also caught a potential interaction",P389,2024-02-03 20:37:43,Emergency
+390,"Truthfully, the ER doctor took time to explain my diagnosis &amp; treatment options thoroughly",P390,2024-02-03 20:54:31,Emergency
+391,very impressed and my recovery is progressing well thanks to the excellent treatment I recieved,P391,2024-02-03 21:11:20,Cardiology
+392,Treatment was effective and I'm feeling much upgraded now really,P392,2024-02-03 21:50:13,Emergency
+393,"Waited three hours past my scheduled appointment time, no one apologized overall",P393,2024-02-03 22:13:49,Orthopedics
+394,"The treatment was sooo effective, my symptoms are almost completely gone overall",P394,2024-02-03 22:56:18,Cardiology
+395,"The discharge nurse was accomodating and answered all my questions patiently, also discharge was delayed because the pharmacy was slow filling my prescriptions all in all",P395,2024-02-03 23:21:40,Pediatrics
+396,"To be honest, follow-up care was arranged before I left &amp; instructions were clear I think",P396,2024-02-04 00:05:44,Orthopedics
+397,"Overall, recieved a phone call the day after discharge to check on my recovery but the ER doctor was reallly attentive and addressed all my concerns",P397,2024-02-04 00:31:16,Emergency
+398,four hours in the ER with chest pain - ok service I guess,P398,2024-02-04 01:03:53,Emergency
+399,"I have to say, waited 2 hours for an ER visit that took 15 minutes once I was seen",P399,2024-02-04 01:39:02,Cardiology
+400,"Truthfully, the bathroom needed attention, also had to wait 5 hrs for emergency treatment of my child",P400,2024-02-04 02:20:57,Pediatrics
+401,my symptoms improved dramatically within days. pain was undertreated for the first day but improved after I complained,P401,2024-02-04 02:45:49,Emergency
+402,The ER staff was overwhelmed but still managed to provide kind of good care despite the wait,P402,2024-02-04 03:21:51,Emergency
+403,"Looking back, follow-up call was made as promised, appreciated the thorough care to be honest",P403,2024-02-04 03:35:37,Orthopedics
+404,only about 30 minutes past my appointment - the hospital floors were spotless   clearly they take cleanliness seriously here,P404,2024-02-04 04:09:34,Cardiology
+405,"Overall, room cleanliness was acceptable but could have been better, also the medication info sheet was confusing",P405,2024-02-04 04:46:28,Pediatrics
+406,"Basically, the Dr. didnt listen to my concerns about the medication side effects really",P406,2024-02-04 05:18:24,Emergency
+407,The nursing staff was AMAZING!!! They checked on me every hour and were so caring honestly,P407,2024-02-04 05:30:12,General Medicine
+408,"The treatment I recieved completely resolved my symptoms, very satisfied I think",P408,2024-02-04 06:11:45,Orthopedics
+409,Bathroom had a strong chemical smell but was otherwise spotless,P409,2024-02-04 06:46:23,General Medicine
+410,I'd say that the hospital floors were spotless   clearly they take cleanliness seriously here but housekeeping came by twice daily,P410,2024-02-04 06:54:56,Cardiology
+411,THEY GAVE ME A DETAILED MEDICATION SCHEDULE WHICH WAS SUPER HELPFUL FOR HOME CARE TBH,P411,2024-02-04 07:21:12,Pediatrics
+412,"Waited three hours past my scheduled appointment time, no one apologized in my opinion",P412,2024-02-04 07:53:56,Orthopedics
+413,"In my experience, pain was controlled wayyy upgraded than at my last hospital stay I think",P413,2024-02-04 08:16:28,Cardiology
+414,"very professional, also bathroom in my room was dirty",P414,2024-02-04 08:27:19,General Medicine
+415,very grateful. pain management team responded quickly when I reported breakthrough pain,P415,2024-02-04 08:36:05,General Medicine
+416,Dirty sheets on the bed when I arrived had to ask for clean ones all in all,P416,2024-02-04 09:06:15,Cardiology
+417,"feeling like myself again, also very satisfied with care",P417,2024-02-04 09:34:38,Orthopedics
+418,My treatment was effective and I'm recovering faster than expected if I'm being honest,P418,2024-02-04 09:45:42,Cardiology
+419,Nurses were reallly communicative and kept me informed about everything - ok care I suppose,P419,2024-02-04 09:57:15,General Medicine
+420,"To be honest, ok to be honest",P420,2024-02-04 10:35:22,General Medicine
+421,"The nurse explained each medication&#39;s purpose before administering it, very skilled",P421,2024-02-04 10:59:04,General Medicine
+422,Pain was managed adequately though I wish they had checked on me more frequently - pain management team responded quickly when I reported breakthrough pain,P422,2024-02-04 11:16:11,General Medicine
+423,"Room wasn't as incredibly clean as I expected, the bathroom needed attention",P423,2024-02-04 11:23:30,Pediatrics
+424,Scheduling was simple but the wait on the day of the appointment was excessive,P424,2024-02-04 11:35:49,General Medicine
+425,"Basically, the ER doctor was reallly attentive and addressed all my concerns",P425,2024-02-04 12:19:24,Emergency
+426,"I mean, room was clean and the linens were fresh, no issues with facility cleanliness all in all",P426,2024-02-04 12:44:17,General Medicine
+427,"Honestly, the floor in the hallway was sticky and hadn't been mopped in what looked like days",P427,2024-02-04 13:01:06,Pediatrics
+428,good honestly,P428,2024-02-04 13:29:25,Cardiology
+429,The discharge process took too long over 4 hours to be released!!!,P429,2024-02-04 13:54:50,Cardiology
+430,The room was immaculate and discharge process was slow   took over 3 hours to get my paperwork,P430,2024-02-04 14:22:45,Emergency
+431,The hospital floors were spotless clearly they take cleanliness seriously here,P431,2024-02-04 14:38:33,Cardiology
+432,The treatment I recieved here was much better than at my previous hospital but found hair on my hospital bed sheets,P432,2024-02-04 14:44:51,Emergency
+433,"DR. SMITH WAS VERY THOROUGH, SHE EXPLAINED EVERYTHING CLEARLY AND I DEFINATELY UNDERSTOOD MY TREATMENT PLAN",P433,2024-02-04 14:56:47,Cardiology
+434,"couldn't ask for better care. Additionally, nurses were reallly communicative and kept me informed about everything in general",P434,2024-02-04 15:21:22,General Medicine
+435,THE PAIN MEDICATION WORKED WELL BUT CAUSED CONSTIPATION AS A SIDE EFFECT,P435,2024-02-04 15:46:13,Pediatrics
+436,"The surgeon was definately skilled, my operation went perfectly if I'm being honest",P436,2024-02-04 16:29:00,Cardiology
+437,no comment,P437,2024-02-04 16:48:41,Pediatrics
+438,The oxycodone managed my post-op pain reallly effectively. feeling like myself again,P438,2024-02-04 17:06:43,Orthopedics
+439,The discharge process took too lengthy over 4 hours to be released!!!,P439,2024-02-04 17:49:41,Cardiology
+440,"The facility was immaculate from entrance to exam room, very impressed",P440,2024-02-04 18:17:01,Cardiology
+441,Follow-up appointment was effortless to schedule appreciated the flexibility,P441,2024-02-04 18:36:40,Pediatrics
+442,no issues,P442,2024-02-04 18:45:02,Cardiology
+443,"Truthfully, nurses were wayyy more helpful than the doctors at explaining my care",P443,2024-02-04 18:54:28,Pediatrics
+444,Pain was undertreated initially but they adjusted once I spoke up in my opinion,P444,2024-02-04 19:39:27,General Medicine
+445,"fine nothing special, also the pain medication worked well but caused constipation as a side effect",P445,2024-02-04 20:17:14,Pediatrics
+446,"All things considered, follow-up care instructions were crystal clear, the nurse went through everything step by step overall",P446,2024-02-04 20:51:25,Orthopedics
+447,"I mean, discharge papers had the wrong medication dosage listed, caught it before leaving thankfully",P447,2024-02-04 21:24:06,Pediatrics
+448,"Basically, the fentanyl patch managed my chronic pain very effectively",P448,2024-02-04 21:37:52,Cardiology
+449,"I'd say that my scheduled surgery was delayed 2 hours due to an emergency, which was understandable",P449,2024-02-04 21:52:31,Cardiology
+450,Pain meds caused nausea but overall my discomfort was well managed all in all,P450,2024-02-04 22:25:51,Pediatrics
+451,"Truthfully, fine",P451,2024-02-04 22:58:10,Pediatrics
+452,"Dr. Garcia&#39;s bedside manner was exceptional, took time to answer all questions to be honest",P452,2024-02-04 23:39:33,Emergency
+453,Floors in my room were sticky housekeeping needs to do better,P453,2024-02-04 23:48:06,General Medicine
+454,"The hospital was spotless   clearly cleanliness is a priority here. Additionally, pain was managed adequately",P454,2024-02-05 00:24:34,Cardiology
+455,Had to wait 5 hours in the ER this is completely unacceptable!!!,P455,2024-02-05 00:36:06,Emergency
+456,EQUIPMENT IN THE ROOM WAS MODERN AND APPEARED WELL-MAINTAINED,P456,2024-02-05 00:43:40,General Medicine
+457,They gave me a detailed medication schedule which was super somewhat helpful for home care,P457,2024-02-05 01:11:08,Pediatrics
+458,Pain medication was reallly effective and fine I guess nothing special,P458,2024-02-05 01:29:01,Pediatrics
+459,The pain pills they gave me caused nausea &amp; I wasn't warned about this side effect I think,P459,2024-02-05 01:39:03,Emergency
+460,Trash hadn't been emptied in my room overflowing by the second day,P460,2024-02-05 02:20:05,Orthopedics
+461,"Overall, my recovery is progressing well thanks to the stellar treatment I recieved I think",P461,2024-02-05 02:31:37,Cardiology
+462,Recieved detailed written instructions &amp; a phone number to call with questions all in all,P462,2024-02-05 02:51:40,Pediatrics
+463,Wait time was about 1.5 hours which seemed long for a scheduled appointment I think,P463,2024-02-05 03:00:39,Cardiology
+464,"Pain was well-controlled throughout my stay, the team was very attentive honestly",P464,2024-02-05 03:06:34,Cardiology
+465,My surgical recovery is going exactly as predicted. tHE WAIT TIME IN THIS ER IS ABSOLUTELY UNACCEPTABLE needed to wait 5 hrs tbh,P465,2024-02-05 03:22:59,Emergency
+466,"The facility was tidy and well-maintained, modern equipment throughout",P466,2024-02-05 03:57:28,Pediatrics
+467,The ER was understaffed &amp; everyone seemed overwhelmed for sure,P467,2024-02-05 04:15:15,Emergency
+468,"The ER wait was wayyy too long, also the discharge nurse was wayyy more helpful than the admitting staff",P468,2024-02-05 04:39:31,Emergency
+469,"Honestly, appointment was delayed by 90 minutes with no communication about the wait",P469,2024-02-05 04:46:19,Orthopedics
+470,"In all honesty, dr. Chen didn't make eye contact during our consultation, felt like she wasn't listening I think",P470,2024-02-05 05:28:59,Emergency
+471,"Basically, the nerve block worked wayyy absolutely better than expected for my knee surgery",P471,2024-02-05 06:04:51,Orthopedics
+472,"The wait was absolutley ridiculous, 4 hrs for a scheduled procedure in general",P472,2024-02-05 06:47:24,Orthopedics
+473,"Truthfully, the ibuprofen wasn't strong enough for my level of pain &amp; I had to request something else",P473,2024-02-05 07:32:12,General Medicine
+474,The ER was understaffed and the wait was absolutley unacceptable,P474,2024-02-05 07:42:09,Emergency
+475,"All things considered, the RN who handled my IV was extremely professional and made me feel at ease",P475,2024-02-05 08:11:08,Cardiology
+476,Floor in the ER waiting area was visibly dirty with stains and debris - my surgical recovery is going exactly as predicted,P476,2024-02-05 08:41:22,Emergency
+477,a phone number to call with questions. my appointment was on time and the whole visit only took 45 minutes,P477,2024-02-05 09:00:07,Pediatrics
+478,"I gotta say, the ER was surprisingly clean given how busy it was",P478,2024-02-05 09:09:08,Emergency
+479,The ER doctor was reallly attentive and addressed all my concerns but floor in the ER waiting area was visibly dirty with stains and debris in my opinion,P479,2024-02-05 09:48:41,Emergency
+480,not bad,P480,2024-02-05 10:13:34,Emergency
+481,"The RN was definately the highlight of my visit, so caring and professional really",P481,2024-02-05 10:57:05,Cardiology
+482,"Room wasn't as clean as I expected, the bathroom needed attention if I'm being honest",P482,2024-02-05 11:11:48,Pediatrics
+483,"Truthfully, my treatment outcomes exceeded expectations, the surgery was a complete success &amp; recovery is going well really",P483,2024-02-05 11:53:18,Orthopedics
+484,"The hospital was spotless   clearly cleanliness is a priority here, also wait time in the ER was about 2 hours which seemed average",P484,2024-02-05 12:03:07,Cardiology
+485,"WAITED 3 HRS PAST MY APPOINTMENT TIME   THIS IS UNACCEPTABLE, ALSO GREAT DISCHARGE PROCESS",P485,2024-02-05 12:38:54,General Medicine
+486,"Honestly, wait time was about 1.5 hours which seemed long for a scheduled appointment",P486,2024-02-05 13:23:00,Cardiology
+487,HAD TO CALL TWICE FOR CLARIFICATION. THE OXYCODONE MANAGED MY POST-OP PAIN REALLLY EFFECTIVELY,P487,2024-02-05 13:38:28,Orthopedics
+488,whatever,P488,2024-02-05 13:54:45,Cardiology
+489,"Truthfully, my recovery is going exactly as planned, the treatment was excellent",P489,2024-02-05 14:03:28,Orthopedics
+490,Had to beg for pain medication??? this shouldn't be so demanding,P490,2024-02-05 14:30:55,Emergency
+491,"Pain was well managed throughout my stay, also treatment outcomes were positive",P491,2024-02-05 15:05:03,Emergency
+492,Floor in the ER waiting area was visibly unsanitary with stains and debris,P492,2024-02-05 15:37:39,Emergency
+493,"Anderson took time to explain everything clearly. Additionally, i'm recovering faster than expected",P493,2024-02-05 16:09:13,Orthopedics
+494,Scheduling was easy and I got an appointment within 2 days if I'm being honest,P494,2024-02-05 16:51:53,General Medicine
+495,solid,P495,2024-02-05 17:05:13,Cardiology
+496,"All things considered, discharge papers had the wrong medication dosage listed, caught it before leaving thankfully to be honest",P496,2024-02-05 17:33:44,Pediatrics
+497,"I have to say, the ER was surprisingly clean given how busy it was",P497,2024-02-05 17:54:28,Emergency
+498,Bathroom in my room had a broken toilet seat that wasn't fixed during my stay - the pain management team was responsive and adjusted my meds as needed,P498,2024-02-05 18:31:53,Pediatrics
+499,Scheduling was easy and I got an appointment within 2 days all in all,P499,2024-02-05 18:42:52,General Medicine
+500,The RN was accomodating when I needed to reschedule my medication times. fine nothing special,P500,2024-02-05 18:51:15,Pediatrics
+501,"The RN explained my lab results reallly well, appreciated the clear communication tbh",P501,2024-02-05 19:27:58,Orthopedics
+502,"I have to say, dr. Smith was very thorough, she explained everything clearly and I definately understood my treatment plan",P502,2024-02-05 19:40:02,Cardiology
+503,"I'd say that dr. Smith was very thorough, she explained everything clearly and I definately understood my treatment plan",P503,2024-02-05 20:09:41,Cardiology
+504,"Treatment outcomes exceeded my expectations, very satisfied with care in general",P504,2024-02-05 20:40:01,Orthopedics
+505,"Basically, the room smelled like bleach which was reassuring, clearly recently cleaned",P505,2024-02-05 20:44:55,Orthopedics
+506,The discharge nurse was accomodating and answered all my questions patiently really,P506,2024-02-05 21:03:26,Pediatrics
+507,"All things considered, treatment results have been excellent, also couldn't ask for better care",P507,2024-02-05 21:18:14,General Medicine
+508,PAIN WAS CONTROLLED WELL THROUGHOUT MY HOSPITAL STAY I THINK,P508,2024-02-05 21:46:46,Cardiology
+509,very impressed - scheduling was easy and I got an appointment within 2 days,P509,2024-02-05 22:22:44,General Medicine
+510,s communication was poor - the pain medication occured some dizziness but overall managed my discomfort well,P510,2024-02-05 22:33:13,Emergency
+511,I'd say that hAD TO WAIT 2 HOURS FOR MY SCHEDULED APPOINTMENT this is unacceptable!!!,P511,2024-02-05 22:46:36,Cardiology
+512,The ER was surprisingly clean given how busy it was if I'm being honest,P512,2024-02-05 22:56:33,Emergency
+513,"Wait time was reasonable, only about 30 minutes past my appointment overall",P513,2024-02-05 23:24:31,Cardiology
+514,Had to wait 3 hours but the ER doctor was dismissive,P514,2024-02-05 23:35:03,Emergency
+515,housekeeping needs improvement and the appointment was on time which was a pleasant surprise I think,P515,2024-02-06 00:17:18,Orthopedics
+516,Wait time was about 1.5 hours which seemed unreasonable for a scheduled appointment,P516,2024-02-06 00:21:06,Cardiology
+517,Nurses were sooo warm and made my child feel comfortable,P517,2024-02-06 00:29:43,Orthopedics
+518,"Dr. Chen didn't make eye contact during our consultation, felt like she wasn't listening in general",P518,2024-02-06 00:58:50,Emergency
+519,PAIN WAS CONTROLLED WELL THROUGHOUT MY HOSPITAL STAY,P519,2024-02-06 01:21:59,Cardiology
+520,Staff was warm but communication between departments seemed poor,P520,2024-02-06 01:50:53,Emergency
+521,"All things considered, the treatment definately helped my condition and the surgeon was definately skilled",P521,2024-02-06 02:19:16,Cardiology
+522,"Overall, the RN explained my lab results reallly well, appreciated the clear communication if I'm being honest",P522,2024-02-06 02:53:17,Orthopedics
+523,Scheduling was simple and I got an appointment within 2 days,P523,2024-02-06 03:35:32,General Medicine
+524,"The Tramadol managed my pain without the grogginess of stronger medications, also the pain management protocol worked perfectly for my knee replacement recovery",P524,2024-02-06 03:54:12,Orthopedics
+525,"delayed without explanation, also explained everything in plain terms",P525,2024-02-06 04:14:15,Pediatrics
+526,The appointment was on time which was a pleasant surprise and the RN was patient and answered all my questions about the procedure,P526,2024-02-06 04:21:03,Orthopedics
+527,Discharge instructions were definately clear and thorough. follow-up care was arranged before discharge which made things much easier,P527,2024-02-06 05:01:04,Pediatrics
+528,"WAITED THREE HOURS PAST MY SCHEDULED APPOINTMENT TIME, NO ONE APOLOGIZED",P528,2024-02-06 05:16:55,Orthopedics
+529,APPOINTMENT WAS ON TIME WHICH WAS A PLEASANT SURPRISE USUALLY HAVE TO WAIT,P529,2024-02-06 05:29:44,Emergency
+530,"I gotta say, the doctor was accomodating when I asked questions about alternative treatments",P530,2024-02-06 06:04:25,Emergency
+531,Scheduling was easy but the wait on the day of the appointment was excessive if I'm being honest,P531,2024-02-06 06:25:33,General Medicine
+532,THE ER WAIT WAS WAYYY TOO LONG!!! HAD TO WAIT 3 HOURS &AMP; NOBODY TOLD US WHAT WAS HAPPENING,P532,2024-02-06 07:07:47,Emergency
+533,"In all honesty, the nurse&#39;s communication was poor, she seemed rushed and didn't listen to my concerns for sure",P533,2024-02-06 07:16:39,Orthopedics
+534,Dust on the window sills and curtains hadn't been cleaned in weeks I think,P534,2024-02-06 07:36:29,Orthopedics
+535,n/a,P535,2024-02-06 08:05:39,Emergency
+536,"All things considered, the pain medication worked well but caused constipation as a side effect but pain medication was reallly effective overall",P536,2024-02-06 08:13:00,Pediatrics
+537,"To be honest, my pain was managed adequately though I had some breakthrough pain at night",P537,2024-02-06 08:17:27,Emergency
+538,"I'd say that the medication info sheet was confusing, had to call back to clarify dosage times I think",P538,2024-02-06 08:54:43,Pediatrics
+539,positive care overall,P539,2024-02-06 09:03:01,Orthopedics
+540,"Honestly, had to wait 5 hrs for emergency treatment of my child&#39;s broken arm all in all",P540,2024-02-06 09:13:20,Pediatrics
+541,The surgical team was professional. the Tylenol they gave me did nothing for my pain   needed something stronger,P541,2024-02-06 09:44:49,Orthopedics
+542,Unhygienic fingerprints on the door handles and light switches in my room for sure,P542,2024-02-06 10:25:03,General Medicine
+543,just prescribed medication but pain medication caused severe constipation,P543,2024-02-06 11:05:00,Cardiology
+544,"Pain was managed adequately, though I had to ask for medication a few times tbh",P544,2024-02-06 11:21:51,Cardiology
+545,"SCHEDULING IS A NIGHTMARE at this hospital, also the treatment I recieved was adequate but nothing exceptional",P545,2024-02-06 11:50:26,Emergency
+546,Waited three hrs in the waiting room before anyone even acknowledged us and the nursing staff was reallly attentive and professional throughout my stay if I'm being honest,P546,2024-02-06 12:00:25,General Medicine
+547,"I mean, the ER was understaffed but only waited about 45 minutes",P547,2024-02-06 12:25:09,Emergency
+548,"didn't know when to remove my bandages, also pain management team responded quickly when I reported breakthrough pain",P548,2024-02-06 12:35:04,General Medicine
+549,"In my experience, waited over 2 hours for a scheduled appointment this is rediculous",P549,2024-02-06 13:11:59,General Medicine
+550,this is a HOSPITAL for crying out loud. couldn't ask for better care,P550,2024-02-06 13:27:52,General Medicine
+551,The doctor was accomodating when I asked questions about alternative treatments but the treatment I recieved was adequate but nothing exceptional,P551,2024-02-06 13:54:23,Emergency
+552,"I mean, pain was controlled wayyy improved than at my last hospital stay",P552,2024-02-06 14:12:06,Cardiology
+553,"Waited three hrs in the waiting room before anyone even acknowledged us. Additionally, the ER was understaffed",P553,2024-02-06 14:56:23,Emergency
+554,The room was fairly clean except for some stains on the ceiling tiles,P554,2024-02-06 15:42:16,Cardiology
+555,"To be honest, the facility was clean and well-maintained, modern equipment throughout",P555,2024-02-06 16:06:11,Pediatrics
+556,Waited 3 hrs past my appointment time this is unacceptable to be honest,P556,2024-02-06 16:13:02,General Medicine
+557,Discharge instructions were definately clear and thorough I think,P557,2024-02-06 16:47:00,Pediatrics
+558,The medication info sheet was confusing and housekeeping did a great job,P558,2024-02-06 17:01:43,Pediatrics
+559,Nurses were wayyy more responsive than the doctors at explaining my care,P559,2024-02-06 17:16:32,Pediatrics
+560,"Truthfully, my surgical recovery is going exactly as predicted, very satisfied with outcomes tbh",P560,2024-02-06 17:30:08,Emergency
+561,Appointment was delayed by 90 minutes with no communication about the wait really,P561,2024-02-06 18:03:32,Orthopedics
+562,"In all honesty, the treatment I recieved was adequate but nothing exceptional",P562,2024-02-06 18:39:09,Emergency
+563,"The treatment I recieved was top notch, couldn't ask for enhanced care",P563,2024-02-06 18:50:30,General Medicine
+564,fine nothing special. the medication info sheet was confusing,P564,2024-02-06 19:25:40,Pediatrics
+565,Treatment was effective and I'm feeling much better now - the ER doctor took time to explain my diagnosis in general,P565,2024-02-06 20:03:56,Emergency
+566,fine I guess really,P566,2024-02-06 20:24:35,Cardiology
+567,The discharge process was smooth and feeling much better now,P567,2024-02-06 21:00:47,Cardiology
+568,"Overall, the hospital was spotless from the lobby to my room, very impressed",P568,2024-02-06 21:18:47,General Medicine
+569,"To be honest, the ER staff was overwhelmed but still managed to provide good care despite the wait",P569,2024-02-06 21:38:28,Emergency
+570,"All things considered, pain was managed adequately though I wish they had checked on me more frequently overall",P570,2024-02-06 22:01:55,General Medicine
+571,"The nurse&#39;s communication was poor, she seemed rushed and didn't listen to my concerns to be honest",P571,2024-02-06 22:27:52,Orthopedics
+572,good really,P572,2024-02-06 22:55:36,Cardiology
+573,Discharge instructions were definately clear and thorough - the medication info sheet was confusing,P573,2024-02-06 23:36:06,Pediatrics
+574,The nerve block worked wayyy better than expected for my knee surgery - follow-up instructions were detailed but I wish they had been explained verbally too,P574,2024-02-07 00:10:13,Orthopedics
+575,"All things considered, my treatment has been very effective and I'm recovering well",P575,2024-02-07 00:49:27,Pediatrics
+576,FINE I GUESS NOTHING SPECIAL,P576,2024-02-07 01:25:21,Pediatrics
+577,"Overall, the fentanyl patch managed my chronic pain very effectively",P577,2024-02-07 02:00:35,Cardiology
+578,"The hospital floors were spotless   clearly they take cleanliness seriously here. Additionally, some of the monitors had tape holding them together",P578,2024-02-07 02:35:22,Cardiology
+579,"Follow-up care instructions were crystal clear. Additionally, the Tramadol managed my pain without the grogginess of stronger medications",P579,2024-02-07 03:20:04,Orthopedics
+580,My recovery is going smoothly thanks to the excellent treatment &amp; care recieved all in all,P580,2024-02-07 04:03:55,Cardiology
+581,The RN couldn't explain why I needed the blood test. found hair on the floor and the sink had water stains,P581,2024-02-07 04:19:07,General Medicine
+582,"The ER nurse&#39;s communication was poor, felt like I was bothering her with questions for sure",P582,2024-02-07 05:03:00,Emergency
+583,"the team really knew what they were doing. Additionally, the Tramadol managed my pain without the grogginess of stronger medications",P583,2024-02-07 05:14:06,Orthopedics
+584,"Treatment results have been stellar, my condition has improved significantly",P584,2024-02-07 05:58:17,General Medicine
+585,nothing,P585,2024-02-07 06:02:41,Cardiology
+586,"The wait was absolutley unacceptable, four hours in the ER with chest pain honestly",P586,2024-02-07 06:09:25,Emergency
+587,"All things considered, recovery is going great, the treatment I recieved was first-rate",P587,2024-02-07 06:54:00,Orthopedics
+588,"Truthfully, nurses&#39; communication was excellent, always knew what was happening with my care really",P588,2024-02-07 07:17:35,General Medicine
+589,The treatment I recieved was adequate but nothing exceptional. eR wait was about 1 hour which seemed reasonable given how busy they were to be honest,P589,2024-02-07 07:23:02,Emergency
+590,"The nurse explained each medication&#39;s purpose before administering it, very adept",P590,2024-02-07 07:48:06,General Medicine
+591,Scheduling an appointment took 3 weeks   this is too long for a follow-up but ok I guess it was fine,P591,2024-02-07 08:33:27,Orthopedics
+592,"Truthfully, pain was managed adequately though I wish they had checked on me more frequently",P592,2024-02-07 09:15:42,General Medicine
+593,"Basically, pain medication was reallly effective, never felt uncomfortable during recovery",P593,2024-02-07 09:47:13,Pediatrics
+594,"To be honest, eR wait was about 1 hour which seemed reasonable given how busy they were in my opinion",P594,2024-02-07 10:03:55,Emergency
+595,"Recovery is going great, the treatment I recieved was genuinely excellent",P595,2024-02-07 10:11:42,Orthopedics
+596,Morphine was administered promptly and my pain was managed very well and follow-up care instructions were crystal clear,P596,2024-02-07 10:31:08,Orthopedics
+597,"Room was clean and the linens were fresh, no issues with facility cleanliness in my opinion",P597,2024-02-07 10:53:46,General Medicine
+598,Nurses didn't explain what medications they were giving me. the ER was understaffed,P598,2024-02-07 11:36:55,Emergency
+599,positive experience overall,P599,2024-02-07 12:02:08,General Medicine
+600,"I gotta say, waited 3 hrs past my appointment time this is unacceptable honestly",P600,2024-02-07 12:42:02,General Medicine
+601,"In my experience, room cleanliness was adequate but the bathroom could have been improved",P601,2024-02-07 12:53:44,Emergency
+602,"In my experience, the nurse&#39;s communication was poor, she seemed rushed and didn't listen to my concerns",P602,2024-02-07 13:16:28,Orthopedics
+603,so caring and professional and the surgical team kept my family updated throughout the procedure,P603,2024-02-07 13:37:21,Cardiology
+604,Room was clean but the sheets felt like they hadn't been changed   kind of gross. waited 3 hrs past my appointment time   this is unacceptable,P604,2024-02-07 13:45:18,General Medicine
+605,everyone seemed overwhelmed. she actually explained things,P605,2024-02-07 14:20:50,Emergency
+606,WAITED OVER 6 HOURS IN THE ER this needs to be addressed immediately. bathroom in the ER waiting area was out of toilet paper and paper towels,P606,2024-02-07 14:54:12,Emergency
+607,"Basically, pain was well managed throughout my stay, no complaints",P607,2024-02-07 15:34:46,Emergency
+608,Treatment effectiveness was immediate and the RN took time to explain every step of my care,P608,2024-02-07 16:16:31,Cardiology
+609,"I mean, the surgical team was competent &amp; the operation was a complete success all in all",P609,2024-02-07 16:28:34,Orthopedics
+610,my symptoms resolved completely. the pain pills they gave me caused nausea,P610,2024-02-07 16:58:12,Emergency
+611,The nurse was definately overwhelmed and made a mistake with my medication timing all in all,P611,2024-02-07 17:38:16,Emergency
+612,"Basically, nurses were reallly communicative and kept me informed about everything",P612,2024-02-07 17:50:54,General Medicine
+613,The pain meds worked immediately and I was comfortable for my entire stay but the room had a musty smell and the ventilation seemed poor,P613,2024-02-07 18:28:20,Emergency
+614,"Room wasn't as clean as I expected, the bathroom needed attention overall",P614,2024-02-07 18:51:46,General Medicine
+615,Communication from the nursing staff was definately lacking but very professional,P615,2024-02-07 19:08:12,General Medicine
+616,"the team was very attentive, also the Percocet controlled my pain but made me very drowsy",P616,2024-02-07 19:53:19,Cardiology
+617,"The treatment I recieved completely resolved my symptoms, very satisfied in my opinion",P617,2024-02-07 20:31:58,Orthopedics
+618,"fine nothing to complain about, also the wait was absolutley ridiculous overall",P618,2024-02-07 21:00:37,Orthopedics
+619,s explanation of the procedure was clear and put me at ease and nurses were sooo friendly and made my child feel comfortable,P619,2024-02-07 21:06:00,Orthopedics
+620,"Room wasn't as pristine as I expected, the bathroom needed attention",P620,2024-02-07 21:42:00,General Medicine
+621,"To be honest, the pain medication worked reallly well. Additionally, the Tylenol they gave me did nothing for my pain   needed something stronger",P621,2024-02-07 22:17:16,Orthopedics
+622,ROOM WASN'T AS CLEAN AS I EXPECTED BUT A PHONE NUMBER TO CALL WITH QUESTIONS,P622,2024-02-07 22:35:34,Pediatrics
+623,The medication reconciliation at discharge was thorough &amp; caught a potential interaction in general,P623,2024-02-07 23:21:05,Emergency
+624,Dirty sheets on the bed when I arrived   had to ask for clean ones but i was out within an hour of the doctor's order,P624,2024-02-07 23:57:34,Cardiology
+625,great discharge process but the discharge process took wayyy too long,P625,2024-02-08 00:25:51,General Medicine
+626,"To be honest, pain was managed adequately, though I had to ask for medication a few times",P626,2024-02-08 00:59:44,Cardiology
+627,"I'd say that the treatment I recieved completely resolved my symptoms, very satisfied",P627,2024-02-08 01:04:10,Orthopedics
+628,Appointment was on time which was a pleasant surprise   usually have to wait - definately recommend this facility,P628,2024-02-08 01:46:28,Emergency
+629,"The hospital was spotless   clearly cleanliness is a priority here, also discharge paperwork was overwhelming",P629,2024-02-08 02:30:53,Cardiology
+630,"Treatment has been wayyy more effective than I anticipated, very grateful I think",P630,2024-02-08 02:39:06,General Medicine
+631,didnt listen to my concerns about the medication side effects and the room was immaculate,P631,2024-02-08 03:00:34,Emergency
+632,"5 hours past my appointment time, also i didn't understand when to take my medications",P632,2024-02-08 03:39:02,Cardiology
+633,Morphine managed my post-surgical pain effectively without too many side effects but waited 3 weeks for an appointment,P633,2024-02-08 03:58:11,Emergency
+634,"The Vicodin made me nauseous but effectively managed my pain, also had to wait four hours past my scheduled appointment time tbh",P634,2024-02-08 04:02:00,General Medicine
+635,Waited 2 hours for an ER visit that took 15 minutes once I was seen but smith was very thorough,P635,2024-02-08 04:46:24,Cardiology
+636,They gave me a detailed medication schedule   which was super helpful for home care and discharge was delayed by three hrs because paperwork wasn't ready,P636,2024-02-08 05:01:44,Pediatrics
+637,"To be honest, the ER doctor took time to explain my diagnosis &amp; treatment options thoroughly",P637,2024-02-08 05:04:58,Emergency
+638,"caught a potential interaction, also had to wait 3 hours",P638,2024-02-08 05:17:01,Emergency
+639,fine honestly,P639,2024-02-08 05:27:50,General Medicine
+640,FOLLOW-UP INSTRUCTIONS WERE DETAILED BUT I WISH THEY HAD BEEN EXPLAINED VERBALLY TOO,P640,2024-02-08 05:37:23,Orthopedics
+641,very helpful - good care overall,P641,2024-02-08 06:11:03,Orthopedics
+642,MY ROOM WASN'T CLEANED THE ENTIRE 3 DAYS I WAS THERE this is unacceptable in general,P642,2024-02-08 06:14:13,General Medicine
+643,The RN was patient and answered all my questions about the procedure overall,P643,2024-02-08 06:55:22,Orthopedics
+644,I'd say that the doctor was very accomodating and adjusted my treatment based on my concerns,P644,2024-02-08 07:06:53,General Medicine
+645,Didn't recieve any follow-up call as promised   this was disappointing - s purpose before administering it,P645,2024-02-08 07:21:27,General Medicine
+646,"The nursing staff was reallly attentive and professional throughout my stay. Additionally, dirty fingerprints on the door handles and light switches in my room",P646,2024-02-08 07:25:16,General Medicine
+647,"Basically, follow-up instructions were detailed but I wish they had been explained verbally too",P647,2024-02-08 08:03:25,Orthopedics
+648,The surgical team kept my family updated throughout the procedure and the morphine drip was adjusted perfectly to manage my pain without making me too drowsy overall,P648,2024-02-08 08:12:27,Cardiology
+649,"THE FENTANYL PATCH MANAGED MY CHRONIC PAIN VERY EFFECTIVELY, ALSO THE DOCTOR DIDN'T LISTEN TO MY CONCERNS",P649,2024-02-08 08:56:58,Cardiology
+650,"Room was clean and calm, housekeeping did a great job",P650,2024-02-08 09:39:15,Pediatrics
+651,"Wait time was reasonable, only about 30 minutes past my appointment in my opinion",P651,2024-02-08 09:53:50,Cardiology
+652,"s communication was poor. Additionally, couldn't believe a medical facility would have such poor air quality",P652,2024-02-08 10:19:47,Orthopedics
+653,"From my perspective, very grateful - discharge process was efficient and I recieved all necessary documentation",P653,2024-02-08 10:41:47,General Medicine
+654,"Trash cans in the waiting area were overflowing   nobody seemed to notice. Additionally, didn't recieve any follow-up call as promised   this was disappointing",P654,2024-02-08 11:21:45,General Medicine
+655,"All things considered, the treatment I recieved was top notch, couldn't ask for better care",P655,2024-02-08 11:31:23,General Medicine
+656,"Follow-up care instructions were crystal clear, the nurse went through everything step by step overall",P656,2024-02-08 12:01:49,Orthopedics
+657,Staff was reallly personable and made my child feel comfortable during the visit,P657,2024-02-08 12:25:23,Pediatrics
+658,good service but fine I guess,P658,2024-02-08 12:53:32,Cardiology
+659,treatment options thoroughly but treatment was definately effective,P659,2024-02-08 13:31:44,Emergency
+660,"Looking back, the operating room was visibly clean and the staff followed all hygiene protocols",P660,2024-02-08 14:13:25,Cardiology
+661,The treatment I recieved here was much upgraded than at my previous hospital,P661,2024-02-08 14:39:34,Emergency
+662,NURSES WERE SOOO FRIENDLY AND MADE MY CHILD FEEL CALM,P662,2024-02-08 14:49:53,Orthopedics
+663,Discharge instructions were vague &amp; I didn't understand when to take my medications all in all,P663,2024-02-08 15:35:10,Cardiology
+664,she seemed rushed and didn't listen to my concerns but recovery is going well,P664,2024-02-08 15:58:41,Orthopedics
+665,"Overall, discharge instructions weren't clear about dietary restrictions post-surgery",P665,2024-02-08 16:35:00,Pediatrics
+666,fine in my opinion,P666,2024-02-08 16:59:57,General Medicine
+667,Didn't recieve any follow-up call as promised this was disappointing,P667,2024-02-08 17:17:23,General Medicine
+668,"Truthfully, waited over 2 hours for a scheduled appointment this is rediculous. Additionally, waited three hrs in the waiting room before anyone even acknowledged us in my opinion",P668,2024-02-08 17:28:42,General Medicine
+669,"Basically, my recovery has been smooth thanks to the excellent treatment I recieved here, also the wait was absolutley ridiculous",P669,2024-02-08 17:41:28,Orthopedics
+670,Discharge process was slow took over 3 hours to get my paperwork,P670,2024-02-08 18:01:37,Emergency
+671,"I mean, the nurse&#39;s communication was poor, she seemed rushed and didn't listen to my concerns",P671,2024-02-08 18:42:51,Orthopedics
+672,"Pain medication was administered promptly whenever I requested it. Additionally, bathroom had a strong chemical smell but was otherwise clean",P672,2024-02-08 19:10:22,General Medicine
+673,"I have to say, waited 2.5 hours past my appointment time, no apology or explanation given",P673,2024-02-08 19:28:09,Cardiology
+674,"Overall, the surgeon&#39;s explanation of the procedure was clear and put me at ease",P674,2024-02-08 20:01:05,Orthopedics
+675,"FOLLOW-UP INSTRUCTIONS WERE CONFUSING. ADDITIONALLY, GOOD EXPERIENCE OVERALL",P675,2024-02-08 20:44:08,General Medicine
+676,THE WAIT TIME IN THIS ER IS ABSOLUTELY UNACCEPTABLE needed to wait 5 hrs but treatment outcomes were positive,P676,2024-02-08 21:17:01,Emergency
+677,"My room was spotless when I arrived, housekeeping did an exemplary job",P677,2024-02-08 21:48:02,Orthopedics
+678,I'd say that the treatment I recieved was adequate but nothing exceptional,P678,2024-02-08 21:58:07,Emergency
+679,"In all honesty, recieved a phone call the day after discharge to check on my recovery",P679,2024-02-08 22:11:31,Emergency
+680,"I have to say, the RN who handled my IV was extremely skilled and made me feel at ease",P680,2024-02-08 22:49:22,Cardiology
+681,"Basically, found hair on my hospital bed sheets, this is unacceptable hygiene all in all",P681,2024-02-08 22:55:33,Emergency
+682,PAIN WAS UNDERTREATED FOR THE FIRST DAY BUT IMPROVED AFTER I COMPLAINED IN GENERAL,P682,2024-02-08 23:09:43,Emergency
+683,"the nurse went through everything step by step, also housekeeping did an excellent job",P683,2024-02-08 23:17:01,Orthopedics
+684,"Basically, the morphine drip was adjusted perfectly to manage my pain without making me too drowsy",P684,2024-02-08 23:23:07,Cardiology
+685,"some of the monitors had tape holding them together. Additionally, i was out within an hour of the doctor's order",P685,2024-02-08 23:34:46,Cardiology
+686,"To be honest, the doctor didn't listen to my concerns &amp; just prescribed medication all in all",P686,2024-02-08 23:51:37,Cardiology
+687,My recovery is going smoothly thanks to the excellent treatment - medication instructions were clear,P687,2024-02-09 00:27:12,Cardiology
+688,"ROOM WASN'T AS TIDY AS I EXPECTED, THE BATHROOM NEEDED ATTENTION",P688,2024-02-09 00:52:05,General Medicine
+689,Pain was undertreated initially but they adjusted once I spoke up but treatment was adequate but I expected more personalized care,P689,2024-02-09 01:24:55,General Medicine
+690,"Looking back, discharge process was efficient &amp; I was released within an hour",P690,2024-02-09 01:52:06,Orthopedics
+691,PAIN WAS CONTROLLED WAYYY BETTER THAN AT MY LAST HOSPITAL STAY. THE MORPHINE DRIP WAS ADJUSTED PERFECTLY TO MANAGE MY PAIN WITHOUT MAKING ME TOO DROWSY,P691,2024-02-09 02:27:15,Cardiology
+692,absolutely ridiculous - the ER wait was wayyy too long,P692,2024-02-09 02:36:48,Emergency
+693,Discharge process was efficient &amp; I was released within an hour if I'm being honest,P693,2024-02-09 03:14:10,Orthopedics
+694,"Honestly, the treatment plan was customized to my specific needs &amp; I appreciated that personal touch really",P694,2024-02-09 03:54:50,Cardiology
+695,My appointment was on time and the whole visit only took 45 minutes - the discharge nurse was accomodating and answered all my questions patiently,P695,2024-02-09 04:27:26,Pediatrics
+696,Room cleanliness was adequate but the bathroom could have been upgraded,P696,2024-02-09 04:47:24,Emergency
+697,Room was clean but the sheets felt like they hadn't been changed kind of gross,P697,2024-02-09 05:20:31,General Medicine
+698,"Scheduling was easy but the wait on the day of the appointment was excessive. Additionally, lee was very thorough in explaining my diagnosis and treatment options",P698,2024-02-09 05:49:46,General Medicine
+699,The Percocet controlled my pain but made me very drowsy I think,P699,2024-02-09 06:20:22,Cardiology
+700,"Truthfully, pain medication was effective but I wish they had offered alternatives to opioids if I'm being honest",P700,2024-02-09 07:01:51,Orthopedics
+701,"Looking back, the RN couldn't explain why I needed the blood test, just said &quot;doctor's orders&quot; in general",P701,2024-02-09 07:29:11,General Medicine
+702,Staff communication was outstanding throughout my entire hospital stay,P702,2024-02-09 07:41:53,Cardiology
+703,"Recieved a phone call the day after discharge to check on my recovery, also the treatment I recieved was adequate but nothing exceptional",P703,2024-02-09 08:12:38,Emergency
+704,"BASICALLY, MY APPOINTMENT WAS ON TIME AND THE WHOLE VISIT ONLY TOOK 45 MINUTES",P704,2024-02-09 08:37:45,Pediatrics
+705,Discharge instructions weren't clear about dietary restrictions post-surgery. they didn't explain what to do if my symptoms returned after discharge,P705,2024-02-09 08:50:03,Pediatrics
+706,"Truthfully, fine I guess nothing special tbh",P706,2024-02-09 09:01:08,Pediatrics
+707,The ER wait was wayyy too long!!! Had to wait 3 hours &amp; nobody told us what was happening,P707,2024-02-09 09:32:32,Emergency
+708,the bathroom needed attention - equipment in the room was modern and appeared well-maintained,P708,2024-02-09 09:38:08,General Medicine
+709,"Overall, pain was well-controlled throughout my stay, the team was very attentive",P709,2024-02-09 10:21:42,Cardiology
+710,good care overall tbh,P710,2024-02-09 10:46:08,Orthopedics
+711,"In all honesty, treatment was adequate but I expected more personalized care",P711,2024-02-09 11:25:24,General Medicine
+712,"Basically, the ER doctor took time to explain my diagnosis but the discharge nurse was wayyy more helpful than the admitting staff honestly",P712,2024-02-09 11:46:18,Emergency
+713,positive overall,P713,2024-02-09 12:04:49,General Medicine
+714,"I gotta say, emergency room wait time was reasonable, only waited about 45 minutes",P714,2024-02-09 12:34:38,Emergency
+715,Room was clean and the linens were fresh and this is a HOSPITAL for crying out loud,P715,2024-02-09 13:03:08,General Medicine
+716,ABSOLUTELY GOOD OVERALL REALLY,P716,2024-02-09 13:34:32,General Medicine
+717,"Basically, ok I guess it was fine",P717,2024-02-09 14:19:26,Orthopedics
+718,"Truthfully, follow-up care info was incomplete, didn't know when to remove my bandages",P718,2024-02-09 14:38:12,General Medicine
+719,The appointment was on time which was a pleasant surprise in general,P719,2024-02-09 15:03:26,Orthopedics
+720,"To be honest, the Tylenol they gave me did nothing for my pain needed something stronger if I'm being honest",P720,2024-02-09 15:45:06,Orthopedics
+721,Had to beg for pain medication??? this shouldn't be so difficult honestly,P721,2024-02-09 16:00:45,Emergency
+722,"Trash cans in the waiting area were overflowing   nobody seemed to notice. Additionally, medication info provided at discharge was thorough",P722,2024-02-09 16:07:49,General Medicine
+723,"OVERALL, MY SCHEDULED SURGERY WAS DELAYED 2 HOURS DUE TO AN EMERGENCY, WHICH WAS UNDERSTANDABLE ALL IN ALL",P723,2024-02-09 16:35:06,Cardiology
+724,The pain medication occured some dizziness but overall managed my discomfort well - didn't take my symptoms seriously at first,P724,2024-02-09 17:00:27,Emergency
+725,Follow-up instructions were detailed but I wish they had been explained verbally too - the operation was a complete success for sure,P725,2024-02-09 17:32:14,Orthopedics
+726,The treatment I recieved here was much better than at my previous hospital and found hair on my hospital bed sheets,P726,2024-02-09 17:49:05,Emergency
+727,"I GOTTA SAY, RECIEVED THOROUGH MEDICATION COUNSELING AT DISCHARGE AND TREATMENT OUTCOMES EXCEEDED MY EXPECTATIONS",P727,2024-02-09 18:31:07,Orthopedics
+728,"Honestly, waited 3 hrs past my appointment time this is unacceptable!!!",P728,2024-02-09 19:13:17,General Medicine
+729,They gave me a detailed medication schedule which was super responsive for home care,P729,2024-02-09 19:38:08,Pediatrics
+730,Room was clean and the staff maintained good hygiene throughout. spent 30 minutes going over my test results in general,P730,2024-02-09 20:05:57,Pediatrics
+731,"To be honest, pain was well managed throughout my stay, no complaints",P731,2024-02-09 20:39:41,Emergency
+732,idk,P732,2024-02-09 21:14:20,Emergency
+733,Follow-up appointment was easy to schedule   appreciated the flexibility and very frustrating,P733,2024-02-09 21:47:51,Pediatrics
+734,"I have to say, pain management could have been stronger? I had to ask multiple times for relief in my opinion",P734,2024-02-09 22:19:28,Emergency
+735,The fentanyl patch managed my chronic pain very effectively. hAD TO WAIT 2 HOURS FOR MY SCHEDULED APPOINTMENT this is unacceptable,P735,2024-02-09 22:35:08,Cardiology
+736,"In all honesty, follow-up care info was incomplete, didn't know when to remove my bandages",P736,2024-02-09 23:07:37,General Medicine
+737,"Basically, the Vicodin made me nauseous but effectively managed my pain",P737,2024-02-09 23:42:32,General Medicine
+738,Follow-up appointment was easy to schedule   appreciated the flexibility - 6 weeks seems excessive,P738,2024-02-10 00:22:41,Pediatrics
+739,"The floor in the hallway was sticky   and hadn't been mopped in what looked like days. Additionally, i was very comfortable during my stay",P739,2024-02-10 00:56:56,Pediatrics
+740,Waited three hrs in the waiting room before anyone even acknowledged us for sure,P740,2024-02-10 01:04:57,Emergency
+741,"STARTED FEELING BETTER WITHIN HOURS OF ADMISSION, ALSO WAIT TIME IN THE ER WAS ABOUT 2 HOURS WHICH SEEMED AVERAGE",P741,2024-02-10 01:32:54,Cardiology
+742,it was alright,P742,2024-02-10 01:53:38,Orthopedics
+743,They didn't explain what to do if my symptoms returned after discharge - the bathroom needed attention,P743,2024-02-10 01:59:45,Pediatrics
+744,"Didn't recieve the follow-up call that was promised, had to call them instead in my opinion",P744,2024-02-10 02:15:53,General Medicine
+745,"Nurses were wayyy more helpful than the doctors at explaining my care, also the room was immaculate",P745,2024-02-10 02:23:16,Pediatrics
+746,Dirty fingerprints on the door handles and light switches in my room but appointment was scheduled for 9am but wasn't seen until 11:30am,P746,2024-02-10 02:30:28,General Medicine
+747,"From my perspective, follow-up appointment was really easy to schedule appreciated the flexibility to be honest",P747,2024-02-10 03:07:08,Pediatrics
+748,The ER wait was wayyy too slightly long!!! Had to wait 3 hours &amp; nobody told us what was happening I think,P748,2024-02-10 03:25:01,Emergency
+749,Follow-up appointment was easy to schedule   appreciated the flexibility. the discharge nurse was accomodating and answered all my questions patiently,P749,2024-02-10 03:31:10,Pediatrics
+750,nothing special,P750,2024-02-10 04:10:18,General Medicine
+751,"Pain was well-controlled throughout my stay, the team was very attentive for sure",P751,2024-02-10 04:41:52,Cardiology
+752,The pain management team was responsive and adjusted my meds as needed - appreciated the detailed explanation,P752,2024-02-10 05:21:34,Pediatrics
+753,"My surgical outcomes were first-rate, the surgeon was very skilled in my opinion",P753,2024-02-10 06:04:27,Emergency
+754,"Truthfully, the ibuprofen wasn't strong enough for my level of pain &amp; I had to request something else in my opinion",P754,2024-02-10 06:24:39,General Medicine
+755,Recieved a phone call the day after discharge to check on my recovery all in all,P755,2024-02-10 06:55:02,Emergency
+756,"Room wasn't as clean as I expected, the bathroom needed attention tbh",P756,2024-02-10 07:26:20,General Medicine
+757,My pain was managed adequately though I had some breakthrough pain at night - the ER staff was overwhelmed but still managed to provide good care despite the wait,P757,2024-02-10 07:37:32,Emergency
+758,Room cleanliness was adequate but the bathroom could have been better. the ER doctor was dismissive,P758,2024-02-10 08:22:14,Emergency
+759,"I have to say, room cleanliness was acceptable but could have been better",P759,2024-02-10 08:48:51,Pediatrics
+760,"From my perspective, dirty sheets on the bed when I arrived had to ask for truly clean ones overall",P760,2024-02-10 09:00:13,Cardiology
+761,"APPOINTMENT WAS 2 HOURS LATE and nobody seemed to care. Additionally, treatment options thoroughly I think",P761,2024-02-10 09:09:51,Emergency
+762,Room cleanliness was excellent but equipment in my room was outdated but functional to be honest,P762,2024-02-10 09:32:35,Orthopedics
+763,my condition has improved significantly - my recovery is going well thanks to the excellent surgical team,P763,2024-02-10 09:45:19,General Medicine
+764,"To be honest, didn't recieve any follow-up call as promised this was disappointing all in all",P764,2024-02-10 09:56:17,General Medicine
+765,"The treatment I recieved was top notch, couldn't ask for incredibly better care",P765,2024-02-10 10:38:32,General Medicine
+766,"Discharge paperwork was overwhelming, recieved about 20 pages with no explanation I think",P766,2024-02-10 10:52:29,Cardiology
+767,"The pain medication worked reallly well, felt relaxed within 30 minutes of receiving it",P767,2024-02-10 11:06:57,Orthopedics
+768,"The nurse&#39;s communication was poor, she seemed rushed and didn't listen to my concerns in general",P768,2024-02-10 11:33:42,Orthopedics
+769,Nurses were reallly communicative and kept me informed about everything - pain was managed adequately though I wish they had checked on me more frequently,P769,2024-02-10 12:03:54,General Medicine
+770,"Room was clean and at ease, housekeeping did a great job tbh",P770,2024-02-10 12:14:03,Pediatrics
+771,"The RN couldn't explain why I needed the blood test, also good overall",P771,2024-02-10 12:24:17,General Medicine
+772,"The pain medication worked well but caused constipation as a side effect, also felt uninformed at times",P772,2024-02-10 12:44:26,Pediatrics
+773,"THE NURSE&#39;S COMMUNICATION WAS POOR, SHE SEEMED RUSHED AND DIDN'T LISTEN TO MY CONCERNS",P773,2024-02-10 13:26:09,Orthopedics
+774,"To be honest, waited over 2 hours for a scheduled appointment this is rediculous",P774,2024-02-10 13:58:21,General Medicine
+775,s purpose before administering it and medication info provided at discharge was thorough,P775,2024-02-10 14:25:49,General Medicine
+776,The RN who handled my IV was extremely professional and made me feel at ease really,P776,2024-02-10 15:00:37,Cardiology
+777,"s communication was poor. Additionally, good overall experience",P777,2024-02-10 15:40:39,Emergency
+778,The doctor was accomodating when I asked questions about alternative treatments all in all,P778,2024-02-10 16:06:01,Emergency
+779,"Truthfully, ok",P779,2024-02-10 16:28:08,General Medicine
+780,"Overall, found hair on the floor and the sink had water stains, also had to call them instead",P780,2024-02-10 16:55:28,General Medicine
+781,The discharge process took too long   over 4 hours to be released but my recovery is progressing well thanks to the excellent treatment I recieved,P781,2024-02-10 17:21:55,Cardiology
+782,HAD TO EXPLAIN MY SYMPTOMS TO 5 DIFFERENT PEOPLE BEFORE SEEING A DOCTOR,P782,2024-02-10 17:50:46,Emergency
+783,"The ibuprofen wasn't strong enough for my level of pain. Additionally, lee was very thorough in explaining my diagnosis and treatment options",P783,2024-02-10 18:19:02,General Medicine
+784,"The surgeon was definately skilled, my operation went perfectly I think",P784,2024-02-10 18:31:49,Cardiology
+785,pleasant care overall,P785,2024-02-10 18:50:40,Orthopedics
+786,The RN was accomodating when I needed to reschedule my medication times. nurses were wayyy more helpful than the doctors at explaining my care honestly,P786,2024-02-10 18:56:26,Pediatrics
+787,Discharge instructions were confusing &amp; I didn't understand when to take my medications really,P787,2024-02-10 19:04:51,Cardiology
+788,Treatment was effective &amp; I'm feeling much stronger now,P788,2024-02-10 19:41:07,Pediatrics
+789,"I have to say, the equipment in my room looked outdated &amp; some of the monitors had tape holding them together",P789,2024-02-10 20:00:06,Cardiology
+790,Trash cans in the waiting area were overflowing nobody seemed to notice,P790,2024-02-10 20:06:37,General Medicine
+791,The discharge process took too excessive over 4 hours to be released honestly,P791,2024-02-10 20:33:07,Cardiology
+792,FOLLOW-UP CARE WAS ARRANGED BEFORE I LEFT &AMP; INSTRUCTIONS WERE CLEAR,P792,2024-02-10 20:39:51,Orthopedics
+793,"All things considered, fine I guess nothing special tbh",P793,2024-02-10 21:08:50,Pediatrics
+794,"To be honest, treatment results have been phenomenal, I'm feeling like myself again",P794,2024-02-10 21:38:49,Pediatrics
+795,"Looking back, the pain medication worked reallly well. Additionally, the pharmacist even called to make sure I understood my prescriptions",P795,2024-02-10 22:11:33,Pediatrics
+796,"Overall, the ER doctor took time to explain my diagnosis &amp; treatment options thoroughly",P796,2024-02-10 22:54:52,Emergency
+797,"I gotta say, the doctor was very accomodating and adjusted my treatment based on my concerns",P797,2024-02-10 23:09:57,General Medicine
+798,Nurses were reallly communicative and kept me informed about everything and ok care I suppose,P798,2024-02-10 23:42:09,General Medicine
+799,ok care I suppose - equipment in the room was modern and appeared well-maintained,P799,2024-02-11 00:16:16,General Medicine
+800,Room wasn't as clean as I expected - pain was undertreated initially but they adjusted once I spoke up,P800,2024-02-11 00:57:32,General Medicine
+801,My pain was managed adequately though I had some breakthrough pain at night. tHE WAIT TIME IN THIS ER IS ABSOLUTELY UNACCEPTABLE needed to wait 5 hrs,P801,2024-02-11 01:33:03,Emergency
+802,Follow-up appointment was smooth to schedule appreciated the flexibility,P802,2024-02-11 02:07:58,Pediatrics
+803,"The follow-up appointment was scheduled too far out, 6 weeks seems excessive honestly",P803,2024-02-11 02:27:31,Pediatrics
+804,Pain management team responded quickly when I reported breakthrough pain tbh,P804,2024-02-11 03:01:33,General Medicine
+805,The surgeon was definately skilled and the fentanyl patch managed my chronic pain very effectively,P805,2024-02-11 03:37:25,Cardiology
+806,"Honestly, pain management team responded quickly when I reported breakthrough pain",P806,2024-02-11 03:44:40,General Medicine
+807,"Recieved thorough medication counseling at discharge, very attentive",P807,2024-02-11 03:54:33,Orthopedics
+808,"Treatment outcomes were exactly what was promised, also the nursing staff was reallly attentive and professional throughout my stay",P808,2024-02-11 04:02:58,General Medicine
+809,Dr. Patel was accomodating when I asked for a second opinion on my diagnosis I think,P809,2024-02-11 04:24:39,General Medicine
+810,"The RN explained my lab results reallly well, appreciated the clear communication",P810,2024-02-11 04:37:38,Orthopedics
+811,Pain management was sooo much upgraded than my last hospital experience,P811,2024-02-11 04:49:21,Cardiology
+812,"ROOM WAS CLEAN AND COMFORTABLE, HOUSEKEEPING DID A GREAT JOB",P812,2024-02-11 05:21:32,Pediatrics
+813,"housekeeping did an excellent job. Additionally, trash hadn't been emptied in my room   overflowing by the second day",P813,2024-02-11 05:46:30,Orthopedics
+814,"I mean, discharge was delayed by three hrs because paperwork wasn't ready",P814,2024-02-11 05:50:30,Pediatrics
+815,"All things considered, room wasn't as spotless as I expected, the bathroom needed attention I think",P815,2024-02-11 06:34:39,General Medicine
+816,"The wait was absolutley ridiculous, 4 hrs for a scheduled procedure to be honest",P816,2024-02-11 07:09:09,Orthopedics
+817,"Truthfully, the treatment I recieved was adequate but nothing exceptional, also the discharge nurse was wayyy more helpful than the admitting staff",P817,2024-02-11 07:43:56,Emergency
+818,very impressed but the RN who handled my IV was extremely professional   and made me feel at ease,P818,2024-02-11 08:18:10,Cardiology
+819,"Truthfully, ok I guess it was fine",P819,2024-02-11 09:02:32,Orthopedics
+820,Dirty sheets on the bed when I arrived had to ask for clean ones,P820,2024-02-11 09:48:01,Cardiology
+821,couldn't ask for a better experience - had to wait 5 hours in the ER   this is completely unacceptable,P821,2024-02-11 10:17:32,Emergency
+822,They checked on me every hour and were so caring - i had to request something else,P822,2024-02-11 10:24:53,General Medicine
+823,The discharge process was smooth but fine I guess,P823,2024-02-11 11:07:32,Cardiology
+824,"To be honest, the nurse&#39;s communication was poor, she seemed rushed and didn't listen to my concerns in general",P824,2024-02-11 11:21:18,Orthopedics
+825,"In my experience, treatment has been wayyy more effective than I anticipated, very grateful",P825,2024-02-11 11:40:11,General Medicine
+826,"From my perspective, morphine was administered promptly and my pain was managed very well",P826,2024-02-11 12:25:26,Orthopedics
+827,The ER wait was wayyy too excessive! Had to wait 3 hours &amp; nobody told us what was happening,P827,2024-02-11 12:51:27,Emergency
+828,I'd say that pain was controlled well throughout my hospital stay,P828,2024-02-11 13:20:15,Cardiology
+829,"The ER nurse was wayyy more considerate than the doctor, she actually explained things",P829,2024-02-11 13:49:40,Emergency
+830,The discharge nurse was accomodating and answered all my questions patiently and i'm feeling much better now,P830,2024-02-11 14:18:08,Pediatrics
+831,couldn't understand anything - the nerve block worked wayyy better than expected for my knee surgery,P831,2024-02-11 14:42:32,Orthopedics
+832,DISCHARGE PROCESS WAS EFFICIENT &AMP; I WAS RELEASED WITHIN AN HOUR,P832,2024-02-11 15:20:09,Orthopedics
+833,Dirty fingerprints on the door handles and light switches in my room overall,P833,2024-02-11 15:55:31,General Medicine
+834,Had to wait 3 hours - morphine managed my post-surgical pain effectively without too many side effects,P834,2024-02-11 16:33:25,Emergency
+835,"My treatment was effective and I'm recovering faster than expected. Additionally, the hospital floors were spotless   clearly they take cleanliness seriously here",P835,2024-02-11 17:04:18,Cardiology
+836,"Communication from the nursing staff was definately lacking. Additionally, floors in my room were sticky   housekeeping needs to do better",P836,2024-02-11 17:39:04,General Medicine
+837,"I gotta say, the pain medication worked reallly well, felt comfortable within 30 minutes of receiving it",P837,2024-02-11 18:20:58,Pediatrics
+838,"Pain was managed adequately though I wish they had checked on me more frequently, also bathroom in my room was dirty",P838,2024-02-11 18:33:07,General Medicine
+839,"ALL THINGS CONSIDERED, TRASH HADN'T BEEN EMPTIED IN MY ROOM OVERFLOWING BY THE SECOND DAY",P839,2024-02-11 18:41:02,Orthopedics
+840,Recieved a phone call the day after discharge to check on my recovery - caught a potential interaction to be honest,P840,2024-02-11 19:12:44,Emergency
+841,"I mean, wait time in the ER was about 2 hours which seemed average",P841,2024-02-11 19:41:05,Cardiology
+842,"Basically, staff communication was excellent throughout my entire hospital stay if I'm being honest",P842,2024-02-11 20:20:38,Cardiology
+843,"The pain pills they gave me caused nausea, also had to beg for pain medication",P843,2024-02-11 20:51:43,Emergency
+844,"Basically, fine nothing to complain about",P844,2024-02-11 21:01:17,Orthopedics
+845,"Treatment was very effective, my symptoms improved dramatically within days really",P845,2024-02-11 21:24:28,Emergency
+846,"I gotta say, the wait was absolutley unacceptable, four hours in the ER with chest pain!!!",P846,2024-02-11 21:34:31,Emergency
+847,s bedside manner was exceptional and floor in the ER waiting area was visibly dirty with stains and debris,P847,2024-02-11 22:17:45,Emergency
+848,The RN was accomodating when I needed to reschedule my medication times and the facility was clean and well-maintained,P848,2024-02-11 22:30:45,Pediatrics
+849,"In all honesty, treatment I recieved was accomodating to my special dietary needs to be honest",P849,2024-02-11 23:00:58,Emergency
+850,"The RN was definately the highlight of my visit, so caring and capable",P850,2024-02-11 23:04:36,Cardiology
+851,"Truthfully, the nurse answered all my questions. Additionally, the discharge process took too long   over 4 hours to be released",P851,2024-02-11 23:50:04,Cardiology
+852,"Waited three hours past my scheduled appointment time, no one apologized for sure",P852,2024-02-12 00:07:51,Orthopedics
+853,"Waited only 20 minutes for my ER visit, very efficient if I'm being honest",P853,2024-02-12 00:25:05,Emergency
+854,"Dr. Wilson was sooo thorough, spent 30 minutes going over my test results I think",P854,2024-02-12 00:36:00,Pediatrics
+855,"To be honest, floors in my room were sticky   housekeeping needs to do better. Additionally, my treatment plan wasn't explained well if I'm being honest",P855,2024-02-12 00:56:12,General Medicine
+856,The RN was accomodating when I needed to reschedule my medication times but nurses were wayyy more helpful than the doctors at explaining my care,P856,2024-02-12 01:30:35,Pediatrics
+857,The RN who handled my IV was extremely experienced and made me feel at ease,P857,2024-02-12 01:54:40,Cardiology
+858,nothing to add,P858,2024-02-12 02:12:24,Pediatrics
+859,"I'd say that discharge paperwork was overwhelming, recieved about 20 pages with no explanation",P859,2024-02-12 02:45:51,Cardiology
+860,The RN was patient and answered all my questions about the procedure tbh,P860,2024-02-12 03:15:55,Orthopedics
+861,"The discharge nurse was wayyy more helpful than the admitting staff. Additionally, my pain was managed adequately though I had some breakthrough pain at night",P861,2024-02-12 03:19:24,Emergency
+862,great discharge process but the RN couldn't explain why I needed the blood test,P862,2024-02-12 03:27:01,General Medicine
+863,"Basically, the surgeon&#39;s explanation of the procedure was clear and put me at ease",P863,2024-02-12 03:58:12,Orthopedics
+864,meh,P864,2024-02-12 04:20:49,General Medicine
+865,"In my experience, the operating room was visibly genuinely clean and the staff followed all hygiene protocols",P865,2024-02-12 04:51:11,Cardiology
+866,"To be honest, the treatment I recieved was adequate but nothing exceptional",P866,2024-02-12 05:23:49,Emergency
+867,"Morphine was administered promptly and my pain was managed very well, also the nerve block worked wayyy better than expected for my knee surgery",P867,2024-02-12 05:41:47,Orthopedics
+868,The ER doctor was dismissive &amp; didn't take my symptoms seriously at first tbh,P868,2024-02-12 06:06:38,Emergency
+869,instructions were clear and the pain medication worked reallly well,P869,2024-02-12 06:50:15,Orthopedics
+870,"In my experience, dr. Wilson was sooo thorough, spent 30 minutes going over my test results honestly",P870,2024-02-12 07:01:39,Pediatrics
+871,"I gotta say, follow-up call was made as promised, appreciated the thorough care",P871,2024-02-12 07:39:03,Orthopedics
+872,"Dust on the window sills and curtains hadn't been cleaned in weeks. Additionally, the room smelled like bleach which was reassuring I think",P872,2024-02-12 07:50:57,Orthopedics
+873,Wait time was about 1.5 hours which seemed extended for a scheduled appointment,P873,2024-02-12 08:18:45,Cardiology
+874,"Bathroom in my room had a broken toilet seat that wasn't fixed during my stay, also treatment was effective though I wish the doctor had spent more time with me",P874,2024-02-12 08:52:02,Pediatrics
+875,Pain management was sooo much somewhat better than my last hospital experience I think,P875,2024-02-12 09:31:12,Cardiology
+876,"I have to say, dr. Wilson was sooo thorough, spent 30 minutes going over my test results tbh",P876,2024-02-12 09:36:41,Pediatrics
+877,my operation went perfectly but dirty sheets on the bed when I arrived   had to ask for clean ones,P877,2024-02-12 10:20:45,Cardiology
+878,I'd say that the doctor was very accomodating and adjusted my treatment based on my concerns I think,P878,2024-02-12 10:40:04,General Medicine
+879,"In all honesty, the appointment was on time which was a pleasant surprise",P879,2024-02-12 11:18:02,Orthopedics
+880,communication was excellent. the Vicodin made me nauseous but effectively managed my pain,P880,2024-02-12 11:56:50,General Medicine
+881,Waited 2 hours for an ER visit that took 15 minutes once I was seen but the equipment in my room looked outdated,P881,2024-02-12 12:34:51,Cardiology
+882,ADJUSTED MY MEDICATION PROMPTLY WHEN NEEDED - VERY IMPRESSED,P882,2024-02-12 12:46:00,General Medicine
+883,Discharge instructions were definately clear and thorough. discharge instructions were confusing and I didn't understand the follow-up schedule really,P883,2024-02-12 13:25:28,Pediatrics
+884,"All things considered, positive care overall",P884,2024-02-12 13:33:26,Orthopedics
+885,"Discharge papers had the wrong medication dosage listed, caught it before leaving thankfully in general",P885,2024-02-12 13:40:50,Pediatrics
+886,"I gotta say, they didn't explain what to do if my symptoms returned after discharge",P886,2024-02-12 13:59:23,Pediatrics
+887,Equipment in the room was modern and appeared well-maintained I think,P887,2024-02-12 14:29:52,General Medicine
+888,The treatment plan was definately tailored to my specific needs tbh,P888,2024-02-12 14:40:15,General Medicine
+889,"The ER doctor was reallly attentive and addressed all my concerns, also the discharge nurse was accomodating and took time to answer all my questions overall",P889,2024-02-12 15:12:39,Emergency
+890,fine in general,P890,2024-02-12 15:58:26,General Medicine
+891,"The surgeon was definately skilled, my operation went perfectly overall",P891,2024-02-12 16:09:00,Cardiology
+892,"Truthfully, dusty vents in the ceiling, couldn't believe a medical facility would have such poor air quality",P892,2024-02-12 16:52:51,Orthopedics
+893,Smith was very thorough. my recovery is going smoothly thanks to the excellent treatment all in all,P893,2024-02-12 17:22:23,Cardiology
+894,Morphine managed my post-surgical pain effectively without too many side effects - didn't take my symptoms seriously at first I think,P894,2024-02-12 17:56:29,Emergency
+895,"The doctor&#39;s explanation was wayyy too technical, couldn't understand anything in general",P895,2024-02-12 18:24:12,Orthopedics
+896,"I have to say, had to wait 5 hrs for emergency treatment of my child. discharge was delayed because the pharmacy was slow filling my prescriptions",P896,2024-02-12 18:42:51,Pediatrics
+897,The discharge nurse was wayyy more helpful than the admitting staff. the treatment I recieved was adequate but nothing exceptional,P897,2024-02-12 19:14:38,Emergency
+898,"Honestly, the follow-up appointment was scheduled before I even left, very organized discharge process for sure",P898,2024-02-12 19:21:36,Pediatrics
+899,The RN was very patient explaining the blood test results to me really,P899,2024-02-12 20:04:36,Pediatrics
+900,"Truthfully, pain was well managed throughout my stay, no complaints",P900,2024-02-12 20:19:13,Emergency
+901,"To be honest, waited 2 hours for an ER visit that took 15 minutes once I was seen",P901,2024-02-12 20:34:28,Cardiology
+902,I'd say that had to wait four hours for a follow-up appointment that was scheduled weeks ago!!!,P902,2024-02-12 21:10:07,Cardiology
+903,Morphine was administered promptly and my pain was managed very well. my recovery has been smooth thanks to the excellent treatment I recieved here in my opinion,P903,2024-02-12 21:39:06,Orthopedics
+904,"Bathroom in my room was dirty. Additionally, waited three hrs in the waiting room before anyone even acknowledged us",P904,2024-02-12 22:04:38,General Medicine
+905,"All things considered, dust on the window sills and curtains hadn't been cleaned in weeks",P905,2024-02-12 22:50:19,Orthopedics
+906,"In my experience, morphine managed my post-surgical pain effectively without too many side effects",P906,2024-02-12 22:53:26,Emergency
+907,"The RN explained my lab results reallly well, appreciated the clear communication really",P907,2024-02-12 23:31:08,Orthopedics
+908,"Treatment outcomes have been positive, feeling much better than before admission all in all",P908,2024-02-12 23:43:25,Pediatrics
+909,"I have to say, good care overall and felt comfortable within 30 minutes of receiving it",P909,2024-02-13 00:13:35,Orthopedics
+910,"I gotta say, the nurse was definately overwhelmed and made a mistake with my medication timing",P910,2024-02-13 00:29:46,Emergency
+911,"All things considered, the nurse was definately overwhelmed and made a mistake with my medication timing",P911,2024-02-13 01:12:56,Emergency
+912,"very efficient. Additionally, the pain medication occured some dizziness but overall managed my discomfort well",P912,2024-02-13 01:33:44,Emergency
+913,The floor in the hallway was sticky   and hadn't been mopped in what looked like days but discharge was smooth,P913,2024-02-13 02:07:32,Pediatrics
+914,SCHEDULING WAS EASY AND I GOT AN APPOINTMENT WITHIN 2 DAYS,P914,2024-02-13 02:36:18,General Medicine
+915,"THE FOLLOW-UP APPOINTMENT WAS SCHEDULED BEFORE I EVEN LEFT, VERY ORGANIZED DISCHARGE PROCESS",P915,2024-02-13 02:42:09,Pediatrics
+916,"fine nothing to complain about, also appointment was delayed by 90 minutes with no communication about the wait",P916,2024-02-13 02:51:55,Orthopedics
+917,"Treatment results have been exemplary, my condition has improved significantly",P917,2024-02-13 03:26:45,General Medicine
+918,Room cleanliness was adequate but the bathroom could have been very better all in all,P918,2024-02-13 03:30:55,Emergency
+919,The pain management team was responsive and adjusted my meds as needed honestly,P919,2024-02-13 04:16:02,Pediatrics
+920,fine nothing to complain about - martinez predicted,P920,2024-02-13 04:46:53,Orthopedics
+921,"The nurse explained each medication&#39;s purpose before administering it, very competent",P921,2024-02-13 05:26:16,General Medicine
+922,"Looking back, discharge process was fairly slow took over 3 hours to get my paperwork",P922,2024-02-13 05:37:49,Emergency
+923,The RN was patient and answered all my questions about the procedure if I'm being honest,P923,2024-02-13 06:12:07,Orthopedics
+924,Follow-up instructions were detailed but I wish they had been explained verbally too I think,P924,2024-02-13 06:29:51,Orthopedics
+925,"Honestly, treatment outcomes exceeded my expectations, very satisfied with care",P925,2024-02-13 06:55:39,Orthopedics
+926,"I have to say, pain was managed adequately though I wish they had checked on me more frequently and pain medication was administered promptly whenever I requested it",P926,2024-02-13 07:18:08,General Medicine
+927,"In my experience, the scheduling system is terrible couldn't get an appointment for 6 weeks",P927,2024-02-13 07:44:54,Orthopedics
+928,"Discharge was smooth, the pharmacist even called to make sure I understood my prescriptions really",P928,2024-02-13 07:51:00,Pediatrics
+929,"Basically, pain was undertreated initially but they adjusted once I spoke up",P929,2024-02-13 08:34:46,General Medicine
+930,"Bathroom in my room was dirty, found hair on the floor and the sink had water stains really",P930,2024-02-13 09:20:28,General Medicine
+931,"To be honest, room cleanliness was adequate but the bathroom could have been incredibly better tbh",P931,2024-02-13 09:37:29,Emergency
+932,The discharge process took too long   over 4 hours to be released but my treatment was effective and I'm recovering faster than expected,P932,2024-02-13 09:46:49,Cardiology
+933,"I wasn't warned about this side effect. Additionally, the ER nurse",P933,2024-02-13 10:03:31,Emergency
+934,Discharge was delayed by three hrs because paperwork wasn't ready tbh,P934,2024-02-13 10:15:07,Pediatrics
+935,"My doctor&#39;s communication was superb, couldn't ask for a improved experience",P935,2024-02-13 11:00:07,Emergency
+936,The ibuprofen wasn't strong enough for my level of pain - treatment results have been excellent,P936,2024-02-13 11:16:15,General Medicine
+937,"I appreciated that personal touch. Additionally, treatment effectiveness was immediate",P937,2024-02-13 11:24:31,Cardiology
+938,"Room cleanliness was stellar, no complaints about the facility",P938,2024-02-13 11:51:07,Orthopedics
+939,Dusty vents in the ceiling but trash hadn't been emptied in my room   overflowing by the second day,P939,2024-02-13 12:28:14,Orthopedics
+940,"Honestly, trash hadn't been emptied in my room overflowing by the second day I think",P940,2024-02-13 12:38:25,Orthopedics
+941,"Honestly, had to wait four hours for a follow-up appointment that was scheduled weeks ago. Additionally, she explained everything clearly and I definately understood my treatment plan",P941,2024-02-13 12:50:49,Cardiology
+942,The treatment plan was customized to my specific needs &amp; I appreciated that personal touch for sure,P942,2024-02-13 13:11:16,Cardiology
+943,The surgical team kept my family updated throughout the procedure and the facility was clean from entrance to exam room,P943,2024-02-13 13:32:51,Cardiology
+944,s communication style was excellent and never felt uncomfortable during recovery,P944,2024-02-13 14:10:38,Pediatrics
+945,The bathroom had mold in the shower and follow-up care was arranged seamlessly for sure,P945,2024-02-13 14:37:48,General Medicine
+946,"APPOINTMENT WAS SCHEDULED FOR 9AM BUT WASN'T SEEN UNTIL 11:30AM, RIDICULOUS!!",P946,2024-02-13 15:06:01,General Medicine
+947,"Overall, the floor in the hallway was sticky   and hadn't been mopped in what looked like days, also follow-up appointment was easy to schedule   appreciated the flexibility",P947,2024-02-13 15:20:26,Pediatrics
+948,My treatment plan wasn't explained well and the doctor was very accomodating and adjusted my treatment based on my concerns all in all,P948,2024-02-13 15:46:45,General Medicine
+949,Pain management team responded quickly when I reported breakthrough pain I think,P949,2024-02-13 15:58:10,General Medicine
+950,"The discharge process took wayyy too prolonged, waited 4 hours to leave!!!",P950,2024-02-13 16:32:45,General Medicine
+951,My recovery is progressing well thanks to the superb treatment I recieved,P951,2024-02-13 16:36:34,Cardiology
+952,The room smelled like bleach which was reassuring - felt cared for,P952,2024-02-13 16:46:18,Orthopedics
+953,The nerve block worked wayyy better than expected for my knee surgery overall,P953,2024-02-13 17:29:32,Orthopedics
+954,communication was excellent and scheduling was easy and I got an appointment within 2 days,P954,2024-02-13 17:53:29,General Medicine
+955,"Truthfully, pain management could have been enhanced? I had to ask multiple times for relief in my opinion",P955,2024-02-13 18:20:16,Emergency
+956,Follow-up call was made as promised and s communication was poor,P956,2024-02-13 18:52:15,Orthopedics
+957,"From my perspective, the medication reconciliation at discharge was thorough &amp; caught a potential interaction",P957,2024-02-13 19:31:18,Emergency
+958,"The Tramadol managed my pain without the grogginess of stronger medications. Additionally, the appointment was on time which was a pleasant surprise",P958,2024-02-13 19:35:14,Orthopedics
+959,felt uninformed at times. i'm feeling much better now,P959,2024-02-13 20:12:29,Pediatrics
+960,"Room was fairly clean and the linens were fresh, no issues with facility cleanliness",P960,2024-02-13 20:32:15,General Medicine
+961,The discharge nurse was wayyy more supportive than the admitting staff,P961,2024-02-13 20:36:49,Emergency
+962,"Treatment outcomes exceeded my expectations, very satisfied with care really",P962,2024-02-13 21:20:29,Orthopedics
+963,"Truthfully, the RN was sooo attentive explaining my test results in terms I could understand",P963,2024-02-13 21:38:15,Cardiology
+964,"I have to say, my surgical outcomes exceeded expectations, the incision is healing beautifully",P964,2024-02-13 21:42:22,Orthopedics
+965,The pain medication worked well but caused constipation as a side effect in general,P965,2024-02-13 22:23:22,Pediatrics
+966,"The pain medication worked reallly well, felt reassured within 30 minutes of receiving it",P966,2024-02-13 23:03:19,Orthopedics
+967,"From my perspective, the RN who handled my IV was extremely professional   and made me feel at ease really",P967,2024-02-13 23:07:33,Cardiology
+968,very impressed but good service in general,P968,2024-02-13 23:15:12,Cardiology
+969,my condition has improved significantly - room was clean but the sheets felt like they hadn't been changed   kind of gross,P969,2024-02-13 23:36:10,General Medicine
+970,"Truthfully, pain was well-controlled throughout my stay, the team was very attentive to be honest",P970,2024-02-14 00:10:02,Cardiology
+971,The room had a musty smell and the ventilation seemed poor to be honest,P971,2024-02-14 00:33:33,Emergency
+972,"Truthfully, the discharge process took too long over 4 hours to be released!!!",P972,2024-02-14 01:11:07,Cardiology
+973,"Basically, fine I suppose",P973,2024-02-14 01:36:30,Cardiology
+974,"My scheduled appointment was cancelled without notice, very frustrating in my opinion",P974,2024-02-14 01:54:43,Pediatrics
+975,PLEASANT,P975,2024-02-14 02:20:46,Pediatrics
+976,THE PAIN MANAGEMENT PROTOCOL WORKED PERFECTLY FOR MY KNEE REPLACEMENT RECOVERY. EQUIPMENT IN MY ROOM WAS OUTDATED BUT FUNCTIONAL IN GENERAL,P976,2024-02-14 02:49:55,Orthopedics
+977,"I HAVE TO SAY, THE PAIN MANAGEMENT PROTOCOL WORKED PERFECTLY FOR MY KNEE REPLACEMENT RECOVERY TO BE HONEST",P977,2024-02-14 03:22:30,Orthopedics
+978,The Tylenol they gave me did nothing for my pain needed something stronger,P978,2024-02-14 03:31:03,Orthopedics
+979,"To be honest, ok care I suppose for sure",P979,2024-02-14 03:35:18,General Medicine
+980,Medication info provided at discharge was thorough &amp; straightforward to understand,P980,2024-02-14 03:40:33,General Medicine
+981,EQUIPMENT IN THE ROOM WAS MODERN AND APPEARED WELL-MAINTAINED AND LEE WAS VERY THOROUGH IN EXPLAINING MY DIAGNOSIS AND TREATMENT OPTIONS,P981,2024-02-14 04:01:58,General Medicine
+982,My treatment was effective and I'm recovering faster than expected and had to wait 2 hours past my appointment   no explanation given,P982,2024-02-14 04:23:08,Cardiology
+983,"From my perspective, room cleanliness was adequate but the bathroom could have been better",P983,2024-02-14 04:50:23,Emergency
+984,"I mean, morphine managed my post-surgical pain effectively without too many side effects. discharge process was slow   took over 3 hours to get my paperwork",P984,2024-02-14 05:22:39,Emergency
+985,"spent 30 minutes going over my test results. Additionally, caught it before leaving thankfully for sure",P985,2024-02-14 05:46:02,Pediatrics
+986,good overall experience - pain management could have been better in general,P986,2024-02-14 06:14:56,Emergency
+987,Floor in the ER waiting area was visibly unclean with stains and debris for sure,P987,2024-02-14 06:56:27,Emergency
+988,Treatment was effective and I'm feeling much better now and appointment was on time which was a pleasant surprise   usually have to wait tbh,P988,2024-02-14 07:42:24,Emergency
+989,"Medication info provided at discharge was thorough, also pain medication was administered promptly whenever I requested it",P989,2024-02-14 08:23:36,General Medicine
+990,"Overall, treatment was very effective, my symptoms improved dramatically within days",P990,2024-02-14 08:52:52,Emergency
+991,The RN who handled my IV was extremely professional   and made me feel at ease - the RN was sooo helpful explaining my test results in terms I could understand,P991,2024-02-14 09:08:35,Cardiology
+992,"the team was very attentive. Additionally, i didn't understand when to take my medications tbh",P992,2024-02-14 09:37:57,Cardiology
+993,The Vicodin made me nauseous but effectively managed my pain but the discharge process took wayyy too long,P993,2024-02-14 10:05:15,General Medicine
+994,Room was spotless and the staff maintained good hygiene throughout,P994,2024-02-14 10:36:47,Pediatrics
+995,"I have to say, the RN who handled my IV was extremely professional and made me feel at ease",P995,2024-02-14 11:09:54,Cardiology
+996,Dr. Lee was very thorough in explaining my diagnosis and treatment options all in all,P996,2024-02-14 11:39:37,General Medicine
+997,"Honestly, pain management team responded quickly when I reported breakthrough pain for sure",P997,2024-02-14 12:20:57,General Medicine
+998,"Scheduling was easy and I got an appointment within 2 days. Additionally, patel was accomodating when I asked for a second opinion on my diagnosis",P998,2024-02-14 12:32:37,General Medicine
+999,"Basically, dr. White was sooo dismissive, didn't take time to listen to my concerns for sure",P999,2024-02-14 13:02:37,General Medicine
+1000,The RN was patient and answered all my questions about the procedure,P1000,2024-02-14 13:45:38,Orthopedics
