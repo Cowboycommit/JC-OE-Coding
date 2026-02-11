@@ -622,7 +622,7 @@ def run_ml_analysis(
             text = ' '.join(text.split())
             return text
 
-        def fit(self, responses, stop_words='english'):
+        def fit(self, responses, stop_words='english', original_texts=None):
             processed = [self.preprocess_text(r) for r in responses]
 
             # Validate LDA compatibility with representation
@@ -802,7 +802,10 @@ def run_ml_analysis(
                     doc_topic_matrix[i, label] = 1.0
 
             self._generate_codebook(texts=processed)
-            self._assign_codes(doc_topic_matrix, responses)
+            # Use original (unprocessed) texts for example quotes if available,
+            # otherwise fall back to the responses used for modelling
+            display_texts = original_texts if original_texts is not None else responses
+            self._assign_codes(doc_topic_matrix, responses, display_texts=display_texts)
 
             # NEW: Mandatory cluster interpretation layer
             # This ensures cluster IDs are never exposed without human-readable explanations
@@ -837,7 +840,7 @@ def run_ml_analysis(
                     self.cluster_interpretation = interpreter.interpret_clusters(
                         vectorizer=term_vectorizer,
                         cluster_model=self.model,
-                        texts=responses,
+                        texts=display_texts,
                         cluster_assignments=labels if hasattr(self.model, 'labels_') else
                             doc_topic_matrix.argmax(axis=1).tolist(),
                         feature_matrix=term_feature_matrix,
@@ -858,7 +861,7 @@ def run_ml_analysis(
                     try:
                         self.cluster_interpretation = interpreter.apply_llm_enhancement(
                             report=self.cluster_interpretation,
-                            texts=responses,
+                            texts=display_texts,
                             cluster_assignments=cluster_assignments
                         )
                         if self.cluster_interpretation.llm_enhanced:
@@ -1061,7 +1064,18 @@ def run_ml_analysis(
             # Return terms that are not subsets
             return [term for i, (term, _) in enumerate(term_words) if i not in to_remove]
 
-        def _assign_codes(self, doc_topic_matrix, responses):
+        def _assign_codes(self, doc_topic_matrix, responses, display_texts=None):
+            """Assign codes to documents based on topic distribution.
+
+            Args:
+                doc_topic_matrix: Document-topic distribution matrix.
+                responses: Text list used for modelling.
+                display_texts: Original (unprocessed) texts for UI display.
+                    Falls back to responses if not provided.
+            """
+            # Use original texts for display if available, otherwise use model texts
+            quote_texts = display_texts if display_texts is not None else responses
+
             assignments = []
             confidences = []
 
@@ -1082,13 +1096,13 @@ def run_ml_analysis(
                         if len(current_examples) < 5:
                             # Always store up to 5 examples regardless of confidence
                             current_examples.append({
-                                'text': str(responses[doc_idx]),
+                                'text': str(quote_texts[doc_idx]),
                                 'confidence': float(confidence)
                             })
                         elif len(current_examples) < 10 and confidence > 0.5:
                             # Store additional high-confidence examples up to 10
                             current_examples.append({
-                                'text': str(responses[doc_idx]),
+                                'text': str(quote_texts[doc_idx]),
                                 'confidence': float(confidence)
                             })
 
@@ -1355,10 +1369,20 @@ def run_ml_analysis(
 
     responses = df_valid[text_column].tolist()
 
+    # Detect original (unprocessed) text for display in examples/quotes
+    # When the user preprocesses text, a '_processed' column is created alongside the original.
+    # We want to use original text for UI display while processed text drives the ML model.
+    original_texts = None
+    if text_column.endswith('_processed'):
+        original_column = text_column[:-len('_processed')]
+        if original_column in df_valid.columns:
+            original_texts = df_valid[original_column].tolist()
+            logger.info(f"Using original text from '{original_column}' for example quotes (ML uses '{text_column}')")
+
     if progress_callback:
         progress_callback(0.5, "Training ML model...")
 
-    coder.fit(responses)
+    coder.fit(responses, original_texts=original_texts)
 
     if progress_callback:
         progress_callback(0.8, "Generating results...")
