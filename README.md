@@ -25,7 +25,7 @@ Interactive web interface for ML-based coding - no coding required!
 - **Code Quality**: Automated testing and linting via Makefile
 
 ### ML-Based Approach
-- 🤖 **Automatic Theme Discovery**: Uses TF-IDF, LDA, LSTM, BERT, and SVM clustering
+- 🤖 **Automatic Theme Discovery**: Uses TF-IDF, LDA, NMF, LSTM, BERT, and SVM clustering
 - 📊 **15 Essential Outputs**: Complete analysis package for researchers
 - 🎯 **Confidence Scoring**: Probabilistic code assignments with quality metrics
 - 📈 **Advanced Analytics**: Co-occurrence analysis, network diagrams, segmentation
@@ -162,7 +162,7 @@ jupyter notebook open_ended_coding_analysis.ipynb
 │   ├── theme_analyzer.py           # Theme identification
 │   └── category_manager.py         # Categorization system
 ├── data/
-│   ├── *.csv                       # Sample datasets (6 curated datasets)
+│   ├── *.csv                       # Sample datasets (6 × 1,000-row curated datasets)
 │   └── stopwords_domain.txt        # Domain-specific stopwords
 ├── documentation/                  # 7-document comprehensive suite
 ├── tests/                          # Unit and integration tests (21 files)
@@ -347,7 +347,7 @@ from ml_open_coding_analysis import MLOpenCoder, OpenCodingResults
 
 coder = MLOpenCoder(
     n_codes=10,              # Number of themes to discover
-    method='tfidf_kmeans',   # Algorithm: 'tfidf_kmeans', 'lda', or 'nmf'
+    method='tfidf_kmeans',   # Algorithm: 'tfidf_kmeans', 'lda', 'nmf', 'bert_kmeans', 'lstm_kmeans', or 'svm'
     min_confidence=0.3       # Confidence threshold
 )
 
@@ -377,6 +377,7 @@ exporter.export_excel('results.xlsx')
 |-----------|-------------|----------|
 | **TF-IDF + K-Means** | Fast bag-of-words clustering | General use, quick exploration |
 | **LDA** | Probabilistic topic modeling | Overlapping themes, academic research |
+| **NMF** | Non-negative matrix factorization | Sparse, non-overlapping topics |
 | **LSTM + K-Means** | Sequential pattern recognition | Order-dependent text, narratives |
 | **BERT + K-Means** | Semantic embedding clustering | Nuanced meaning, synonyms |
 | **SVM Spectral** | Kernel-based clustering | Complex, non-linear boundaries |
@@ -631,6 +632,22 @@ Built with:
 - [ ] Multi-language support (currently English only)
 
 ## Version History
+
+### v1.4.0 (2026) - Dataset Expansion & Concordance
+- **Dataset Expansion**: All 6 datasets expanded to 1,000 rows each using seed-based variation engine
+  - Synonym substitution, phrase recombination, casual style markers
+  - Preserves segment proportions from original seeds
+  - Script: `scripts/expand_datasets.py`
+- **Optimal Sampling**: Click-button sampling for 5/10/15/20 target codes
+  - 150/300/500/700 rows respectively (30-35 responses per code)
+  - Available in app.py, app_lite.py, and both notebooks
+- **Method Concordance**: All 6 ML methods now available in all 4 interfaces
+  - ML notebook `MLOpenCoder` updated to support all 6 methods
+  - Preprocessing aligned (stopword removal with negation preservation)
+  - ngram_range standardized to (1,3) across all interfaces
+  - n_codes defaults/limits standardized (default=10, max=30)
+- **NMF Method**: Added Non-negative Matrix Factorization to all interfaces
+- **Documentation**: Comprehensive documentation update for accuracy
 
 ### v1.3.1 (2026) - Codebase Refactoring
 - **Shared UI Utilities**: Created `helpers/ui_utils.py` with common patterns

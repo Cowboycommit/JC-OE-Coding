@@ -30,7 +30,7 @@ jupyter notebook ml_open_coding_analysis.ipynb
 
 ## Key Features
 
-- **5 ML Algorithms**: TF-IDF+K-Means, LDA, LSTM, BERT, SVM
+- **6 ML Algorithms**: TF-IDF+K-Means, LDA, NMF, LSTM, BERT, SVM
 - **Text Preprocessing**: Data-type presets, negation preservation, domain stopwords
 - **Sentiment Analysis**: VADER (survey), Twitter-RoBERTa (social), Review-BERT (reviews)
 - **LLM-Enhanced Labels**: AI-refined code labels and descriptions
@@ -140,7 +140,7 @@ The Open-Ended Coding Analysis Framework is a comprehensive machine learning pip
 
 - **Data Pipeline**: Ingestion, validation, and formatting of input data
 - **Text Preprocessing**: Data-type presets, negation preservation, domain stopwords
-- **ML Analysis Engine**: 5 algorithms (TF-IDF, LDA, LSTM, BERT, SVM)
+- **ML Analysis Engine**: 6 algorithms (TF-IDF, LDA, NMF, LSTM, BERT, SVM)
 - **Sentiment Analysis**: Data-type-specific models (VADER, Twitter-RoBERTa, Review-BERT)
 - **LLM Enhancement**: AI-refined code labels and descriptions
 - **Quality Assurance**: Validation, rigor diagnostics, and QA reports
@@ -164,9 +164,9 @@ Each component is documented in detail across the documentation suite to ensure 
 
 ## Version Information
 
-- **Documentation Suite Version**: 1.2
-- **Framework Version**: 1.3.1
-- **Last Updated**: 2026-01-26
+- **Documentation Suite Version**: 1.3
+- **Framework Version**: 1.4.0
+- **Last Updated**: 2026-02-11
 - **Framework Status**: Production Ready
 - **Maintenance**: Active
 

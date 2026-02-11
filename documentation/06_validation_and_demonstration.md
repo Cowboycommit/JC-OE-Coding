@@ -2,14 +2,14 @@
 
 **Framework**: Open-Ended Coding Analysis Framework
 **Document Version**: 2.0
-**Last Updated**: 2025-12-26
+**Last Updated**: 2026-02-11
 **Purpose**: Provide validation examples, demonstration scripts, and test procedures
 
 ---
 
 ## Executive Overview
 
-This document provides comprehensive validation procedures and demonstration examples for the Open-Ended Coding Analysis Framework. Each ML method (TF-IDF + K-Means, LDA, NMF) is validated with multiple real-world examples using sample datasets. This ensures the framework is production-ready and provides reliable, reproducible results.
+This document provides comprehensive validation procedures and demonstration examples for the Open-Ended Coding Analysis Framework. All 6 ML methods (TF-IDF + K-Means, LDA, NMF, LSTM + K-Means, BERT + K-Means, SVM Spectral) are validated with real-world examples using the expanded 1,000-row sample datasets. This ensures the framework is production-ready and provides reliable, reproducible results.
 
 **Key Components:**
 - **Validation Examples**: At least 2 examples per ML method with step-by-step procedures
@@ -233,7 +233,7 @@ LDA produces **probabilistic topic distributions** where each response can belon
 
 #### Example 1.2.2: Fashion Responses Analysis
 
-**Dataset**: `data/fashion_responses.csv`
+**Dataset**: `data/fashion_responses_1000.csv`
 **Use Case**: Topic modeling of fashion industry perspectives
 **Objective**: Discover 6-8 topics in fashion discussions
 
@@ -241,7 +241,7 @@ LDA produces **probabilistic topic distributions** where each response can belon
 
 ```python
 # Load data
-df = pd.read_csv('data/fashion_responses.csv')
+df = pd.read_csv('data/fashion_responses_1000.csv')
 
 # Configure LDA model
 coder = MLOpenCoder(
@@ -283,7 +283,7 @@ Same file structure as TF-IDF example, but with LDA-specific characteristics:
 
 #### Example 1.3.1: Cricket Commentary Responses
 
-**Dataset**: `data/cricket_responses.csv`
+**Dataset**: `data/cricket_responses_1000.csv`
 **Use Case**: Analyzing sports commentary with clear thematic separation
 **Objective**: Extract 6-8 distinct themes from cricket discussions
 
@@ -325,7 +325,7 @@ NMF typically produces **sparser, more interpretable topics** than LDA:
 
 #### Example 1.3.2: Sample Remote Work Responses
 
-**Dataset**: `data/Remote_Work_Experiences_200.csv`
+**Dataset**: `data/Remote_Work_Experiences_1000.csv`
 **Use Case**: Analyzing remote work feedback with distinct themes
 **Objective**: Identify 8-10 clear themes in remote work experiences
 
@@ -333,7 +333,7 @@ NMF typically produces **sparser, more interpretable topics** than LDA:
 
 ```python
 # Load sample data
-df = pd.read_csv('data/Remote_Work_Experiences_200.csv')
+df = pd.read_csv('data/Remote_Work_Experiences_1000.csv')
 
 # Configure NMF model
 coder = MLOpenCoder(
@@ -539,7 +539,7 @@ jupyter notebook ml_open_coding_analysis.ipynb
 
 **Commands to Run**:
 ```python
-# In notebook - run three methods
+# In notebook - run all six methods
 # TF-IDF + K-Means
 tfidf_results = run_ml_analysis(df, 'response', 'tfidf_kmeans', n_codes=10)
 
@@ -548,10 +548,19 @@ lda_results = run_ml_analysis(df, 'response', 'lda', n_codes=10, min_confidence=
 
 # NMF
 nmf_results = run_ml_analysis(df, 'response', 'nmf', n_codes=10, min_confidence=0.30)
+
+# BERT + K-Means (semantic)
+bert_results = run_ml_analysis(df, 'response', 'bert_kmeans', n_codes=10)
+
+# LSTM + K-Means (sequence-aware)
+lstm_results = run_ml_analysis(df, 'response', 'lstm_kmeans', n_codes=10)
+
+# SVM Spectral (non-linear)
+svm_results = run_ml_analysis(df, 'response', 'svm', n_codes=10)
 ```
 
 **What to Show**:
-- Run same dataset through all three algorithms
+- Run same dataset through all six algorithms
 - Compare coverage percentages
 - Show different code/topic labels
 - Highlight complementary insights
@@ -559,16 +568,14 @@ nmf_results = run_ml_analysis(df, 'response', 'nmf', n_codes=10, min_confidence=
 
 **Narration Script**:
 ```
-"The framework supports three ML algorithms:
+"The framework supports six ML algorithms:
 
 TF-IDF + K-Means: Fast and interpretable. Best for initial exploration.
-Coverage: 94%, Silhouette: 0.42
-
 LDA: Probabilistic topic modeling. Captures overlapping themes.
-Coverage: 82%, Allows multi-topic assignments.
-
 NMF: Sparse, distinct components. Clear thematic separation.
-Coverage: 89%, High confidence scores.
+BERT + K-Means: Semantic embedding clustering for nuanced meaning.
+LSTM + K-Means: Sequential pattern recognition for narratives.
+SVM Spectral: Kernel-based clustering for complex boundaries.
 
 Use multiple methods for triangulation and validation."
 ```
@@ -646,7 +653,7 @@ Production-ready with confidence."
 **Narration Script**:
 ```
 "The ML-Based Open Coding Analysis Framework provides:
-- Automated theme discovery with three ML algorithms
+- Automated theme discovery with six ML algorithms
 - 15 essential research outputs
 - User-friendly web interface and Jupyter notebooks
 - Comprehensive validation and testing
@@ -768,7 +775,7 @@ python -m http.server 8080 -d htmlcov  # View in browser
 
 ### 4.1 System-Level Acceptance
 
-- [ ] All three ML methods execute without errors
+- [ ] All six ML methods execute without errors
 - [ ] Streamlit UI launches successfully
 - [ ] Jupyter notebooks run end-to-end
 - [ ] All sample datasets load correctly

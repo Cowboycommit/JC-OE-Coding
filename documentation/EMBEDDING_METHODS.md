@@ -535,7 +535,7 @@ run_ml_analysis(df, 'response', n_codes=10, representation='word2vec')
 
 ### Q: Do I need to change my clustering method?
 
-**A:** No. Embeddings work with all clustering methods (`tfidf_kmeans`, `lda`, `nmf`).
+**A:** No. Embeddings work with all 6 clustering methods (`tfidf_kmeans`, `lda`, `nmf`, `bert_kmeans`, `lstm_kmeans`, `svm`).
 
 ### Q: Can I use embeddings without internet?
 

@@ -201,7 +201,9 @@ This system assists qualitative open coding by:
 
 **Dataset Size Constraints:**
 - Minimum recommended: 50+ responses for 10 codes
-- Current dataset: 300 responses
+- Optimal range: 300-500 responses for all 6 ML methods
+- Current demo datasets: 1,000 rows each (use optimal sampling for target code counts)
+- See `documentation/OPTIMAL_DATASET_SIZE.md` for detailed guidance
 
 **Coverage Limitations:**
 - 15 responses (5.0%) received no codes
@@ -233,7 +235,7 @@ This system assists qualitative open coding by:
 To address these limitations:
 
 1. **Always validate auto-generated codes with human review**
-2. **Compare multiple methods** (TF-IDF, LDA, NMF) to check robustness
+2. **Compare multiple methods** (TF-IDF, LDA, NMF, BERT, LSTM, SVM) to check robustness
 3. **Test sensitivity** to number of codes and confidence threshold
 4. **Manually review uncoded and low-confidence responses**
 5. **Consider qualitative coding of a subsample** for validation
@@ -359,7 +361,7 @@ not replace it. Use responsibly, transparently, and with ongoing critical reflec
 
 **Vectorization:**
 - Max features: 1000
-- N-gram range: (1, 2) for TF-IDF, (1, 1) for LDA
+- N-gram range: (1, 3) for TF-IDF, (1, 1) for LDA
 - Min document frequency: 2
 - Max document frequency: 0.8
 - Stop words: English

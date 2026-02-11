@@ -235,6 +235,11 @@ For this project to deliver good accuracy across **all six ML methods**:
 - **Best accuracy ceiling:** 500-1,000 responses (diminishing returns beyond this
   for most methods; LDA continues to improve)
 
-The current demo datasets (200-300 responses each) are well-sized for demonstrating
-most methods. For production use targeting all six methods at good accuracy, scaling
-to **300-500 responses** is the recommended target.
+The current demo datasets (1,000 responses each) exceed the optimal range for all methods.
+The built-in optimal sampling feature provides recommended subsets:
+- **5 codes:** 150 responses (30 per code)
+- **10 codes:** 300 responses (30 per code)
+- **15 codes:** 500 responses (33 per code)
+- **20 codes:** 700 responses (35 per code)
+
+These sampling buttons are available in app.py, app_lite.py, and both Jupyter notebooks.

@@ -1,6 +1,6 @@
 # Analytics Pipeline Validation Report
 
-**Report Date:** January 27, 2026
+**Report Date:** February 11, 2026
 **Validation Scope:** End-to-end analysis of analytics pipeline, notebooks, and UIs for consistency and reproducibility
 
 ---
@@ -18,7 +18,7 @@ This report documents the comprehensive validation of the Open-Ended Coding Anal
 | Engineering UI (app_lite.py) | ✅ Valid | Uses same shared module |
 | ML Notebook (ml_open_coding_analysis.ipynb) | ✅ Valid | Self-contained with consistent results |
 | Traditional Notebook (open_ended_coding_analysis.ipynb) | ✅ Valid | Uses src/ modules |
-| Data Files | ✅ Valid | 6 curated datasets (1,500 total rows) |
+| Data Files | ✅ Valid | 6 curated datasets (1,000 rows each, 6,000 total) |
 | Documentation | ✅ Updated | README and DATASET_ASSESSMENT_REPORT updated |
 
 ---
@@ -52,7 +52,7 @@ The project uses a layered architecture ensuring consistency:
 │  └──────────────────┴──────────────────┴──────────────────┘    │
 ├─────────────────────────────────────────────────────────────────┤
 │                        data/ DATASETS                            │
-│                    (12 CSV files, shared)                        │
+│             (6 × 1,000-row CSV files, shared)                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -107,15 +107,18 @@ The project uses a layered architecture ensuring consistency:
 **ml_open_coding_analysis.ipynb**
 - **Status:** ✅ Valid
 - **Approach:** Self-contained ML classes (MLOpenCoder, OpenCodingResults)
-- **Data Files:** Uses `/data/Healthcare_Patient_Feedback_300.csv` (exists)
-- **Algorithms:** TF-IDF+KMeans, LDA, NMF
+- **Data Files:** Uses `/data/Healthcare_Patient_Feedback_1000.csv`
+- **Algorithms:** All 6 methods: TF-IDF+KMeans, LDA, NMF, LSTM+KMeans, BERT+KMeans, SVM Spectral
+- **Preprocessing:** Aligned with `src/text_preprocessor.py` (stopword removal with negation preservation)
+- **Vectorization:** ngram_range=(1,3), max_features=1000, min_df=2, max_df=0.8
+- **Sampling:** Supports optimal sampling (150/300/500/700 rows for 5/10/15/20 codes)
 - **Outputs:** 15 essential outputs
 
 **open_ended_coding_analysis.ipynb**
-- **Status:** ✅ Valid (after data file creation)
+- **Status:** ✅ Valid
 - **Approach:** Uses shared `src/` modules (CodeFrame, ThemeAnalyzer, CategoryManager)
-- **Data Files:** Uses `/data/Remote_Work_Experiences_200.csv`, `/data/cricket_responses.csv`, `/data/fashion_responses.csv`
-- **Issue Fixed:** Missing data files were created
+- **Data Files:** Uses `/data/Remote_Work_Experiences_1000.csv`, `/data/cricket_responses_1000.csv`, `/data/fashion_responses_1000.csv`
+- **Sampling:** Supports optimal sampling (150/300/500/700 rows for 5/10/15/20 codes)
 
 ---
 
@@ -123,18 +126,18 @@ The project uses a layered architecture ensuring consistency:
 
 ### 3.1 Data File Inventory (Rationalized)
 
-**6 Curated Datasets** optimized for open-ended qualitative analysis:
+**6 Curated Datasets** (1,000 rows each) optimized for open-ended qualitative analysis:
 
 | File | Rows | Columns | Primary Text Column | Status |
 |------|------|---------|---------------------|--------|
-| Psychology_Wellbeing_Study_300.csv | 300 | 5 | response | ✅ Best quality |
-| Healthcare_Patient_Feedback_300.csv | 300 | 5 | response | ✅ Domain-specific |
-| Market_Research_Survey_300.csv | 300 | 5 | response | ✅ Business use |
-| Remote_Work_Experiences_200.csv | 200 | 5 | response | ✅ Quick demos |
-| cricket_responses.csv | 200 | 5 | response | ✅ Topic variety |
-| fashion_responses.csv | 200 | 5 | response | ✅ Theme diversity |
+| Psychology_Wellbeing_Study_1000.csv | 1,000 | 5 | response | ✅ Best quality |
+| Healthcare_Patient_Feedback_1000.csv | 1,000 | 5 | response | ✅ Domain-specific |
+| Market_Research_Survey_1000.csv | 1,000 | 5 | response | ✅ Business use |
+| Remote_Work_Experiences_1000.csv | 1,000 | 5 | response | ✅ Quick demos |
+| cricket_responses_1000.csv | 1,000 | 5 | response | ✅ Topic variety |
+| fashion_responses_1000.csv | 1,000 | 5 | response | ✅ Theme diversity |
 
-**Total:** 1,500 rows of high-quality, curated qualitative data
+**Total:** 6,000 rows of high-quality, curated qualitative data (expanded from original seeds using `scripts/expand_datasets.py`)
 
 **Removed datasets:** AG News, GoEmotions, SNIPS, SemEval, SST-2, SST-5 (pre-labeled classification datasets not suitable for theme discovery)
 
@@ -151,47 +154,62 @@ df = loader.load_csv('data/filename.csv')
 # Traditional Notebook
 from src.data_loader import DataLoader
 loader = DataLoader()
-df = loader.load_csv('data/Remote_Work_Experiences_200.csv')
+df = loader.load_csv('data/Remote_Work_Experiences_1000.csv')
 
 # ML Notebook (inline loading but same format)
-df = pd.read_csv('data/Healthcare_Patient_Feedback_300.csv')
+df = pd.read_csv('data/Healthcare_Patient_Feedback_1000.csv')
 ```
 
 ---
 
 ## 4. Issues Identified and Resolved
 
-### 4.1 Missing Data Files (RESOLVED)
+### 4.1 Missing Data Files (RESOLVED - January 2026)
 
-**Issue:** The `open_ended_coding_analysis.ipynb` notebook referenced data files that did not exist:
-- `data/Remote_Work_Experiences_200.csv`
-- `data/cricket_responses.csv`
-- `data/fashion_responses.csv`
+**Issue:** The `open_ended_coding_analysis.ipynb` notebook referenced data files that did not exist.
 
-**Resolution:** Created all three files with appropriate content matching the notebook's expected format.
+**Resolution:** Created all required data files.
 
-### 4.2 Documentation Update (RESOLVED)
+### 4.2 Dataset Expansion (RESOLVED - February 2026)
 
-**Issue:** README and DATASET_ASSESSMENT_REPORT showed 9 datasets, but 12 are now available.
+**Issue:** Original datasets (200-300 rows) were insufficient for all 6 ML methods to train with good accuracy.
 
-**Resolution:** Updated both documents to reflect 12 datasets.
+**Resolution:** All 6 datasets expanded to 1,000 rows each using seed-based variation engine (`scripts/expand_datasets.py`). Added optimal sampling buttons in all UIs and notebooks.
+
+### 4.3 Method Concordance (RESOLVED - February 2026)
+
+**Issue:** ML notebook only supported 3 methods (TF-IDF, LDA, NMF) while UIs supported 5-6. Preprocessing, vectorization parameters, and n_codes defaults were inconsistent across interfaces.
+
+**Resolution:**
+- ML notebook `MLOpenCoder` class rewritten to support all 6 methods
+- Preprocessing aligned across all interfaces (stopword removal with negation preservation)
+- ngram_range standardized to (1,3) everywhere (was (1,2) in some places)
+- n_codes default standardized to 10 (app_lite had 8)
+- n_codes max standardized to 30 (app_lite had 20)
+- Optimal sampling added to all 4 interfaces
+
+### 4.4 Documentation Update (RESOLVED - February 2026)
+
+**Issue:** Documentation referenced old dataset filenames, old row counts, and incomplete method lists.
+
+**Resolution:** All documentation updated to reflect 1,000-row datasets, 6 ML methods, and new features.
 
 ---
 
 ## 5. ML Algorithm Consistency
 
-Both UIs and notebooks support consistent ML algorithms:
+All UIs and notebooks now support all 6 ML algorithms consistently (aligned February 2026):
 
 | Algorithm | app.py | app_lite.py | ML Notebook | Status |
 |-----------|--------|-------------|-------------|--------|
 | TF-IDF + K-Means | ✅ | ✅ | ✅ | Consistent |
 | LDA | ✅ | ✅ | ✅ | Consistent |
-| LSTM + K-Means | ✅ | ✅ | ❌ | UI only |
-| BERT + K-Means | ✅ | ✅ | ❌ | UI only |
-| SVM Spectral | ✅ | ✅ | ❌ | UI only |
-| NMF | ❌ | ❌ | ✅ | Notebook only |
+| NMF | ✅ | ✅ | ✅ | Consistent |
+| LSTM + K-Means | ✅ | ✅ | ✅ | Consistent |
+| BERT + K-Means | ✅ | ✅ | ✅ | Consistent |
+| SVM Spectral | ✅ | ✅ | ✅ | Consistent |
 
-**Note:** The ML notebook provides TF-IDF, LDA, and NMF. The UIs provide more advanced embedding methods (LSTM, BERT, SVM) via the full `helpers/analysis.py` module.
+**Note:** The ML notebook's `MLOpenCoder` class was updated to support all 6 methods with aligned preprocessing (stopword removal with negation preservation), consistent vectorization parameters (ngram_range=(1,3), max_features=1000), and the same optimal sampling feature as the UIs.
 
 ---
 
@@ -250,10 +268,10 @@ PIPELINE VALIDATION TESTS
 ============================================================
 
 1. Testing DataLoader...
-   [PASS] Loaded 300 rows from Healthcare data
-   [PASS] Loaded 200 rows from Remote_Work_Experiences_200
-   [PASS] Loaded 200 rows from cricket_responses
-   [PASS] Loaded 200 rows from fashion_responses
+   [PASS] Loaded 1000 rows from Healthcare data
+   [PASS] Loaded 1000 rows from Remote_Work_Experiences_1000
+   [PASS] Loaded 1000 rows from cricket_responses_1000
+   [PASS] Loaded 1000 rows from fashion_responses_1000
 
 2. Testing CodeFrame...
    [PASS] CodeFrame applied codes: ['CODE1']
@@ -291,10 +309,11 @@ Core Module Tests Complete
 
 ### 8.1 For Users
 
-1. **Primary Demo:** Use `Healthcare_Patient_Feedback_300.csv` for best results
-2. **Business Use Case:** Use `Market_Research_Survey_300.csv` for consumer insights
-3. **Research Context:** Use `Psychology_Wellbeing_Study_300.csv` for academic demos
-4. **Notebook Demo:** Use `Remote_Work_Experiences_200.csv` for traditional coding workflow
+1. **Primary Demo:** Use `Healthcare_Patient_Feedback_1000.csv` for best results
+2. **Business Use Case:** Use `Market_Research_Survey_1000.csv` for consumer insights
+3. **Research Context:** Use `Psychology_Wellbeing_Study_1000.csv` for academic demos
+4. **Notebook Demo:** Use `Remote_Work_Experiences_1000.csv` for traditional coding workflow
+5. **Optimal Sampling:** Use the built-in sampling buttons (150/300/500/700 rows for 5/10/15/20 codes)
 
 ### 8.2 For Developers
 
@@ -309,12 +328,13 @@ Core Module Tests Complete
 The Open-Ended Coding Analysis Framework has been validated for:
 
 - **Architectural Consistency:** All UIs use the same shared analysis module
-- **Data Consistency:** All 12 datasets are accessible from all interfaces
+- **Data Consistency:** All 6 datasets (1,000 rows each) accessible from all interfaces
+- **Method Concordance:** All 6 ML methods available across all 4 interfaces (app.py, app_lite.py, ML notebook, traditional notebook)
+- **Parameter Alignment:** Consistent preprocessing, vectorization (ngram_range=(1,3)), and defaults across all interfaces
 - **Reproducibility:** Same inputs produce same outputs across interfaces
-- **Documentation Accuracy:** README and reports are up to date
-
-The validation identified and resolved the missing data file issue for the traditional coding notebook. All components are now operational and consistent.
+- **Optimal Sampling:** All interfaces support sampling for 5/10/15/20 target codes
+- **Documentation Accuracy:** All documentation updated to reflect current state
 
 ---
 
-*Validation performed by automated multi-agent analysis on January 27, 2026*
+*Validation last updated February 11, 2026 following dataset expansion, concordance alignment, and documentation update.*
