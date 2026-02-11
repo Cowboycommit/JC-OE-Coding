@@ -324,7 +324,7 @@ class VectorizerFactory:
                 'lowercase': count_kwargs.get('lowercase', True),
                 'strip_accents': count_kwargs.get('strip_accents', None),
                 'token_pattern': count_kwargs.get('token_pattern', r'(?u)\b\w\w+\b'),
-                'ngram_range': count_kwargs.get('ngram_range', (1, 2))
+                'ngram_range': count_kwargs.get('ngram_range', (1, 3))
             }
             # Stop words are already applied in the vocabulary, but we keep
             # the setting for consistency in case of new terms

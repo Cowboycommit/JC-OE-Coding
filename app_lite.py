@@ -721,8 +721,8 @@ def main():
                     n_codes = st.slider(
                         "Number of codes",
                         min_value=3,
-                        max_value=20,
-                        value=8,
+                        max_value=30,
+                        value=10,
                         key="n_codes_slider",
                     )
 
