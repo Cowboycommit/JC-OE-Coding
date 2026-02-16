@@ -86,6 +86,27 @@ DEFAULT_LABEL_STOPWORDS: Set[str] = {
     'rsquo', 'lsquo', 'rdquo', 'ldquo', 'hellip', 'bull', 'copy', 'reg', 'trade'
 }
 
+# Sentiment-bearing words that should be excluded from labels when a cluster
+# has mixed sentiment (both positive and negative views on the same topic).
+# These adjectives/adverbs inject a sentiment direction into what should be
+# a neutral topic label, causing mismatch with representative quotes.
+SENTIMENT_LABEL_WORDS: Set[str] = {
+    # Negative sentiment words
+    'poor', 'bad', 'terrible', 'horrible', 'awful', 'worst', 'worse',
+    'lacking', 'inadequate', 'insufficient', 'inconsistent', 'unreliable',
+    'disappointing', 'disappointed', 'frustrating', 'frustrated',
+    'unacceptable', 'unsatisfactory', 'unhelpful', 'unprofessional',
+    'rude', 'slow', 'delayed', 'broken', 'failed', 'failing', 'negative',
+    'declining', 'deteriorating', 'problematic', 'difficult', 'confusing',
+    'unclear', 'missing', 'neglected', 'ignored', 'forgotten',
+    # Positive sentiment words
+    'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'outstanding',
+    'exceptional', 'perfect', 'best', 'superior', 'impressive',
+    'satisfying', 'satisfied', 'pleasant', 'friendly', 'helpful',
+    'professional', 'efficient', 'quick', 'fast', 'brilliant',
+    'remarkable', 'superb', 'magnificent', 'positive', 'improving',
+}
+
 # For backward compatibility
 LABEL_STOPWORDS = DEFAULT_LABEL_STOPWORDS
 
@@ -600,6 +621,50 @@ class ClusterInterpreter:
                 filtered_weights.append(weight)
         return filtered_terms, filtered_weights
 
+    def _filter_sentiment_terms_for_label(
+        self,
+        terms: List[str],
+        weights: List[float]
+    ) -> Tuple[List[str], List[float]]:
+        """
+        Remove sentiment-bearing words from label terms for mixed-sentiment clusters.
+
+        When a cluster has mixed sentiment (both positive and negative views on
+        the same topic), sentiment-bearing adjectives like "inconsistent" or
+        "excellent" should not appear in the label because they create a
+        misleading mismatch with representative quotes of the opposite sentiment.
+
+        For multi-word terms (n-grams), individual sentiment words are removed
+        from the phrase rather than dropping the entire term, so "inconsistent
+        follow-up care" becomes "follow-up care".
+
+        Args:
+            terms: List of terms (may include n-grams)
+            weights: Corresponding weights
+
+        Returns:
+            Tuple of (filtered_terms, filtered_weights) with sentiment words removed
+        """
+        filtered_terms = []
+        filtered_weights = []
+        for term, weight in zip(terms, weights):
+            words = term.split()
+            if len(words) > 1:
+                # Multi-word term: strip sentiment words but keep the rest
+                neutral_words = [
+                    w for w in words if w.lower() not in SENTIMENT_LABEL_WORDS
+                ]
+                if neutral_words:
+                    filtered_terms.append(" ".join(neutral_words))
+                    filtered_weights.append(weight)
+                # else: entire phrase was sentiment words, drop it
+            else:
+                # Single word: drop if it's a sentiment word
+                if term.lower() not in SENTIMENT_LABEL_WORDS:
+                    filtered_terms.append(term)
+                    filtered_weights.append(weight)
+        return filtered_terms, filtered_weights
+
     def _filter_label_terms(self, terms: List[str]) -> List[str]:
         """
         Filter terms for use in labels: remove duplicates and subset phrases.
@@ -912,22 +977,40 @@ class ClusterInterpreter:
                 filtered_terms, filtered_weights
             )
 
+            # Get document indices early - needed for sentiment analysis before label generation
+            doc_indices = cluster_docs.get(cluster_idx, [])
+            doc_count = len(doc_indices)
+
+            # Analyze sentiment BEFORE label generation so we can produce
+            # sentiment-neutral labels for mixed-sentiment clusters
+            sentiment_result = self._analyze_cluster_sentiment(texts, doc_indices)
+
+            # For mixed-sentiment clusters, remove sentiment-bearing words from
+            # label terms to avoid misleading labels like "Inconsistent Follow-Up
+            # Care" when the cluster contains both positive and negative quotes
+            label_terms = filtered_terms
+            label_weights = filtered_weights
+            if sentiment_result['is_mixed']:
+                label_terms, label_weights = self._filter_sentiment_terms_for_label(
+                    filtered_terms, filtered_weights
+                )
+                # Fall back to unfiltered terms if filtering removed everything
+                if not label_terms:
+                    label_terms = filtered_terms
+                    label_weights = filtered_weights
+
             # Generate label using phrase-based or word-based approach
             if self.prefer_ngram_phrases:
                 label = self._generate_phrase_based_label(
-                    filtered_terms, filtered_weights, self.n_label_terms
+                    label_terms, label_weights, self.n_label_terms
                 )
             else:
                 label = self._generate_word_based_label(
-                    filtered_terms, filtered_weights, self.n_label_terms
+                    label_terms, label_weights, self.n_label_terms
                 )
 
             if not label:
                 label = f"Cluster {cluster_idx} (low confidence)"
-
-            # Get document count and indices
-            doc_indices = cluster_docs.get(cluster_idx, [])
-            doc_count = len(doc_indices)
 
             # Get representative documents
             representative_docs = self._get_representative_docs(
@@ -973,9 +1056,6 @@ class ClusterInterpreter:
             if cluster_coherence is not None and cluster_coherence < self.min_coherence_threshold:
                 warnings.append(f"Low coherence ({cluster_coherence:.2f}) - cluster may be poorly defined")
                 confidence *= 0.85
-
-            # Analyze sentiment distribution within the cluster
-            sentiment_result = self._analyze_cluster_sentiment(texts, doc_indices)
 
             # Add warning for mixed-sentiment clusters
             if sentiment_result['is_mixed']:
