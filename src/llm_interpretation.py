@@ -457,7 +457,8 @@ IMPORTANT: You MUST provide exactly 3 alternative_labels. Each alternative shoul
         term_weights: List[float],
         sample_texts: List[str],
         current_label: str,
-        document_count: int
+        document_count: int,
+        sentiment_info: Optional[Dict[str, Any]] = None
     ) -> str:
         """Build the prompt for cluster interpretation with rich context."""
         # Format top terms with weights - include more terms for better context
@@ -476,6 +477,34 @@ IMPORTANT: You MUST provide exactly 3 alternative_labels. Each alternative shoul
                 samples.append(f"  {i}. \"{truncated}\"")
             samples_str = "\n".join(samples)
 
+        # Build sentiment context block if available
+        sentiment_block = ""
+        sentiment_instruction = ""
+        if sentiment_info and sentiment_info.get('distribution'):
+            dist = sentiment_info['distribution']
+            pos_pct = dist.get('positive', 0)
+            neg_pct = dist.get('negative', 0)
+            neu_pct = dist.get('neutral', 0)
+            dominant = sentiment_info.get('dominant', 'unknown')
+            is_mixed = sentiment_info.get('is_mixed', False)
+
+            sentiment_block = f"""
+SENTIMENT DISTRIBUTION IN THIS CLUSTER:
+- Positive: {pos_pct:.0%}
+- Negative: {neg_pct:.0%}
+- Neutral: {neu_pct:.0%}
+- Dominant sentiment: {dominant}
+"""
+            if is_mixed:
+                sentiment_instruction = (
+                    "5. IMPORTANT: This cluster has MIXED SENTIMENT - it contains both "
+                    "positive and negative views about the same topic. Your label MUST be "
+                    "sentiment-NEUTRAL (describe the TOPIC only, not the sentiment direction). "
+                    "For example, use 'Follow-Up Care' instead of 'Inconsistent Follow-Up Care' "
+                    "or 'Excellent Follow-Up Care'. The label should accurately apply to ALL "
+                    "quotes regardless of whether they are positive or negative."
+                )
+
         prompt = f"""Analyze this cluster of survey responses and provide a SPECIFIC, ACCURATE label.
 
 CLUSTER STATISTICS:
@@ -484,7 +513,7 @@ CLUSTER STATISTICS:
 
 TOP KEYWORDS BY TF-IDF WEIGHT (these indicate frequent/distinctive terms):
 {terms_str}
-
+{sentiment_block}
 REPRESENTATIVE SAMPLE RESPONSES (read these carefully to understand the theme):
 {samples_str if samples_str else "  (No samples available)"}
 
@@ -493,6 +522,7 @@ ANALYSIS INSTRUCTIONS:
 2. Identify the COMMON THEME across all samples - what specific topic/issue/feedback do they share?
 3. The keywords show what terms are frequent, but the samples show the actual meaning
 4. Avoid generic labels - be as specific as possible about the actual content
+{sentiment_instruction}
 
 Based on your analysis, provide your response in this exact JSON format:
 {{
@@ -679,7 +709,8 @@ CRITICAL REQUIREMENTS:
         term_weights: List[float],
         current_label: str,
         document_count: int,
-        sample_texts: Optional[List[str]] = None
+        sample_texts: Optional[List[str]] = None,
+        sentiment_info: Optional[Dict[str, Any]] = None
     ) -> LLMEnhancedLabel:
         """
         Enhance a cluster summary with LLM-generated interpretation.
@@ -690,6 +721,9 @@ CRITICAL REQUIREMENTS:
             current_label: Current auto-generated label
             document_count: Number of documents in cluster
             sample_texts: Optional sample texts from the cluster
+            sentiment_info: Optional sentiment distribution for this cluster.
+                When the cluster has mixed sentiment, the LLM is instructed to
+                generate a sentiment-neutral topic label.
 
         Returns:
             LLMEnhancedLabel with refined label and description
@@ -717,7 +751,8 @@ CRITICAL REQUIREMENTS:
             term_weights=term_weights,
             sample_texts=sample_texts or [],
             current_label=current_label,
-            document_count=document_count
+            document_count=document_count,
+            sentiment_info=sentiment_info
         )
 
         response, source = self._generate_with_fallback(prompt)
@@ -799,12 +834,27 @@ CRITICAL REQUIREMENTS:
                 current_label = summary.label
                 doc_count = summary.document_count
                 representative_docs = getattr(summary, 'representative_docs', [])
+                # Extract sentiment info for the LLM prompt
+                sentiment_info = None
+                if getattr(summary, 'sentiment_distribution', None) is not None:
+                    sentiment_info = {
+                        'distribution': summary.sentiment_distribution,
+                        'dominant': summary.dominant_sentiment,
+                        'is_mixed': summary.has_mixed_sentiment,
+                    }
             else:
                 top_terms = summary.get('top_terms', [])
                 term_weights = summary.get('term_weights', [])
                 current_label = summary.get('label', '')
                 doc_count = summary.get('document_count', 0)
                 representative_docs = summary.get('representative_docs', [])
+                sentiment_info = None
+                if summary.get('sentiment_distribution') is not None:
+                    sentiment_info = {
+                        'distribution': summary['sentiment_distribution'],
+                        'dominant': summary.get('dominant_sentiment'),
+                        'is_mixed': summary.get('has_mixed_sentiment', False),
+                    }
 
             # Get sample texts - prefer representative docs (closest to cluster center)
             sample_texts = []
@@ -833,7 +883,8 @@ CRITICAL REQUIREMENTS:
                 term_weights=term_weights,
                 current_label=current_label,
                 document_count=doc_count,
-                sample_texts=sample_texts
+                sample_texts=sample_texts,
+                sentiment_info=sentiment_info
             )
 
             enhanced_labels[cluster_id] = enhanced

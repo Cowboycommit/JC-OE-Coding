@@ -91,6 +91,21 @@ except ImportError:
     VECTORIZER_FACTORY_AVAILABLE = False
     logging.warning("Vectorizer factory not available. Using legacy vectorization.")
 
+# Import hyperparameter tuning module
+try:
+    from src.hyperparameter_tuning import (
+        HyperparameterTuner,
+        TuningConfig,
+        TuningResult,
+        OptimizationMetric,
+        tune_hyperparameters,
+        get_default_params
+    )
+    HYPERPARAMETER_TUNING_AVAILABLE = True
+except ImportError:
+    HYPERPARAMETER_TUNING_AVAILABLE = False
+    logging.warning("Hyperparameter tuning not available. Install optuna: pip install optuna")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -607,7 +622,7 @@ def run_ml_analysis(
             text = ' '.join(text.split())
             return text
 
-        def fit(self, responses, stop_words='english'):
+        def fit(self, responses, stop_words='english', original_texts=None):
             processed = [self.preprocess_text(r) for r in responses]
 
             # Validate LDA compatibility with representation
@@ -787,7 +802,10 @@ def run_ml_analysis(
                     doc_topic_matrix[i, label] = 1.0
 
             self._generate_codebook(texts=processed)
-            self._assign_codes(doc_topic_matrix, responses)
+            # Use original (unprocessed) texts for example quotes if available,
+            # otherwise fall back to the responses used for modelling
+            display_texts = original_texts if original_texts is not None else responses
+            self._assign_codes(doc_topic_matrix, responses, display_texts=display_texts)
 
             # NEW: Mandatory cluster interpretation layer
             # This ensures cluster IDs are never exposed without human-readable explanations
@@ -822,7 +840,7 @@ def run_ml_analysis(
                     self.cluster_interpretation = interpreter.interpret_clusters(
                         vectorizer=term_vectorizer,
                         cluster_model=self.model,
-                        texts=responses,
+                        texts=display_texts,
                         cluster_assignments=labels if hasattr(self.model, 'labels_') else
                             doc_topic_matrix.argmax(axis=1).tolist(),
                         feature_matrix=term_feature_matrix,
@@ -843,7 +861,7 @@ def run_ml_analysis(
                     try:
                         self.cluster_interpretation = interpreter.apply_llm_enhancement(
                             report=self.cluster_interpretation,
-                            texts=responses,
+                            texts=display_texts,
                             cluster_assignments=cluster_assignments
                         )
                         if self.cluster_interpretation.llm_enhanced:
@@ -1046,7 +1064,18 @@ def run_ml_analysis(
             # Return terms that are not subsets
             return [term for i, (term, _) in enumerate(term_words) if i not in to_remove]
 
-        def _assign_codes(self, doc_topic_matrix, responses):
+        def _assign_codes(self, doc_topic_matrix, responses, display_texts=None):
+            """Assign codes to documents based on topic distribution.
+
+            Args:
+                doc_topic_matrix: Document-topic distribution matrix.
+                responses: Text list used for modelling.
+                display_texts: Original (unprocessed) texts for UI display.
+                    Falls back to responses if not provided.
+            """
+            # Use original texts for display if available, otherwise use model texts
+            quote_texts = display_texts if display_texts is not None else responses
+
             assignments = []
             confidences = []
 
@@ -1067,13 +1096,13 @@ def run_ml_analysis(
                         if len(current_examples) < 5:
                             # Always store up to 5 examples regardless of confidence
                             current_examples.append({
-                                'text': str(responses[doc_idx]),
+                                'text': str(quote_texts[doc_idx]),
                                 'confidence': float(confidence)
                             })
                         elif len(current_examples) < 10 and confidence > 0.5:
                             # Store additional high-confidence examples up to 10
                             current_examples.append({
-                                'text': str(responses[doc_idx]),
+                                'text': str(quote_texts[doc_idx]),
                                 'confidence': float(confidence)
                             })
 
@@ -1340,10 +1369,20 @@ def run_ml_analysis(
 
     responses = df_valid[text_column].tolist()
 
+    # Detect original (unprocessed) text for display in examples/quotes
+    # When the user preprocesses text, a '_processed' column is created alongside the original.
+    # We want to use original text for UI display while processed text drives the ML model.
+    original_texts = None
+    if text_column.endswith('_processed'):
+        original_column = text_column[:-len('_processed')]
+        if original_column in df_valid.columns:
+            original_texts = df_valid[original_column].tolist()
+            logger.info(f"Using original text from '{original_column}' for example quotes (ML uses '{text_column}')")
+
     if progress_callback:
         progress_callback(0.5, "Training ML model...")
 
-    coder.fit(responses)
+    coder.fit(responses, original_texts=original_texts)
 
     if progress_callback:
         progress_callback(0.8, "Generating results...")
@@ -1389,6 +1428,164 @@ def run_ml_analysis(
     logger.info(f"Analysis completed in {metrics['execution_time']:.2f} seconds")
 
     return coder, results_df, metrics
+
+
+def run_ml_analysis_with_tuning(
+    df: pd.DataFrame,
+    text_column: str,
+    method: str = 'tfidf_kmeans',
+    min_confidence: float = 0.2,
+    n_trials: int = 50,
+    timeout: int = 300,
+    optimization_metric: str = 'silhouette',
+    tune_n_codes: bool = True,
+    min_codes: int = 3,
+    max_codes: int = 15,
+    progress_callback=None,
+    label_column: Optional[str] = None
+) -> Tuple[Any, Any, Dict, 'TuningResult']:
+    """
+    Run ML-based open coding with automatic hyperparameter tuning.
+
+    This function first optimizes hyperparameters using Optuna, then runs
+    the analysis with the best parameters found.
+
+    Args:
+        df: DataFrame with responses
+        text_column: Name of the text column
+        method: ML method:
+            - 'tfidf_kmeans': TF-IDF + K-Means (fast, keyword-based)
+            - 'lda': Latent Dirichlet Allocation (topic modeling)
+            - 'lstm_kmeans': LSTM autoencoder + K-Means (sequential patterns)
+            - 'bert_kmeans': BERT embeddings + K-Means (semantic understanding)
+            - 'svm': SVM-based Spectral Clustering (kernel-based boundaries)
+        min_confidence: Minimum confidence threshold
+        n_trials: Number of optimization trials (default: 50)
+        timeout: Maximum optimization time in seconds (default: 300)
+        optimization_metric: Metric to optimize:
+            - 'silhouette': Silhouette score (default, balance of cohesion/separation)
+            - 'calinski_harabasz': Calinski-Harabasz index (variance ratio)
+            - 'davies_bouldin': Davies-Bouldin index (lower is better)
+            - 'combined': Weighted combination of all metrics
+        tune_n_codes: Whether to tune the number of clusters (default: True)
+        min_codes: Minimum number of codes to test
+        max_codes: Maximum number of codes to test
+        progress_callback: Optional callback for progress updates
+        label_column: Optional column for post-hoc evaluation
+
+    Returns:
+        Tuple of (coder, results_df, metrics, tuning_result)
+        - coder: Fitted MLOpenCoder instance
+        - results_df: DataFrame with coding results
+        - metrics: Dictionary of analysis metrics
+        - tuning_result: TuningResult with optimization details
+
+    Raises:
+        ImportError: If optuna is not installed
+        ValueError: If dataset is too small
+
+    Example:
+        >>> coder, results, metrics, tuning = run_ml_analysis_with_tuning(
+        ...     df, 'response',
+        ...     method='tfidf_kmeans',
+        ...     n_trials=30,
+        ...     optimization_metric='silhouette'
+        ... )
+        >>> print(f"Best n_codes: {tuning.best_params['n_codes']}")
+        >>> print(f"Best score: {tuning.best_score:.4f}")
+    """
+    if not HYPERPARAMETER_TUNING_AVAILABLE:
+        raise ImportError(
+            "Hyperparameter tuning requires optuna. Install with: pip install optuna"
+        )
+
+    # Validate inputs
+    if text_column not in df.columns:
+        raise ValueError(f"Column '{text_column}' not found in DataFrame")
+
+    if len(df) < 10:
+        raise ValueError("Need at least 10 rows for hyperparameter tuning")
+
+    # Get valid texts for tuning
+    valid_mask = df[text_column].notna() & (df[text_column].astype(str).str.strip() != '')
+    texts = df[valid_mask][text_column].tolist()
+
+    if len(texts) < 10:
+        raise ValueError("Need at least 10 non-empty text entries for tuning")
+
+    # Progress callback wrapper for tuning phase
+    def tuning_progress(progress, message):
+        if progress_callback:
+            # Tuning takes ~50% of total time
+            progress_callback(progress * 0.5, f"[Tuning] {message}")
+
+    logger.info(f"Starting hyperparameter tuning for {method} with {n_trials} trials")
+
+    # Run hyperparameter tuning
+    tuning_result = tune_hyperparameters(
+        texts=texts,
+        method=method,
+        n_trials=n_trials,
+        timeout=timeout,
+        optimization_metric=optimization_metric,
+        tune_n_codes=tune_n_codes,
+        min_codes=min_codes,
+        max_codes=max_codes,
+        progress_callback=tuning_progress,
+        verbose=1
+    )
+
+    logger.info(f"Tuning complete. Best score: {tuning_result.best_score:.4f}")
+    logger.info(f"Best params: {tuning_result.best_params}")
+
+    # Extract best parameters
+    best_n_codes = tuning_result.best_params.get('n_codes', 10)
+    best_vectorizer_params = tuning_result.best_params.get('vectorizer_params', {})
+    best_embedding_params = tuning_result.best_params.get('embedding_params', {})
+
+    # Determine representation based on method
+    representation = 'tfidf'
+    if method == 'lstm_kmeans':
+        representation = 'lstm'
+    elif method == 'bert_kmeans':
+        representation = 'bert'
+
+    # Progress callback wrapper for analysis phase
+    def analysis_progress(progress, message):
+        if progress_callback:
+            # Analysis takes remaining ~50% of total time
+            progress_callback(0.5 + progress * 0.5, f"[Analysis] {message}")
+
+    # Run analysis with optimized parameters
+    coder, results_df, metrics = run_ml_analysis(
+        df=df,
+        text_column=text_column,
+        n_codes=best_n_codes,
+        method=method,
+        min_confidence=min_confidence,
+        representation=representation,
+        embedding_kwargs=best_embedding_params if best_embedding_params else None,
+        progress_callback=analysis_progress,
+        use_adaptive_preprocessing=True,
+        preprocessing_override=best_vectorizer_params if best_vectorizer_params else None,
+        label_column=label_column
+    )
+
+    # Add tuning information to metrics
+    metrics['hyperparameter_tuning'] = {
+        'enabled': True,
+        'n_trials': tuning_result.n_trials_completed,
+        'optimization_time': tuning_result.optimization_time,
+        'optimization_metric': optimization_metric,
+        'best_score': tuning_result.best_score,
+        'best_params': tuning_result.best_params,
+        'all_metrics': tuning_result.all_metrics
+    }
+
+    if progress_callback:
+        progress_callback(1.0, "Analysis with tuning complete!")
+
+    return coder, results_df, metrics, tuning_result
 
 
 def calculate_metrics_summary(coder, results_df: pd.DataFrame) -> Dict[str, Any]:
