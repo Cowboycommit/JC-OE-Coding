@@ -12,7 +12,7 @@ A comprehensive toolkit for qualitative data analysis including:
 - Gold standard text preprocessing and data cleaning
 """
 
-__version__ = "1.1.0"
+__version__ = "1.4.0"
 __author__ = "Your Name"
 
 from .data_loader import DataLoader

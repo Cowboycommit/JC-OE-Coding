@@ -30,11 +30,14 @@ In the context of ML-based qualitative data analysis, **gold-standard outputs** 
 
 ### Framework Coverage
 
-This document establishes benchmarks for:
-- Unsupervised learning techniques (TF-IDF, K-Means, LDA, NMF)
-- Semantic embedding models (SentenceBERT, Word2Vec, FastText)
-- Quality filtering and validation metrics
-- Output completeness across 15 essential deliverables
+This document establishes benchmarks for all 6 primary ML methods:
+- **TF-IDF+K-Means**: Document vectorization and partitional clustering
+- **LDA**: Probabilistic topic modeling
+- **NMF**: Non-negative matrix factorization for topic extraction
+- **LSTM+K-Means**: Deep learning sequence embeddings with clustering
+- **BERT+K-Means (SentenceBERT)**: Transformer-based semantic embeddings with clustering
+- **SVM Spectral**: Support vector machine with spectral clustering
+- Additionally: Quality filtering, validation metrics, and output completeness across 15 essential deliverables
 
 ---
 
@@ -171,9 +174,81 @@ l1_ratio: 0.5  # Balance L1/L2 regularization
 
 ---
 
-### 4. Semantic Embeddings
+### 4. LSTM+K-Means Clustering
 
-**Purpose**: Capture semantic meaning through dense vector representations.
+**Purpose**: Use LSTM (Long Short-Term Memory) neural networks to generate sequence-aware embeddings, then cluster with K-Means.
+
+#### Key Performance Indicators
+
+| Metric | Acceptable Range | Good Performance | Interpretation |
+|--------|-----------------|------------------|----------------|
+| Silhouette Score | > 0.25 | 0.4 - 0.6 | Cluster separation quality |
+| Davies-Bouldin Index | < 2.0 | < 1.0 | Lower = better cluster separation |
+| Calinski-Harabasz Score | > 100 | > 500 | Higher = better defined clusters |
+| Training Loss | Converging | Stable plateau | Model convergence indicator |
+
+#### When to Use LSTM+K-Means
+
+- **Best for**: Medium-to-long text where word order and sequential context matter
+- **Dataset size**: Minimum 200 documents, optimal 500+
+- **Expected clusters**: 5-15 themes
+- **Strengths**: Captures sequential dependencies and contextual meaning that bag-of-words models miss
+
+#### Quality Criteria
+
+- [ ] Silhouette score ≥ 0.3 indicates acceptable cluster quality
+- [ ] LSTM training loss has converged (no significant decrease in final epochs)
+- [ ] No single cluster contains > 50% of documents
+- [ ] Each cluster has ≥ 5% of total documents
+- [ ] Cluster labels are interpretable by domain experts
+
+#### Known Issues
+
+- Requires more compute resources than TF-IDF or LDA
+- Sensitive to hyperparameters (embedding dimension, sequence length, learning rate)
+- May overfit on small datasets; use dropout and early stopping
+
+---
+
+### 5. SVM Spectral Clustering
+
+**Purpose**: Use Support Vector Machine (SVM) decision boundaries combined with spectral clustering for non-linear theme separation.
+
+#### Key Performance Indicators
+
+| Metric | Acceptable Range | Good Performance | Interpretation |
+|--------|-----------------|------------------|----------------|
+| Silhouette Score | > 0.25 | 0.4 - 0.6 | Cluster separation quality |
+| Normalized Mutual Information (NMI) | > 0.3 | > 0.5 | Agreement with reference clustering |
+| Davies-Bouldin Index | < 2.0 | < 1.0 | Lower = better cluster separation |
+| SVM Classification Accuracy | > 0.7 | > 0.85 | If used for semi-supervised validation |
+
+#### When to Use SVM Spectral
+
+- **Best for**: Datasets with non-linear cluster boundaries that K-Means struggles with
+- **Dataset size**: Minimum 100 documents, optimal 500+
+- **Expected clusters**: 5-15 themes
+- **Strengths**: Handles complex, non-convex cluster shapes; robust to outliers
+
+#### Quality Criteria
+
+- [ ] Silhouette score ≥ 0.3 indicates acceptable cluster quality
+- [ ] Spectral embedding reveals clear group structure in 2D projection
+- [ ] No single cluster contains > 50% of documents
+- [ ] Each cluster has ≥ 5% of total documents
+- [ ] Cluster labels can be interpreted by domain experts
+
+#### Known Issues
+
+- Computationally expensive for large datasets (O(n^3) for spectral decomposition)
+- Requires kernel function selection (RBF recommended as default)
+- Number of clusters must be specified (use eigengap heuristic for selection)
+
+---
+
+### 6. Semantic Embeddings (BERT+K-Means)
+
+**Purpose**: Capture semantic meaning through dense vector representations using BERT-based models, then cluster with K-Means.
 
 #### SentenceBERT (Recommended for Short-Medium Text)
 
@@ -264,7 +339,7 @@ R002,Pricing Feedback,0.92,kmeans_tfidf
 ```json
 {
   "codebook_metadata": {
-    "creation_date": "2025-12-25",
+    "creation_date": "2026-02-23",
     "method": "LDA_10topics",
     "total_responses": 1500,
     "quality_score": 0.68
@@ -574,7 +649,7 @@ output/
 
 #### Quality Checklist
 
-- [ ] **Algorithm Selection**: Justify why TF-IDF/LDA/NMF/embeddings were chosen
+- [ ] **Algorithm Selection**: Justify why TF-IDF+K-Means/LDA/NMF/LSTM+K-Means/BERT+K-Means/SVM Spectral were chosen
 - [ ] **Preprocessing Steps**: Tokenization, stopwords, stemming/lemmatization
 - [ ] **Hyperparameters**: All configurable parameters documented with rationale
 - [ ] **Random Seeds**: For reproducibility
@@ -885,6 +960,6 @@ This document establishes the **gold-standard criteria** for evaluating ML-based
 ---
 
 **Document Version:** 1.0
-**Last Updated:** 2025-12-25
+**Last Updated:** 2026-02-23
 **Maintained by:** Agent-C (Benchmarks & Standards)
 **Related Documentation:** [Method Comparison](./01_method_comparison_matrix.md) | [Validation Examples](./06_validation_and_demonstration.md) | [QA Standards](./09_QA_standards.md)

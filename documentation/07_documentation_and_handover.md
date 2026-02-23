@@ -2,7 +2,7 @@
 
 **Framework**: Open-Ended Coding Analysis Framework
 **Document Version**: 1.0
-**Last Updated**: 2025-12-26
+**Last Updated**: 2026-02-23
 **Purpose**: Comprehensive methodology documentation, developer handover, and maintenance guide
 
 ---
@@ -617,7 +617,62 @@ H_sparsity = calculate_sparsity(H)
 
 ---
 
-### 1.4 Embeddings-Based Clustering (Optional)
+### 1.4 LSTM + K-Means Clustering
+
+#### Objectives
+
+**Primary Goal**: Use Long Short-Term Memory (LSTM) neural networks to learn sequential text representations, then cluster the learned embeddings with K-Means.
+
+**Use Cases**:
+- Capturing word order and sequential context in responses
+- When keyword frequency alone misses thematic nuance
+- Medium-to-large datasets where deep learning training is feasible
+
+**When to Use**:
+- Dataset size: 300+ responses (more data improves LSTM training)
+- When sequential/contextual patterns matter
+- When computational time of 1-5 minutes is acceptable
+
+---
+
+### 1.5 BERT + K-Means Clustering
+
+#### Objectives
+
+**Primary Goal**: Leverage pre-trained BERT-based sentence embeddings (SentenceTransformers) to capture deep semantic similarity, then cluster with K-Means.
+
+**Use Cases**:
+- Short texts where keywords are insufficient
+- When semantic similarity matters more than exact keyword overlap
+- Capturing paraphrases and synonyms
+- Small-to-medium datasets where maximum quality is desired
+
+**When to Use**:
+- Dataset size: Any size (even small datasets benefit from pre-trained embeddings)
+- When responses use varied vocabulary for similar concepts
+- When higher quality clustering justifies longer processing time (1-5 minutes on CPU)
+
+---
+
+### 1.6 SVM Spectral Clustering
+
+#### Objectives
+
+**Primary Goal**: Use spectral clustering with an RBF (SVM-style) kernel to discover non-linear cluster boundaries in TF-IDF feature space.
+
+**Use Cases**:
+- When themes have complex, non-spherical boundaries
+- When K-Means assumptions (spherical clusters) are violated
+- Discovering subtle groupings that linear methods miss
+
+**When to Use**:
+- Dataset size: 50-5,000 responses (spectral methods are memory-intensive for large datasets)
+- When standard K-Means produces poor silhouette scores
+- When themes overlap in complex ways
+
+---
+
+### 1.7 Embeddings-Based Clustering (General Reference)
 
 #### Objectives
 
@@ -1079,11 +1134,14 @@ def run_custom_algorithm(df, text_column, n_codes, **kwargs):
 # In page_configuration()
 method = st.selectbox(
     "ML Algorithm",
-    options=['tfidf_kmeans', 'lda', 'nmf', 'custom_algorithm'],
+    options=['tfidf_kmeans', 'lda', 'nmf', 'lstm_kmeans', 'bert_kmeans', 'svm', 'custom_algorithm'],
     format_func=lambda x: {
         'tfidf_kmeans': 'TF-IDF + K-Means',
         'lda': 'Latent Dirichlet Allocation',
         'nmf': 'Non-negative Matrix Factorization',
+        'lstm_kmeans': 'LSTM + K-Means',
+        'bert_kmeans': 'BERT + K-Means',
+        'svm': 'SVM Spectral Clustering',
         'custom_algorithm': 'My Custom Algorithm'  # Add here
     }[x]
 )
@@ -1221,17 +1279,20 @@ Browser will open automatically to http://localhost:8501
 - Click "⚙️ Configuration"
 - Select text column containing responses
 - Choose number of codes (start with 8-12)
-- Select ML algorithm:
-  - **TF-IDF + K-Means**: Recommended for first-time users
+- Select ML algorithm (6 methods available):
+  - **TF-IDF + K-Means**: Recommended for first-time users (fastest)
   - **LDA**: For overlapping themes
   - **NMF**: For distinct, sparse themes
+  - **LSTM + K-Means**: For capturing sequential context via deep learning
+  - **BERT + K-Means**: For maximum semantic understanding via pre-trained embeddings
+  - **SVM Spectral**: For discovering non-linear cluster boundaries
 - Set confidence threshold (0.3 is a good starting point)
 
 **Step 4: Run Analysis**
 - Click "🚀 Run Analysis"
 - Review configuration summary
 - Click "🚀 Start Analysis" button
-- Wait for completion (typically 5-30 seconds)
+- Wait for completion (typically 5-60 seconds for TF-IDF, 1-5 minutes for deep learning methods)
 
 **Step 5: Review Results**
 - Click "📊 Results Overview" to see:
@@ -1274,7 +1335,7 @@ df.head()
 ```python
 coder = MLOpenCoder(
     n_codes=10,
-    method='tfidf_kmeans',  # or 'lda', 'nmf'
+    method='tfidf_kmeans',  # or 'lda', 'nmf', 'lstm_kmeans', 'bert_kmeans', 'svm'
     min_confidence=0.3
 )
 
@@ -1446,7 +1507,25 @@ A: Decision guide:
 - Want faster alternative to LDA
 - Interpretability via sparsity important
 
-**Best practice**: Run all three methods and compare results for triangulation
+**Use LSTM + K-Means when**:
+- Responses contain sequential/contextual patterns
+- Dataset has 300+ responses for adequate training
+- Deep learning feature extraction is desired
+- Processing time of 1-5 minutes is acceptable
+
+**Use BERT + K-Means when**:
+- Maximum semantic understanding is needed
+- Paraphrase detection is important ("working from home" = "remote work")
+- Dataset is small-to-medium (<5,000 responses)
+- Pre-trained embeddings can capture domain nuance
+
+**Use SVM Spectral when**:
+- K-Means produces poor cluster separation
+- Themes have non-linear or complex boundaries
+- Dataset is small-to-medium (spectral methods are memory-intensive)
+- Non-spherical cluster shapes are expected
+
+**Best practice**: Run multiple methods (all 6 are available) and compare results for triangulation
 
 ---
 
@@ -1557,7 +1636,7 @@ A: Use the **Executive Summary** (auto-generated):
 - Analyzed: [N] responses
 - Discovered: [K] themes
 - Coverage: [X]% of responses coded
-- Method: [TF-IDF + K-Means / LDA / NMF]
+- Method: [TF-IDF + K-Means / LDA / NMF / LSTM + K-Means / BERT + K-Means / SVM Spectral]
 
 ### Top Themes
 1. **[Theme Name]** ([X]% of responses)
@@ -1955,7 +2034,7 @@ gc.collect()
 
 **Status**: Complete
 **Version**: 1.0
-**Last Updated**: 2025-12-26
+**Last Updated**: 2026-02-23
 **Maintained By**: Framework Development Team
 
 **Related Documents**:

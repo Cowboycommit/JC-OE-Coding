@@ -2,17 +2,20 @@
 VectorizerFactory for ensuring vectorization parity across clustering methods.
 
 This module provides a factory that ensures identical tokenisation and filtering
-across all clustering methods (KMeans, LDA, LSTM, BERT), with the ONLY difference being
-term weighting:
+across all clustering methods (KMeans, LDA, NMF, LSTM, BERT, SVM), with the ONLY
+difference being term weighting:
 - TF-IDF + KMeans: TF-IDF weighted matrix
 - LDA: CountVectorizer with identical settings (counts instead of TF-IDF weights)
+- NMF: TF-IDF weighted matrix (same as KMeans)
 - LSTM + KMeans: LSTM embeddings (via embeddings.py), TF-IDF for term extraction
 - BERT + KMeans: BERT embeddings (via embeddings.py), TF-IDF for term extraction
+- SVM Spectral: TF-IDF weighted matrix (same as KMeans)
 
 Key principles:
 - All methods share the same vocabulary, stopwords, min_df/max_df, ngram_range for term extraction
 - Preprocessing outputs are reused across methods where possible
 - The only difference for LDA is term weighting (counts vs TF-IDF)
+- NMF and SVM use the same TF-IDF matrix as KMeans
 - LSTM and BERT use their own embedding methods for clustering
 - Factory integrates with existing adaptive preprocessing
 

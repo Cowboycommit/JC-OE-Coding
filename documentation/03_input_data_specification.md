@@ -1,7 +1,7 @@
 # Input Data Specification
 
 **Version:** 1.0
-**Date:** 2025-12-25
+**Date:** 2026-02-23
 **Module:** `src/data_loader.py`
 **Framework:** Open-Ended Coding Analysis Framework
 
@@ -49,7 +49,7 @@ The Open-Ended Coding Analysis Framework accepts data from multiple sources for 
 
 | Metric | Minimum | Recommended | Notes |
 |--------|---------|-------------|-------|
-| **Response Count** | 20 | 300-500 | Statistical validity requires 20-30 minimum; 300-500 optimal for all 6 ML methods (see `OPTIMAL_DATASET_SIZE.md`) |
+| **Response Count** | 20 | 300-1,000 | Statistical validity requires 20-30 minimum; 300-1,000 responses optimal for all 6 ML methods (current demo datasets are 1,000 rows each) (see `OPTIMAL_DATASET_SIZE.md`) |
 | **Response Length** | 5 characters | 10+ characters | Shorter responses flagged for quality review |
 | **Word Count per Response** | 1 word | 3+ words | Single-word responses may lack analytic value |
 | **Analytic Response Ratio** | 50% | 80%+ | Non-analytic responses flagged but retained |
@@ -273,7 +273,7 @@ For detailed formatting rules, see [Data Formatting Rules](04_data_formatting_ru
 - Machine learning models need minimum sample size
 - Theme emergence requires adequate coverage
 
-**Recommendation:** 300-500 responses for robust analysis across all 6 ML methods (see `OPTIMAL_DATASET_SIZE.md`)
+**Recommendation:** 300-1,000 responses optimal for robust analysis across all 6 ML methods (current demo datasets are 1,000 rows each) (see `OPTIMAL_DATASET_SIZE.md`)
 
 ---
 
@@ -532,7 +532,7 @@ Before loading your data, verify:
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
-| 1.0 | 2025-12-25 | Initial release | Agent-D (Data Contract) |
+| 1.0 | 2026-02-23 | Initial release | Agent-D (Data Contract) |
 
 ---
 

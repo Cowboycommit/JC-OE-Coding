@@ -2,27 +2,36 @@
 
 This document summarises the current dataset inventory, minimum requirements, and best-practice recommendations for achieving optimal results with the open-ended coding framework.
 
+**Last Updated:** 2026-02-23
+**Framework Version:** 1.4.0
+
 ---
 
 ## 1. Current Datasets
 
-The project ships with **6 curated datasets** (1,500 rows total), split into two tiers.
+The project ships with **6 curated datasets** (6,000 rows total), each containing 1,000 rows expanded from original seeds using a variation engine (synonym substitution, phrase recombination, casual style markers). The expansion script is `scripts/expand_datasets.py`.
 
-### Tier 1 — Primary Analysis Datasets (300 rows each)
+| Dataset | Rows | Response Column | Best Use Case |
+|---------|------|-----------------|---------------|
+| `Healthcare_Patient_Feedback_1000.csv` | 1,000 | `response` | Domain-specific patient experience patterns |
+| `Market_Research_Survey_1000.csv` | 1,000 | `response` | Consumer insights and demographic analysis |
+| `Psychology_Wellbeing_Study_1000.csv` | 1,000 | `response` | Rich emotional content, natural themes |
+| `Remote_Work_Experiences_1000.csv` | 1,000 | `response` | Remote work feedback, 30+ themes |
+| `cricket_responses_1000.csv` | 1,000 | `response` | Topic variety, 40+ natural cricket topics |
+| `fashion_responses_1000.csv` | 1,000 | `response` | Theme diversity, 45+ fashion topics |
 
-| Dataset | Rows | Avg Response Length | Best Use Case |
-|---------|------|---------------------|---------------|
-| `Psychology_Wellbeing_Study_300.csv` | 300 | 95 chars | Rich emotional content, natural themes |
-| `Healthcare_Patient_Feedback_300.csv` | 300 | 69 chars | Domain-specific patient experience patterns |
-| `Market_Research_Survey_300.csv` | 300 | 60 chars | Consumer insights and demographic analysis |
+**Legacy datasets** (300/200 rows) are retained in the `data/` folder for quick testing but are not the primary analysis targets.
 
-### Tier 2 — Demo / Quick-Test Datasets (200 rows each)
+### Optimal Sampling
 
-| Dataset | Rows | Avg Response Length | Best Use Case |
-|---------|------|---------------------|---------------|
-| `Remote_Work_Experiences_200.csv` | 200 | 77 chars | Quick demos, 30+ remote-work topics |
-| `cricket_responses.csv` | 200 | 79 chars | Topic variety, 40+ natural cricket topics |
-| `fashion_responses.csv` | 200 | 69 chars | Theme diversity, 45+ fashion topics |
+All interfaces (app.py, app_lite.py, both notebooks) provide an optimal sample size selector for target code counts:
+
+| Target Codes | Sample Size | Responses per Code |
+|---|---|---|
+| 5 codes | 150 responses | 30 per code |
+| 10 codes | 300 responses | 30 per code |
+| 15 codes | 500 responses | 33 per code |
+| 20 codes | 700 responses | 35 per code |
 
 ---
 
@@ -43,7 +52,7 @@ The project ships with **6 curated datasets** (1,500 rows total), split into two
 
 | Metric | Recommended | Project Standard |
 |--------|-------------|------------------|
-| Response count | 50+ | 200-300 |
+| Response count | 50+ | 300-1,000 |
 | Response length | 10+ characters | 60-95 chars average |
 | Words per response | 3+ | 10-20 typical |
 | Analytic response ratio | 80%+ | 95%+ |
@@ -52,27 +61,30 @@ The project ships with **6 curated datasets** (1,500 rows total), split into two
 
 ## 3. Dataset Size and Algorithm Selection
 
-The framework selects algorithms based on the number of responses available.
+The framework supports 6 ML methods. Algorithm suitability varies by dataset size.
 
 ### Small Datasets (< 100 responses)
 
-- **Prefer:** TF-IDF + K-Means, SVM Spectral
+- **Prefer:** TF-IDF + K-Means, NMF, SVM Spectral
 - **Avoid:** LDA (needs more data), LSTM (needs more data)
 - **Recommended codes:** 3-5
 - **Notes:** Simpler and faster methods; manual validation becomes more critical
 
 ### Medium Datasets (100-500 responses) — Optimal Range
 
-- **Best methods:** TF-IDF + K-Means, LDA, BERT
-- **Recommended codes:** 5-12 (varies by complexity)
-- **Notes:** All algorithms work well; good balance of statistical validity and efficiency. The current project datasets (200-300 rows) sit in this range.
+- **Best methods:** All 6 methods work well (TF-IDF, LDA, NMF, LSTM, BERT, SVM)
+- **Recommended codes:** 5-15 (varies by complexity)
+- **Notes:** Good balance of statistical validity and efficiency. Use optimal sampling for best results.
 
 ### Large Datasets (500+ responses)
 
-- **Prefer:** LDA and topic modelling
+- **Prefer:** LDA and NMF for topic modeling; TF-IDF for speed
 - **Also viable:** BERT, LSTM
-- **Recommended codes:** 10-15+
-- **Notes:** Better statistical power for validation; higher computational cost
+- **Avoid:** SVM Spectral above 2,000 responses (O(n^3) cost)
+- **Recommended codes:** 10-20+
+- **Notes:** Better statistical power for validation; higher computational cost for deep learning methods
+
+See `documentation/OPTIMAL_DATASET_SIZE.md` for detailed method-by-method guidance.
 
 ---
 
@@ -80,12 +92,12 @@ The framework selects algorithms based on the number of responses available.
 
 | Dataset | Rows | Recommended Codes | Suggested Algorithm |
 |---------|------|-------------------|---------------------|
-| `Healthcare_Patient_Feedback_300.csv` | 300 | 6-8 | TF-IDF + K-Means |
-| `Market_Research_Survey_300.csv` | 300 | 5-7 | TF-IDF + K-Means |
-| `Psychology_Wellbeing_Study_300.csv` | 300 | 7-10 | NMF or LDA |
-| `cricket_responses.csv` | 200 | 8-12 | TF-IDF + K-Means |
-| `fashion_responses.csv` | 200 | 8-10 | TF-IDF + K-Means |
-| `Remote_Work_Experiences_200.csv` | 200 | 6-8 | TF-IDF + K-Means |
+| `Healthcare_Patient_Feedback_1000.csv` | 1,000 | 8-15 | TF-IDF + K-Means or LDA |
+| `Market_Research_Survey_1000.csv` | 1,000 | 8-12 | TF-IDF + K-Means |
+| `Psychology_Wellbeing_Study_1000.csv` | 1,000 | 10-15 | NMF or LDA |
+| `Remote_Work_Experiences_1000.csv` | 1,000 | 10-15 | TF-IDF + K-Means or NMF |
+| `cricket_responses_1000.csv` | 1,000 | 10-15 | TF-IDF + K-Means |
+| `fashion_responses_1000.csv` | 1,000 | 10-15 | TF-IDF + K-Means |
 
 ---
 
@@ -119,17 +131,30 @@ All responses are retained and flagged — no automatic exclusion occurs.
 
 ---
 
-## 6. Performance Expectations
+## 6. Supported ML Methods
 
-| Dataset Size | Expected Processing Time |
-|--------------|--------------------------|
-| < 300 rows | 10-30 seconds |
-| < 1,000 rows | < 30 seconds |
-| Per-response granularity | < 50 ms per 1,000 responses |
+| Method | Minimum Responses | Optimal Range | Speed |
+|--------|-------------------|---------------|-------|
+| TF-IDF + K-Means | 50 | 200-500 | Fast |
+| LDA | 100 | 500-2,000 | Moderate |
+| NMF | 50 | 200-500 | Fast |
+| LSTM + K-Means | 200 | 500-2,000 | Slow |
+| BERT + K-Means | 50 | 200-500 | Moderate |
+| SVM Spectral | 30 | 100-500 | Moderate |
 
 ---
 
-## 7. Bringing Your Own Data
+## 7. Performance Expectations
+
+| Dataset Size | Expected Processing Time (TF-IDF) | Deep Learning Methods |
+|---|---|---|
+| < 300 rows | 5-15 seconds | 30-120 seconds |
+| 300-1,000 rows | 10-30 seconds | 1-5 minutes |
+| 1,000+ rows | 30-60 seconds | 2-10 minutes |
+
+---
+
+## 8. Bringing Your Own Data
 
 When preparing a custom dataset for this framework:
 
@@ -140,7 +165,8 @@ When preparing a custom dataset for this framework:
 5. **UTF-8 encoding** — ensure special characters are properly encoded.
 6. **English language** — the current pipeline supports English only.
 7. **Start with fewer codes** (5-7) and increase if the silhouette score is low or themes appear merged.
+8. **Use the data template:** Available at `documentation/input_data_template.xlsx` or via the Streamlit UI.
 
 ---
 
-*See also: [Input Data Specification](03_input_data_specification.md) | [Methods](METHODS.md) | [Validation and Demonstration](06_validation_and_demonstration.md)*
+*See also: [Input Data Specification](03_input_data_specification.md) | [Methods](METHODS.md) | [Optimal Dataset Size](OPTIMAL_DATASET_SIZE.md) | [Validation and Demonstration](06_validation_and_demonstration.md)*

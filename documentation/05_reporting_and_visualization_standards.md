@@ -3,7 +3,7 @@
 **Agent-E: Reporting & Visualization Standards**
 **Open-Ended Coding Analysis Framework**
 **Version:** 1.0
-**Last Updated:** December 2025
+**Last Updated:** 2026-02-23
 
 ---
 
@@ -993,7 +993,7 @@ def load_and_process_data(file_path):
 
 **File Naming Convention:** `[project_name]_[export_type]_[YYYY-MM-DD].csv`
 
-Example: `customer_feedback_coded_results_2025-12-25.csv`
+Example: `customer_feedback_coded_results_2026-02-23.csv`
 
 #### Column Specifications
 
@@ -1003,7 +1003,7 @@ Example: `customer_feedback_coded_results_2025-12-25.csv`
 | `response_text` | String | Original text (quoted) | `"Great service!"` |
 | `code` | String | Assigned code/theme | `Customer Service` |
 | `confidence` | Float (2 decimals) | Confidence score | `0.87` |
-| `timestamp` | ISO 8601 | Processing time | `2025-12-25T10:30:00` |
+| `timestamp` | ISO 8601 | Processing time | `2026-02-23T10:30:00` |
 | `metadata_*` | Variable | Any additional metadata | `metadata_segment: Premium` |
 
 #### Encoding and Format
@@ -1108,7 +1108,7 @@ with pd.ExcelWriter('export.xlsx', engine='openpyxl') as writer:
 {
     "metadata": {
         "project_name": "Customer Feedback Analysis",
-        "export_date": "2025-12-25T10:30:00Z",
+        "export_date": "2026-02-23T10:30:00Z",
         "framework_version": "1.3.1",
         "total_responses": 500,
         "total_codes": 12,
@@ -1131,7 +1131,7 @@ with pd.ExcelWriter('export.xlsx', engine='openpyxl') as writer:
                     "reasoning": "Direct mention of customer service quality"
                 }
             ],
-            "timestamp": "2025-12-25T10:15:00Z"
+            "timestamp": "2026-02-23T10:15:00Z"
         }
     ],
     "summary_statistics": {
@@ -1265,9 +1265,9 @@ fig.write_html(
 **File Naming:**
 - Format: `[chart_type]_[description]_[date].png`
 - Examples:
-  - `frequency_bar_top_themes_2025-12-25.png`
-  - `heatmap_cooccurrence_2025-12-25.png`
-  - `network_code_relationships_2025-12-25.svg`
+  - `frequency_bar_top_themes_2026-02-23.png`
+  - `heatmap_cooccurrence_2026-02-23.png`
+  - `network_code_relationships_2026-02-23.svg`
 
 ### 5. Complete Export Package
 
@@ -1275,7 +1275,7 @@ When providing full results to stakeholders, bundle all outputs:
 
 **Directory Structure:**
 ```
-project_name_export_2025-12-25/
+project_name_export_2026-02-23/
 ├── README.md                          # Export documentation
 ├── executive_summary.pdf              # PDF summary report
 ├── data/

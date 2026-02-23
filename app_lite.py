@@ -18,7 +18,7 @@ PIPELINE STAGES:
     2. Data Validation & Text Preprocessing - Validate structure, apply text cleaning
        (includes negation preservation, domain stopwords, quality filtering)
     3. Method Eligibility Checks - Verify ML method compatibility with data
-    4. Model Execution - Run clustering/topic modeling (TF-IDF, LDA, LSTM, BERT, SVM)
+    4. Model Execution - Run clustering/topic modeling (TF-IDF, LDA, NMF, LSTM, BERT, SVM)
     5. Diagnostics & Assumptions - Assess validity, generate QA report
     6. Visualization Generation - Charts, word clouds, network diagrams
     7. Export & Reporting - Excel package, methods documentation, executive summary
@@ -26,6 +26,7 @@ PIPELINE STAGES:
 SUPPORTED ML METHODS:
     - tfidf_kmeans: TF-IDF + K-Means (fast, bag-of-words)
     - lda: Latent Dirichlet Allocation (topic modeling)
+    - nmf: Non-negative Matrix Factorization (additive topics)
     - lstm_kmeans: LSTM + K-Means (sequential patterns)
     - bert_kmeans: BERT + K-Means (semantic understanding)
     - svm: SVM Spectral Clustering (kernel-based)
@@ -303,6 +304,7 @@ PIPELINE_STAGES = [
 ML_METHODS = {
     "tfidf_kmeans": "TF-IDF + K-Means (Fast, bag-of-words)",
     "lda": "LDA - Latent Dirichlet Allocation (Topic modeling)",
+    "nmf": "NMF - Non-negative Matrix Factorization (Additive topics)",
     "lstm_kmeans": "LSTM + K-Means (Sequential patterns)",
     "bert_kmeans": "BERT + K-Means (Semantic understanding)",
     "svm": "SVM Spectral Clustering (Kernel-based)",
@@ -433,7 +435,7 @@ def main():
     2. **Data Validation & Text Preprocessing** - Validate structure, apply text cleaning
        (negation preservation, domain stopwords, quality filtering)
     3. **Method Eligibility Checks** - Verify ML method compatibility with data characteristics
-    4. **Model Execution** - Run clustering/topic modeling (TF-IDF, LDA, LSTM, BERT, SVM)
+    4. **Model Execution** - Run clustering/topic modeling (TF-IDF, LDA, NMF, LSTM, BERT, SVM)
     5. **Diagnostics & Assumptions** - Assess validity, generate QA report, detect bias
     6. **Visualization Generation** - Charts, word clouds, network diagrams, sentiment plots
     7. **Export & Reporting** - Excel package, methods documentation, executive summary
