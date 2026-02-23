@@ -218,9 +218,10 @@ def find_optimal_codes(
         max_codes: Maximum number of codes to test
         method: ML method to use for testing:
             - 'tfidf_kmeans': Uses TF-IDF features
+            - 'lda': Uses CountVectorizer
+            - 'nmf': Uses TF-IDF features
             - 'bert_kmeans': Uses BERT embeddings
             - 'lstm_kmeans': Uses LSTM embeddings
-            - 'lda': Uses CountVectorizer
             - 'svm': Uses TF-IDF with spectral clustering
         stop_words: Stop words language (for TF-IDF/LDA methods)
         progress_callback: Optional callback for progress updates
@@ -312,7 +313,7 @@ def find_optimal_codes(
         else:
             vectorizer = TfidfVectorizer(
                 max_features=1000, stop_words=stop_words, min_df=2,
-                max_df=0.8, ngram_range=(1, 2)
+                max_df=0.8, ngram_range=(1, 3)
             )
 
         try:
@@ -457,6 +458,7 @@ def run_ml_analysis(
         method: ML method:
             - 'tfidf_kmeans': TF-IDF + K-Means (fast, keyword-based)
             - 'lda': Latent Dirichlet Allocation (topic modeling)
+            - 'nmf': Non-negative Matrix Factorization (additive topics)
             - 'lstm_kmeans': LSTM autoencoder + K-Means (sequential patterns)
             - 'bert_kmeans': BERT embeddings + K-Means (semantic understanding)
             - 'svm': SVM-based Spectral Clustering (kernel-based boundaries)
@@ -513,7 +515,7 @@ def run_ml_analysis(
         )
     """
     from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-    from sklearn.decomposition import LatentDirichletAllocation
+    from sklearn.decomposition import LatentDirichletAllocation, NMF
     from sklearn.cluster import KMeans
     from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
     import re
@@ -555,6 +557,7 @@ def run_ml_analysis(
                 method: ML method:
                     - 'tfidf_kmeans': TF-IDF + K-Means (fast, keyword-based)
                     - 'lda': Latent Dirichlet Allocation (topic modeling)
+                    - 'nmf': Non-negative Matrix Factorization (additive topics)
                     - 'lstm_kmeans': LSTM autoencoder + K-Means (sequential patterns)
                     - 'bert_kmeans': BERT embeddings + K-Means (semantic understanding)
                     - 'svm': SVM-based Spectral Clustering (kernel-based boundaries)
@@ -625,15 +628,15 @@ def run_ml_analysis(
         def fit(self, responses, stop_words='english', original_texts=None):
             processed = [self.preprocess_text(r) for r in responses]
 
-            # Validate LDA compatibility with representation
-            # LDA requires non-negative count/frequency matrices (TF-IDF or CountVectorizer)
+            # Validate LDA/NMF compatibility with representation
+            # LDA and NMF require non-negative matrices (TF-IDF or CountVectorizer)
             # Semantic embeddings (SBERT, Word2Vec, FastText, LSTM) produce dense vectors with negative values
-            if self.method == 'lda' and self.representation != 'tfidf':
+            if self.method in ('lda', 'nmf') and self.representation != 'tfidf':
                 raise ValueError(
-                    f"Method 'LDA' is incompatible with '{self.representation}' representation. "
-                    f"LDA requires non-negative count/frequency matrices (bag-of-words). "
+                    f"Method '{self.method.upper()}' is incompatible with '{self.representation}' representation. "
+                    f"{self.method.upper()} requires non-negative matrices (bag-of-words). "
                     f"Semantic embeddings like SBERT, BERT, LSTM, Word2Vec, and FastText produce vectors with negative values. "
-                    f"Please use representation='tfidf' with LDA, or switch to method='tfidf_kmeans', "
+                    f"Please use representation='tfidf' with {self.method.upper()}, or switch to method='tfidf_kmeans', "
                     f"'lstm_kmeans', or 'bert_kmeans' for clustering with semantic embeddings."
                 )
 
@@ -702,7 +705,7 @@ def run_ml_analysis(
                             stop_words=stop_words,
                             min_df=2,
                             max_df=0.8,
-                            ngram_range=(1, 2)
+                            ngram_range=(1, 3)
                         )
                         factory = VectorizerFactory()
                         self.vectorizer, self.feature_matrix = factory.create_for_method(
@@ -722,7 +725,7 @@ def run_ml_analysis(
                         else:
                             self.vectorizer = TfidfVectorizer(
                                 max_features=1000, stop_words=stop_words, min_df=2,
-                                max_df=0.8, ngram_range=(1, 2)
+                                max_df=0.8, ngram_range=(1, 3)
                             )
                         try:
                             self.feature_matrix = self.vectorizer.fit_transform(processed)
@@ -768,6 +771,10 @@ def run_ml_analysis(
                 self.model = LatentDirichletAllocation(
                     n_components=self.n_codes, random_state=42, max_iter=20
                 )
+            elif self.method == 'nmf':
+                self.model = NMF(
+                    n_components=self.n_codes, random_state=42, max_iter=200
+                )
             elif self.method == 'svm':
                 # SVM-based Spectral Clustering uses kernel methods similar to SVM
                 from sklearn.cluster import SpectralClustering
@@ -782,7 +789,7 @@ def run_ml_analysis(
                 self.model = KMeans(n_clusters=self.n_codes, random_state=42, n_init=10)
 
             # Fit model and get document-topic distributions
-            if self.method == 'lda':
+            if self.method in ('lda', 'nmf'):
                 doc_topic_matrix = self.model.fit_transform(self.feature_matrix)
             elif self.method == 'svm':
                 # SpectralClustering uses fit_predict

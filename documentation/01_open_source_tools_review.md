@@ -2,7 +2,7 @@
 
 **Agent-B: Tools & Dependencies Documentation**
 **Framework**: Open-Ended Coding Analysis Framework
-**Last Updated**: 2025-12-25
+**Last Updated**: 2026-02-23
 
 ---
 
@@ -14,7 +14,7 @@ This document provides a comprehensive review of open source software (OSS) tool
 - **Data Processing**: pandas (mature, ubiquitous, excellent documentation)
 - **ML/Clustering**: scikit-learn (comprehensive, stable, production-ready)
 - **NLP**: nltk + gensim (flexible, lightweight, complementary)
-- **Embeddings**: SentenceTransformers (optional, state-of-art semantic understanding)
+- **Embeddings**: SentenceTransformers (standard primary method, state-of-art semantic understanding)
 - **Visualization**: plotly (interactive, web-ready, rich features)
 - **Web UI**: streamlit (rapid development, minimal boilerplate)
 
@@ -45,8 +45,8 @@ All selected tools are open source with permissive licensing (MIT, Apache 2.0, B
 
 | Tool | Version | Strengths | Weaknesses | Use Case Fit |
 |------|---------|-----------|------------|--------------|
-| **scikit-learn** ✓ | >=1.3.0 | Production-ready; comprehensive algorithms; excellent documentation; CPU-optimized; consistent API | No GPU acceleration; not suitable for deep learning | **Selected**: Ideal for traditional ML (K-Means, NMF, TF-IDF) |
-| PyTorch | - | GPU support; deep learning capabilities; dynamic computation | Heavy dependency; overkill for clustering; steep learning curve | Not needed for traditional clustering |
+| **scikit-learn** ✓ | >=1.3.0 | Production-ready; comprehensive algorithms; excellent documentation; CPU-optimized; consistent API | No GPU acceleration; not suitable for deep learning | **Selected**: Ideal for traditional ML (K-Means, NMF, TF-IDF, SVM) |
+| **PyTorch/Keras (LSTM)** ✓ | Latest | GPU support; deep learning capabilities; dynamic computation; LSTM for sequence-based embeddings | Heavier dependency; requires more compute | **Selected**: Standard primary method for LSTM+K-Means clustering |
 | TensorFlow | - | End-to-end ML platform; production deployment tools | Complex setup; heavy resource usage | Too complex for project needs |
 | cuML (RAPIDS) | - | GPU-accelerated scikit-learn API | CUDA dependency; compatibility issues | Unnecessary GPU complexity |
 
@@ -115,16 +115,16 @@ All selected tools are open source with permissive licensing (MIT, Apache 2.0, B
 
 | Tool | Version | Strengths | Weaknesses | Use Case Fit |
 |------|---------|-----------|------------|--------------|
-| **SentenceTransformers** ✓ (opt.) | Latest | State-of-art semantic similarity; pre-trained models; easy API | Large model downloads; slower inference; GPU recommended | **Selected**: Optional for advanced semantic analysis |
+| **SentenceTransformers** ✓ | Latest | State-of-art semantic similarity; pre-trained models; easy API | Large model downloads; slower inference; GPU recommended | **Selected**: Standard primary method for semantic analysis (BERT+K-Means) |
 | Word2Vec (gensim) | - | Lightweight; fast; good for word similarity | Requires training corpus; no sentence-level semantics | Covered by gensim dependency |
 | FastText | - | Handles OOV words; subword information | Similar limitations to Word2Vec | Not needed with SentenceTransformers |
 | OpenAI Embeddings | - | Very high quality; latest models | API dependency; cost; data privacy concerns | Not suitable for OSS framework |
 
-**Justification**: SentenceTransformers is **optional** because:
-- **Advanced use case**: Semantic clustering, similarity search beyond keyword matching
-- **Optional dependency**: Framework works without it (falls back to TF-IDF)
+**Justification**: SentenceTransformers is a **standard primary method** because:
+- **Core use case**: Semantic clustering (BERT+K-Means), similarity search beyond keyword matching
+- **Standard dependency**: One of the 6 primary ML methods alongside TF-IDF, LDA, NMF, LSTM, and SVM
 - **Quality tradeoff**: Best-in-class semantic understanding vs. computational cost
-- **Flexibility**: Users can opt-in when semantic depth justifies the overhead
+- **Flexibility**: Provides semantic depth for datasets where keyword-based methods are insufficient
 
 **When to use SentenceTransformers:**
 - Short texts where keywords aren't representative (e.g., social media posts)
@@ -266,10 +266,10 @@ The following criteria guided all tool selection decisions:
 | Decision | Pros | Cons | Mitigation |
 |----------|------|------|------------|
 | **pandas over polars/dask** | Mature, ubiquitous, excellent docs | Slower, more memory | Adequate for target dataset sizes |
-| **scikit-learn over PyTorch** | Simpler, stable, no GPU needed | No neural networks | Traditional ML sufficient for clustering/NMF |
+| **scikit-learn + PyTorch/Keras** | scikit-learn for TF-IDF, NMF, SVM; PyTorch/Keras for LSTM | More dependencies | Both are standard primary methods in the 6-method framework |
 | **nltk over spaCy** | Lightweight, flexible | Slower, less modern | Speed adequate for batch processing |
 | **Dual topic modeling (LDA + NMF)** | Flexibility, comparison | More dependencies | Both lightweight, complementary |
-| **SentenceTransformers optional** | No forced heavy dependency | Miss semantic features by default | Clear opt-in path for advanced users |
+| **SentenceTransformers (BERT) as standard primary method** | Full semantic analysis capabilities | Heavier dependency than TF-IDF | Standard primary method alongside TF-IDF, LDA, NMF, LSTM, and SVM |
 | **plotly over bokeh/altair** | Rich features, interactive | Larger files | Worth it for interactivity |
 | **streamlit over dash** | Rapid development | Less customization | Sufficient for research tool UI |
 | **networkx over igraph** | Easier to use, better docs | Slower for huge graphs | Graph sizes manageable |
@@ -334,7 +334,7 @@ As the framework evolves, consider these scaling paths:
 - **Trigger**: Multi-million record datasets, cloud deployment
 
 #### 5. **Advanced Embeddings**
-- **Current**: Optional SentenceTransformers
+- **Current**: SentenceTransformers (standard primary method for BERT+K-Means)
 - **Future**: Custom fine-tuned transformers, domain-specific models
 - **Trigger**: Specialized domain needs (medical, legal, etc.)
 

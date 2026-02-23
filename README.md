@@ -25,7 +25,7 @@ Interactive web interface for ML-based coding - no coding required!
 - **Code Quality**: Automated testing and linting via Makefile
 
 ### ML-Based Approach
-- 🤖 **Automatic Theme Discovery**: Uses TF-IDF, LDA, NMF, LSTM, BERT, and SVM clustering
+- 🤖 **Automatic Theme Discovery**: Uses TF-IDF+K-Means, LDA, NMF, LSTM+K-Means, BERT+K-Means, and SVM Spectral clustering
 - 📊 **15 Essential Outputs**: Complete analysis package for researchers
 - 🎯 **Confidence Scoring**: Probabilistic code assignments with quality metrics
 - 📈 **Advanced Analytics**: Co-occurrence analysis, network diagrams, segmentation
@@ -152,12 +152,21 @@ jupyter notebook open_ended_coding_analysis.ipynb
 │   ├── __init__.py
 │   ├── data_loader.py              # Data loading (CSV, Excel, JSON)
 │   ├── text_preprocessor.py        # Enhanced text preprocessing (NLTK)
+│   ├── text_processing.py          # Text segmentation (multi-granularity)
 │   ├── gold_standard_preprocessing.py  # Industry-standard text normalization
+│   ├── dataset_preprocessing.py    # Adaptive preprocessing for dataset types
 │   ├── sentiment_analysis.py       # Data-type-specific sentiment models
-│   ├── embeddings.py               # TF-IDF, BERT, LSTM, Word2Vec
+│   ├── embeddings.py               # TF-IDF, BERT, LSTM, Word2Vec, FastText
+│   ├── vectorizer_factory.py       # Consistent vectorization across methods
 │   ├── cluster_interpretation.py   # Code labeling with LLM enhancement
+│   ├── cluster_evaluation.py       # Post-hoc cluster quality evaluation
+│   ├── hyperparameter_tuning.py    # Optuna-based hyperparameter optimization
+│   ├── llm_interpretation.py       # LLM-assisted cluster labeling (Mistral)
 │   ├── method_visualizations.py    # Word clouds, network diagrams
+│   ├── methods_documentation.py    # Auto-generated methods documentation
 │   ├── rigor_diagnostics.py        # Validity assessment
+│   ├── stopwords_discovery.py      # Domain stopword detection
+│   ├── content_quality.py          # Response quality assessment
 │   ├── code_frame.py               # Code frame management
 │   ├── theme_analyzer.py           # Theme identification
 │   └── category_manager.py         # Categorization system
@@ -166,9 +175,11 @@ jupyter notebook open_ended_coding_analysis.ipynb
 │   └── stopwords_domain.txt        # Domain-specific stopwords
 ├── documentation/                  # 7-document comprehensive suite
 ├── tests/                          # Unit and integration tests (21 files)
+├── scripts/                        # Utility scripts
+│   ├── expand_datasets.py          # Dataset expansion to 1,000 rows
+│   └── setup_local_models.py       # Local model setup
 ├── requirements.txt                # Production dependencies
 ├── requirements-dev.txt            # Development dependencies
-├── Makefile                        # Build and test automation
 └── README.md                       # This file
 ```
 
@@ -395,35 +406,13 @@ exporter.export_excel('results.xlsx')
 
 ```bash
 # Run all tests
-make test
+pytest tests/ -v
 
 # Run specific test file
 pytest tests/test_data_loader.py -v
 
 # Run with coverage
-make test-coverage
-```
-
-### Code Quality
-
-```bash
-# Run linting
-make lint
-
-# Format code
-make format
-
-# Type checking
-make typecheck
-
-# Run all quality checks
-make quality
-```
-
-### Building Documentation
-
-```bash
-make docs
+pytest tests/ --cov=src --cov=helpers --cov-report=term-missing
 ```
 
 ## Data Format
@@ -489,13 +478,13 @@ The framework includes robust error handling:
 
 ## Advanced Features
 
-### Intercoder Reliability
+### Rigor Diagnostics
 
 ```python
-from src.reliability import calculate_cohens_kappa
+from src.rigor_diagnostics import RigorDiagnostics
 
-kappa = calculate_cohens_kappa(coder1_codes, coder2_codes)
-print(f"Cohen's Kappa: {kappa:.3f}")
+diagnostics = RigorDiagnostics()
+report = diagnostics.generate_report(results_df, coder)
 ```
 
 ### Export to Multiple Formats
@@ -577,7 +566,7 @@ The project includes comprehensive tests:
 Run the full test suite:
 
 ```bash
-make test-all
+pytest tests/ -v
 ```
 
 ## License
@@ -606,16 +595,21 @@ If you use this framework in your research, please cite:
 ## Acknowledgments
 
 Built with:
-- Pandas for data manipulation
+- scikit-learn for ML algorithms (TF-IDF, LDA, NMF, K-Means, Spectral Clustering)
+- Pandas and NumPy for data manipulation
 - Plotly and Seaborn for visualizations
-- Jupyter for interactive analysis
+- Streamlit for the web interface
+- Sentence-Transformers for BERT embeddings
+- TensorFlow/Keras for LSTM embeddings
+- NLTK for text preprocessing
+- Jupyter for interactive notebook analysis
 
 ## Roadmap
 
 ### Completed Features
 
 - [x] Machine learning-assisted coding (ML-based notebook)
-- [x] Advanced NLP integration (topic modeling with LDA, LSTM, BERT, SVM)
+- [x] Advanced NLP integration (topic modeling with LDA, NMF, LSTM, BERT, SVM)
 - [x] Comprehensive export formats (CSV, Excel, Markdown)
 - [x] Executive summaries and stakeholder reports
 - [x] Web-based dashboard (Streamlit UI)

@@ -241,6 +241,7 @@ def auto_select_best_method(texts):
     scores = {
         'tfidf_kmeans': 50,  # Baseline - reliable default
         'lda': 40,
+        'nmf': 45,           # Similar to TF-IDF, fast, non-overlapping topics
         'bert_kmeans': 30,
         'lstm_kmeans': 25,
         'svm': 20
@@ -255,6 +256,7 @@ def auto_select_best_method(texts):
     if n_samples < 100:
         # Small dataset - prefer simpler, faster methods
         scores['tfidf_kmeans'] += 20
+        scores['nmf'] += 18  # NMF is fast and robust on small data
         scores['svm'] += 15
         scores['bert_kmeans'] += 10  # BERT can work well on small data
         scores['lda'] -= 10  # LDA needs more data for stable topics
@@ -263,12 +265,14 @@ def auto_select_best_method(texts):
     elif n_samples < 500:
         # Medium dataset - most methods work well
         scores['tfidf_kmeans'] += 15
+        scores['nmf'] += 12
         scores['lda'] += 10
         scores['bert_kmeans'] += 10
         reasoning.append(f"Medium dataset ({n_samples} samples) suitable for most methods")
     else:
         # Large dataset - LDA shines, BERT/LSTM become more viable
         scores['lda'] += 25
+        scores['nmf'] += 15  # NMF scales well and stays fast
         scores['tfidf_kmeans'] += 10
         scores['bert_kmeans'] += 5
         scores['lstm_kmeans'] += 10
@@ -279,29 +283,34 @@ def auto_select_best_method(texts):
         # Short texts - BERT for semantics, TF-IDF for speed
         scores['bert_kmeans'] += 20
         scores['tfidf_kmeans'] += 15
+        scores['nmf'] += 12  # NMF handles short texts well
         scores['lda'] -= 5  # LDA prefers longer documents
         reasoning.append(f"Short texts (avg {avg_length:.0f} words) benefit from semantic methods")
     elif avg_length < 100:
         # Medium length - all methods work
         scores['tfidf_kmeans'] += 10
+        scores['nmf'] += 10
         scores['lda'] += 10
         reasoning.append(f"Medium text length (avg {avg_length:.0f} words) works with all methods")
     else:
         # Long texts - LDA excels at topic extraction
         scores['lda'] += 20
+        scores['nmf'] += 10  # NMF produces coherent topics on long text
         scores['tfidf_kmeans'] += 5
         scores['lstm_kmeans'] += 10  # Sequential patterns in long text
         reasoning.append(f"Long texts (avg {avg_length:.0f} words) ideal for topic modeling")
 
     # Vocabulary diversity factors
     if vocab_diversity > 0.6:
-        # High diversity - LDA can find distinct topics
+        # High diversity - topic models find distinct topics
         scores['lda'] += 15
+        scores['nmf'] += 12  # NMF excels at non-overlapping topics
         scores['bert_kmeans'] += 10
         reasoning.append(f"High vocabulary diversity ({vocab_diversity:.2%}) supports topic discovery")
     elif vocab_diversity < 0.3:
         # Low diversity - simpler methods sufficient
         scores['tfidf_kmeans'] += 15
+        scores['nmf'] += 10
         scores['svm'] += 10
         reasoning.append(f"Lower vocabulary diversity ({vocab_diversity:.2%}) suits simpler methods")
 
@@ -319,6 +328,7 @@ def auto_select_best_method(texts):
     method_names = {
         'tfidf_kmeans': 'TF-IDF + K-Means',
         'lda': 'LDA (Latent Dirichlet Allocation)',
+        'nmf': 'NMF (Non-negative Matrix Factorization)',
         'bert_kmeans': 'BERT + K-Means',
         'lstm_kmeans': 'LSTM + K-Means',
         'svm': 'SVM Spectral Clustering'
@@ -2286,7 +2296,7 @@ def page_configuration():
             <li><strong>Vocabulary diversity</strong> - High diversity supports topic discovery</li>
             </ul>
             <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">
-            All 5 methods are considered: TF-IDF, LDA, BERT, LSTM, and SVM
+            All 6 methods are considered: TF-IDF, LDA, NMF, BERT, LSTM, and SVM
             </p>
             </div>
             """, unsafe_allow_html=True)
@@ -2294,11 +2304,12 @@ def page_configuration():
         else:
             method = st.selectbox(
                 "ML Algorithm",
-                options=['tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'],
+                options=['tfidf_kmeans', 'lda', 'nmf', 'lstm_kmeans', 'bert_kmeans', 'svm'],
                 index=0,
                 format_func=lambda x: {
                     'tfidf_kmeans': 'TF-IDF + K-Means (Fast, Recommended)',
                     'lda': 'Latent Dirichlet Allocation (Topic Modeling)',
+                    'nmf': 'NMF - Non-negative Matrix Factorization (Additive Topics)',
                     'lstm_kmeans': 'LSTM + K-Means (Sequential Patterns)',
                     'bert_kmeans': 'BERT + K-Means (Semantic Understanding)',
                     'svm': 'SVM Spectral Clustering (Kernel-based)'
@@ -2319,6 +2330,12 @@ def page_configuration():
                 'runtime': "🐢 **Moderate** (~30-60s for 1000 responses)",
                 'good_for': "Good for discovering overlapping themes",
                 'watch_out': "Watch out for slower performance with large datasets"
+            },
+            'nmf': {
+                'description': "**Non-negative Matrix Factorization** decomposes the TF-IDF matrix into additive, parts-based topic representations. Produces coherent, non-overlapping topics.",
+                'runtime': "⚡ **Fast** (~5-15s for 1000 responses)",
+                'good_for': "Good for sparse, non-overlapping topics; deterministic results",
+                'watch_out': "Watch out for very sparse matrices with few documents"
             },
             'lstm_kmeans': {
                 'description': "**LSTM + K-Means** uses a recurrent neural network to capture sequential patterns in text, then clusters the learned representations.",
@@ -2578,7 +2595,7 @@ def page_run_analysis():
         st.info("🔍 The algorithm will automatically determine the optimal number of codes before running the analysis.")
 
     if auto_optimal_method:
-        st.info("🤖 The algorithm will analyze your data (size, text length, vocabulary diversity) and select the best method from all 5 available options.")
+        st.info("🤖 The algorithm will analyze your data (size, text length, vocabulary diversity) and select the best method from all 6 available options.")
 
     if enable_sentiment:
         data_type_models = {'twitter': 'Twitter-RoBERTa', 'survey': 'VADER', 'longform': 'Review-BERT', 'news': 'Review-BERT'}
@@ -4058,7 +4075,7 @@ def page_about():
     ### 🎯 Core Features
 
     - **Automatic Theme Discovery**: ML algorithms discover themes and patterns in your data
-    - **Multiple ML Algorithms**: TF-IDF+K-Means, LDA, LSTM, BERT, and SVM-based clustering
+    - **Multiple ML Algorithms**: TF-IDF+K-Means, LDA, NMF, LSTM, BERT, and SVM-based clustering
     - **Confidence Scoring**: Every code assignment includes a confidence score
     - **LLM-Enhanced Labels**: Auto-generated code labels refined by language models
     - **15 Essential Outputs**: Complete analysis package for researchers
@@ -4104,6 +4121,7 @@ def page_about():
     |-----------|-------------|----------|
     | **TF-IDF + K-Means** | Fast bag-of-words clustering | General use, quick exploration |
     | **LDA** | Probabilistic topic modeling | Overlapping themes, academic research |
+    | **NMF** | Non-negative matrix factorization | Sparse, non-overlapping topics |
     | **LSTM + K-Means** | Sequential pattern recognition | Order-dependent text, narratives |
     | **BERT + K-Means** | Semantic embedding clustering | Nuanced meaning, synonyms |
     | **SVM Spectral** | Kernel-based clustering | Complex, non-linear boundaries |

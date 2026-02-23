@@ -46,7 +46,7 @@ data_preparation:
 # ML Method Configuration
 ml_method:
   # Primary method
-  name: "tfidf_kmeans"  # Options: tfidf_kmeans, lda, lstm_kmeans, bert_kmeans, svm
+  name: "tfidf_kmeans"  # Options: tfidf_kmeans, lda, nmf, lstm_kmeans, bert_kmeans, svm
 
   # Code discovery
   n_codes: 10
@@ -98,6 +98,15 @@ model_specific:
     learning_decay: 0.7
     doc_topic_prior: null  # Alpha (None = 1/n_components)
     topic_word_prior: null  # Beta (None = 1/n_components)
+
+  # Non-negative Matrix Factorization
+  nmf:
+    n_components: 10
+    init: "nndsvda"  # Deterministic initialization
+    max_iter: 200
+    random_state: 42
+    alpha: 0.1  # Regularization
+    l1_ratio: 0.5  # L1 vs L2 regularization balance
 
   # LSTM + K-Means
   lstm_kmeans:

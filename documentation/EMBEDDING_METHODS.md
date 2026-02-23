@@ -1,16 +1,16 @@
 # Semantic Embedding Methods Guide
 
 **Version:** 1.0
-**Date:** 2025-12-25
+**Date:** 2026-02-23
 **Agent:** Agent-3 (NLP/Embedding Specialist)
 
 ---
 
 ## Overview
 
-This document describes the semantic embedding methods available in the ML Open-Ended Coding system. These methods provide alternatives to the default TF-IDF approach, offering better semantic understanding at the cost of increased computational time.
+This document describes the semantic embedding methods available in the ML Open-Ended Coding system. The framework supports **6 ML methods** in total: TF-IDF+K-Means, LDA, NMF, LSTM+K-Means, BERT+K-Means, and SVM Spectral. The embedding methods described here provide alternatives to the default TF-IDF approach, offering better semantic understanding at the cost of increased computational time.
 
-**Key Principle:** TF-IDF remains the default for backward compatibility and speed. All embedding methods are **opt-in** and work **offline** (no API keys required).
+**Key Principle:** TF-IDF remains the default for backward compatibility and speed. BERT+K-Means and LSTM+K-Means are **standard primary methods** in the framework (not optional alternatives) and are available alongside TF-IDF+K-Means, LDA, NMF, and SVM Spectral. All embedding methods work **offline** (no API keys required).
 
 ---
 
@@ -535,7 +535,7 @@ run_ml_analysis(df, 'response', n_codes=10, representation='word2vec')
 
 ### Q: Do I need to change my clustering method?
 
-**A:** No. Embeddings work with all 6 clustering methods (`tfidf_kmeans`, `lda`, `nmf`, `bert_kmeans`, `lstm_kmeans`, `svm`).
+**A:** No. Embeddings work with all 6 ML methods in the framework (`tfidf_kmeans`, `lda`, `nmf`, `lstm_kmeans`, `bert_kmeans`, `svm`). Note that BERT+K-Means and LSTM+K-Means are standard primary methods, not optional extras.
 
 ### Q: Can I use embeddings without internet?
 
@@ -616,7 +616,8 @@ Transactions of the Association for Computational Linguistics, 5, 135-146.
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | 2025-12-25 | Agent-3 (NLP/Embedding Specialist) | Initial documentation |
+| 1.0 | 2026-02-23 | Agent-3 (NLP/Embedding Specialist) | Initial documentation |
+| 1.1 | 2026-02-23 | Framework Team | Updated dates; clarified BERT+K-Means and LSTM+K-Means as standard primary methods; noted 6 ML methods total |
 
 **Next Review:** After user testing and feedback
 

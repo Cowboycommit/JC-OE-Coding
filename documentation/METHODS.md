@@ -1,16 +1,16 @@
 # Methods Documentation
 
 **Project:** Employee Satisfaction Survey Analysis
-**Generated:** 2025-12-25 03:30:00
-**Version:** 1.0
+**Generated:** 2026-02-23
+**Version:** 1.4
 
 ---
 
 ## 1. Data Preparation
 
 ### 1.1 Dataset Characteristics
-- **Total responses collected:** 300
-- **Analytic sample size:** 300 responses
+- **Total responses collected:** 1,000 (per dataset)
+- **Analytic sample size:** 1,000 responses (or optimal subsample)
 - **Data collection period:** [User to specify]
 - **Response format:** Open-ended text responses
 
