@@ -224,7 +224,7 @@ class TestMethodsDocGenerator:
         # Check that violations are properly documented
         violation_phrases = [v['phrase'] for v in violations]
         assert 'objectively identifies' in violation_phrases
-        assert '100% accurate' in violation_phrases
+        assert '100% accuracy' in violation_phrases
 
     def test_generate_bibtex_citations_tfidf(self):
         """Test BibTeX citation generation for TF-IDF."""

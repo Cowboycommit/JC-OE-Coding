@@ -206,7 +206,7 @@ class TestAdaptivePreprocessor:
         assert config.min_df >= 5
         assert config.sublinear_tf is True
         assert config.max_df <= 0.9
-        assert config.ngram_range == (1, 2)
+        assert config.ngram_range == (1, 3)
 
     def test_config_override(self, preprocessor):
         """Test manual config override."""

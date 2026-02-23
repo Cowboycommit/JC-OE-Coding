@@ -329,24 +329,62 @@ class Word2VecEmbedder(BaseEmbedder):
         from gensim.models import Word2Vec
         from gensim.utils import simple_preprocess
 
-        # Tokenize texts
-        tokenized = [simple_preprocess(str(text)) for text in texts]
+        # Tokenize texts, treating None and empty strings as empty token lists
+        tokenized = []
+        for text in texts:
+            if text is None or (isinstance(text, str) and not text.strip()):
+                tokenized.append([])
+            else:
+                tokenized.append(simple_preprocess(str(text)))
+
+        # Filter out empty token lists for training (Word2Vec can't train on empty sentences)
+        training_sentences = [tokens for tokens in tokenized if tokens]
 
         logger.info(f"Training Word2Vec model (vector_size={self.vector_size}, epochs={self.epochs})")
 
-        # Train Word2Vec model
+        if not training_sentences:
+            raise ValueError(
+                "No valid tokens found after preprocessing. "
+                "All texts are empty or too short for Word2Vec training."
+            )
+
+        # Build vocabulary first to check if any words pass min_count
         self.model = Word2Vec(
-            sentences=tokenized,
             vector_size=self.vector_size,
             window=self.window,
             min_count=self.min_count,
             workers=self.workers,
-            epochs=self.epochs,
             sg=self.sg
+        )
+        self.model.build_vocab(training_sentences)
+
+        vocab_size = len(self.model.wv)
+
+        if vocab_size == 0:
+            # No words passed min_count threshold - train with min_count=1 as fallback
+            warnings.warn(
+                f"No words met min_count={self.min_count}. "
+                f"Falling back to min_count=1 to build vocabulary.",
+                UserWarning
+            )
+            self.model = Word2Vec(
+                vector_size=self.vector_size,
+                window=self.window,
+                min_count=1,
+                workers=self.workers,
+                sg=self.sg
+            )
+            self.model.build_vocab(training_sentences)
+            vocab_size = len(self.model.wv)
+
+        # Train the model
+        self.model.train(
+            training_sentences,
+            total_examples=self.model.corpus_count,
+            epochs=self.epochs
         )
 
         self.is_fitted_ = True
-        vocab_size = len(self.model.wv)
         logger.info(f"Word2Vec model trained. Vocabulary size: {vocab_size}")
 
         if vocab_size < 50:
@@ -379,6 +417,11 @@ class Word2VecEmbedder(BaseEmbedder):
         embeddings = []
 
         for text in texts:
+            if text is None or (isinstance(text, str) and not text.strip()):
+                # None or empty text -> zero vector
+                embeddings.append(np.zeros(self.vector_size))
+                continue
+
             tokens = simple_preprocess(str(text))
 
             # Get vectors for words in vocabulary
@@ -677,14 +720,28 @@ class FastTextEmbedder(BaseEmbedder):
         from gensim.models import FastText
         from gensim.utils import simple_preprocess
 
-        # Tokenize texts
-        tokenized = [simple_preprocess(str(text)) for text in texts]
+        # Tokenize texts, treating None and empty strings as empty token lists
+        tokenized = []
+        for text in texts:
+            if text is None or (isinstance(text, str) and not text.strip()):
+                tokenized.append([])
+            else:
+                tokenized.append(simple_preprocess(str(text)))
+
+        # Filter out empty token lists for training
+        training_sentences = [tokens for tokens in tokenized if tokens]
 
         logger.info(f"Training FastText model (vector_size={self.vector_size}, epochs={self.epochs})")
 
+        if not training_sentences:
+            raise ValueError(
+                "No valid tokens found after preprocessing. "
+                "All texts are empty or too short for FastText training."
+            )
+
         # Train FastText model
         self.model = FastText(
-            sentences=tokenized,
+            sentences=training_sentences,
             vector_size=self.vector_size,
             window=self.window,
             min_count=self.min_count,
@@ -728,6 +785,11 @@ class FastTextEmbedder(BaseEmbedder):
         embeddings = []
 
         for text in texts:
+            if text is None or (isinstance(text, str) and not text.strip()):
+                # None or empty text -> zero vector
+                embeddings.append(np.zeros(self.vector_size))
+                continue
+
             tokens = simple_preprocess(str(text))
 
             if tokens:

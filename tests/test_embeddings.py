@@ -221,8 +221,13 @@ class TestSentenceBERTEmbedder:
         """Test fit_transform with actual SentenceBERT model (if available)."""
         from src.embeddings import SentenceBERTEmbedder
 
-        embedder = SentenceBERTEmbedder(model_name='all-MiniLM-L6-v2')
-        vectors = embedder.fit_transform(SAMPLE_TEXTS[:3])  # Use subset to save time
+        try:
+            embedder = SentenceBERTEmbedder(model_name='all-MiniLM-L6-v2')
+            vectors = embedder.fit_transform(SAMPLE_TEXTS[:3])  # Use subset to save time
+        except (OSError, Exception) as e:
+            if "403" in str(e) or "ProxyError" in str(type(e).__name__) or "ConnectionError" in str(type(e).__name__):
+                pytest.skip("Cannot download model (network/proxy restriction)")
+            raise
 
         assert vectors.shape[0] == 3
         assert vectors.shape[1] == 384  # all-MiniLM-L6-v2 has 384 dimensions
@@ -237,15 +242,18 @@ class TestSentenceBERTEmbedder:
         from src.embeddings import SentenceBERTEmbedder
         from sklearn.metrics.pairwise import cosine_similarity
 
-        embedder = SentenceBERTEmbedder(model_name='all-MiniLM-L6-v2')
-
-        similar_texts = [
-            "Remote work provides flexibility",
-            "Working from home offers flexibility",
-            "I love pizza"
-        ]
-
-        vectors = embedder.fit_transform(similar_texts)
+        try:
+            embedder = SentenceBERTEmbedder(model_name='all-MiniLM-L6-v2')
+            similar_texts = [
+                "Remote work provides flexibility",
+                "Working from home offers flexibility",
+                "I love pizza"
+            ]
+            vectors = embedder.fit_transform(similar_texts)
+        except (OSError, Exception) as e:
+            if "403" in str(e) or "ProxyError" in str(type(e).__name__) or "ConnectionError" in str(type(e).__name__):
+                pytest.skip("Cannot download model (network/proxy restriction)")
+            raise
 
         # First two texts should be more similar than first and third
         sim_0_1 = cosine_similarity([vectors[0]], [vectors[1]])[0, 0]
@@ -450,14 +458,19 @@ class TestIntegrationWithMLOpenCoder:
 
         df = pd.DataFrame({'text': SAMPLE_TEXTS[:5]})  # Small subset
 
-        coder, results, metrics = run_ml_analysis(
-            df,
-            text_column='text',
-            n_codes=2,
-            method='tfidf_kmeans',
-            representation='sbert',
-            embedding_kwargs={'model_name': 'all-MiniLM-L6-v2'}
-        )
+        try:
+            coder, results, metrics = run_ml_analysis(
+                df,
+                text_column='text',
+                n_codes=2,
+                method='tfidf_kmeans',
+                representation='sbert',
+                embedding_kwargs={'model_name': 'all-MiniLM-L6-v2'}
+            )
+        except (OSError, Exception) as e:
+            if "403" in str(e) or "ProxyError" in str(type(e).__name__) or "ConnectionError" in str(type(e).__name__):
+                pytest.skip("Cannot download model (network/proxy restriction)")
+            raise
 
         assert metrics['representation'] == 'sbert'
         assert len(results) == 5
