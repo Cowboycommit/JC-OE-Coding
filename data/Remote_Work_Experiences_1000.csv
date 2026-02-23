@@ -1,0 +1,1001 @@
+id,response,respondent_id,timestamp,topic
+1,Working from home has given me incredible flexibility to manage my schedule around family needs,R001,2024-01-15 08:30:00,Flexibility
+2,The lack of commute saves me nearly two hours daily which I now spend exercising,R002,2024-01-15 09:15:00,Commute
+3,I struggle with feeling isolated and miss the spontaneous conversations with colleagues,R003,2024-01-15 10:00:00,Isolation
+4,Video call fatigue is real - back to back meetings leave me completely drained,R004,2024-01-15 11:30:00,Communication
+5,My productivity has increased significantly without office distractions and interruptions,R005,2024-01-15 12:45:00,Productivity
+6,Setting boundaries between work and personal life has become increasingly difficult,R006,2024-01-15 13:20:00,Boundaries
+7,The cost savings from not buying lunch out and commuting are substantial,R007,2024-01-15 14:00:00,Cost
+8,I find it harder to disconnect from work when my office is in my living room,R008,2024-01-15 15:30:00,Boundaries
+9,Collaborating on creative projects feels less dynamic without in-person brainstorming,R009,2024-01-15 16:15:00,Collaboration
+10,Having control over my environment helps me focus better on deep work tasks,R010,2024-01-16 08:00:00,Productivity
+11,I miss the energy of being around motivated colleagues in a shared space,R011,2024-01-16 09:30:00,Isolation
+12,Technology issues during important presentations cause significant stress and anxiety,R012,2024-01-16 10:45:00,Technology
+13,The flexibility to attend medical appointments without taking leave is invaluable,R013,2024-01-16 11:15:00,Flexibility
+14,Building relationships with new team members remotely is challenging and takes longer,R014,2024-01-16 12:00:00,Relationships
+15,My work-life balance has improved dramatically since transitioning to remote work,R015,2024-01-16 13:30:00,Balance
+16,I feel disconnected from company culture and important decisions happening in the office,R016,2024-01-16 14:20:00,Culture
+17,The autonomy to structure my day according to my peak productivity hours is wonderful,R017,2024-01-16 15:00:00,Autonomy
+18,Communication gaps lead to misunderstandings that wouldn't happen face-to-face,R018,2024-01-16 16:30:00,Communication
+19,I can finally live where I want rather than being tied to an expensive city,R019,2024-01-17 08:30:00,Location
+20,The blurring of professional and personal spaces affects my mental wellbeing,R020,2024-01-17 09:00:00,Wellbeing
+21,Remote work has allowed me to be more present for my children's important moments,R021,2024-01-17 10:15:00,Family
+22,I worry about being overlooked for promotions since I'm not physically visible,R022,2024-01-17 11:00:00,Career
+23,Creating a dedicated home office space has been essential for maintaining focus,R023,2024-01-17 12:30:00,Workspace
+24,The informal learning from overhearing senior colleagues is something I really miss,R024,2024-01-17 13:45:00,Learning
+25,I appreciate not having to deal with office politics and workplace drama daily,R025,2024-01-17 14:30:00,Culture
+26,Time zone differences make scheduling meetings with global teams extremely difficult,R026,2024-01-17 15:15:00,Collaboration
+27,My health has improved with more time for exercise and preparing nutritious meals,R027,2024-01-17 16:00:00,Health
+28,I feel like I'm always working because my laptop is always within reach,R028,2024-01-18 08:00:00,Boundaries
+29,The trust my employer shows by allowing remote work has increased my loyalty,R029,2024-01-18 09:30:00,Trust
+30,Virtual team building activities feel forced and don't create genuine connections,R030,2024-01-18 10:45:00,Relationships
+31,Being able to work in comfortable clothes improves my overall daily comfort,R031,2024-01-18 11:30:00,Comfort
+32,Career progression feels uncertain when I can't demonstrate my value in person,R032,2024-01-18 12:15:00,Career
+33,I've developed better written communication skills out of necessity,R033,2024-01-18 13:00:00,Skills
+34,The loneliness of working alone all day sometimes becomes overwhelming,R034,2024-01-18 14:30:00,Isolation
+35,Remote work has given me the opportunity to pursue hobbies I never had time for,R035,2024-01-18 15:15:00,Balance
+36,Technical difficulties during client calls make me look unprofessional,R036,2024-01-18 16:00:00,Technology
+37,I can better manage my chronic health condition with the flexibility of remote work,R037,2024-01-19 08:30:00,Health
+38,The lack of separation between work and home has strained my relationship,R038,2024-01-19 09:15:00,Relationships
+39,I'm more productive in the morning and can now structure my day accordingly,R039,2024-01-19 10:00:00,Productivity
+40,Missing out on hallway conversations means I'm often the last to know about changes,R040,2024-01-19 11:30:00,Communication
+41,Working remotely has allowed me to care for my aging parents while maintaining my career,R041,2024-01-19 12:00:00,Family
+42,I find myself working longer hours because there's no natural end to the workday,R042,2024-01-19 13:30:00,Boundaries
+43,The environmental impact of reduced commuting aligns with my personal values,R043,2024-01-19 14:15:00,Environment
+44,Onboarding new employees remotely is significantly more challenging than in person,R044,2024-01-19 15:00:00,Onboarding
+45,I've created a morning routine that sets me up for a productive day,R045,2024-01-20 08:00:00,Routine
+46,The flexibility to take breaks when needed helps me maintain mental clarity,R046,2024-01-20 09:30:00,Flexibility
+47,I miss celebrating team wins and milestones together in the office,R047,2024-01-20 10:15:00,Culture
+48,My internet connection isn't always reliable which impacts my work quality,R048,2024-01-20 11:00:00,Technology
+49,Remote work has improved my relationship with my partner as I'm more present,R049,2024-01-20 12:30:00,Relationships
+50,I struggle to stay motivated without the accountability of being in an office,R050,2024-01-20 13:45:00,Motivation
+51,The money saved on professional clothing is a nice unexpected benefit,R051,2024-01-20 14:30:00,Cost
+52,I feel more in control of my time and how I allocate it throughout the day,R052,2024-01-20 15:15:00,Autonomy
+53,Mentoring junior colleagues is much harder without casual in-person interactions,R053,2024-01-20 16:00:00,Mentoring
+54,I appreciate being able to create an ergonomic workspace tailored to my needs,R054,2024-01-21 08:30:00,Workspace
+55,The lack of physical activity from not walking around an office concerns me,R055,2024-01-21 09:15:00,Health
+56,Remote work has forced me to become more organized and self-disciplined,R056,2024-01-21 10:00:00,Skills
+57,I feel guilty taking breaks when working from home even though I need them,R057,2024-01-21 11:30:00,Wellbeing
+58,Being able to attend my children's school events without missing work is priceless,R058,2024-01-21 12:00:00,Family
+59,The hybrid model seems like the best compromise for maintaining connections,R059,2024-01-21 13:30:00,Hybrid
+60,I've had to learn to be more proactive in seeking feedback and visibility,R060,2024-01-21 14:15:00,Career
+61,Working from different locations keeps me inspired and prevents monotony,R061,2024-01-21 15:00:00,Location
+62,I miss the clear transition between work mode and home mode that commuting provided,R062,2024-01-22 08:00:00,Boundaries
+63,The flexibility to work from anywhere has allowed me to travel more,R063,2024-01-22 09:30:00,Travel
+64,I feel less stressed without the daily pressure of rush hour traffic,R064,2024-01-22 10:15:00,Commute
+65,Building trust with remote team members requires more intentional effort,R065,2024-01-22 11:00:00,Trust
+66,I've become more efficient at running and participating in virtual meetings,R066,2024-01-22 12:30:00,Skills
+67,The isolation has negatively impacted my mental health at times,R067,2024-01-22 13:45:00,Wellbeing
+68,I appreciate having quiet time for focused work without constant interruptions,R068,2024-01-22 14:30:00,Productivity
+69,Remote onboarding made it harder to understand company processes and culture,R069,2024-01-22 15:15:00,Onboarding
+70,I've invested in better equipment to make my home office more professional,R070,2024-01-22 16:00:00,Workspace
+71,The work from home setup has made it easier to integrate work with my lifestyle,R071,2024-01-23 08:30:00,Balance
+72,I miss the creativity that comes from spontaneous whiteboard sessions,R072,2024-01-23 09:15:00,Collaboration
+73,Managing a remote team requires completely different skills than in-person management,R073,2024-01-23 10:00:00,Management
+74,I've rediscovered the joy of cooking proper lunches instead of grabbing fast food,R074,2024-01-23 11:30:00,Health
+75,The flexibility to work during my most productive hours has transformed my output,R075,2024-01-23 12:00:00,Productivity
+76,I worry that younger workers are missing crucial developmental experiences,R076,2024-01-23 13:30:00,Learning
+77,Video calls don't capture body language and nuance the way in-person meetings do,R077,2024-01-23 14:15:00,Communication
+78,My pets love having me home and honestly it's been great for both of us,R078,2024-01-23 15:00:00,Comfort
+79,The pressure to always be available online is exhausting and unsustainable,R079,2024-01-24 08:00:00,Boundaries
+80,I've developed stronger relationships with my neighbors since being home more,R080,2024-01-24 09:30:00,Community
+81,Remote work has made me realize how much time was wasted in unnecessary meetings,R081,2024-01-24 10:15:00,Productivity
+82,I struggle with imposter syndrome more when I can't see how others are working,R082,2024-01-24 11:00:00,Wellbeing
+83,The option to work remotely has become a non-negotiable factor in job decisions,R083,2024-01-24 12:30:00,Career
+84,I miss the energy and buzz of a busy office environment,R084,2024-01-24 13:45:00,Culture
+85,Setting up boundaries with family members during work hours has been challenging,R085,2024-01-24 14:30:00,Family
+86,I've become more intentional about scheduling social interactions outside work,R086,2024-01-24 15:15:00,Relationships
+87,The lack of oversight has allowed me to develop better self-management skills,R087,2024-01-24 16:00:00,Autonomy
+88,Remote work has eliminated the stress of finding parking every morning,R088,2024-01-25 08:30:00,Commute
+89,I feel more empowered to decline meetings that don't require my presence,R089,2024-01-25 09:15:00,Productivity
+90,The transition to remote work highlighted how dependent I was on office infrastructure,R090,2024-01-25 10:00:00,Technology
+91,I've been able to create a workspace that truly reflects my personality and needs,R091,2024-01-25 11:30:00,Workspace
+92,The reduced face time with leadership has impacted my visibility for advancement,R092,2024-01-25 12:00:00,Career
+93,I appreciate the reduced exposure to office germs and seasonal illnesses,R093,2024-01-25 13:30:00,Health
+94,Async communication has made collaboration across time zones more manageable,R094,2024-01-25 14:15:00,Collaboration
+95,I've realized how important physical separation between work and home really is,R095,2024-01-25 15:00:00,Boundaries
+96,Remote work has allowed me to pursue a side project I've always dreamed about,R096,2024-01-26 08:00:00,Balance
+97,I feel more comfortable contributing in virtual meetings than I did in person,R097,2024-01-26 09:30:00,Communication
+98,The company's remote work policy has improved my opinion of leadership,R098,2024-01-26 10:15:00,Trust
+99,I miss having dedicated IT support just down the hall when things go wrong,R099,2024-01-26 11:00:00,Technology
+100,Working from home has allowed me to be more environmentally conscious overall,R100,2024-01-26 12:30:00,Environment
+101,The freedom to step away for personal tasks without judgment is liberating,R101,2024-01-26 13:45:00,Flexibility
+102,I've noticed my social skills have declined from lack of daily in-person interaction,R102,2024-01-26 14:30:00,Skills
+103,Remote work has given me the space to manage my anxiety better during work hours,R103,2024-01-26 15:15:00,Wellbeing
+104,I find it harder to disconnect on weekends when my office is always accessible,R104,2024-01-26 16:00:00,Boundaries
+105,The lack of natural light in my home office affects my energy levels negatively,R105,2024-01-27 08:30:00,Workspace
+106,I've become better at prioritizing tasks without someone looking over my shoulder,R106,2024-01-27 09:15:00,Autonomy
+107,Remote work has tested and ultimately strengthened my relationship with my spouse,R107,2024-01-27 10:00:00,Relationships
+108,I miss the ritual of getting ready and transitioning into work mode each morning,R108,2024-01-27 11:30:00,Routine
+109,The flexibility to volunteer in my community during lunch breaks is wonderful,R109,2024-01-27 12:00:00,Community
+110,I worry about the long-term career implications of being remote while others are in office,R110,2024-01-27 13:30:00,Career
+111,Having a consistent routine has become essential for maintaining productivity at home,R111,2024-01-27 14:15:00,Routine
+112,I appreciate being able to take calls while walking outside for fresh air,R112,2024-01-27 15:00:00,Health
+113,The initial excitement of remote work has faded into a sense of monotony,R113,2024-01-28 08:00:00,Motivation
+114,I've invested significantly in my home office setup to match office quality,R114,2024-01-28 09:30:00,Workspace
+115,Remote work has made it easier to pursue continuing education alongside my job,R115,2024-01-28 10:15:00,Learning
+116,The lack of informal feedback makes it hard to know if I'm meeting expectations,R116,2024-01-28 11:00:00,Communication
+117,I feel more rested without the early morning rush to get to the office,R117,2024-01-28 12:30:00,Wellbeing
+118,Cross-functional collaboration has become more siloed in a remote environment,R118,2024-01-28 13:45:00,Collaboration
+119,I've developed a better understanding of what I need to be productive,R119,2024-01-28 14:30:00,Productivity
+120,The dog walking breaks throughout the day have been great for mental health,R120,2024-01-28 15:15:00,Balance
+121,Remote work has exposed weaknesses in our team's communication practices,R121,2024-01-28 16:00:00,Communication
+122,I appreciate the reduced pressure to conform to office dress codes and norms,R122,2024-01-29 08:30:00,Comfort
+123,Building company culture remotely requires much more intentional effort,R123,2024-01-29 09:15:00,Culture
+124,I've learned to set clear expectations about my availability with my team,R124,2024-01-29 10:00:00,Boundaries
+125,The savings from remote work have allowed me to pay off debt faster,R125,2024-01-29 11:30:00,Cost
+126,I miss the mentorship opportunities that came from working near senior colleagues,R126,2024-01-29 12:00:00,Mentoring
+127,Remote work has given me perspective on what truly matters in my career,R127,2024-01-29 13:30:00,Career
+128,I struggle with maintaining work friendships when we never see each other in person,R128,2024-01-29 14:15:00,Relationships
+129,The flexibility to adjust my schedule around my energy levels has been transformative,R129,2024-01-29 15:00:00,Flexibility
+130,I've realized how much the office environment was draining my energy,R130,2024-01-30 08:00:00,Wellbeing
+131,Remote work requires more self-advocacy to ensure my contributions are recognized,R131,2024-01-30 09:30:00,Career
+132,I appreciate being able to work through difficult personal times without scrutiny,R132,2024-01-30 10:15:00,Autonomy
+133,The hybrid schedule offers the best of both remote and in-office benefits,R133,2024-01-30 11:00:00,Hybrid
+134,I've become more efficient at documenting decisions and processes for remote teams,R134,2024-01-30 12:30:00,Skills
+135,Remote work has highlighted the importance of trust between managers and employees,R135,2024-01-30 13:45:00,Trust
+136,I miss the serendipitous encounters that led to unexpected collaborations,R136,2024-01-30 14:30:00,Collaboration
+137,Working from home has allowed me to create a more sustainable daily rhythm,R137,2024-01-30 15:15:00,Routine
+138,The constant notifications and messages create more interruptions than office visits did,R138,2024-01-30 16:00:00,Productivity
+139,I've had to be more proactive about maintaining professional relationships,R139,2024-01-31 08:30:00,Relationships
+140,Remote work has made me appreciate the value of focused deep work time,R140,2024-01-31 09:15:00,Productivity
+141,The boundary between being responsive and being constantly available is unclear,R141,2024-01-31 10:00:00,Boundaries
+142,I feel more connected to my local community since working from home,R142,2024-01-31 11:30:00,Community
+143,Remote work has revealed which meetings were actually necessary and which weren't,R143,2024-01-31 12:00:00,Productivity
+144,I miss the creative energy that came from working in a dynamic office environment,R144,2024-01-31 13:30:00,Culture
+145,The reduced commute stress has had a noticeable positive impact on my mood,R145,2024-01-31 14:15:00,Wellbeing
+146,I've learned to be more explicit in my communication to avoid misunderstandings,R146,2024-01-31 15:00:00,Communication
+147,Remote work has made me more disciplined about taking proper lunch breaks,R147,2024-02-01 08:00:00,Health
+148,I struggle with the lack of visual cues about when colleagues are busy or available,R148,2024-02-01 09:30:00,Communication
+149,The flexibility to work from different rooms keeps me from feeling stuck,R149,2024-02-01 10:15:00,Workspace
+150,I've developed stronger project management skills from leading remote initiatives,R150,2024-02-01 11:00:00,Skills
+151,Remote work has allowed me to be more present during family emergencies,R151,2024-02-01 12:30:00,Family
+152,I feel less anxious about work without the pressure of office surveillance,R152,2024-02-01 13:45:00,Wellbeing
+153,The inconsistent home internet speeds impact my ability to perform reliably,R153,2024-02-01 14:30:00,Technology
+154,I've created rituals to mark the start and end of my workday at home,R154,2024-02-01 15:15:00,Routine
+155,Remote work has made global collaboration easier despite the time zone challenges,R155,2024-02-01 16:00:00,Collaboration
+156,I miss the spontaneous lunch outings and coffee breaks with colleagues,R156,2024-02-02 08:30:00,Relationships
+157,The autonomy to manage my own time has made me more accountable for results,R157,2024-02-02 09:15:00,Autonomy
+158,Remote work has pushed me to improve my written communication significantly,R158,2024-02-02 10:00:00,Skills
+159,I appreciate the accessibility benefits that remote work provides for many workers,R159,2024-02-02 11:30:00,Flexibility
+160,Building rapport with clients remotely requires more effort and creativity,R160,2024-02-02 12:00:00,Relationships
+161,I've found that my creativity flows better in the comfort of my own space,R161,2024-02-02 13:30:00,Productivity
+162,The lack of commute has given me time to develop new personal interests,R162,2024-02-02 14:15:00,Balance
+163,Remote work has made me more aware of my work habits and patterns,R163,2024-02-02 15:00:00,Productivity
+164,I worry about junior employees missing out on organic learning opportunities,R164,2024-02-03 08:00:00,Mentoring
+165,The flexibility to exercise during lunch has improved my afternoon productivity,R165,2024-02-03 09:30:00,Health
+166,Remote work has shown me the importance of intentional team building activities,R166,2024-02-03 10:15:00,Culture
+167,I've become more comfortable with video conferencing than I ever was with presentations,R167,2024-02-03 11:00:00,Skills
+168,The separation from toxic office dynamics has improved my job satisfaction,R168,2024-02-03 12:30:00,Wellbeing
+169,I miss the immediate feedback and quick problem-solving of in-person collaboration,R169,2024-02-03 13:45:00,Collaboration
+170,Remote work requires better planning and preparation for virtual meetings to be effective,R170,2024-02-03 14:30:00,Productivity
+171,I've realized the importance of maintaining professional boundaries even when working from home,R171,2024-02-03 15:15:00,Boundaries
+172,The option to relocate to a lower cost area while keeping my salary has been life-changing,R172,2024-02-03 16:00:00,Location
+173,Remote work has made performance management more challenging but more outcome-focused,R173,2024-02-04 08:30:00,Management
+174,I appreciate the flexibility to handle household tasks during natural work breaks,R174,2024-02-04 09:15:00,Balance
+175,The lack of water cooler conversations means I miss important informal information,R175,2024-02-04 10:00:00,Communication
+176,Remote work has taught me to be more intentional about career development,R176,2024-02-04 11:30:00,Career
+177,I've discovered that I'm more introverted than I realized and thrive working alone,R177,2024-02-04 12:00:00,Wellbeing
+178,The flexibility to attend to personal wellness during the day is incredibly valuable,R178,2024-02-04 13:30:00,Health
+179,Remote work has pushed our team to document processes that were previously tribal knowledge,R179,2024-02-04 14:15:00,Skills
+180,I miss having a clear physical separation between my professional and personal identities,R180,2024-02-04 15:00:00,Boundaries
+181,The reduced office overhead should translate to better employee compensation,R181,2024-02-05 08:00:00,Cost
+182,I've learned to create artificial urgency to maintain productivity without supervision,R182,2024-02-05 09:30:00,Motivation
+183,Remote work has made me more thoughtful about when synchronous communication is necessary,R183,2024-02-05 10:15:00,Communication
+184,The trust demonstrated by remote work policies has strengthened employee loyalty,R184,2024-02-05 11:00:00,Trust
+185,I struggle with the lack of natural opportunities to build cross-team relationships,R185,2024-02-05 12:30:00,Relationships
+186,Remote work has revealed the importance of regular check-ins with team members,R186,2024-02-05 13:45:00,Management
+187,I appreciate being able to control my environment including temperature and lighting,R187,2024-02-05 14:30:00,Workspace
+188,The virtual happy hours feel forced but are necessary for maintaining team connections,R188,2024-02-05 15:15:00,Culture
+189,Remote work has made me more efficient at written communication and documentation,R189,2024-02-05 16:00:00,Skills
+190,I find it easier to focus on complex tasks without the constant hum of an open office,R190,2024-02-06 08:30:00,Productivity
+191,The flexibility to attend midday appointments without formal leave requests is appreciated,R191,2024-02-06 09:15:00,Flexibility
+192,Remote work has challenged me to find new ways to demonstrate my value and impact,R192,2024-02-06 10:00:00,Career
+193,I miss the immediate gratification of solving problems together at a whiteboard,R193,2024-02-06 11:30:00,Collaboration
+194,The initial equipment and furniture investment for home office was significant but worthwhile,R194,2024-02-06 12:00:00,Workspace
+195,Remote work has taught me the importance of overcommunication in distributed teams,R195,2024-02-06 13:30:00,Communication
+196,I appreciate the opportunity to structure my work around my personal chronotype,R196,2024-02-06 14:15:00,Autonomy
+197,The reduction in casual social interactions has negatively impacted my sense of belonging,R197,2024-02-06 15:00:00,Isolation
+198,Remote work has made me more appreciative of in-person interactions when they happen,R198,2024-02-07 08:00:00,Relationships
+199,I've become more resilient and adaptable through navigating the challenges of remote work,R199,2024-02-07 09:30:00,Skills
+200,The future of work is clearly hybrid and I hope companies embrace this flexibility permanently,R200,2024-02-07 10:15:00,Hybrid
+201,"In my experience, the autonomy to manage my own time has made me more accountable for results, also the autonomy to structure my day according to my peak productivity hours is wonderful",R201,2024-02-07 10:46:38,Autonomy
+202,"To be honest, i've had to learn to be more proactive in seeking feedback and visibility",R202,2024-02-07 10:52:37,Career
+203,idk,R203,2024-02-07 10:56:00,Cost
+204,Remote work has made me realize how much time was wasted in unnecessary meetings all in all,R204,2024-02-07 11:10:02,Productivity
+205,"Remote work has made me more thoughtful about when synchronous communication is necessary. Additionally, i've learned to be more explicit in my communication to avoid misunderstandings",R205,2024-02-07 11:32:18,Communication
+206,The money saved on very professional clothing is a nice unexpected benefit all in all,R206,2024-02-07 11:47:33,Cost
+207,Collaborating on creative projects feels less dynamic without in-person brainstorming and i miss the serendipitous encounters that led to unexpected collaborations,R207,2024-02-07 12:14:06,Collaboration
+208,"All things considered, i feel guilty taking breaks when working from home even though I need them. Additionally, remote work has given me the space to manage my anxiety better during work hours",R208,2024-02-07 12:19:49,Wellbeing
+209,"I mean, i've become more efficient at documenting decisions and processes for remote teams",R209,2024-02-07 12:46:37,Skills
+210,The lack of separation between work and home has strained my relationship in general,R210,2024-02-07 13:23:00,Relationships
+211,The reduction in casual social interactions has negatively impacted my sense of belonging - i struggle with feeling isolated and miss the spontaneous conversations with colleagues,R211,2024-02-07 14:00:00,Isolation
+212,"All things considered, the informal learning from overhearing senior colleagues is something I really miss",R212,2024-02-07 14:34:42,Learning
+213,The hybrid model seems like the best compromise for maintaining connections,R213,2024-02-07 15:13:40,Hybrid
+214,I'd say that i've had to be more proactive about maintaining slightly professional relationships,R214,2024-02-07 15:26:19,Relationships
+215,The reduced office overhead should translate to better employee compensation but the savings from remote work have allowed me to pay off debt faster,R215,2024-02-07 15:47:23,Cost
+216,"Honestly, building relationships with new team members remotely is challenging and takes longer",R216,2024-02-07 16:19:44,Relationships
+217,meh,R217,2024-02-07 16:40:37,Autonomy
+218,Working from home has allowed me to be more environmentally conscious overall all in all,R218,2024-02-07 16:48:00,Environment
+219,"In my experience, remote work has given me perspective on what truly matters in my career",R219,2024-02-07 17:20:01,Career
+220,no issues,R220,2024-02-07 17:31:29,Balance
+221,"All things considered, the work from home setup has made it easier to integrate work with my lifestyle",R221,2024-02-07 18:16:14,Balance
+222,"In all honesty, remote work has highlighted the importance of trust between managers and employees in my opinion",R222,2024-02-07 18:50:48,Trust
+223,"Basically, the trust my employer shows by allowing remote work has increased my loyalty",R223,2024-02-07 19:26:59,Trust
+224,nothing special,R224,2024-02-07 20:09:16,Skills
+225,THE REDUCED FACE TIME WITH LEADERSHIP HAS IMPACTED MY VISIBILITY FOR ADVANCEMENT BUT I'VE HAD TO LEARN TO BE MORE PROACTIVE IN SEEKING FEEDBACK AND VISIBILITY,R225,2024-02-07 20:27:09,Career
+226,"I gotta say, i appreciate the opportunity to structure my work around my personal chronotype",R226,2024-02-07 20:54:42,Autonomy
+227,I miss the immediate gratification of solving problems together at a whiteboard. i miss the serendipitous encounters that led to unexpected collaborations,R227,2024-02-07 21:06:42,Collaboration
+228,"I gotta say, i've rediscovered the joy of cooking proper lunches instead of grabbing fast food - i appreciate the reduced exposure to office germs and seasonal illnesses",R228,2024-02-07 21:50:22,Health
+229,I'd say that i've become more resilient and adaptable through navigating the challenges of remote work in my opinion,R229,2024-02-07 22:06:25,Skills
+230,"Overall, the hybrid schedule offers the best of both remote and in-office benefits and the future of work is clearly hybrid and I hope companies embrace this flexibility permanently",R230,2024-02-07 22:33:15,Hybrid
+231,The virtual happy hours feel forced but are necessary for maintaining team connections but i appreciate not having to deal with office politics and workplace drama daily,R231,2024-02-07 22:53:02,Culture
+232,I'VE BECOME BETTER AT PRIORITIZING TASKS WITHOUT SOMEONE LOOKING OVER MY SHOULDER,R232,2024-02-07 23:23:59,Autonomy
+233,Setting boundaries between work and personal life has become increasingly difficult - i find it harder to disconnect on weekends when my office is always accessible,R233,2024-02-07 23:30:13,Boundaries
+234,I can finally live where I want rather than being tied to an expensive city and the option to relocate to a lower cost area while keeping my salary has been life-changing,R234,2024-02-08 00:00:48,Location
+235,THE FLEXIBILITY TO TAKE BREAKS WHEN NEEDED HELPS ME MAINTAIN MENTAL CLARITY,R235,2024-02-08 00:11:11,Flexibility
+236,"Truthfully, i miss the energy of being around motivated colleagues in a shared space and the reduction in casual social interactions has negatively impacted my sense of belonging",R236,2024-02-08 00:18:31,Isolation
+237,I miss the mentorship opportunities that came from working near senior colleagues - mentoring junior colleagues is much harder without casual in-person interactions,R237,2024-02-08 00:26:59,Mentoring
+238,I feel more comfortable contributing in virtual meetings than I did in person. communication gaps lead to misunderstandings that wouldn't happen face-to-face all in all,R238,2024-02-08 00:33:28,Communication
+239,"Truthfully, i appreciate the reduced pressure to conform to office dress codes and norms",R239,2024-02-08 00:59:59,Comfort
+240,"I have to say, remote work has given me the space to manage my anxiety superior during work hours",R240,2024-02-08 01:42:55,Wellbeing
+241,nothing to add,R241,2024-02-08 02:21:04,Wellbeing
+242,The blurring of very professional and personal spaces affects my mental wellbeing,R242,2024-02-08 02:25:40,Wellbeing
+243,"Basically, the lack of separation between work and home has strained my relationship",R243,2024-02-08 02:39:02,Relationships
+244,"Creating a dedicated home office space has been essential for maintaining focus. Additionally, the initial equipment and furniture investment for home office was significant but worthwhile all in all",R244,2024-02-08 03:01:28,Workspace
+245,"I have to say, the constant notifications and messages create more interruptions than office visits did honestly",R245,2024-02-08 03:18:44,Productivity
+246,I miss the energy of being around motivated colleagues in a shared space but i struggle with feeling isolated and miss the spontaneous conversations with colleagues,R246,2024-02-08 03:29:51,Isolation
+247,good overall,R247,2024-02-08 04:10:45,Trust
+248,The blurring of professional and personal spaces affects my mental wellbeing if I'm being honest,R248,2024-02-08 04:50:47,Wellbeing
+249,I can upgraded manage my chronic health condition with the flexibility of remote work,R249,2024-02-08 05:03:01,Health
+250,The company's remote work policy has improved my opinion of leadership and the trust my employer shows by allowing remote work has increased my loyalty,R250,2024-02-08 05:45:08,Trust
+251,"In all honesty, my pets really enjoy having me home and honestly it's been great for both of us",R251,2024-02-08 06:03:25,Comfort
+252,"Remote work has made performance management more challenging but more outcome-focused, also managing a remote team requires completely different skills than in-person management",R252,2024-02-08 06:37:54,Management
+253,I've become more resilient and adaptable through navigating the challenges of remote work and i've become more comfortable with video conferencing than I ever was with presentations,R253,2024-02-08 06:53:36,Skills
+254,"All things considered, the initial equipment and furniture investment for home office was significant but worthwhile",R254,2024-02-08 07:25:30,Workspace
+255,"The flexibility to volunteer in my community during lunch breaks is wonderful. Additionally, i've developed stronger relationships with my neighbors since being home more",R255,2024-02-08 07:53:55,Community
+256,"I have to say, i feel more in control of my time and how I allocate it throughout the day tbh",R256,2024-02-08 08:17:28,Autonomy
+257,I struggle with feeling isolated and miss the spontaneous conversations with colleagues. i miss the energy of being around motivated colleagues in a shared space,R257,2024-02-08 08:45:49,Isolation
+258,My pets love having me home and honestly it's been great for both of us all in all,R258,2024-02-08 09:27:35,Comfort
+259,I'm more productive in the morning and can now structure my day accordingly - the constant notifications and messages create more interruptions than office visits did,R259,2024-02-08 09:37:48,Productivity
+260,"The flexibility to attend medical appointments without taking leave is invaluable. Additionally, the flexibility to attend midday appointments without formal leave requests is appreciated",R260,2024-02-08 10:17:41,Flexibility
+261,Remote work has given me the opportunity to pursue hobbies I never had time for I think,R261,2024-02-08 10:54:00,Balance
+262,Remote work requires more self-advocacy to ensure my contributions are recognized. the reduced face time with leadership has impacted my visibility for advancement overall,R262,2024-02-08 11:18:22,Career
+263,"My pets love having me home and honestly it's been great for both of us, also being able to work in comfortable clothes improves my overall daily comfort in general",R263,2024-02-08 11:38:13,Comfort
+264,"From my perspective, i've learned to be more explicit in my communication to avoid misunderstandings",R264,2024-02-08 11:45:39,Communication
+265,"Basically, i can slightly better manage my chronic health condition with the flexibility of remote work",R265,2024-02-08 12:10:00,Health
+266,I've become more resilient and adaptable through navigating the challenges of remote work,R266,2024-02-08 12:49:22,Skills
+267,The autonomy to structure my day according to my peak productivity hours is wonderful and i feel more in control of my time and how I allocate it throughout the day,R267,2024-02-08 13:01:36,Autonomy
+268,The flexibility to volunteer in my community during lunch breaks is wonderful to be honest,R268,2024-02-08 13:33:23,Community
+269,"Remote work has made it easier to pursue continuing education alongside my job. Additionally, the informal learning from overhearing senior colleagues is something I really miss",R269,2024-02-08 14:13:35,Learning
+270,I've realized how much the office environment was draining my energy and i feel more rested without the early morning rush to get to the office,R270,2024-02-08 14:17:50,Wellbeing
+271,I feel less anxious about work without the pressure of office surveillance tbh,R271,2024-02-08 14:47:01,Wellbeing
+272,The loneliness of working alone all day sometimes becomes overwhelming but i miss the energy of being around motivated colleagues in a shared space,R272,2024-02-08 15:20:54,Isolation
+273,I'd say that my internet connection isn't always reliable which impacts my work quality overall,R273,2024-02-08 15:28:35,Technology
+274,Onboarding new employees remotely is significantly more challenging than in person - remote onboarding made it harder to understand company processes and culture,R274,2024-02-08 16:04:13,Onboarding
+275,I appreciate being able to create an ergonomic workspace tailored to my needs in general,R275,2024-02-08 16:13:21,Workspace
+276,I appreciate being able to work through difficult personal times without scrutiny I think,R276,2024-02-08 16:47:06,Autonomy
+277,"Remote work has forced me to become more organized and self-disciplined. Additionally, i've developed stronger project management skills from leading remote initiatives",R277,2024-02-08 17:23:56,Skills
+278,"Working from home has given me incredible flexibility to manage my schedule around family needs, also the flexibility to take breaks when needed helps me maintain mental clarity",R278,2024-02-08 17:59:11,Flexibility
+279,Remote work has made me more aware of my work habits and patterns but the flexibility to work during my most productive hours has transformed my output,R279,2024-02-08 18:37:05,Productivity
+280,"Overall, the work from home setup has made it easier to integrate work with my lifestyle",R280,2024-02-08 19:15:48,Balance
+281,"The cost savings from not buying lunch out and commuting are substantial, also the money saved on professional clothing is a nice unexpected benefit",R281,2024-02-08 20:00:34,Cost
+282,"Building trust with remote team members requires more intentional effort. Additionally, the trust demonstrated by remote work policies has strengthened employee loyalty really",R282,2024-02-08 20:04:43,Trust
+283,I can better manage my chronic health condition with the flexibility of remote work - my health has improved with more time for exercise and preparing nutritious meals,R283,2024-02-08 20:09:11,Health
+284,"Remote work has made me more aware of my work habits and patterns. Additionally, my productivity has increased significantly without office distractions and interruptions overall",R284,2024-02-08 20:44:26,Productivity
+285,"I've discovered that I'm more introverted than I realized and thrive working alone. Additionally, i've realized how much the office environment was draining my energy",R285,2024-02-08 21:09:29,Wellbeing
+286,I'd say that i feel less stressed without the daily pressure of rush hour traffic,R286,2024-02-08 21:37:52,Commute
+287,I appreciate being able to work through difficult personal times without scrutiny. the lack of oversight has allowed me to develop better self-management skills,R287,2024-02-08 22:08:03,Autonomy
+288,"In all honesty, the option to work remotely has become a non-negotiable factor in job decisions",R288,2024-02-08 22:22:02,Career
+289,"In all honesty, remote work requires more self-advocacy to ensure my contributions are recognized",R289,2024-02-08 22:41:51,Career
+290,"Basically, remote work has highlighted the importance of trust between managers and employees",R290,2024-02-08 23:10:38,Trust
+291,"I have to say, i appreciate being able to create an ergonomic workspace tailored to my needs",R291,2024-02-08 23:40:16,Workspace
+292,The hybrid model seems like the best compromise for maintaining connections in my opinion,R292,2024-02-08 23:57:47,Hybrid
+293,I feel more in control of my time and how I allocate it throughout the day I think,R293,2024-02-09 00:03:47,Autonomy
+294,I APPRECIATE THE REDUCED EXPOSURE TO OFFICE GERMS AND SEASONAL ILLNESSES,R294,2024-02-09 00:07:04,Health
+295,"To be honest, remote work has improved my relationship with my partner as I'm more present",R295,2024-02-09 00:23:38,Relationships
+296,I've realized how much the office environment was draining my energy all in all,R296,2024-02-09 00:26:55,Wellbeing
+297,"Looking back, i appreciate being able to control my environment including temperature and lighting",R297,2024-02-09 01:11:35,Workspace
+298,Remote work has taught me to be more intentional about career development but the option to work remotely has become a non-negotiable factor in job decisions,R298,2024-02-09 01:42:47,Career
+299,The dog walking breaks throughout the day have been great for mental health - the work from home setup has made it easier to integrate work with my lifestyle,R299,2024-02-09 02:21:49,Balance
+300,I've had to be more proactive about maintaining fairly professional relationships,R300,2024-02-09 02:47:40,Relationships
+301,Remote work has forced me to become more organized and self-disciplined overall,R301,2024-02-09 03:32:13,Skills
+302,Remote work requires more self-advocacy to ensure my contributions are recognized but the option to work remotely has become a non-negotiable factor in job decisions,R302,2024-02-09 04:09:40,Career
+303,Remote work has made me more appreciative of in-person interactions when they happen. building rapport with clients remotely requires more effort and creativity,R303,2024-02-09 04:22:49,Relationships
+304,Remote work has exposed weaknesses in our team's communication practices. video calls don't capture body language and nuance the way in-person meetings do,R304,2024-02-09 05:05:10,Communication
+305,decent,R305,2024-02-09 05:44:32,Mentoring
+306,"Overall, remote work has pushed me to improve my written communication significantly but i've developed stronger project management skills from leading remote initiatives",R306,2024-02-09 05:52:33,Skills
+307,The autonomy to manage my own time has made me more accountable for results all in all,R307,2024-02-09 06:05:55,Autonomy
+308,Setting up boundaries with family members during work hours has been challenging I think,R308,2024-02-09 06:26:31,Family
+309,I struggle with maintaining work friendships when we never see each other in person and building relationships with new team members remotely is challenging and takes longer,R309,2024-02-09 06:31:18,Relationships
+310,"Cross-functional collaboration has become more siloed in a remote environment. Additionally, i miss the immediate feedback and quick problem-solving of in-person collaboration",R310,2024-02-09 07:02:08,Collaboration
+311,Remote work requires superior planning and preparation for virtual meetings to be effective,R311,2024-02-09 07:47:50,Productivity
+312,Remote work has challenged me to find new ways to demonstrate my value and impact. the reduced face time with leadership has impacted my visibility for advancement,R312,2024-02-09 07:54:37,Career
+313,The company's remote work policy has improved my opinion of leadership for sure,R313,2024-02-09 08:03:12,Trust
+314,"I gotta say, the boundary between being responsive and being constantly available is unclear. Additionally, i've realized how important physical separation between work and home really is",R314,2024-02-09 08:39:07,Boundaries
+315,"All things considered, remote work has shown me the importance of intentional team building activities for sure",R315,2024-02-09 09:14:35,Culture
+316,"I appreciate having quiet time for focused work without constant interruptions. Additionally, remote work has made me realize how much time was wasted in unnecessary meetings",R316,2024-02-09 09:20:48,Productivity
+317,"I GOTTA SAY, I APPRECIATE BEING ABLE TO CONTROL MY ENVIRONMENT INCLUDING TEMPERATURE AND LIGHTING BUT THE FLEXIBILITY TO WORK FROM DIFFERENT ROOMS KEEPS ME FROM FEELING STUCK FOR SURE",R317,2024-02-09 10:00:40,Workspace
+318,THE AUTONOMY TO MANAGE MY OWN TIME HAS MADE ME MORE ACCOUNTABLE FOR RESULTS,R318,2024-02-09 10:22:47,Autonomy
+319,Remote work has made me more efficient at written communication and documentation in my opinion,R319,2024-02-09 10:50:47,Skills
+320,"The lack of informal feedback makes it hard to know if I'm meeting expectations. Additionally, video call fatigue is real - back to back meetings leave me completely drained",R320,2024-02-09 11:00:43,Communication
+321,The informal learning from overhearing senior colleagues is something I really miss all in all,R321,2024-02-09 11:42:19,Learning
+322,"Honestly, the trust my employer shows by allowing remote work has increased my loyalty",R322,2024-02-09 11:54:57,Trust
+323,Remote work has eliminated the stress of finding parking every morning if I'm being honest,R323,2024-02-09 12:02:45,Commute
+324,"All things considered, i feel like I'm always working because my laptop is always within reach - setting boundaries between work and personal life has become increasingly difficult",R324,2024-02-09 12:36:16,Boundaries
+325,"OVERALL, REMOTE WORK HAS PUSHED OUR TEAM TO DOCUMENT PROCESSES THAT WERE PREVIOUSLY TRIBAL KNOWLEDGE",R325,2024-02-09 12:44:00,Skills
+326,I miss the mentorship opportunities that came from working near senior colleagues and mentoring junior colleagues is much harder without casual in-person interactions all in all,R326,2024-02-09 12:54:42,Mentoring
+327,"I have to say, working remotely has allowed me to care for my aging parents while maintaining my career in general",R327,2024-02-09 13:19:20,Family
+328,whatever,R328,2024-02-09 13:49:20,Collaboration
+329,Remote work has made me more disciplined about taking proper lunch breaks if I'm being honest,R329,2024-02-09 14:14:21,Health
+330,The savings from remote work have allowed me to pay off debt faster. the reduced office overhead should translate to better employee compensation,R330,2024-02-09 14:52:35,Cost
+331,"From my perspective, i appreciate the opportunity to structure my work around my personal chronotype, also the lack of oversight has allowed me to develop better self-management skills to be honest",R331,2024-02-09 15:14:14,Autonomy
+332,Remote work has pushed me to improve my written communication significantly - i've become more efficient at running and participating in virtual meetings,R332,2024-02-09 15:55:19,Skills
+333,"All things considered, i worry that younger workers are missing crucial developmental experiences",R333,2024-02-09 16:38:44,Learning
+334,I FEEL MORE COMFORTABLE CONTRIBUTING IN VIRTUAL MEETINGS THAN I DID IN PERSON,R334,2024-02-09 17:05:52,Communication
+335,"I have to say, the freedom to step away for personal tasks without judgment is liberating",R335,2024-02-09 17:34:19,Flexibility
+336,"Looking back, remote work has revealed which meetings were actually necessary and which weren't - remote work has made me more aware of my work habits and patterns",R336,2024-02-09 18:09:11,Productivity
+337,I'd say that the autonomy to structure my day according to my peak productivity hours is wonderful,R337,2024-02-09 18:12:51,Autonomy
+338,I've noticed my social skills have declined from lack of daily in-person interaction in general,R338,2024-02-09 18:41:52,Skills
+339,Remote work has made me more efficient at written communication and documentation in general,R339,2024-02-09 19:26:43,Skills
+340,"To be honest, i struggle with the lack of visual cues about when colleagues are busy or available. missing out on hallway conversations means I'm often the last to know about changes",R340,2024-02-09 19:43:14,Communication
+341,"The flexibility to attend medical appointments without taking leave is invaluable. Additionally, i appreciate the accessibility benefits that remote work provides for many workers",R341,2024-02-09 19:54:40,Flexibility
+342,"I struggle with the lack of natural opportunities to build cross-team relationships, also the lack of separation between work and home has strained my relationship for sure",R342,2024-02-09 20:27:13,Relationships
+343,"Honestly, i appreciate the opportunity to structure my work around my personal chronotype",R343,2024-02-09 21:06:00,Autonomy
+344,"From my perspective, the flexibility to attend to personal wellness during the day is incredibly valuable",R344,2024-02-09 21:33:45,Health
+345,I've developed a better understanding of what I need to be productive and the flexibility to work during my most productive hours has transformed my output all in all,R345,2024-02-09 21:50:30,Productivity
+346,"Truthfully, i struggle to stay motivated without the accountability of being in an office but i've learned to create artificial urgency to maintain productivity without supervision",R346,2024-02-09 21:58:46,Motivation
+347,Having a consistent routine has become essential for maintaining productivity at home really,R347,2024-02-09 22:23:55,Routine
+348,"The flexibility to take breaks when needed helps me maintain mental clarity, also the flexibility to attend midday appointments without formal leave requests is appreciated",R348,2024-02-09 22:57:01,Flexibility
+349,THE LONELINESS OF WORKING ALONE ALL DAY SOMETIMES BECOMES OVERWHELMING,R349,2024-02-09 23:02:48,Isolation
+350,Remote work has tested and ultimately strengthened my relationship with my spouse - i miss the spontaneous lunch outings and coffee breaks with colleagues,R350,2024-02-09 23:30:51,Relationships
+351,Managing a remote team requires completely different skills than in-person management if I'm being honest,R351,2024-02-09 23:48:23,Management
+352,Video call fatigue is real - back to back meetings leave me completely drained. video calls don't capture body language and nuance the way in-person meetings do,R352,2024-02-09 23:54:22,Communication
+353,The informal learning from overhearing senior colleagues is something I really miss honestly,R353,2024-02-10 00:30:35,Learning
+354,Working from home has allowed me to create a more sustainable daily rhythm and i've created rituals to mark the start and end of my workday at home,R354,2024-02-10 00:56:00,Routine
+355,"I gotta say, remote work has revealed which meetings were actually necessary and which weren't",R355,2024-02-10 01:36:53,Productivity
+356,"From my perspective, i worry about junior employees missing out on organic learning opportunities but mentoring junior colleagues is much harder without casual in-person interactions",R356,2024-02-10 01:40:51,Mentoring
+357,I FEEL MORE RESTED WITHOUT THE EARLY MORNING RUSH TO GET TO THE OFFICE,R357,2024-02-10 02:06:05,Wellbeing
+358,"Looking back, video calls don't capture body language and nuance the way in-person meetings do",R358,2024-02-10 02:39:53,Communication
+359,The inconsistent home internet speeds impact my ability to perform reliably - technical difficulties during client calls make me look unprofessional really,R359,2024-02-10 03:06:40,Technology
+360,Working from home has allowed me to be more environmentally conscious overall but the environmental impact of reduced commuting aligns with my personal values,R360,2024-02-10 03:35:52,Environment
+361,The initial excitement of remote work has faded into a sense of monotony and i struggle to stay motivated without the accountability of being in an office,R361,2024-02-10 04:16:56,Motivation
+362,I miss the energy and buzz of a busy office environment in my opinion,R362,2024-02-10 04:31:23,Culture
+363,I miss the ritual of getting ready and transitioning into work mode each morning tbh,R363,2024-02-10 04:35:25,Routine
+364,"FROM MY PERSPECTIVE, COMMUNICATION GAPS LEAD TO MISUNDERSTANDINGS THAT WOULDN'T HAPPEN FACE-TO-FACE",R364,2024-02-10 04:50:51,Communication
+365,The flexibility to volunteer in my community during lunch breaks is wonderful if I'm being honest,R365,2024-02-10 05:27:16,Community
+366,Remote work has exposed weaknesses in our team's communication practices tbh,R366,2024-02-10 06:11:07,Communication
+367,n/a,R367,2024-02-10 06:53:43,Balance
+368,I've had to learn to be more proactive in seeking feedback and visibility and i worry about being overlooked for promotions since I'm not physically visible,R368,2024-02-10 07:11:26,Career
+369,"I've realized how important physical separation between work and home really is, also the boundary between being responsive and being constantly available is unclear",R369,2024-02-10 07:55:49,Boundaries
+370,"Truthfully, i've noticed my social skills have declined from lack of daily in-person interaction and i've become more efficient at running and participating in virtual meetings",R370,2024-02-10 08:28:32,Skills
+371,I've invested in better equipment to make my home office more qualified,R371,2024-02-10 09:13:15,Workspace
+372,fine nothing special,R372,2024-02-10 09:37:58,Culture
+373,The flexibility to attend medical appointments without taking leave is invaluable,R373,2024-02-10 10:02:31,Flexibility
+374,"Cross-functional collaboration has become more siloed in a remote environment, also i miss the immediate gratification of solving problems together at a whiteboard",R374,2024-02-10 10:34:29,Collaboration
+375,Remote work has tested and ultimately strengthened my relationship with my spouse overall,R375,2024-02-10 11:08:39,Relationships
+376,The flexibility to take breaks when needed helps me maintain mental clarity. i appreciate the accessibility benefits that remote work provides for many workers,R376,2024-02-10 11:33:56,Flexibility
+377,"In my experience, i feel disconnected from company culture and important decisions happening in the office",R377,2024-02-10 12:02:33,Culture
+378,"I have to say, i miss having a clear physical separation between my somewhat professional and personal identities",R378,2024-02-10 12:29:46,Boundaries
+379,"In all honesty, i miss having a clear physical separation between my competent and personal identities",R379,2024-02-10 13:07:14,Boundaries
+380,"All things considered, remote work has allowed me to pursue a side project I've always dreamed about",R380,2024-02-10 13:46:53,Balance
+381,"Honestly, i appreciate being able to create an ergonomic workspace tailored to my needs",R381,2024-02-10 13:53:56,Workspace
+382,The informal learning from overhearing senior colleagues is something I really miss in my opinion,R382,2024-02-10 14:17:03,Learning
+383,"Remote work has challenged me to find new ways to demonstrate my value and impact, also the option to work remotely has become a non-negotiable factor in job decisions",R383,2024-02-10 14:31:51,Career
+384,"In my experience, i've been able to create a workspace that truly reflects my personality and needs. Additionally, the flexibility to work from different rooms keeps me from feeling stuck",R384,2024-02-10 15:12:24,Workspace
+385,alright,R385,2024-02-10 15:20:12,Community
+386,"Basically, remote work has made me more aware of my work habits and patterns",R386,2024-02-10 15:44:54,Productivity
+387,"I feel less anxious about work without the pressure of office surveillance, also i feel more rested without the early morning rush to get to the office",R387,2024-02-10 16:25:07,Wellbeing
+388,"Truthfully, i'm more productive in the morning and can now structure my day accordingly",R388,2024-02-10 16:49:16,Productivity
+389,satisfactory,R389,2024-02-10 17:03:14,Collaboration
+390,"Building relationships with new team members remotely is challenging and takes longer. Additionally, remote work has improved my relationship with my partner as I'm more present for sure",R390,2024-02-10 17:10:05,Relationships
+391,"To be honest, i find it harder to disconnect on weekends when my office is always accessible all in all",R391,2024-02-10 17:49:03,Boundaries
+392,"Honestly, i've developed stronger written communication skills out of necessity",R392,2024-02-10 18:25:11,Skills
+393,I STRUGGLE WITH FEELING ISOLATED AND MISS THE SPONTANEOUS CONVERSATIONS WITH COLLEAGUES,R393,2024-02-10 18:32:09,Isolation
+394,I feel more connected to my local community since working from home but the flexibility to volunteer in my community during lunch breaks is wonderful,R394,2024-02-10 19:08:56,Community
+395,"I find it harder to disconnect from work when my office is in my living room, also i've learned to set clear expectations about my availability with my team",R395,2024-02-10 19:45:38,Boundaries
+396,My internet connection isn't always reliable which impacts my work quality in my opinion,R396,2024-02-10 20:27:59,Technology
+397,I FEEL LESS STRESSED WITHOUT THE DAILY PRESSURE OF RUSH HOUR TRAFFIC FOR SURE,R397,2024-02-10 20:49:31,Commute
+398,"Remote work has shown me the importance of intentional team building activities, also building company culture remotely requires much more intentional effort",R398,2024-02-10 21:14:03,Culture
+399,"The lack of physical activity from not walking around an office concerns me, also the flexibility to attend to personal wellness during the day is incredibly valuable",R399,2024-02-10 21:48:20,Health
+400,Career progression feels uncertain when I can't demonstrate my value in person. i've had to learn to be more proactive in seeking feedback and visibility,R400,2024-02-10 22:29:50,Career
+401,"I appreciate the accessibility benefits that remote work provides for many workers. Additionally, the flexibility to take breaks when needed helps me maintain mental clarity",R401,2024-02-10 22:59:19,Flexibility
+402,"Looking back, i appreciate the reduced pressure to conform to office dress codes and norms all in all",R402,2024-02-10 23:45:13,Comfort
+403,I've invested in better equipment to make my home office more competent,R403,2024-02-10 23:49:37,Workspace
+404,"From my perspective, the isolation has negatively impacted my mental health at times",R404,2024-02-11 00:04:54,Wellbeing
+405,"From my perspective, remote work has made me more thoughtful about when synchronous communication is necessary",R405,2024-02-11 00:26:16,Communication
+406,I've developed stronger project management skills from leading remote initiatives really,R406,2024-02-11 00:41:21,Skills
+407,I've invested significantly in my home office setup to match office quality really,R407,2024-02-11 01:24:04,Workspace
+408,I'VE DEVELOPED STRONGER RELATIONSHIPS WITH MY NEIGHBORS SINCE BEING HOME MORE,R408,2024-02-11 01:50:27,Community
+409,"To be honest, i've created rituals to mark the start and end of my workday at home",R409,2024-02-11 02:18:45,Routine
+410,I've developed a better understanding of what I need to be productive and remote work has made me appreciate the value of focused deep work time,R410,2024-02-11 02:54:55,Productivity
+411,The future of work is clearly hybrid and I hope companies embrace this flexibility permanently but the hybrid model seems like the best compromise for maintaining connections,R411,2024-02-11 03:23:10,Hybrid
+412,"I gotta say, being able to attend my children's school events without missing work is priceless",R412,2024-02-11 03:43:19,Family
+413,"Overall, setting up boundaries with family members during work hours has been challenging",R413,2024-02-11 04:25:09,Family
+414,"Looking back, the dog walking breaks throughout the day have been great for mental health",R414,2024-02-11 04:44:33,Balance
+415,I MISS THE ENERGY OF BEING AROUND MOTIVATED COLLEAGUES IN A SHARED SPACE,R415,2024-02-11 05:24:24,Isolation
+416,Remote work has given me perspective on what truly matters in my career - remote work has taught me to be more intentional about career development,R416,2024-02-11 05:36:39,Career
+417,The autonomy to manage my own time has made me more accountable for results really,R417,2024-02-11 05:42:53,Autonomy
+418,The initial equipment and furniture investment for home office was significant but worthwhile - the lack of natural light in my home office affects my energy levels negatively,R418,2024-02-11 06:19:13,Workspace
+419,Creating a dedicated home office space has been essential for maintaining focus and the initial equipment and furniture investment for home office was significant but worthwhile really,R419,2024-02-11 06:49:29,Workspace
+420,"The work from home setup has made it easier to integrate work with my lifestyle, also remote work has allowed me to pursue a side project I've always dreamed about",R420,2024-02-11 07:24:56,Balance
+421,I miss the immediate feedback and quick problem-solving of in-person collaboration I think,R421,2024-02-11 07:33:32,Collaboration
+422,The flexibility to volunteer in my community during lunch breaks is wonderful. i feel more connected to my local community since working from home,R422,2024-02-11 07:53:40,Community
+423,I MISS THE SPONTANEOUS LUNCH OUTINGS AND COFFEE BREAKS WITH COLLEAGUES,R423,2024-02-11 08:34:45,Relationships
+424,"I appreciate the reduced exposure to office germs and seasonal illnesses, also remote work has made me more disciplined about taking proper lunch breaks",R424,2024-02-11 09:17:12,Health
+425,"BASICALLY, COMMUNICATION GAPS LEAD TO MISUNDERSTANDINGS THAT WOULDN'T HAPPEN FACE-TO-FACE",R425,2024-02-11 09:20:52,Communication
+426,"To be honest, i've invested significantly in my home office setup to match office quality to be honest",R426,2024-02-11 09:30:17,Workspace
+427,The lack of physical activity from not walking around an office concerns me and my health has improved with more time for exercise and preparing nutritious meals,R427,2024-02-11 09:59:44,Health
+428,"I have to say, remote work has given me perspective on what truly matters in my career tbh",R428,2024-02-11 10:29:13,Career
+429,"Honestly, the hybrid model seems like the best compromise for maintaining connections",R429,2024-02-11 10:59:48,Hybrid
+430,"Basically, i've invested significantly in my home office setup to match office quality. i appreciate being able to control my environment including temperature and lighting really",R430,2024-02-11 11:15:39,Workspace
+431,I find myself working longer hours because there's no natural end to the workday and the boundary between being responsive and being constantly available is unclear,R431,2024-02-11 11:38:44,Boundaries
+432,I worry that younger workers are missing crucial developmental experiences to be honest,R432,2024-02-11 11:58:10,Learning
+433,good,R433,2024-02-11 12:43:07,Family
+434,"I mean, i've found that my creativity flows better in the comfort of my own space",R434,2024-02-11 13:01:21,Productivity
+435,"Overall, the environmental impact of reduced commuting aligns with my personal values",R435,2024-02-11 13:34:05,Environment
+436,"REMOTE WORK HAS MADE IT EASIER TO PURSUE CONTINUING EDUCATION ALONGSIDE MY JOB, ALSO I WORRY THAT YOUNGER WORKERS ARE MISSING CRUCIAL DEVELOPMENTAL EXPERIENCES",R436,2024-02-11 13:43:55,Learning
+437,"I appreciate being able to create an ergonomic workspace tailored to my needs. Additionally, i've invested in better equipment to make my home office more professional",R437,2024-02-11 14:27:47,Workspace
+438,I miss the creative energy that came from working in a dynamic office environment - building company culture remotely requires much more intentional effort,R438,2024-02-11 14:34:50,Culture
+439,"I appreciate the opportunity to structure my work around my personal chronotype. Additionally, i appreciate being able to work through difficult personal times without scrutiny",R439,2024-02-11 15:15:03,Autonomy
+440,The flexibility to work from anywhere has allowed me to travel more for sure,R440,2024-02-11 15:41:32,Travel
+441,"From my perspective, i've developed a better understanding of what I need to be productive",R441,2024-02-11 16:25:52,Productivity
+442,I miss the creativity that comes from spontaneous whiteboard sessions - remote work has made global collaboration easier despite the time zone challenges,R442,2024-02-11 17:04:19,Collaboration
+443,"I mean, my health has improved with more time for exercise and preparing nutritious meals",R443,2024-02-11 17:07:56,Health
+444,Remote work has allowed me to pursue a side project I've always dreamed about - my work-life balance has improved dramatically since transitioning to remote work really,R444,2024-02-11 17:17:02,Balance
+445,Remote work has shown me the importance of intentional team building activities if I'm being honest,R445,2024-02-11 17:42:57,Culture
+446,I struggle with feeling isolated and miss the spontaneous conversations with colleagues if I'm being honest,R446,2024-02-11 18:04:43,Isolation
+447,My health has improved with more time for exercise and preparing nutritious meals but the flexibility to exercise during lunch has improved my afternoon productivity,R447,2024-02-11 18:48:13,Health
+448,"To be honest, i've learned to set clear expectations about my availability with my team",R448,2024-02-11 19:09:44,Boundaries
+449,"I miss the serendipitous encounters that led to unexpected collaborations, also cross-functional collaboration has become more siloed in a remote environment",R449,2024-02-11 19:34:53,Collaboration
+450,"Looking back, the trust my employer shows by allowing remote work has increased my loyalty",R450,2024-02-11 19:47:17,Trust
+451,"The reduction in casual social interactions has negatively impacted my sense of belonging, also the loneliness of working alone all day sometimes becomes overwhelming all in all",R451,2024-02-11 20:20:52,Isolation
+452,Remote work has improved my relationship with my partner as I'm more present but remote work has tested and ultimately strengthened my relationship with my spouse if I'm being honest,R452,2024-02-11 20:55:08,Relationships
+453,I appreciate being able to create an ergonomic workspace tailored to my needs all in all,R453,2024-02-11 20:58:58,Workspace
+454,"I gotta say, building rapport with clients remotely requires more effort and creativity. virtual team building activities feel forced and don't create genuine connections",R454,2024-02-11 21:15:20,Relationships
+455,REMOTE WORK HAS MADE ME MORE APPRECIATIVE OF IN-PERSON INTERACTIONS WHEN THEY HAPPEN,R455,2024-02-11 21:47:30,Relationships
+456,"I've found that my creativity flows better in the comfort of my own space. Additionally, remote work has made me more aware of my work habits and patterns",R456,2024-02-11 22:02:26,Productivity
+457,"Basically, the flexibility to attend medical appointments without taking leave is invaluable",R457,2024-02-11 22:06:17,Flexibility
+458,"I HAVE TO SAY, I APPRECIATE BEING ABLE TO TAKE CALLS WHILE WALKING OUTSIDE FOR FRESH AIR IN GENERAL",R458,2024-02-11 22:41:06,Health
+459,"From my perspective, setting up boundaries with family members during work hours has been challenging",R459,2024-02-11 22:44:12,Family
+460,Remote work has eliminated the stress of finding parking every morning. i feel less stressed without the daily pressure of rush hour traffic,R460,2024-02-11 23:07:25,Commute
+461,"To be honest, the flexibility to attend to personal wellness during the day is incredibly valuable",R461,2024-02-11 23:29:54,Health
+462,I worry about being overlooked for promotions since I'm not physically visible to be honest,R462,2024-02-11 23:54:39,Career
+463,I struggle with maintaining work friendships when we never see each other in person I think,R463,2024-02-12 00:03:27,Relationships
+464,"I have to say, cross-functional collaboration has become more siloed in a remote environment",R464,2024-02-12 00:10:30,Collaboration
+465,"I gotta say, i miss the serendipitous encounters that led to unexpected collaborations all in all",R465,2024-02-12 00:24:30,Collaboration
+466,I'd say that i struggle to stay motivated without the accountability of being in an office,R466,2024-02-12 01:05:51,Motivation
+467,I miss the serendipitous encounters that led to unexpected collaborations. cross-functional collaboration has become more siloed in a remote environment,R467,2024-02-12 01:17:24,Collaboration
+468,"Looking back, remote work has made me more efficient at written communication and documentation",R468,2024-02-12 01:49:05,Skills
+469,The freedom to step away for personal tasks without judgment is liberating - the flexibility to adjust my schedule around my energy levels has been transformative,R469,2024-02-12 01:57:57,Flexibility
+470,"From my perspective, i appreciate not having to deal with office politics and workplace drama daily if I'm being honest",R470,2024-02-12 02:08:15,Culture
+471,"Basically, video call fatigue is real - back to back meetings leave me completely drained",R471,2024-02-12 02:47:52,Communication
+472,I'd say that i find it harder to disconnect from work when my office is in my living room in general,R472,2024-02-12 02:51:58,Boundaries
+473,"Basically, collaborating on creative projects feels less dynamic without in-person brainstorming to be honest",R473,2024-02-12 03:10:40,Collaboration
+474,I'd say that i worry about the long-term career implications of being remote while others are in office to be honest,R474,2024-02-12 03:15:37,Career
+475,Video calls don't capture body language and nuance the way in-person meetings do in general,R475,2024-02-12 03:53:26,Communication
+476,I find it harder to disconnect from work when my office is in my living room and i've realized the importance of maintaining professional boundaries even when working from home,R476,2024-02-12 04:12:36,Boundaries
+477,Building relationships with new team members remotely is challenging and takes longer and i've had to be more proactive about maintaining professional relationships I think,R477,2024-02-12 04:58:18,Relationships
+478,"Basically, i appreciate the accessibility benefits that remote work provides for many workers, also the freedom to step away for personal tasks without judgment is liberating",R478,2024-02-12 05:09:22,Flexibility
+479,"I have to say, remote work has revealed which meetings were actually necessary and which weren't",R479,2024-02-12 05:51:07,Productivity
+480,I can finally live where I want rather than being tied to an expensive city - the option to relocate to a lower cost area while keeping my salary has been life-changing,R480,2024-02-12 06:05:21,Location
+481,"Basically, i appreciate not having to deal with office politics and workplace drama daily",R481,2024-02-12 06:51:01,Culture
+482,I've realized how important physical separation between work and home really is - i've learned to set clear expectations about my availability with my team,R482,2024-02-12 07:23:50,Boundaries
+483,The dog walking breaks throughout the day have been great for mental health and the work from home setup has made it easier to integrate work with my lifestyle,R483,2024-02-12 08:08:02,Balance
+484,"Overall, i've become more efficient at documenting decisions and processes for remote teams",R484,2024-02-12 08:30:38,Skills
+485,"I've realized how much the office environment was draining my energy. Additionally, the isolation has negatively impacted my mental health at times",R485,2024-02-12 09:13:27,Wellbeing
+486,"I gotta say, the savings from remote work have allowed me to pay off debt faster for sure",R486,2024-02-12 09:29:19,Cost
+487,Remote work has eliminated the stress of finding parking every morning and i feel less stressed without the daily pressure of rush hour traffic,R487,2024-02-12 09:59:33,Commute
+488,"ALL THINGS CONSIDERED, I WORRY ABOUT THE LONG-TERM CAREER IMPLICATIONS OF BEING REMOTE WHILE OTHERS ARE IN OFFICE",R488,2024-02-12 10:18:04,Career
+489,THE INFORMAL LEARNING FROM OVERHEARING SENIOR COLLEAGUES IS SOMETHING I REALLY MISS,R489,2024-02-12 10:32:17,Learning
+490,"I gotta say, the dog walking breaks throughout the day have been great for mental health",R490,2024-02-12 10:51:05,Balance
+491,"Basically, i can finally live where I want rather than being tied to an expensive city",R491,2024-02-12 11:21:51,Location
+492,The trust demonstrated by remote work policies has strengthened employee loyalty I think,R492,2024-02-12 11:57:42,Trust
+493,"Basically, the constant notifications and messages create more interruptions than office visits did and remote work has made me realize how much time was wasted in unnecessary meetings",R493,2024-02-12 12:34:47,Productivity
+494,"Remote work has made global collaboration easier despite the time zone challenges. Additionally, time zone differences make scheduling meetings with global teams extremely difficult",R494,2024-02-12 12:56:23,Collaboration
+495,The freedom to step away for personal tasks without judgment is liberating to be honest,R495,2024-02-12 13:40:42,Flexibility
+496,"Honestly, the lack of oversight has allowed me to develop enhanced self-management skills",R496,2024-02-12 13:45:00,Autonomy
+497,The lack of commute saves me nearly two hours daily which I now spend exercising in general,R497,2024-02-12 14:17:36,Commute
+498,The blurring of professional and personal spaces affects my mental wellbeing in general,R498,2024-02-12 14:25:21,Wellbeing
+499,The flexibility to exercise during lunch has improved my afternoon productivity. the flexibility to attend to personal wellness during the day is incredibly valuable,R499,2024-02-12 15:06:55,Health
+500,"From my perspective, the lack of water cooler conversations means I miss important informal information",R500,2024-02-12 15:17:32,Communication
+501,Remote work has tested and ultimately strengthened my relationship with my spouse in general,R501,2024-02-12 15:22:03,Relationships
+502,I FEEL MORE CONNECTED TO MY LOCAL COMMUNITY SINCE WORKING FROM HOME,R502,2024-02-12 15:31:25,Community
+503,REMOTE WORK HAS MADE IT EASIER TO PURSUE CONTINUING EDUCATION ALONGSIDE MY JOB. THE INFORMAL LEARNING FROM OVERHEARING SENIOR COLLEAGUES IS SOMETHING I REALLY MISS,R503,2024-02-12 15:54:03,Learning
+504,I find it harder to disconnect on weekends when my office is always accessible and i find it harder to disconnect from work when my office is in my living room,R504,2024-02-12 16:26:03,Boundaries
+505,I'd say that setting boundaries between work and personal life has become increasingly difficult in my opinion,R505,2024-02-12 16:51:25,Boundaries
+506,The lack of oversight has allowed me to develop better self-management skills overall,R506,2024-02-12 17:28:10,Autonomy
+507,I appreciate the accessibility benefits that remote work provides for many workers and the flexibility to adjust my schedule around my energy levels has been transformative overall,R507,2024-02-12 18:13:10,Flexibility
+508,"To be honest, mentoring junior colleagues is much harder without casual in-person interactions",R508,2024-02-12 18:17:07,Mentoring
+509,"In all honesty, the hybrid model seems like the best compromise for maintaining connections",R509,2024-02-12 18:25:40,Hybrid
+510,Cross-functional collaboration has become more siloed in a remote environment and remote work has made global collaboration easier despite the time zone challenges,R510,2024-02-12 18:28:54,Collaboration
+511,Building relationships with new team members remotely is challenging and takes longer and i've become more intentional about scheduling social interactions outside work really,R511,2024-02-12 19:08:33,Relationships
+512,"In my experience, remote work has made it easier to pursue continuing education alongside my job",R512,2024-02-12 19:51:11,Learning
+513,"Looking back, i worry that younger workers are missing crucial developmental experiences and the informal learning from overhearing senior colleagues is something I really miss",R513,2024-02-12 20:00:03,Learning
+514,I feel more rested without the early morning rush to get to the office in general,R514,2024-02-12 20:09:00,Wellbeing
+515,fine I guess,R515,2024-02-12 20:27:57,Isolation
+516,I'd say that the company's remote work policy has improved my opinion of leadership and the trust my employer shows by allowing remote work has increased my loyalty,R516,2024-02-12 20:32:37,Trust
+517,nothing,R517,2024-02-12 20:51:24,Boundaries
+518,"Truthfully, remote work has challenged me to find new ways to demonstrate my value and impact",R518,2024-02-12 21:10:11,Career
+519,Building trust with remote team members requires more intentional effort and the company's remote work policy has improved my opinion of leadership all in all,R519,2024-02-12 21:49:56,Trust
+520,The flexibility to take breaks when needed helps me maintain mental clarity all in all,R520,2024-02-12 21:59:13,Flexibility
+521,no comment,R521,2024-02-12 22:44:45,Commute
+522,"I gotta say, remote work has made me more thoughtful about when synchronous communication is necessary",R522,2024-02-12 23:19:16,Communication
+523,"Looking back, the lack of natural light in my home office affects my energy levels negatively if I'm being honest",R523,2024-02-12 23:41:07,Workspace
+524,"The constant notifications and messages create more interruptions than office visits did. Additionally, i'm more productive in the morning and can now structure my day accordingly",R524,2024-02-13 00:07:58,Productivity
+525,I miss the spontaneous lunch outings and coffee breaks with colleagues and remote work has tested and ultimately strengthened my relationship with my spouse overall,R525,2024-02-13 00:40:08,Relationships
+526,WORKING FROM DIFFERENT LOCATIONS KEEPS ME INSPIRED AND PREVENTS MONOTONY REALLY,R526,2024-02-13 00:46:44,Location
+527,"I mean, the money saved on professional clothing is a nice unexpected benefit to be honest",R527,2024-02-13 00:56:29,Cost
+528,I've been able to create a workspace that truly reflects my personality and needs to be honest,R528,2024-02-13 01:14:16,Workspace
+529,"Truthfully, the autonomy to manage my own time has made me more accountable for results",R529,2024-02-13 01:34:25,Autonomy
+530,I miss the serendipitous encounters that led to unexpected collaborations I think,R530,2024-02-13 01:56:08,Collaboration
+531,Remote work has allowed me to be more present for my children's important moments - working remotely has allowed me to care for my aging parents while maintaining my career I think,R531,2024-02-13 02:42:06,Family
+532,"In all honesty, remote work has exposed weaknesses in our team's communication practices",R532,2024-02-13 02:50:16,Communication
+533,I appreciate not having to deal with office politics and workplace drama daily. i feel disconnected from company culture and important decisions happening in the office,R533,2024-02-13 02:55:46,Culture
+534,"The company's remote work policy has improved my opinion of leadership, also building trust with remote team members requires more intentional effort",R534,2024-02-13 03:27:58,Trust
+535,Working remotely has allowed me to care for my aging parents while maintaining my career really,R535,2024-02-13 03:36:50,Family
+536,"Remote work has made performance management more challenging but more outcome-focused, also remote work has revealed the importance of regular check-ins with team members",R536,2024-02-13 04:13:14,Management
+537,REMOTE WORK HAS MADE PERFORMANCE MANAGEMENT MORE CHALLENGING BUT MORE OUTCOME-FOCUSED AND REMOTE WORK HAS REVEALED THE IMPORTANCE OF REGULAR CHECK-INS WITH TEAM MEMBERS,R537,2024-02-13 04:28:18,Management
+538,"I mean, i miss the energy and buzz of a busy office environment I think",R538,2024-02-13 04:45:24,Culture
+539,Working from home has allowed me to be more environmentally conscious overall if I'm being honest,R539,2024-02-13 04:49:59,Environment
+540,"I have to say, remote work has allowed me to pursue a side project I've always dreamed about if I'm being honest",R540,2024-02-13 05:15:10,Balance
+541,Remote work has tested and ultimately strengthened my relationship with my spouse but virtual team building activities feel forced and don't create genuine connections to be honest,R541,2024-02-13 05:53:43,Relationships
+542,Remote work has made me more disciplined about taking proper lunch breaks,R542,2024-02-13 06:33:31,Health
+543,"I gotta say, the lack of informal feedback makes it hard to know if I'm meeting expectations",R543,2024-02-13 06:43:49,Communication
+544,ok I guess,R544,2024-02-13 07:28:24,Trust
+545,"In all honesty, i've discovered that I'm more introverted than I realized and thrive working alone",R545,2024-02-13 07:55:40,Wellbeing
+546,The lack of oversight has allowed me to develop better self-management skills really,R546,2024-02-13 08:23:08,Autonomy
+547,"I've discovered that I'm more introverted than I realized and thrive working alone. Additionally, i feel less anxious about work without the pressure of office surveillance",R547,2024-02-13 08:29:33,Wellbeing
+548,"Remote work has given me the opportunity to pursue hobbies I never had time for. Additionally, remote work has allowed me to pursue a side project I've always dreamed about",R548,2024-02-13 08:52:46,Balance
+549,"I mean, collaborating on creative projects feels less dynamic without in-person brainstorming",R549,2024-02-13 09:13:08,Collaboration
+550,"Overall, i feel more in control of my time and how I allocate it throughout the day. Additionally, the lack of oversight has allowed me to develop better self-management skills overall",R550,2024-02-13 09:40:30,Autonomy
+551,"In all honesty, the constant notifications and messages create more interruptions than office visits did I think",R551,2024-02-13 09:50:39,Productivity
+552,I've become more kind of comfortable with video conferencing than I ever was with presentations,R552,2024-02-13 10:16:29,Skills
+553,I miss the creative energy that came from working in a dynamic office environment really,R553,2024-02-13 10:54:19,Culture
+554,Technology issues during significant presentations cause significant stress and anxiety all in all,R554,2024-02-13 11:10:20,Technology
+555,"From my perspective, building relationships with new team members remotely is challenging and takes longer and i've had to be more proactive about maintaining professional relationships",R555,2024-02-13 11:28:35,Relationships
+556,"I worry that younger workers are missing crucial developmental experiences. Additionally, remote work has made it easier to pursue continuing education alongside my job",R556,2024-02-13 11:55:50,Learning
+557,"I appreciate being able to create an ergonomic workspace tailored to my needs, also i've invested significantly in my home office setup to match office quality",R557,2024-02-13 12:31:17,Workspace
+558,I miss the serendipitous encounters that led to unexpected collaborations and async communication has made collaboration across time zones more manageable,R558,2024-02-13 12:48:02,Collaboration
+559,The separation from toxic office dynamics has improved my job satisfaction I think,R559,2024-02-13 13:24:59,Wellbeing
+560,The lack of commute saves me nearly two hours daily which I now spend exercising tbh,R560,2024-02-13 13:36:41,Commute
+561,My internet connection isn't always reliable which impacts my work quality for sure,R561,2024-02-13 14:09:45,Technology
+562,I've become more resilient and adaptable through navigating the challenges of remote work but i've become more comfortable with video conferencing than I ever was with presentations,R562,2024-02-13 14:37:47,Skills
+563,it was okay,R563,2024-02-13 15:02:41,Culture
+564,The work from home setup has made it easier to integrate work with my lifestyle but i appreciate the flexibility to handle household tasks during natural work breaks,R564,2024-02-13 15:38:49,Balance
+565,The flexibility to attend medical appointments without taking leave is invaluable - the freedom to step away for personal tasks without judgment is liberating,R565,2024-02-13 16:17:12,Flexibility
+566,I've become stronger at prioritizing tasks without someone looking over my shoulder,R566,2024-02-13 16:37:14,Autonomy
+567,"I gotta say, the flexibility to work during my most productive hours has transformed my output. Additionally, i feel more empowered to decline meetings that don't require my presence",R567,2024-02-13 16:52:19,Productivity
+568,"To be honest, i've rediscovered the joy of cooking proper lunches instead of grabbing really fast food",R568,2024-02-13 17:20:41,Health
+569,"Overall, i've become more intentional about scheduling social interactions outside work, also remote work has tested and ultimately strengthened my relationship with my spouse",R569,2024-02-13 17:56:10,Relationships
+570,Technology issues during genuinely important presentations cause significant stress and anxiety,R570,2024-02-13 18:41:26,Technology
+571,"I mean, i'm more productive in the morning and can now structure my day accordingly - remote work has made me realize how much time was wasted in unnecessary meetings",R571,2024-02-13 19:11:34,Productivity
+572,I feel more rested without the early morning rush to get to the office. i feel guilty taking breaks when working from home even though I need them,R572,2024-02-13 19:17:39,Wellbeing
+573,"Honestly, i struggle with feeling isolated and miss the spontaneous conversations with colleagues all in all",R573,2024-02-13 19:28:46,Isolation
+574,"Looking back, having a consistent routine has become essential for maintaining productivity at home. i've created rituals to mark the start and end of my workday at home",R574,2024-02-13 19:47:24,Routine
+575,"I gotta say, i miss the spontaneous lunch outings and coffee breaks with colleagues - the lack of separation between work and home has strained my relationship",R575,2024-02-13 20:07:24,Relationships
+576,Remote work has tested and ultimately strengthened my relationship with my spouse - building rapport with clients remotely requires more effort and creativity,R576,2024-02-13 20:29:36,Relationships
+577,"I mean, the trust demonstrated by remote work policies has strengthened employee loyalty. Additionally, building trust with remote team members requires more intentional effort",R577,2024-02-13 21:01:37,Trust
+578,I miss the clear transition between work mode and home mode that commuting provided tbh,R578,2024-02-13 21:20:20,Boundaries
+579,"All things considered, i've noticed my social skills have declined from lack of daily in-person interaction",R579,2024-02-13 21:50:42,Skills
+580,I've become more comfortable with video conferencing than I ever was with presentations but i've become more efficient at running and participating in virtual meetings,R580,2024-02-13 22:12:11,Skills
+581,The hybrid model seems like the best compromise for maintaining connections all in all,R581,2024-02-13 22:51:58,Hybrid
+582,The option to relocate to a lower cost area while keeping my salary has been life-changing to be honest,R582,2024-02-13 23:36:04,Location
+583,"In my experience, i've become more intentional about scheduling social interactions outside work",R583,2024-02-14 00:13:43,Relationships
+584,The work from home setup has made it easier to integrate work with my lifestyle. remote work has allowed me to pursue a side project I've always dreamed about,R584,2024-02-14 00:55:38,Balance
+585,I've developed a incredibly better understanding of what I need to be productive,R585,2024-02-14 01:41:36,Productivity
+586,"TRUTHFULLY, I FEEL MORE REASSURED CONTRIBUTING IN VIRTUAL MEETINGS THAN I DID IN PERSON TO BE HONEST",R586,2024-02-14 02:10:30,Communication
+587,"Honestly, the lack of commute has given me time to develop new personal interests",R587,2024-02-14 02:30:26,Balance
+588,I've become more intentional about scheduling social interactions outside work if I'm being honest,R588,2024-02-14 02:38:42,Relationships
+589,"Honestly, i miss having a clear physical separation between my professional and personal identities",R589,2024-02-14 03:10:07,Boundaries
+590,Technical difficulties during client calls make me look unprofessional all in all,R590,2024-02-14 03:42:05,Technology
+591,ok,R591,2024-02-14 04:22:07,Health
+592,I appreciate the reduced pressure to conform to office dress codes and norms - being able to work in comfortable clothes improves my overall daily comfort,R592,2024-02-14 04:48:42,Comfort
+593,"Remote work has given me perspective on what truly matters in my career, also remote work has taught me to be more intentional about career development",R593,2024-02-14 05:12:13,Career
+594,Virtual team building activities feel forced and don't create genuine connections tbh,R594,2024-02-14 05:37:58,Relationships
+595,"All things considered, the loneliness of working alone all day sometimes becomes overwhelming",R595,2024-02-14 05:49:03,Isolation
+596,Remote work has made me appreciate the value of focused deep work time but remote work has revealed which meetings were actually necessary and which weren't,R596,2024-02-14 05:56:21,Productivity
+597,I've realized how critical physical separation between work and home really is in general,R597,2024-02-14 06:10:58,Boundaries
+598,I miss celebrating team wins and milestones together in the office. the virtual happy hours feel forced but are necessary for maintaining team connections,R598,2024-02-14 06:56:57,Culture
+599,I've realized how much the office environment was draining my energy really,R599,2024-02-14 07:21:09,Wellbeing
+600,The flexibility to attend medical appointments without taking leave is invaluable but i appreciate the accessibility benefits that remote work provides for many workers,R600,2024-02-14 07:56:18,Flexibility
+601,Remote work has pushed me to improve my written communication significantly but i've become more resilient and adaptable through navigating the challenges of remote work,R601,2024-02-14 08:18:31,Skills
+602,"I have to say, the flexibility to attend to personal wellness during the day is incredibly valuable",R602,2024-02-14 08:32:55,Health
+603,I've had to learn to be more proactive in seeking feedback and visibility tbh,R603,2024-02-14 08:51:35,Career
+604,Managing a remote team requires completely different skills than in-person management. remote work has made performance management more challenging but more outcome-focused,R604,2024-02-14 09:22:01,Management
+605,The reduced face time with leadership has impacted my visibility for advancement but remote work has given me perspective on what truly matters in my career,R605,2024-02-14 09:58:45,Career
+606,The flexibility to exercise during lunch has improved my afternoon productivity honestly,R606,2024-02-14 10:03:33,Health
+607,I struggle with the lack of natural opportunities to build cross-team relationships really,R607,2024-02-14 10:11:47,Relationships
+608,The lack of oversight has allowed me to develop superior self-management skills,R608,2024-02-14 10:52:34,Autonomy
+609,I find it harder to disconnect from work when my office is in my living room but i feel like I'm always working because my laptop is always within reach,R609,2024-02-14 10:55:39,Boundaries
+610,I miss the ritual of getting ready and transitioning into work mode each morning I think,R610,2024-02-14 11:09:40,Routine
+611,"I gotta say, i'm more productive in the morning and can now structure my day accordingly",R611,2024-02-14 11:38:20,Productivity
+612,"Honestly, building trust with remote team members requires more intentional effort",R612,2024-02-14 11:43:31,Trust
+613,I STRUGGLE WITH MAINTAINING WORK FRIENDSHIPS WHEN WE NEVER SEE EACH OTHER IN PERSON AND I'VE HAD TO BE MORE PROACTIVE ABOUT MAINTAINING PROFESSIONAL RELATIONSHIPS,R613,2024-02-14 12:01:37,Relationships
+614,"To be honest, the lack of oversight has allowed me to develop better self-management skills - i've become better at prioritizing tasks without someone looking over my shoulder",R614,2024-02-14 12:10:06,Autonomy
+615,"To be honest, i worry about the long-term career implications of being remote while others are in office",R615,2024-02-14 12:52:13,Career
+616,REMOTE WORK HAS MADE ME MORE THOUGHTFUL ABOUT WHEN SYNCHRONOUS COMMUNICATION IS NECESSARY,R616,2024-02-14 13:29:24,Communication
+617,"In my experience, the initial excitement of remote work has faded into a sense of monotony really",R617,2024-02-14 13:56:19,Motivation
+618,I appreciate the accessibility benefits that remote work provides for many workers I think,R618,2024-02-14 14:21:30,Flexibility
+619,"All things considered, the transition to remote work highlighted how dependent I was on office infrastructure to be honest",R619,2024-02-14 14:51:59,Technology
+620,"I have to say, building company culture remotely requires much more intentional effort tbh",R620,2024-02-14 15:22:58,Culture
+621,I've invested in better equipment to make my home office more professional and creating a dedicated home office space has been essential for maintaining focus,R621,2024-02-14 15:53:26,Workspace
+622,"I mean, building relationships with new team members remotely is challenging and takes longer",R622,2024-02-14 16:17:39,Relationships
+623,"Truthfully, my work-life balance has improved dramatically since transitioning to remote work",R623,2024-02-14 16:21:12,Balance
+624,Remote work has given me the space to manage my anxiety better during work hours and i've realized how much the office environment was draining my energy,R624,2024-02-14 17:05:40,Wellbeing
+625,"I gotta say, the reduced face time with leadership has impacted my visibility for advancement",R625,2024-02-14 17:23:48,Career
+626,Having control over my environment helps me focus superior on deep work tasks,R626,2024-02-14 17:27:52,Productivity
+627,fine,R627,2024-02-14 17:42:11,Comfort
+628,Having control over my environment helps me focus better on deep work tasks and i've found that my creativity flows better in the comfort of my own space,R628,2024-02-14 18:13:47,Productivity
+629,ASYNC COMMUNICATION HAS MADE COLLABORATION ACROSS TIME ZONES MORE MANAGEABLE AND TIME ZONE DIFFERENCES MAKE SCHEDULING MEETINGS WITH GLOBAL TEAMS EXTREMELY DIFFICULT,R629,2024-02-14 18:51:30,Collaboration
+630,"I have to say, remote work has made me more thoughtful about when synchronous communication is necessary and i struggle with the lack of visual cues about when colleagues are busy or available",R630,2024-02-14 19:21:01,Communication
+631,"Working from home has allowed me to create a more sustainable daily rhythm, also i've created a morning routine that sets me up for a productive day",R631,2024-02-14 19:33:51,Routine
+632,"Overall, remote work has exposed weaknesses in our team's communication practices",R632,2024-02-14 19:45:47,Communication
+633,I miss the clear transition between work mode and home mode that commuting provided but the pressure to always be available online is exhausting and unsustainable,R633,2024-02-14 20:01:33,Boundaries
+634,I find it harder to disconnect on weekends when my office is always accessible. i find myself working longer hours because there's no natural end to the workday,R634,2024-02-14 20:16:46,Boundaries
+635,"Overall, i appreciate the flexibility to handle household tasks during natural work breaks, also remote work has allowed me to pursue a side project I've always dreamed about",R635,2024-02-14 20:45:36,Balance
+636,"I appreciate the opportunity to structure my work around my personal chronotype, also i feel more in control of my time and how I allocate it throughout the day",R636,2024-02-14 20:49:00,Autonomy
+637,My work-life balance has improved dramatically since transitioning to remote work honestly,R637,2024-02-14 21:00:05,Balance
+638,Remote work has taught me to be more intentional about career development. remote work has challenged me to find new ways to demonstrate my value and impact,R638,2024-02-14 21:26:56,Career
+639,"Overall, the inconsistent home internet speeds impact my ability to perform reliably",R639,2024-02-14 22:06:17,Technology
+640,The lack of natural light in my home office affects my energy levels negatively really,R640,2024-02-14 22:48:28,Workspace
+641,I struggle to stay motivated without the accountability of being in an office but the initial excitement of remote work has faded into a sense of monotony,R641,2024-02-14 23:25:24,Motivation
+642,Creating a dedicated home office space has been essential for maintaining focus and the initial equipment and furniture investment for home office was significant but worthwhile,R642,2024-02-14 23:43:18,Workspace
+643,I'd say that the separation from toxic office dynamics has improved my job satisfaction,R643,2024-02-15 00:18:23,Wellbeing
+644,I've realized how rather important physical separation between work and home really is,R644,2024-02-15 00:25:15,Boundaries
+645,"Looking back, the work from home setup has made it easier to integrate work with my lifestyle",R645,2024-02-15 00:29:39,Balance
+646,The reduction in casual social interactions has negatively impacted my sense of belonging in general,R646,2024-02-15 00:38:01,Isolation
+647,"Honestly, i appreciate not having to deal with office politics and workplace drama daily I think",R647,2024-02-15 00:57:49,Culture
+648,"I have to say, i find it easier to focus on complex tasks without the constant hum of an open office",R648,2024-02-15 01:33:03,Productivity
+649,"Looking back, my work-life balance has improved dramatically since transitioning to remote work",R649,2024-02-15 02:11:21,Balance
+650,Setting boundaries between work and personal life has become increasingly challenging,R650,2024-02-15 02:30:46,Boundaries
+651,I'm more productive in the morning and can now structure my day accordingly but the constant notifications and messages create more interruptions than office visits did,R651,2024-02-15 03:05:30,Productivity
+652,"Remote work has highlighted the importance of trust between managers and employees, also the company's remote work policy has improved my opinion of leadership",R652,2024-02-15 03:28:30,Trust
+653,Building trust with remote team members requires more intentional effort. the company's remote work policy has improved my opinion of leadership,R653,2024-02-15 03:55:57,Trust
+654,My internet connection isn't always reliable which impacts my work quality and the inconsistent home internet speeds impact my ability to perform reliably,R654,2024-02-15 04:02:02,Technology
+655,I've invested in better equipment to make my home office more professional and the flexibility to work from different rooms keeps me from feeling stuck,R655,2024-02-15 04:42:20,Workspace
+656,Remote work has made me realize how much time was wasted in unnecessary meetings really,R656,2024-02-15 05:03:01,Productivity
+657,I've had to be more proactive about maintaining adept relationships,R657,2024-02-15 05:46:04,Relationships
+658,"I have to say, i've learned to be more explicit in my communication to avoid misunderstandings",R658,2024-02-15 06:27:03,Communication
+659,I feel disconnected from company culture and important decisions happening in the office overall,R659,2024-02-15 06:35:24,Culture
+660,ok,R660,2024-02-15 07:10:46,Culture
+661,I've realized how important physical separation between work and home really is in my opinion,R661,2024-02-15 07:26:14,Boundaries
+662,I've realized how important physical separation between work and home really is - setting boundaries between work and personal life has become increasingly difficult,R662,2024-02-15 07:47:19,Boundaries
+663,"Overall, i appreciate the reduced exposure to office germs and seasonal illnesses",R663,2024-02-15 07:54:21,Health
+664,Remote work has shown me the importance of intentional team building activities but i miss the energy and buzz of a busy office environment,R664,2024-02-15 08:16:43,Culture
+665,"From my perspective, i've developed stronger project management skills from leading remote initiatives",R665,2024-02-15 08:35:55,Skills
+666,"Looking back, remote work has forced me to become more organized and self-disciplined",R666,2024-02-15 08:54:47,Skills
+667,"In all honesty, remote work has made me appreciate the value of focused deep work time all in all",R667,2024-02-15 09:21:30,Productivity
+668,Remote work has allowed me to be more present for my children's important moments overall,R668,2024-02-15 09:51:38,Family
+669,"Truthfully, the reduction in casual social interactions has negatively impacted my sense of belonging",R669,2024-02-15 10:27:08,Isolation
+670,I miss the serendipitous encounters that led to unexpected collaborations. i miss the immediate feedback and quick problem-solving of in-person collaboration,R670,2024-02-15 10:53:40,Collaboration
+671,"Working from home has given me incredible flexibility to manage my schedule around family needs. Additionally, the flexibility to attend medical appointments without taking leave is invaluable",R671,2024-02-15 11:34:22,Flexibility
+672,My pets love having me home and honestly it's been great for both of us - i appreciate the reduced pressure to conform to office dress codes and norms,R672,2024-02-15 12:14:39,Comfort
+673,"From my perspective, remote work has pushed me to improve my written communication significantly",R673,2024-02-15 12:54:39,Skills
+674,Remote work has made me realize how much time was wasted in unnecessary meetings and the flexibility to work during my most productive hours has transformed my output,R674,2024-02-15 12:59:46,Productivity
+675,Being able to work in comfortable clothes improves my overall daily comfort. i appreciate the reduced pressure to conform to office dress codes and norms,R675,2024-02-15 13:35:30,Comfort
+676,"IN ALL HONESTY, REMOTE WORK HAS MADE ME MORE AWARE OF MY WORK HABITS AND PATTERNS",R676,2024-02-15 14:04:36,Productivity
+677,"The lack of separation between work and home has strained my relationship, also i struggle with the lack of natural opportunities to build cross-team relationships",R677,2024-02-15 14:48:47,Relationships
+678,"Looking back, i miss having dedicated IT support just down the hall when things go wrong - my internet connection isn't always reliable which impacts my work quality",R678,2024-02-15 15:20:54,Technology
+679,The lack of oversight has allowed me to develop fairly better self-management skills,R679,2024-02-15 15:50:53,Autonomy
+680,"To be honest, setting up boundaries with family members during work hours has been challenging if I'm being honest",R680,2024-02-15 16:05:01,Family
+681,I feel less anxious about work without the pressure of office surveillance - remote work has given me the space to manage my anxiety better during work hours,R681,2024-02-15 16:18:32,Wellbeing
+682,The work from home setup has made it easier to integrate work with my lifestyle honestly,R682,2024-02-15 16:28:40,Balance
+683,Creating a dedicated home office space has been essential for maintaining focus. i appreciate being able to create an ergonomic workspace tailored to my needs,R683,2024-02-15 16:58:55,Workspace
+684,"Honestly, creating a dedicated home office space has been essential for maintaining focus",R684,2024-02-15 17:43:42,Workspace
+685,"From my perspective, remote work has made me more efficient at written communication and documentation and i've become more efficient at documenting decisions and processes for remote teams",R685,2024-02-15 18:00:36,Skills
+686,Setting up boundaries with family members during work hours has been challenging in my opinion,R686,2024-02-15 18:27:49,Family
+687,Working remotely has allowed me to care for my aging parents while maintaining my career - remote work has allowed me to be more present for my children's important moments,R687,2024-02-15 18:52:21,Family
+688,"Truthfully, i've become better at prioritizing tasks without someone looking over my shoulder",R688,2024-02-15 19:02:02,Autonomy
+689,THE FUTURE OF WORK IS CLEARLY HYBRID AND I HOPE COMPANIES EMBRACE THIS FLEXIBILITY PERMANENTLY,R689,2024-02-15 19:45:27,Hybrid
+690,"In my experience, remote work has made global collaboration easier despite the time zone challenges",R690,2024-02-15 20:00:09,Collaboration
+691,The lack of oversight has allowed me to develop superior self-management skills all in all,R691,2024-02-15 20:09:51,Autonomy
+692,Virtual team building activities feel forced and don't create genuine connections - building rapport with clients remotely requires more effort and creativity,R692,2024-02-15 20:42:41,Relationships
+693,I've found that my creativity flows superior in the comfort of my own space,R693,2024-02-15 20:50:13,Productivity
+694,"Basically, remote work has made me more efficient at written communication and documentation",R694,2024-02-15 20:57:33,Skills
+695,I've learned to be more explicit in my communication to avoid misunderstandings. remote work has exposed weaknesses in our team's communication practices for sure,R695,2024-02-15 21:09:05,Communication
+696,"All things considered, i struggle to stay motivated without the accountability of being in an office",R696,2024-02-15 21:41:35,Motivation
+697,The reduced office overhead should translate to superior employee compensation,R697,2024-02-15 21:46:24,Cost
+698,I'd say that remote work has allowed me to be more present for my children's important moments,R698,2024-02-15 22:21:36,Family
+699,I've realized the importance of maintaining professional boundaries even when working from home and the pressure to always be available online is exhausting and unsustainable,R699,2024-02-15 22:53:37,Boundaries
+700,I miss the serendipitous encounters that led to unexpected collaborations - async communication has made collaboration across time zones more manageable,R700,2024-02-15 22:57:19,Collaboration
+701,I find myself working longer hours because there's no natural end to the workday. i find it harder to disconnect on weekends when my office is always accessible,R701,2024-02-15 23:24:42,Boundaries
+702,Time zone differences make scheduling meetings with global teams extremely difficult - collaborating on creative projects feels less dynamic without in-person brainstorming,R702,2024-02-15 23:40:19,Collaboration
+703,Remote work requires more self-advocacy to ensure my contributions are recognized for sure,R703,2024-02-16 00:17:26,Career
+704,I'm more productive in the morning and can now structure my day accordingly if I'm being honest,R704,2024-02-16 00:46:34,Productivity
+705,I've become more comfortable with video conferencing than I ever was with presentations,R705,2024-02-16 01:15:22,Skills
+706,"Building company culture remotely requires much more intentional effort. Additionally, i feel disconnected from company culture and important decisions happening in the office",R706,2024-02-16 01:32:31,Culture
+707,"Missing out on hallway conversations means I'm often the last to know about changes, also remote work has made me more thoughtful about when synchronous communication is necessary if I'm being honest",R707,2024-02-16 01:58:09,Communication
+708,The isolation has negatively impacted my mental health at times. the separation from toxic office dynamics has improved my job satisfaction,R708,2024-02-16 02:03:55,Wellbeing
+709,"Basically, i appreciate the opportunity to structure my work around my personal chronotype",R709,2024-02-16 02:31:49,Autonomy
+710,REMOTE WORK HAS MADE GLOBAL COLLABORATION EASIER DESPITE THE TIME ZONE CHALLENGES,R710,2024-02-16 02:47:15,Collaboration
+711,"I have to say, remote work has made me more appreciative of in-person interactions when they happen",R711,2024-02-16 03:20:22,Relationships
+712,Remote work has pushed our team to document processes that were previously tribal knowledge. i've developed stronger project management skills from leading remote initiatives tbh,R712,2024-02-16 03:52:15,Skills
+713,I miss the creativity that comes from spontaneous whiteboard sessions and i miss the immediate gratification of solving problems together at a whiteboard,R713,2024-02-16 04:23:32,Collaboration
+714,The constant notifications and messages create more interruptions than office visits did overall,R714,2024-02-16 04:55:03,Productivity
+715,The lack of physical activity from not walking around an office concerns me but i appreciate the reduced exposure to office germs and seasonal illnesses,R715,2024-02-16 05:23:21,Health
+716,Building company culture remotely requires much more intentional effort - i miss the creative energy that came from working in a dynamic office environment,R716,2024-02-16 05:48:49,Culture
+717,My internet connection isn't always reliable which impacts my work quality but technology issues during important presentations cause significant stress and anxiety,R717,2024-02-16 05:55:31,Technology
+718,"Remote work has taught me to be more intentional about career development, also the option to work remotely has become a non-negotiable factor in job decisions",R718,2024-02-16 06:30:58,Career
+719,I FIND IT EASIER TO FOCUS ON COMPLEX TASKS WITHOUT THE CONSTANT HUM OF AN OPEN OFFICE,R719,2024-02-16 06:44:15,Productivity
+720,"Overall, the flexibility to work from anywhere has allowed me to travel more all in all",R720,2024-02-16 07:04:45,Travel
+721,The virtual happy hours feel forced but are necessary for maintaining team connections I think,R721,2024-02-16 07:16:56,Culture
+722,My internet connection isn't always reliable which impacts my work quality really,R722,2024-02-16 07:57:12,Technology
+723,I can finally live where I want rather than being tied to an expensive city I think,R723,2024-02-16 08:13:09,Location
+724,"In all honesty, the initial excitement of remote work has faded into a sense of monotony. i've learned to create artificial urgency to maintain productivity without supervision",R724,2024-02-16 08:50:35,Motivation
+725,"Truthfully, i've learned to create artificial urgency to maintain productivity without supervision but i struggle to stay motivated without the accountability of being in an office",R725,2024-02-16 09:06:36,Motivation
+726,I miss celebrating team wins and milestones together in the office but building company culture remotely requires much more intentional effort,R726,2024-02-16 09:21:51,Culture
+727,"Overall, the constant notifications and messages create more interruptions than office visits did really",R727,2024-02-16 09:25:06,Productivity
+728,The future of work is clearly hybrid and I hope companies embrace this flexibility permanently honestly,R728,2024-02-16 09:46:42,Hybrid
+729,Video calls don't capture body language and nuance the way in-person meetings do. i feel more comfortable contributing in virtual meetings than I did in person in general,R729,2024-02-16 10:14:09,Communication
+730,"The pressure to always be available online is exhausting and unsustainable, also i miss having a clear physical separation between my professional and personal identities",R730,2024-02-16 10:41:18,Boundaries
+731,"I find it harder to disconnect from work when my office is in my living room. Additionally, i've realized the importance of maintaining professional boundaries even when working from home really",R731,2024-02-16 10:47:29,Boundaries
+732,I can finally live where I want rather than being tied to an expensive city and working from different locations keeps me inspired and prevents monotony,R732,2024-02-16 11:21:24,Location
+733,Mentoring junior colleagues is much harder without casual in-person interactions to be honest,R733,2024-02-16 11:38:13,Mentoring
+734,"To be honest, i've rediscovered the joy of cooking proper lunches instead of grabbing fast food",R734,2024-02-16 12:11:01,Health
+735,I feel like I'm always working because my laptop is always within reach - i find myself working longer hours because there's no natural end to the workday really,R735,2024-02-16 12:48:22,Boundaries
+736,Remote work has improved my relationship with my partner as I'm more present if I'm being honest,R736,2024-02-16 13:02:54,Relationships
+737,Remote work has revealed the importance of regular check-ins with team members in my opinion,R737,2024-02-16 13:28:02,Management
+738,I've learned to be more explicit in my communication to avoid misunderstandings to be honest,R738,2024-02-16 13:52:04,Communication
+739,The lack of commute saves me nearly two hours daily which I now spend exercising. remote work has eliminated the stress of finding parking every morning,R739,2024-02-16 14:05:27,Commute
+740,The constant notifications and messages create more interruptions than office visits did - the flexibility to work during my most productive hours has transformed my output,R740,2024-02-16 14:47:04,Productivity
+741,The flexibility to attend medical appointments without taking leave is invaluable and the flexibility to attend midday appointments without formal leave requests is appreciated honestly,R741,2024-02-16 15:21:46,Flexibility
+742,The lack of water cooler conversations means I miss vital informal information overall,R742,2024-02-16 15:43:02,Communication
+743,"I appreciate being able to create an ergonomic workspace tailored to my needs, also i appreciate being able to control my environment including temperature and lighting I think",R743,2024-02-16 16:19:45,Workspace
+744,I appreciate the reduced pressure to conform to office dress codes and norms honestly,R744,2024-02-16 16:38:51,Comfort
+745,"Looking back, i've learned to set clear expectations about my availability with my team",R745,2024-02-16 17:04:44,Boundaries
+746,The option to relocate to a lower cost area while keeping my salary has been life-changing honestly,R746,2024-02-16 17:30:51,Location
+747,I worry about the long-term career implications of being remote while others are in office. remote work requires more self-advocacy to ensure my contributions are recognized,R747,2024-02-16 17:37:04,Career
+748,"All things considered, i've become better at prioritizing tasks without someone looking over my shoulder, also i appreciate the opportunity to structure my work around my personal chronotype",R748,2024-02-16 18:11:28,Autonomy
+749,I'D SAY THAT BEING ABLE TO WORK IN COMFORTABLE CLOTHES IMPROVES MY OVERALL DAILY COMFORT REALLY,R749,2024-02-16 18:36:40,Comfort
+750,I miss the clear transition between work mode and home mode that commuting provided but the boundary between being responsive and being constantly available is unclear,R750,2024-02-16 19:01:16,Boundaries
+751,I APPRECIATE BEING ABLE TO CONTROL MY ENVIRONMENT INCLUDING TEMPERATURE AND LIGHTING,R751,2024-02-16 19:20:17,Workspace
+752,I've noticed my social skills have declined from lack of daily in-person interaction,R752,2024-02-16 19:59:54,Skills
+753,"Missing out on hallway conversations means I'm often the last to know about changes, also video calls don't capture body language and nuance the way in-person meetings do honestly",R753,2024-02-16 20:38:52,Communication
+754,"I gotta say, the transition to remote work highlighted how dependent I was on office infrastructure",R754,2024-02-16 21:17:45,Technology
+755,I'm more productive in the morning and can now structure my day accordingly tbh,R755,2024-02-16 21:55:17,Productivity
+756,"In all honesty, i've had to learn to be more proactive in seeking feedback and visibility",R756,2024-02-16 22:20:13,Career
+757,"I have to say, remote work requires more self-advocacy to ensure my contributions are recognized tbh",R757,2024-02-16 22:56:33,Career
+758,"All things considered, remote work has given me perspective on what truly matters in my career if I'm being honest",R758,2024-02-16 23:05:50,Career
+759,Remote work has allowed me to be more present for my children's significant moments I think,R759,2024-02-16 23:12:36,Family
+760,I miss the immediate feedback and quick problem-solving of in-person collaboration. i miss the creativity that comes from spontaneous whiteboard sessions,R760,2024-02-16 23:34:45,Collaboration
+761,"I mean, async communication has made collaboration across time zones more manageable",R761,2024-02-16 23:47:42,Collaboration
+762,"Working from different locations keeps me inspired and prevents monotony. Additionally, the option to relocate to a lower cost area while keeping my salary has been life-changing",R762,2024-02-17 00:33:28,Location
+763,"Virtual team building activities feel forced and don't create genuine connections. Additionally, building relationships with new team members remotely is challenging and takes longer all in all",R763,2024-02-17 01:04:12,Relationships
+764,THE REDUCTION IN CASUAL SOCIAL INTERACTIONS HAS NEGATIVELY IMPACTED MY SENSE OF BELONGING,R764,2024-02-17 01:37:30,Isolation
+765,"Looking back, i worry about junior employees missing out on organic learning opportunities",R765,2024-02-17 01:53:27,Mentoring
+766,I've learned to be more explicit in my communication to avoid misunderstandings but remote work has taught me the importance of overcommunication in distributed teams in general,R766,2024-02-17 02:33:12,Communication
+767,"In all honesty, setting up boundaries with family members during work hours has been challenging",R767,2024-02-17 02:37:56,Family
+768,"All things considered, i feel guilty taking breaks when working from home even though I need them but the reduced commute stress has had a noticeable positive impact on my mood",R768,2024-02-17 03:03:15,Wellbeing
+769,"Remote work has improved my relationship with my partner as I'm more present. Additionally, building rapport with clients remotely requires more effort and creativity",R769,2024-02-17 03:32:18,Relationships
+770,The reduced office overhead should translate to better employee compensation I think,R770,2024-02-17 03:41:38,Cost
+771,The inconsistent home internet speeds impact my ability to perform reliably. technical difficulties during client calls make me look unprofessional,R771,2024-02-17 03:50:33,Technology
+772,"All things considered, i've realized the importance of maintaining rather professional boundaries even when working from home",R772,2024-02-17 04:08:17,Boundaries
+773,"Basically, i've learned to set clear expectations about my availability with my team for sure",R773,2024-02-17 04:25:41,Boundaries
+774,Working from home has allowed me to create a more sustainable daily rhythm,R774,2024-02-17 04:45:59,Routine
+775,"Remote work has made me more thoughtful about when synchronous communication is necessary. Additionally, missing out on hallway conversations means I'm often the last to know about changes",R775,2024-02-17 05:13:40,Communication
+776,"The boundary between being responsive and being constantly available is unclear. Additionally, i find myself working longer hours because there's no natural end to the workday to be honest",R776,2024-02-17 05:33:31,Boundaries
+777,Working from different locations keeps me inspired and prevents monotony. i can finally live where I want rather than being tied to an expensive city all in all,R777,2024-02-17 06:04:33,Location
+778,Remote work has allowed me to be more present during family emergencies in my opinion,R778,2024-02-17 06:35:37,Family
+779,"All things considered, working from home has given me incredible flexibility to manage my schedule around family needs - the freedom to step away for personal tasks without judgment is liberating in my opinion",R779,2024-02-17 06:38:58,Flexibility
+780,"FROM MY PERSPECTIVE, REMOTE WORK HAS ELIMINATED THE STRESS OF FINDING PARKING EVERY MORNING",R780,2024-02-17 07:17:51,Commute
+781,Remote work has allowed me to be more present for my children's kind of important moments,R781,2024-02-17 07:57:10,Family
+782,"From my perspective, i miss the creativity that comes from spontaneous whiteboard sessions",R782,2024-02-17 08:16:19,Collaboration
+783,"All things considered, the lack of physical activity from not walking around an office concerns me",R783,2024-02-17 08:35:56,Health
+784,"I gotta say, i've learned to create artificial urgency to maintain productivity without supervision",R784,2024-02-17 08:54:10,Motivation
+785,I feel more content contributing in virtual meetings than I did in person,R785,2024-02-17 09:34:06,Communication
+786,I've become more efficient at running and participating in virtual meetings to be honest,R786,2024-02-17 10:13:04,Skills
+787,"To be honest, the lack of natural light in my home office affects my energy levels negatively",R787,2024-02-17 10:39:35,Workspace
+788,"I MISS THE SPONTANEOUS LUNCH OUTINGS AND COFFEE BREAKS WITH COLLEAGUES. ADDITIONALLY, BUILDING RELATIONSHIPS WITH NEW TEAM MEMBERS REMOTELY IS CHALLENGING AND TAKES LONGER",R788,2024-02-17 11:00:15,Relationships
+789,"I gotta say, the loneliness of working alone all day sometimes becomes overwhelming if I'm being honest",R789,2024-02-17 11:15:26,Isolation
+790,I've had to learn to be more proactive in seeking feedback and visibility. remote work requires more self-advocacy to ensure my contributions are recognized,R790,2024-02-17 11:39:40,Career
+791,"I'VE LEARNED TO CREATE ARTIFICIAL URGENCY TO MAINTAIN PRODUCTIVITY WITHOUT SUPERVISION. ADDITIONALLY, THE INITIAL EXCITEMENT OF REMOTE WORK HAS FADED INTO A SENSE OF MONOTONY",R791,2024-02-17 11:51:37,Motivation
+792,"I gotta say, i can better manage my chronic health condition with the flexibility of remote work",R792,2024-02-17 12:03:24,Health
+793,"In my experience, remote work has challenged me to find new ways to demonstrate my value and impact",R793,2024-02-17 12:49:11,Career
+794,"All things considered, i miss the immediate feedback and quick problem-solving of in-person collaboration overall",R794,2024-02-17 13:07:58,Collaboration
+795,"To be honest, the initial equipment and furniture investment for home office was significant but worthwhile",R795,2024-02-17 13:50:46,Workspace
+796,Remote work has made me more efficient at written communication and documentation. i've become more efficient at running and participating in virtual meetings,R796,2024-02-17 14:23:15,Skills
+797,I've had to be more proactive about maintaining competent relationships,R797,2024-02-17 14:33:14,Relationships
+798,I miss the mentorship opportunities that came from working near senior colleagues and i worry about junior employees missing out on organic learning opportunities,R798,2024-02-17 15:16:58,Mentoring
+799,Remote work has made it easier to pursue continuing education alongside my job - i worry that younger workers are missing crucial developmental experiences,R799,2024-02-17 15:46:03,Learning
+800,I feel less stressed without the daily pressure of rush hour traffic - the lack of commute saves me nearly two hours daily which I now spend exercising,R800,2024-02-17 16:09:42,Commute
+801,The inconsistent home internet speeds impact my ability to perform reliably in general,R801,2024-02-17 16:40:53,Technology
+802,I struggle with the lack of natural opportunities to build cross-team relationships honestly,R802,2024-02-17 17:20:20,Relationships
+803,I've realized the importance of maintaining professional boundaries even when working from home tbh,R803,2024-02-17 17:31:21,Boundaries
+804,"From my perspective, i've found that my creativity flows improved in the comfort of my own space really",R804,2024-02-17 17:59:32,Productivity
+805,"Remote work has made me more efficient at written communication and documentation. Additionally, i've developed stronger project management skills from leading remote initiatives",R805,2024-02-17 18:09:12,Skills
+806,"Basically, the inconsistent home internet speeds impact my ability to perform reliably honestly",R806,2024-02-17 18:43:09,Technology
+807,I feel like I'm always working because my laptop is always within reach overall,R807,2024-02-17 19:15:16,Boundaries
+808,"Truthfully, i miss celebrating team wins and milestones together in the office honestly",R808,2024-02-17 19:38:30,Culture
+809,The hybrid schedule offers the best of both remote and in-office benefits. the future of work is clearly hybrid and I hope companies embrace this flexibility permanently,R809,2024-02-17 20:03:04,Hybrid
+810,"Truthfully, i feel less stressed without the daily pressure of rush hour traffic",R810,2024-02-17 20:22:29,Commute
+811,"I gotta say, remote work has given me perspective on what truly matters in my career",R811,2024-02-17 21:01:52,Career
+812,I miss having dedicated IT support just down the hall when things go wrong but technical difficulties during client calls make me look unprofessional,R812,2024-02-17 21:09:03,Technology
+813,"I mean, the autonomy to structure my day according to my peak productivity hours is wonderful",R813,2024-02-17 21:33:28,Autonomy
+814,"The transition to remote work highlighted how dependent I was on office infrastructure, also technical difficulties during client calls make me look unprofessional",R814,2024-02-17 22:17:31,Technology
+815,"I worry that younger workers are missing crucial developmental experiences, also the informal learning from overhearing senior colleagues is something I really miss",R815,2024-02-17 22:32:15,Learning
+816,Remote work has shown me the importance of intentional team building activities honestly,R816,2024-02-17 23:05:15,Culture
+817,I appreciate having quiet time for focused work without constant interruptions. remote work has made me more aware of my work habits and patterns,R817,2024-02-17 23:09:25,Productivity
+818,I feel more empowered to decline meetings that don't require my presence for sure,R818,2024-02-17 23:21:12,Productivity
+819,The flexibility to attend medical appointments without taking leave is invaluable - i appreciate the accessibility benefits that remote work provides for many workers,R819,2024-02-18 00:07:10,Flexibility
+820,"In all honesty, remote work has pushed our team to document processes that were previously tribal knowledge",R820,2024-02-18 00:30:45,Skills
+821,Creating a dedicated home office space has been essential for maintaining focus all in all,R821,2024-02-18 00:45:23,Workspace
+822,"Mentoring junior colleagues is much harder without casual in-person interactions, also i miss the mentorship opportunities that came from working near senior colleagues",R822,2024-02-18 01:14:42,Mentoring
+823,"The lack of natural light in my home office affects my energy levels negatively, also i appreciate being able to control my environment including temperature and lighting",R823,2024-02-18 01:50:57,Workspace
+824,I struggle with the lack of visual cues about when colleagues are busy or available - i've learned to be more explicit in my communication to avoid misunderstandings,R824,2024-02-18 02:15:31,Communication
+825,"Honestly, video call fatigue is real - back to back meetings leave me completely drained",R825,2024-02-18 02:45:02,Communication
+826,"I have to say, the flexibility to attend midday appointments without formal leave requests is appreciated",R826,2024-02-18 03:16:30,Flexibility
+827,I struggle with imposter syndrome more when I can't see how others are working. i've discovered that I'm more introverted than I realized and thrive working alone,R827,2024-02-18 03:51:37,Wellbeing
+828,"Overall, working from home has given me incredible flexibility to manage my schedule around family needs",R828,2024-02-18 04:09:55,Flexibility
+829,"I mean, onboarding new employees remotely is significantly more challenging than in person",R829,2024-02-18 04:29:25,Onboarding
+830,Remote work has exposed weaknesses in our team's communication practices really,R830,2024-02-18 04:53:02,Communication
+831,"The lack of water cooler conversations means I miss important informal information, also i've learned to be more explicit in my communication to avoid misunderstandings",R831,2024-02-18 05:19:30,Communication
+832,Communication gaps lead to misunderstandings that wouldn't happen face-to-face honestly,R832,2024-02-18 06:01:29,Communication
+833,Remote work has given me perspective on what truly matters in my career tbh,R833,2024-02-18 06:21:44,Career
+834,"All things considered, i miss the creativity that comes from spontaneous whiteboard sessions",R834,2024-02-18 07:01:37,Collaboration
+835,"I have to say, the flexibility to attend to personal wellness during the day is incredibly valuable. Additionally, i've rediscovered the joy of cooking proper lunches instead of grabbing fast food overall",R835,2024-02-18 07:22:59,Health
+836,SETTING UP BOUNDARIES WITH FAMILY MEMBERS DURING WORK HOURS HAS BEEN CHALLENGING,R836,2024-02-18 07:30:35,Family
+837,I've become more intentional about scheduling social interactions outside work all in all,R837,2024-02-18 07:41:47,Relationships
+838,The flexibility to attend medical appointments without taking leave is invaluable for sure,R838,2024-02-18 08:22:29,Flexibility
+839,"I gotta say, remote work has made me more disciplined about taking proper lunch breaks",R839,2024-02-18 08:26:02,Health
+840,I've been able to create a workspace that truly reflects my personality and needs and the flexibility to work from different rooms keeps me from feeling stuck,R840,2024-02-18 08:50:01,Workspace
+841,I've developed better written communication skills out of necessity for sure,R841,2024-02-18 09:01:39,Skills
+842,"I mean, i've had to learn to be more proactive in seeking feedback and visibility. i worry about the long-term career implications of being remote while others are in office",R842,2024-02-18 09:35:46,Career
+843,"I MEAN, I'VE DEVELOPED A STRONGER UNDERSTANDING OF WHAT I NEED TO BE PRODUCTIVE",R843,2024-02-18 09:40:08,Productivity
+844,The lack of informal feedback makes it hard to know if I'm meeting expectations and remote work has exposed weaknesses in our team's communication practices,R844,2024-02-18 10:04:22,Communication
+845,"In all honesty, i miss the immediate gratification of solving problems together at a whiteboard",R845,2024-02-18 10:13:52,Collaboration
+846,I struggle with the lack of natural opportunities to build cross-team relationships but i struggle with maintaining work friendships when we never see each other in person,R846,2024-02-18 10:32:39,Relationships
+847,The initial excitement of remote work has faded into a sense of monotony,R847,2024-02-18 10:44:52,Motivation
+848,Remote work has pushed our team to document processes that were previously tribal knowledge honestly,R848,2024-02-18 11:17:39,Skills
+849,"Managing a remote team requires completely different skills than in-person management. Additionally, remote work has made performance management more challenging but more outcome-focused",R849,2024-02-18 11:42:19,Management
+850,"Truthfully, remote work has given me perspective on what truly matters in my career",R850,2024-02-18 12:26:41,Career
+851,MY PRODUCTIVITY HAS INCREASED SIGNIFICANTLY WITHOUT OFFICE DISTRACTIONS AND INTERRUPTIONS,R851,2024-02-18 13:06:49,Productivity
+852,"Truthfully, i've learned to be more explicit in my communication to avoid misunderstandings",R852,2024-02-18 13:25:10,Communication
+853,"I miss the creativity that comes from spontaneous whiteboard sessions. Additionally, cross-functional collaboration has become more siloed in a remote environment overall",R853,2024-02-18 13:50:14,Collaboration
+854,"In my experience, having a consistent routine has become essential for maintaining productivity at home",R854,2024-02-18 14:10:58,Routine
+855,"Honestly, i feel more connected to my local community since working from home, also the flexibility to volunteer in my community during lunch breaks is wonderful",R855,2024-02-18 14:17:34,Community
+856,The virtual really happy hours feel forced but are necessary for maintaining team connections,R856,2024-02-18 14:26:48,Culture
+857,"I gotta say, being able to work in comfortable clothes improves my overall daily comfort",R857,2024-02-18 14:46:08,Comfort
+858,The isolation has negatively impacted my mental health at times and i feel more rested without the early morning rush to get to the office,R858,2024-02-18 15:14:45,Wellbeing
+859,The initial equipment and furniture investment for home office was significant but worthwhile but creating a dedicated home office space has been essential for maintaining focus,R859,2024-02-18 15:48:51,Workspace
+860,"All things considered, the hybrid model seems like the best compromise for maintaining connections honestly",R860,2024-02-18 16:12:53,Hybrid
+861,I feel less stressed without the daily pressure of rush hour traffic really,R861,2024-02-18 16:39:09,Commute
+862,Remote work has made me more thoughtful about when synchronous communication is necessary I think,R862,2024-02-18 17:17:11,Communication
+863,"I struggle with maintaining work friendships when we never see each other in person. Additionally, the lack of separation between work and home has strained my relationship",R863,2024-02-18 17:30:30,Relationships
+864,"Truthfully, my pets am passionate about having me home and honestly it's been great for both of us really",R864,2024-02-18 17:50:30,Comfort
+865,"In my experience, working from home has allowed me to create a more sustainable daily rhythm for sure",R865,2024-02-18 18:28:42,Routine
+866,"From my perspective, i've realized how important physical separation between work and home really is",R866,2024-02-18 18:36:35,Boundaries
+867,I find it easier to focus on complex tasks without the constant hum of an open office but i'm more productive in the morning and can now structure my day accordingly,R867,2024-02-18 18:43:07,Productivity
+868,"From my perspective, i've learned to create artificial urgency to maintain productivity without supervision all in all",R868,2024-02-18 19:17:40,Motivation
+869,"Overall, the future of work is clearly hybrid and I hope companies embrace this flexibility permanently I think",R869,2024-02-18 19:29:08,Hybrid
+870,Remote work has made global collaboration easier despite the time zone challenges but i miss the serendipitous encounters that led to unexpected collaborations,R870,2024-02-18 20:09:51,Collaboration
+871,The boundary between being responsive and being constantly available is unclear in general,R871,2024-02-18 20:53:47,Boundaries
+872,The lack of natural light in my home office affects my energy levels negatively but creating a dedicated home office space has been essential for maintaining focus,R872,2024-02-18 21:07:49,Workspace
+873,I've realized how important physical separation between work and home really is in general,R873,2024-02-18 21:53:45,Boundaries
+874,not bad,R874,2024-02-18 22:22:02,Family
+875,"I've rediscovered the joy of cooking proper lunches instead of grabbing fast food, also i can better manage my chronic health condition with the flexibility of remote work",R875,2024-02-18 22:31:25,Health
+876,"Looking back, the lack of natural light in my home office affects my energy levels negatively",R876,2024-02-18 22:37:43,Workspace
+877,"I've had to learn to be more proactive in seeking feedback and visibility. Additionally, remote work has challenged me to find new ways to demonstrate my value and impact for sure",R877,2024-02-18 22:50:38,Career
+878,"I have to say, remote work has made performance management more challenging but more outcome-focused",R878,2024-02-18 23:01:42,Management
+879,"I've found that my creativity flows better in the comfort of my own space. Additionally, remote work has made me appreciate the value of focused deep work time",R879,2024-02-18 23:32:15,Productivity
+880,"Honestly, i worry about the long-term career implications of being remote while others are in office",R880,2024-02-18 23:38:48,Career
+881,I've become superior at prioritizing tasks without someone looking over my shoulder overall,R881,2024-02-18 23:43:46,Autonomy
+882,"I have to say, remote work requires better planning and preparation for virtual meetings to be effective overall",R882,2024-02-19 00:05:17,Productivity
+883,"I have to say, i feel more rested without the early morning rush to get to the office",R883,2024-02-19 00:51:00,Wellbeing
+884,"I mean, the pressure to always be available online is exhausting and unsustainable",R884,2024-02-19 01:12:31,Boundaries
+885,The company's remote work policy has improved my opinion of leadership tbh,R885,2024-02-19 01:51:42,Trust
+886,"Looking back, being able to attend my children's school events without missing work is priceless",R886,2024-02-19 02:17:05,Family
+887,I'd say that working from home has allowed me to be more environmentally conscious overall,R887,2024-02-19 02:21:00,Environment
+888,"In my experience, setting up boundaries with family members during work hours has been challenging in general",R888,2024-02-19 02:50:37,Family
+889,"Looking back, collaborating on creative projects feels less dynamic without in-person brainstorming if I'm being honest",R889,2024-02-19 03:06:57,Collaboration
+890,"I mean, i've realized how significant physical separation between work and home really is",R890,2024-02-19 03:18:45,Boundaries
+891,"Overall, the option to work remotely has become a non-negotiable factor in job decisions tbh",R891,2024-02-19 03:40:05,Career
+892,"All things considered, the lack of natural light in my home office affects my energy levels negatively",R892,2024-02-19 03:57:45,Workspace
+893,I've become more efficient at documenting decisions and processes for remote teams. remote work has forced me to become more organized and self-disciplined,R893,2024-02-19 04:25:15,Skills
+894,"Remote onboarding made it harder to understand company processes and culture, also onboarding new employees remotely is significantly more challenging than in person",R894,2024-02-19 04:56:33,Onboarding
+895,"The lack of informal feedback makes it hard to know if I'm meeting expectations, also i've learned to be more explicit in my communication to avoid misunderstandings tbh",R895,2024-02-19 05:39:27,Communication
+896,"The money saved on professional clothing is a nice unexpected benefit, also the cost savings from not buying lunch out and commuting are substantial in general",R896,2024-02-19 05:49:37,Cost
+897,I feel less anxious about work without the pressure of office surveillance overall,R897,2024-02-19 06:12:56,Wellbeing
+898,"I gotta say, the initial excitement of remote work has faded into a sense of monotony and i struggle to stay motivated without the accountability of being in an office",R898,2024-02-19 06:58:29,Motivation
+899,"In my experience, the lack of commute has given me time to develop new personal interests",R899,2024-02-19 07:28:45,Balance
+900,Remote work has revealed which meetings were actually necessary and which weren't. remote work has made me more aware of my work habits and patterns,R900,2024-02-19 08:07:37,Productivity
+901,Remote work has made performance management more challenging but more outcome-focused,R901,2024-02-19 08:16:04,Management
+902,"From my perspective, mentoring junior colleagues is much harder without casual in-person interactions. Additionally, i miss the mentorship opportunities that came from working near senior colleagues",R902,2024-02-19 08:23:58,Mentoring
+903,The company's remote work policy has improved my opinion of leadership but building trust with remote team members requires more intentional effort,R903,2024-02-19 08:29:47,Trust
+904,I'VE BECOME MORE EFFICIENT AT DOCUMENTING DECISIONS AND PROCESSES FOR REMOTE TEAMS,R904,2024-02-19 09:11:41,Skills
+905,I've become better at prioritizing tasks without someone looking over my shoulder - i appreciate being able to work through difficult personal times without scrutiny in my opinion,R905,2024-02-19 09:21:25,Autonomy
+906,"I HAVE TO SAY, THE AUTONOMY TO MANAGE MY OWN TIME HAS MADE ME MORE ACCOUNTABLE FOR RESULTS",R906,2024-02-19 09:57:14,Autonomy
+907,"I have to say, i've developed stronger project management skills from leading remote initiatives",R907,2024-02-19 10:03:30,Skills
+908,"The environmental impact of reduced commuting aligns with my personal values. Additionally, working from home has allowed me to be more environmentally conscious overall",R908,2024-02-19 10:28:40,Environment
+909,I APPRECIATE NOT HAVING TO DEAL WITH OFFICE POLITICS AND WORKPLACE DRAMA DAILY - BUILDING COMPANY CULTURE REMOTELY REQUIRES MUCH MORE INTENTIONAL EFFORT,R909,2024-02-19 11:10:18,Culture
+910,I appreciate the flexibility to handle household tasks during natural work breaks. remote work has given me the opportunity to pursue hobbies I never had time for,R910,2024-02-19 11:51:26,Balance
+911,The informal learning from overhearing senior colleagues is something I really miss in general,R911,2024-02-19 12:25:34,Learning
+912,I've developed stronger project management skills from leading remote initiatives. remote work has pushed me to improve my written communication significantly,R912,2024-02-19 12:40:51,Skills
+913,Working from home has allowed me to create a more sustainable daily rhythm for sure,R913,2024-02-19 13:15:46,Routine
+914,Virtual team building activities feel forced and don't create genuine connections if I'm being honest,R914,2024-02-19 13:57:01,Relationships
+915,"All things considered, my pets cherish having me home and honestly it's been great for both of us",R915,2024-02-19 14:41:52,Comfort
+916,I've learned to create artificial urgency to maintain productivity without supervision but the initial excitement of remote work has faded into a sense of monotony,R916,2024-02-19 15:07:21,Motivation
+917,"Truthfully, i've learned to set clear expectations about my availability with my team",R917,2024-02-19 15:15:36,Boundaries
+918,Remote work has forced me to become more organized and self-disciplined I think,R918,2024-02-19 15:39:48,Skills
+919,"In all honesty, i worry about being overlooked for promotions since I'm not physically visible",R919,2024-02-19 15:50:59,Career
+920,The lack of separation between work and home has strained my relationship if I'm being honest,R920,2024-02-19 16:00:14,Relationships
+921,"I've invested in better equipment to make my home office more professional. Additionally, the flexibility to work from different rooms keeps me from feeling stuck",R921,2024-02-19 16:42:28,Workspace
+922,I've developed a stronger understanding of what I need to be productive,R922,2024-02-19 16:57:56,Productivity
+923,The lack of commute has given me time to develop new personal interests. remote work has given me the opportunity to pursue hobbies I never had time for,R923,2024-02-19 17:26:06,Balance
+924,"All things considered, i feel more rested without the early morning rush to get to the office",R924,2024-02-19 17:44:04,Wellbeing
+925,"Basically, i've become more resilient and adaptable through navigating the challenges of remote work in my opinion",R925,2024-02-19 18:01:37,Skills
+926,"Basically, onboarding new employees remotely is significantly more challenging than in person",R926,2024-02-19 18:14:58,Onboarding
+927,I'd say that i appreciate being able to take calls while walking outside for fresh air,R927,2024-02-19 18:33:11,Health
+928,Being able to attend my children's school events without missing work is priceless but working remotely has allowed me to care for my aging parents while maintaining my career I think,R928,2024-02-19 19:07:42,Family
+929,"Basically, i appreciate the accessibility benefits that remote work provides for many workers but the flexibility to attend midday appointments without formal leave requests is appreciated",R929,2024-02-19 19:29:40,Flexibility
+930,I've had to learn to be more proactive in seeking feedback and visibility really,R930,2024-02-19 20:09:22,Career
+931,"I have to say, the flexibility to take breaks when needed helps me maintain mental clarity",R931,2024-02-19 20:20:23,Flexibility
+932,I miss the energy of being around motivated colleagues in a shared space for sure,R932,2024-02-19 21:01:24,Isolation
+933,I feel less stressed without the daily pressure of rush hour traffic in my opinion,R933,2024-02-19 21:30:58,Commute
+934,I'd say that the option to relocate to a lower cost area while keeping my salary has been life-changing,R934,2024-02-19 21:39:55,Location
+935,Mentoring junior colleagues is much harder without casual in-person interactions. i worry about junior employees missing out on organic learning opportunities,R935,2024-02-19 22:05:42,Mentoring
+936,"Remote work has allowed me to pursue a side project I've always dreamed about, also my work-life balance has improved dramatically since transitioning to remote work",R936,2024-02-19 22:11:42,Balance
+937,I'd say that the flexibility to work during my most productive hours has transformed my output tbh,R937,2024-02-19 22:33:28,Productivity
+938,"The flexibility to volunteer in my community during lunch breaks is wonderful. Additionally, i feel more connected to my local community since working from home honestly",R938,2024-02-19 23:04:55,Community
+939,I've found that my creativity flows better in the comfort of my own space and i've developed a better understanding of what I need to be productive all in all,R939,2024-02-19 23:32:17,Productivity
+940,"I've learned to set clear expectations about my availability with my team. Additionally, i've realized the importance of maintaining professional boundaries even when working from home I think",R940,2024-02-20 00:04:12,Boundaries
+941,"Truthfully, the cost savings from not buying lunch out and commuting are substantial",R941,2024-02-20 00:38:06,Cost
+942,"All things considered, remote work has highlighted the importance of trust between managers and employees I think",R942,2024-02-20 01:11:09,Trust
+943,"Basically, i miss the clear transition between work mode and home mode that commuting provided",R943,2024-02-20 01:40:27,Boundaries
+944,Remote work has taught me to be more intentional about career development honestly,R944,2024-02-20 01:57:38,Career
+945,"I appreciate being able to take calls while walking outside for fresh air. Additionally, i can better manage my chronic health condition with the flexibility of remote work",R945,2024-02-20 02:37:20,Health
+946,"In all honesty, i feel more rested without the early morning rush to get to the office in my opinion",R946,2024-02-20 03:11:08,Wellbeing
+947,Remote work has improved my relationship with my partner as I'm more present. i've had to be more proactive about maintaining professional relationships in general,R947,2024-02-20 03:43:15,Relationships
+948,Cross-functional collaboration has become more siloed in a remote environment but i miss the immediate feedback and quick problem-solving of in-person collaboration,R948,2024-02-20 03:51:52,Collaboration
+949,"All things considered, video calls don't capture body language and nuance the way in-person meetings do",R949,2024-02-20 04:34:05,Communication
+950,REMOTE WORK HAS EXPOSED WEAKNESSES IN OUR TEAM'S COMMUNICATION PRACTICES,R950,2024-02-20 05:03:53,Communication
+951,I can finally live where I want rather than being tied to an expensive city - working from different locations keeps me inspired and prevents monotony,R951,2024-02-20 05:49:12,Location
+952,"Working from different locations keeps me inspired and prevents monotony, also i can finally live where I want rather than being tied to an expensive city",R952,2024-02-20 06:00:35,Location
+953,"Looking back, the flexibility to work from anywhere has allowed me to travel more",R953,2024-02-20 06:21:34,Travel
+954,Being able to attend my children's school events without missing work is priceless. setting up boundaries with family members during work hours has been challenging,R954,2024-02-20 06:45:35,Family
+955,The flexibility to work from anywhere has allowed me to travel more,R955,2024-02-20 07:28:09,Travel
+956,"Overall, remote work has revealed which meetings were actually necessary and which weren't",R956,2024-02-20 07:53:23,Productivity
+957,"From my perspective, i appreciate being able to control my environment including temperature and lighting",R957,2024-02-20 08:01:00,Workspace
+958,Video calls don't capture body language and nuance the way in-person meetings do overall,R958,2024-02-20 08:26:27,Communication
+959,The flexibility to adjust my schedule around my energy levels has been transformative overall,R959,2024-02-20 09:02:31,Flexibility
+960,Remote work has made me more appreciative of in-person interactions when they happen I think,R960,2024-02-20 09:19:42,Relationships
+961,"In all honesty, the money saved on professional clothing is a nice unexpected benefit. Additionally, the reduced office overhead should translate to better employee compensation",R961,2024-02-20 10:02:21,Cost
+962,Remote work has made me more thoughtful about when synchronous communication is necessary,R962,2024-02-20 10:33:02,Communication
+963,nothing to add,R963,2024-02-20 10:47:57,Culture
+964,"Overall, i miss the creativity that comes from spontaneous whiteboard sessions",R964,2024-02-20 11:12:59,Collaboration
+965,"Managing a remote team requires completely different skills than in-person management, also remote work has made performance management more challenging but more outcome-focused",R965,2024-02-20 11:48:14,Management
+966,"I appreciate being able to work through difficult personal times without scrutiny. Additionally, the autonomy to manage my own time has made me more accountable for results",R966,2024-02-20 12:09:09,Autonomy
+967,The flexibility to attend midday appointments without formal leave requests is appreciated really,R967,2024-02-20 12:36:29,Flexibility
+968,"Basically, i miss having a clear physical separation between my professional and personal identities overall",R968,2024-02-20 12:39:58,Boundaries
+969,I STRUGGLE WITH FEELING ISOLATED AND MISS THE SPONTANEOUS CONVERSATIONS WITH COLLEAGUES IN GENERAL,R969,2024-02-20 13:03:30,Isolation
+970,I struggle with imposter syndrome more when I can't see how others are working and i feel guilty taking breaks when working from home even though I need them,R970,2024-02-20 13:35:47,Wellbeing
+971,I APPRECIATE NOT HAVING TO DEAL WITH OFFICE POLITICS AND WORKPLACE DRAMA DAILY,R971,2024-02-20 13:52:47,Culture
+972,I find it harder to disconnect from work when my office is in my living room honestly,R972,2024-02-20 14:00:39,Boundaries
+973,"All things considered, i've created rituals to mark the start and end of my workday at home all in all",R973,2024-02-20 14:04:05,Routine
+974,I feel more comfortable contributing in virtual meetings than I did in person and the lack of water cooler conversations means I miss important informal information,R974,2024-02-20 14:24:20,Communication
+975,I'VE DEVELOPED GENUINELY BETTER WRITTEN COMMUNICATION SKILLS OUT OF NECESSITY,R975,2024-02-20 14:30:25,Skills
+976,"To be honest, i appreciate the reduced pressure to conform to office dress codes and norms",R976,2024-02-20 15:13:51,Comfort
+977,Remote work has made me appreciate the value of focused deep work time but remote work has made me more aware of my work habits and patterns,R977,2024-02-20 15:33:49,Productivity
+978,"I've invested significantly in my home office setup to match office quality, also i appreciate being able to control my environment including temperature and lighting",R978,2024-02-20 16:01:26,Workspace
+979,Remote work has made it easier to pursue continuing education alongside my job in my opinion,R979,2024-02-20 16:11:16,Learning
+980,"To be honest, communication gaps lead to misunderstandings that wouldn't happen face-to-face. Additionally, remote work has exposed weaknesses in our team's communication practices",R980,2024-02-20 16:37:14,Communication
+981,"From my perspective, the initial equipment and furniture investment for home office was significant but worthwhile",R981,2024-02-20 16:57:03,Workspace
+982,"All things considered, i've realized the importance of maintaining professional boundaries even when working from home and setting boundaries between work and personal life has become increasingly difficult tbh",R982,2024-02-20 17:11:29,Boundaries
+983,"My health has improved with more time for exercise and preparing nutritious meals, also the flexibility to attend to personal wellness during the day is incredibly valuable",R983,2024-02-20 17:29:07,Health
+984,Remote work has allowed me to be more present for my children's important moments and remote work has allowed me to be more present during family emergencies,R984,2024-02-20 18:03:34,Family
+985,"IN ALL HONESTY, I'VE FOUND THAT MY CREATIVITY FLOWS BETTER IN THE COMFORT OF MY OWN SPACE",R985,2024-02-20 18:37:09,Productivity
+986,I miss the spontaneous lunch outings and coffee breaks with colleagues really,R986,2024-02-20 19:18:55,Relationships
+987,"Truthfully, i find myself working longer hours because there's no natural end to the workday. i miss the clear transition between work mode and home mode that commuting provided",R987,2024-02-20 19:50:06,Boundaries
+988,"Working remotely has allowed me to care for my aging parents while maintaining my career, also remote work has allowed me to be more present during family emergencies in my opinion",R988,2024-02-20 19:55:28,Family
+989,THE FLEXIBILITY TO ATTEND MIDDAY APPOINTMENTS WITHOUT FORMAL LEAVE REQUESTS IS APPRECIATED,R989,2024-02-20 20:08:49,Flexibility
+990,Building trust with remote team members requires more intentional effort overall,R990,2024-02-20 20:21:11,Trust
+991,The flexibility to work from different rooms keeps me from feeling stuck. i appreciate being able to create an ergonomic workspace tailored to my needs,R991,2024-02-20 20:50:10,Workspace
+992,The informal learning from overhearing senior colleagues is something I really miss but remote work has made it easier to pursue continuing education alongside my job,R992,2024-02-20 21:02:21,Learning
+993,Remote work has pushed our team to document processes that were previously tribal knowledge and i've developed better written communication skills out of necessity,R993,2024-02-20 21:47:16,Skills
+994,I appreciate not having to deal with office politics and workplace drama daily honestly,R994,2024-02-20 21:53:56,Culture
+995,it was alright,R995,2024-02-20 22:00:10,Productivity
+996,"All things considered, my internet connection isn't always reliable which impacts my work quality",R996,2024-02-20 22:06:26,Technology
+997,THE INITIAL EQUIPMENT AND FURNITURE INVESTMENT FOR HOME OFFICE WAS SIGNIFICANT BUT WORTHWHILE BUT CREATING A DEDICATED HOME OFFICE SPACE HAS BEEN ESSENTIAL FOR MAINTAINING FOCUS I THINK,R997,2024-02-20 22:12:46,Workspace
+998,"I mean, mentoring junior colleagues is much harder without casual in-person interactions",R998,2024-02-20 22:37:05,Mentoring
+999,"I gotta say, creating a dedicated home office space has been essential for maintaining focus, also the lack of natural light in my home office affects my energy levels negatively",R999,2024-02-20 23:08:15,Workspace
+1000,I've noticed my social skills have declined from lack of daily in-person interaction in my opinion,R1000,2024-02-20 23:35:12,Skills

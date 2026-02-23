@@ -49,7 +49,7 @@ The Open-Ended Coding Analysis Framework accepts data from multiple sources for 
 
 | Metric | Minimum | Recommended | Notes |
 |--------|---------|-------------|-------|
-| **Response Count** | 20 | 50+ | Statistical validity requires 20-30 responses minimum |
+| **Response Count** | 20 | 300-500 | Statistical validity requires 20-30 minimum; 300-500 optimal for all 6 ML methods (see `OPTIMAL_DATASET_SIZE.md`) |
 | **Response Length** | 5 characters | 10+ characters | Shorter responses flagged for quality review |
 | **Word Count per Response** | 1 word | 3+ words | Single-word responses may lack analytic value |
 | **Analytic Response Ratio** | 50% | 80%+ | Non-analytic responses flagged but retained |
@@ -273,7 +273,7 @@ For detailed formatting rules, see [Data Formatting Rules](04_data_formatting_ru
 - Machine learning models need minimum sample size
 - Theme emergence requires adequate coverage
 
-**Recommendation:** 50+ responses for robust analysis
+**Recommendation:** 300-500 responses for robust analysis across all 6 ML methods (see `OPTIMAL_DATASET_SIZE.md`)
 
 ---
 
@@ -437,7 +437,7 @@ Based on actual sample files in the `/home/user/JC-OE-Coding/data/` directory:
 
 ### Basic Schema (Minimal Required)
 
-**File:** `Remote_Work_Experiences_200.csv`
+**File:** `Remote_Work_Experiences_1000.csv`
 
 ```csv
 id,response,respondent_id,timestamp

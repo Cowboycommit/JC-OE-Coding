@@ -527,6 +527,48 @@ def main():
             st.markdown("**Preview (first 5 rows)**:")
             st.dataframe(df.head(), use_container_width=True)
 
+            # ── Optimal Sample Size Selector ──────────────────────────
+            # Based on analysis: 30-50 responses per code ensures all
+            # ML methods (TF-IDF, LDA, NMF, LSTM, BERT, SVM) work well
+            st.markdown("---")
+            st.markdown("**🎯 Optimal Sample Size for Analysis**")
+            st.caption(
+                "Randomly sample the optimal number of rows for your target code count. "
+                "Sizes are calibrated so all ML methods produce good accuracy."
+            )
+
+            OPTIMAL_SAMPLES = {
+                5:  {"size": 150, "label": "5 Codes (150 rows)"},
+                10: {"size": 300, "label": "10 Codes (300 rows)"},
+                15: {"size": 500, "label": "15 Codes (500 rows)"},
+                20: {"size": 700, "label": "20 Codes (700 rows)"},
+            }
+
+            total_rows = len(df)
+            col_s1, col_s2, col_s3, col_s4 = st.columns(4)
+
+            for col_btn, n_codes_opt in [(col_s1, 5), (col_s2, 10), (col_s3, 15), (col_s4, 20)]:
+                info = OPTIMAL_SAMPLES[n_codes_opt]
+                sample_size = min(info["size"], total_rows)
+                with col_btn:
+                    if st.button(
+                        f"🎯 {info['label']}",
+                        key=f"lite_sample_{n_codes_opt}",
+                        use_container_width=True,
+                        help=f"Sample {sample_size} rows optimized for {n_codes_opt} codes",
+                    ):
+                        sampled = df.sample(n=sample_size, random_state=42).reset_index(drop=True)
+                        if sampled.columns[0] in ("id",):
+                            sampled.iloc[:, 0] = range(1, len(sampled) + 1)
+                        st.session_state["raw_df"] = sampled
+                        st.success(
+                            f"Sampled **{sample_size}** of {total_rows} rows "
+                            f"(optimal for **{n_codes_opt} codes**)"
+                        )
+                        st.rerun()
+
+            st.caption(f"Current dataset: **{total_rows}** rows")
+
     # --------------------------------------------------------------------------
     # STAGE 2: Data Validation & Typing
     # --------------------------------------------------------------------------
@@ -725,8 +767,8 @@ def main():
                     n_codes = st.slider(
                         "Number of codes",
                         min_value=3,
-                        max_value=20,
-                        value=8,
+                        max_value=30,
+                        value=10,
                         key="n_codes_slider",
                     )
 

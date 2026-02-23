@@ -1,7 +1,7 @@
 # Dataset Assessment Report
 ## Open-Ended Coding Analysis Framework
 
-**Report Date:** January 18, 2026
+**Report Date:** February 11, 2026
 **Assessment Scope:** Evaluating which datasets best demonstrate the full feature set of the ML-powered qualitative analysis framework
 
 ---
@@ -10,18 +10,18 @@
 
 This report assesses the **6 curated datasets** available in the project, optimized for demonstrating the framework's capabilities. The datasets were rationalized from 12 to 6, removing pre-classified benchmark datasets that don't align with the tool's open-ended qualitative analysis purpose.
 
-> **Dataset Rationalization (January 2026):** Removed 6 low-value datasets (AG News, GoEmotions, SNIPS, SemEval, SST-2, SST-5) that were pre-labeled classification datasets unsuitable for theme discovery. Expanded demo datasets to 200 rows each for better ML clustering results.
+> **Dataset Expansion (February 2026):** All 6 datasets expanded to 1,000 rows each using seed-based variation (synonym substitution, phrase recombination, style variation) via `scripts/expand_datasets.py`. Original smaller datasets retained for backward compatibility. Added optimal sampling feature for targeted code counts (5/10/15/20 codes).
 
 ### Curated Dataset Inventory
 
 | Dataset | Records | Avg Length | Best For |
 |---------|---------|------------|----------|
-| Psychology_Wellbeing_Study_300.csv | 300 | 95 chars | **Best quality** - Rich emotional content, natural themes |
-| Healthcare_Patient_Feedback_300.csv | 300 | 69 chars | **Domain-specific** - Patient experience patterns |
-| Market_Research_Survey_300.csv | 300 | 60 chars | **Business use** - Consumer insights, demographics |
-| Remote_Work_Experiences_200.csv | 200 | 77 chars | **Quick demos** - Remote work themes |
-| cricket_responses.csv | 200 | 79 chars | **Topic variety** - 40+ natural topics |
-| fashion_responses.csv | 200 | 69 chars | **Theme diversity** - 45+ natural topics |
+| Psychology_Wellbeing_Study_1000.csv | 1,000 | 95 chars | **Best quality** - Rich emotional content, natural themes |
+| Healthcare_Patient_Feedback_1000.csv | 1,000 | 69 chars | **Domain-specific** - Patient experience patterns |
+| Market_Research_Survey_1000.csv | 1,000 | 60 chars | **Business use** - Consumer insights, demographics |
+| Remote_Work_Experiences_1000.csv | 1,000 | 77 chars | **Quick demos** - Remote work themes |
+| cricket_responses_1000.csv | 1,000 | 79 chars | **Topic variety** - 40+ natural topics |
+| fashion_responses_1000.csv | 1,000 | 69 chars | **Theme diversity** - 45+ natural topics |
 
 ---
 
@@ -45,32 +45,33 @@ The framework provides **15 essential outputs** for qualitative analysis:
 14. **Uncoded Responses** - Edge cases and low-confidence items
 15. **Executive Summaries** - High-level stakeholder reports
 
-### ML Algorithms Supported
+### ML Algorithms Supported (All 6 Methods)
 - TF-IDF + K-Means (default)
 - Latent Dirichlet Allocation (LDA)
 - Non-negative Matrix Factorization (NMF)
 - BERT + K-Means (semantic)
 - LSTM + K-Means (sequence-aware)
+- SVM Spectral Clustering (non-linear boundaries)
 
 ---
 
 ## Complete Dataset Inventory
 
-### Survey Datasets (Purpose-Built for Testing)
+### Survey Datasets (1,000 rows each)
 
-| Dataset | Size | Records | Segmentation Column | Key Themes |
-|---------|------|---------|---------------------|------------|
-| Healthcare_Patient_Feedback_300.csv | 34 KB | 300 | `department` | Wait times, staff, communication, cleanliness |
-| Market_Research_Survey_300.csv | 32 KB | 300 | `demographic_segment` | Quality, price, service, loyalty |
-| Psychology_Wellbeing_Study_300.csv | 39 KB | 300 | `age_group` | Burnout, balance, mental health, growth |
+| Dataset | Records | Segmentation Column | Key Themes |
+|---------|---------|---------------------|------------|
+| Healthcare_Patient_Feedback_1000.csv | 1,000 | `department` | Wait times, staff, communication, cleanliness |
+| Market_Research_Survey_1000.csv | 1,000 | `demographic_segment` | Quality, price, service, loyalty |
+| Psychology_Wellbeing_Study_1000.csv | 1,000 | `age_group` | Burnout, balance, mental health, growth |
 
-### Demo Datasets (200 rows each)
+### Topic Datasets (1,000 rows each)
 
-| Dataset | Size | Records | Topic Column | Content Focus |
-|---------|------|---------|--------------|---------------|
-| Remote_Work_Experiences_200.csv | 22 KB | 200 | `topic` | Remote work themes (30+ topics) |
-| cricket_responses.csv | 21 KB | 200 | `topic` | Cricket perspectives (40+ topics) |
-| fashion_responses.csv | 19 KB | 200 | `topic` | Fashion opinions (45+ topics) |
+| Dataset | Records | Topic Column | Content Focus |
+|---------|---------|--------------|---------------|
+| Remote_Work_Experiences_1000.csv | 1,000 | `topic` | Remote work themes (30+ topics) |
+| cricket_responses_1000.csv | 1,000 | `topic` | Cricket perspectives (40+ topics) |
+| fashion_responses_1000.csv | 1,000 | `topic` | Fashion opinions (45+ topics) |
 
 ---
 
@@ -78,7 +79,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ### Tier 1: Excellent Demo Datasets
 
-#### 1. Healthcare_Patient_Feedback_300.csv
+#### 1. Healthcare_Patient_Feedback_1000.csv
 **Overall Rating: 5/5 Stars**
 
 | Criterion | Score | Notes |
@@ -108,7 +109,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ---
 
-#### 2. Market_Research_Survey_300.csv
+#### 2. Market_Research_Survey_1000.csv
 **Overall Rating: 5/5 Stars**
 
 | Criterion | Score | Notes |
@@ -138,7 +139,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ---
 
-#### 3. Psychology_Wellbeing_Study_300.csv
+#### 3. Psychology_Wellbeing_Study_1000.csv
 **Overall Rating: 5/5 Stars**
 
 | Criterion | Score | Notes |
@@ -169,9 +170,9 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ---
 
-### Tier 2: Demo Datasets
+### Tier 2: Topic Datasets (1,000 rows each)
 
-#### 4. Remote_Work_Experiences_200.csv
+#### 4. Remote_Work_Experiences_1000.csv
 **Overall Rating: 4.5/5 Stars**
 
 | Criterion | Score | Notes |
@@ -191,7 +192,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ---
 
-#### 5. cricket_responses.csv
+#### 5. cricket_responses_1000.csv
 **Overall Rating: 4.5/5 Stars**
 
 | Criterion | Score | Notes |
@@ -210,7 +211,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 
 ---
 
-#### 6. fashion_responses.csv
+#### 6. fashion_responses_1000.csv
 **Overall Rating: 4.5/5 Stars**
 
 | Criterion | Score | Notes |
@@ -240,7 +241,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 | **Co-occurrence Analysis** | Healthcare | Related issues co-occur (wait + communication) |
 | **Representative Quotes** | All 6 datasets | Authentic, quotable responses |
 | **Text Preprocessing** | Healthcare, Market Research | Intentional errors test robustness |
-| **Quick Demonstrations** | Remote Work Experiences | Balanced size and content |
+| **Quick Demonstrations** | Remote Work Experiences | Balanced content, use optimal sampling |
 | **Algorithm Comparison** | Psychology (nuanced) | Tests separation of subtle themes |
 | **Executive Reporting** | Market Research | Business-relevant insights |
 | **Lifestyle/Cultural** | Fashion, Cricket | Domain-specific theme extraction |
@@ -250,7 +251,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 ## Recommended Demo Configurations
 
 ### Configuration 1: Full Feature Showcase
-**Dataset:** Healthcare_Patient_Feedback_300.csv
+**Dataset:** Healthcare_Patient_Feedback_1000.csv
 ```
 - Algorithm: TF-IDF + K-Means
 - Number of codes: 6-8
@@ -263,7 +264,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 ---
 
 ### Configuration 2: Business Use Case Demo
-**Dataset:** Market_Research_Survey_300.csv
+**Dataset:** Market_Research_Survey_1000.csv
 ```
 - Algorithm: TF-IDF + K-Means
 - Number of codes: 5-7
@@ -276,7 +277,7 @@ The framework provides **15 essential outputs** for qualitative analysis:
 ---
 
 ### Configuration 3: Research/Academic Demo
-**Dataset:** Psychology_Wellbeing_Study_300.csv
+**Dataset:** Psychology_Wellbeing_Study_1000.csv
 ```
 - Algorithm: NMF or LDA
 - Number of codes: 7-10
@@ -315,10 +316,19 @@ The framework provides **15 essential outputs** for qualitative analysis:
 ## Summary Recommendations
 
 ### For General Demonstrations
-Use the **three 300-row test datasets** in order:
-1. **Healthcare_Patient_Feedback_300** - Best overall demonstration
-2. **Market_Research_Survey_300** - Business context
-3. **Psychology_Wellbeing_Study_300** - Research context
+Use the **six 1,000-row datasets** with optimal sampling:
+1. **Healthcare_Patient_Feedback_1000** - Best overall demonstration
+2. **Market_Research_Survey_1000** - Business context
+3. **Psychology_Wellbeing_Study_1000** - Research context
+
+### Optimal Sampling for Demonstrations
+All datasets support optimal sampling for targeted code counts:
+| Target Codes | Sample Size | Responses per Code |
+|---|---|---|
+| 5 codes | 150 responses | 30 per code |
+| 10 codes | 300 responses | 30 per code |
+| 15 codes | 500 responses | 33 per code |
+| 20 codes | 700 responses | 35 per code |
 
 ### For Specific Features
 | Feature to Highlight | Use This Dataset |
@@ -326,9 +336,9 @@ Use the **three 300-row test datasets** in order:
 | Preprocessing pipeline | Healthcare (has intentional errors) |
 | Demographic segmentation | Market Research |
 | Complex theme extraction | Psychology Wellbeing |
-| Quick demos | Remote_Work_Experiences_200 |
-| Topic variety | cricket_responses (40+ topics) |
-| Theme diversity | fashion_responses (45+ topics) |
+| Quick demos | Remote_Work_Experiences_1000 |
+| Topic variety | cricket_responses_1000 (40+ topics) |
+| Theme diversity | fashion_responses_1000 (45+ topics) |
 
 ### Dataset Column Structure
 
@@ -355,25 +365,24 @@ The following datasets were removed as they don't align with open-ended qualitat
 
 ## Conclusion
 
-The **6 curated datasets** provide optimal coverage for the framework's capabilities:
+The **6 curated datasets** (1,000 rows each, 6,000 total) provide optimal coverage for the framework's capabilities:
 
-### Primary Analysis Datasets (300 rows each)
-- **Psychology_Wellbeing_Study_300** - Best overall quality, rich emotional content
-- **Healthcare_Patient_Feedback_300** - Domain-specific feedback patterns
-- **Market_Research_Survey_300** - Business/consumer insights
-
-### Demo Datasets (200 rows each)
-- **Remote_Work_Experiences_200** - Remote work themes (ideal for quick demos)
-- **cricket_responses** - Topic variety (40+ natural topics)
-- **fashion_responses** - Theme diversity (45+ natural topics)
+### All Datasets (1,000 rows each)
+- **Psychology_Wellbeing_Study_1000** - Best overall quality, rich emotional content
+- **Healthcare_Patient_Feedback_1000** - Domain-specific feedback patterns
+- **Market_Research_Survey_1000** - Business/consumer insights
+- **Remote_Work_Experiences_1000** - Remote work themes (ideal for quick demos)
+- **cricket_responses_1000** - Topic variety (40+ natural topics)
+- **fashion_responses_1000** - Theme diversity (45+ natural topics)
 
 All datasets feature:
-- Authentic, open-ended qualitative text
+- Authentic, open-ended qualitative text expanded from curated seeds
 - 60-95 character average length (optimal for theme discovery)
 - Consistent column structure for pipeline compatibility
 - Natural topic variety for demonstrating ML clustering
-- Suitable size for meaningful analysis (200-300 rows)
+- 1,000 rows each - sufficient for all 6 ML methods at good accuracy
+- Built-in optimal sampling support (150/300/500/700 rows for 5/10/15/20 codes)
 
 ---
 
-*Report updated January 2026 following dataset rationalization and optimization.*
+*Report updated February 2026 following dataset expansion to 1,000 rows and concordance alignment.*
