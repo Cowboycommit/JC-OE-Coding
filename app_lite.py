@@ -864,9 +864,6 @@ def main():
                         st.session_state["auto_method"] = auto_method
                         st.session_state["auto_n_codes"] = auto_n_codes
                         st.session_state["enable_hp_tuning"] = enable_hp_tuning
-                        st.session_state["hp_n_trials"] = hp_n_trials
-                        st.session_state["hp_timeout"] = hp_timeout
-                        st.session_state["hp_metric"] = hp_metric
                         st.session_state["stage_3_complete"] = True
                         reset_downstream_stages(3)
 
