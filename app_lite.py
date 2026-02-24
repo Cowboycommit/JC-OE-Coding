@@ -1599,10 +1599,10 @@ def main():
                 except Exception as e:
                     st.error(f"Export generation failed: {e}")
 
-        if st.session_state["stage_7_complete"]:
+        if st.session_state.get("stage_7_complete"):
             st.markdown("**Available Downloads**:")
 
-            if st.session_state["excel_bytes"]:
+            if st.session_state.get("excel_bytes"):
                 st.download_button(
                     label="Download Excel Package",
                     data=st.session_state["excel_bytes"],
@@ -1610,7 +1610,7 @@ def main():
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 )
 
-            if st.session_state["methods_doc"]:
+            if st.session_state.get("methods_doc"):
                 st.download_button(
                     label="Download Methods Documentation (MD)",
                     data=st.session_state["methods_doc"],
@@ -1618,7 +1618,7 @@ def main():
                     mime="text/markdown",
                 )
 
-            if st.session_state["executive_summary"]:
+            if st.session_state.get("executive_summary"):
                 st.download_button(
                     label="Download Executive Summary (MD)",
                     data=st.session_state["executive_summary"],
@@ -1641,21 +1641,21 @@ def main():
 
     with col1:
         st.markdown("**Data Artifacts**")
-        st.markdown(f"- Raw DataFrame: {'Present' if st.session_state['raw_df'] is not None else 'None'}")
-        st.markdown(f"- Validated DataFrame: {'Present' if st.session_state['validated_df'] is not None else 'None'}")
-        st.markdown(f"- Text Column: `{st.session_state['text_column'] or 'Not set'}`")
+        st.markdown(f"- Raw DataFrame: {'Present' if st.session_state.get('raw_df') is not None else 'None'}")
+        st.markdown(f"- Validated DataFrame: {'Present' if st.session_state.get('validated_df') is not None else 'None'}")
+        st.markdown(f"- Text Column: `{st.session_state.get('text_column') or 'Not set'}`")
 
     with col2:
         st.markdown("**Analysis Artifacts**")
-        st.markdown(f"- MLOpenCoder: {'Present' if st.session_state['coder'] is not None else 'None'}")
-        st.markdown(f"- Results DataFrame: {'Present' if st.session_state['results_df'] is not None else 'None'}")
-        st.markdown(f"- Metrics Dict: {'Present' if st.session_state['metrics'] is not None else 'None'}")
+        st.markdown(f"- MLOpenCoder: {'Present' if st.session_state.get('coder') is not None else 'None'}")
+        st.markdown(f"- Results DataFrame: {'Present' if st.session_state.get('results_df') is not None else 'None'}")
+        st.markdown(f"- Metrics Dict: {'Present' if st.session_state.get('metrics') is not None else 'None'}")
 
     with col3:
         st.markdown("**Export Artifacts**")
-        st.markdown(f"- QA Report: {'Present' if st.session_state['qa_report'] else 'None'}")
-        st.markdown(f"- Excel Bytes: {'Present' if st.session_state['excel_bytes'] else 'None'}")
-        st.markdown(f"- Methods Doc: {'Present' if st.session_state['methods_doc'] else 'None'}")
+        st.markdown(f"- QA Report: {'Present' if st.session_state.get('qa_report') else 'None'}")
+        st.markdown(f"- Excel Bytes: {'Present' if st.session_state.get('excel_bytes') else 'None'}")
+        st.markdown(f"- Methods Doc: {'Present' if st.session_state.get('methods_doc') else 'None'}")
 
     # ==========================================================================
     # SECTION: SEPARATION OF CONCERNS CALLOUTS
