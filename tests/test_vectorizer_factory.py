@@ -36,7 +36,7 @@ class TestVectorizerConfig:
         assert config.max_features == 1000
         assert config.min_df == 2
         assert config.max_df == 0.8
-        assert config.ngram_range == (1, 2)
+        assert config.ngram_range == (1, 3)
         assert config.stop_words == 'english'
         assert config.sublinear_tf is False
         assert config.lowercase is True

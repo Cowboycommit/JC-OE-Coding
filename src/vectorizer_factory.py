@@ -229,13 +229,16 @@ class VectorizerFactory:
             # LSTM and BERT methods handle their own embeddings via embeddings.py
             # Return TF-IDF for term extraction (used in cluster interpretation)
             return self._get_tfidf_vectorizer_and_matrix(texts, config)
+        elif method == 'nmf':
+            # NMF uses the same TF-IDF matrix as KMeans
+            return self._get_tfidf_vectorizer_and_matrix(texts, config)
         elif method == 'svm':
             # SVM Spectral Clustering uses TF-IDF features
             return self._get_tfidf_vectorizer_and_matrix(texts, config)
         else:
             raise ValueError(
                 f"Unsupported method: '{method}'. "
-                f"Supported methods: 'tfidf_kmeans', 'lda', 'lstm_kmeans', 'bert_kmeans', 'svm'"
+                f"Supported methods: 'tfidf_kmeans', 'lda', 'nmf', 'lstm_kmeans', 'bert_kmeans', 'svm'"
             )
 
     def _get_tfidf_vectorizer_and_matrix(

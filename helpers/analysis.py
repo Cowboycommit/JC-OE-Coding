@@ -254,6 +254,19 @@ def find_optimal_codes(
     if filtered_count > 0:
         logger.info(f"Filtered out {filtered_count} null/empty entries for code optimization")
 
+    # Pre-validate dataset size before attempting vectorization
+    if len(df_valid) < 2:
+        raise ValueError(
+            f"Dataset too small for clustering. Need at least 2 samples, "
+            f"but found {len(df_valid)} valid samples after filtering."
+        )
+
+    if len(df_valid) < min_codes:
+        raise ValueError(
+            f"Dataset cannot support {min_codes} codes. Only {len(df_valid)} valid samples available. "
+            f"Either reduce min_codes or provide a larger, more diverse dataset."
+        )
+
     responses = df_valid[text_column].tolist()
 
     # Preprocess text with multilingual support

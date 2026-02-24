@@ -37,6 +37,7 @@ class MethodsDocGenerator:
         'accurately classifies',
         'ground truth',
         '100% accurate',
+        '100% accuracy',
         'replaces human coding',
         'eliminates bias',
         'perfectly categorizes',
@@ -819,7 +820,7 @@ not replace it. Use responsibly, transparently, and with ongoing critical reflec
         params = f"""
 **Core Parameters:**
 - ML method: {metrics.get('method', 'tfidf_kmeans')}
-- Number of codes: {coder.n_codes}
+- n_codes: {coder.n_codes}
 - Confidence threshold: {coder.min_confidence}
 - Random seed: 42
 

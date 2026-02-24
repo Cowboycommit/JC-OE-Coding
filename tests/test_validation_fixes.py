@@ -147,16 +147,21 @@ class TestSuccessfulValidation:
         """Should successfully find optimal codes on valid dataset."""
         df = pd.DataFrame({
             'text': [
-                'Response about machine learning and AI',
-                'Data science and analytics discussion',
-                'Cloud computing and infrastructure',
-                'Software development practices',
-                'Cybersecurity and privacy concerns',
-                'DevOps and continuous integration',
-                'Mobile app development',
-                'Web development frameworks',
-                'Database design patterns',
-                'Agile project management'
+                'Machine learning and data science are important for AI development',
+                'Data science involves machine learning and statistical analysis',
+                'Cloud computing infrastructure supports machine learning workloads',
+                'Software development practices include testing and code review',
+                'Cybersecurity and privacy are concerns in software development',
+                'DevOps practices improve software development and deployment',
+                'Mobile app development uses modern software development tools',
+                'Web development frameworks support software development teams',
+                'Database design patterns are used in software development projects',
+                'Agile project management helps software development teams deliver',
+                'Machine learning models require data science expertise to build',
+                'Data science teams use cloud computing for large scale analysis',
+                'Software development testing ensures code quality and reliability',
+                'DevOps and cloud computing work together for deployment automation',
+                'Web development and mobile app development share common patterns'
             ]
         })
 
